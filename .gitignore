@@ -1,24 +1,41 @@
 # node_modules klasörünü ekleme
 node_modules/
 
-# build klasörünü ekleme (isteğe bağlı, Render build’i kendi alacaksa eklenebilir)
+# build klasörleri
 build/
+dist/
 
-# log dosyalarını ekleme
+# log dosyaları
 npm-debug.log
 yarn-debug.log
 yarn-error.log
 
-# .env dosyalarını ekleme (şifrelerin, anahtarların güvenliği için)
+# Ortam ve gizli anahtar dosyaları
 .env
-.env.local
 .env.*
-# Diğer yaygın ortam dosyaları
 .envrc
+.env.local
 .env.development.local
 .env.test.local
 .env.production.local
-# Vercel, Netlify, Render config dosyaları
+
+# Render, Vercel, Netlify config ve çıktı dosyaları
+render.yaml
 .vercel/
 .netlify/
+
+# Python artefaktları ve sanal ortamlar
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.coverage
+
+# IDE ve sistem dosyaları
+.DS_Store
+Thumbs.db
+
 render.yaml
