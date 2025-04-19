@@ -575,66 +575,7 @@ const BugunCozduklerin = () => {
         )}
       </Dialog>
 
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-          borderRadius: 2,
-          boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
-        }
-      }}
-    >
-      {selectedSubject && (
-        <>
-          <DialogTitle sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            bgcolor: `${yksData[selectedSubject].color}15`,
-            pb: 2,
-            pt: 2
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box
-                sx={{
-                  backgroundColor: `${yksData[selectedSubject].color}25`,
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mr: 2,
-                }}
-              >
-                <BookIcon sx={{ color: yksData[selectedSubject].color, fontSize: 22 }} />
-              </Box>
-              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-                {selectedSubject} Konuları
-              </Typography>
-            </Box>
-            <IconButton
-              edge="end"
-              color="inherit"
-              onClick={handleCloseDialog}
-              aria-label="close"
-              size="large"
-            >
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ pt: 0 }}>
-            {/* ... (rest of your DialogContent code) ... */}
-          </DialogContent>
-          <DialogActions sx={{ p: 2.5, bgcolor: 'rgba(245, 247, 250, 0.8)' }}>
-            {/* ... (rest of your DialogActions code) ... */}
-          </DialogActions>
-        </>
-      )}
-    </Dialog>
+
     <Dialog
       open={topicDialogOpen}
       onClose={handleCloseTopicDialog}
@@ -666,11 +607,8 @@ const BugunCozduklerin = () => {
       autoHideDuration={4000}
       onClose={handleSnackbarClose}
       anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-    >
-      <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} variant="filled">
-        {snackbarMessage}
-      </Alert>
-    </Snackbar>
+      message={snackbarMessage}
+    />
   </>
 );
 
