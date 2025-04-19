@@ -784,7 +784,6 @@ const getSubjectIcon = (subject) => {
                     </List>
                   )}
                 </Box>
-                
                 <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
                   <LightbulbIcon sx={{ color: 'warning.main', mr: 1 }} fontSize="small" />
                   <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
