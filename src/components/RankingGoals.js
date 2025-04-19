@@ -245,19 +245,17 @@ const RankingGoals = () => {
               {schools.map((item, idx) => (
                 <Chip
                   key={idx}
-                  label={<span style={{ fontWeight: 700, fontSize: 'clamp(15px, 4vw, 18px)', wordBreak: 'break-all', textAlign: 'center', width: '100%', display: 'inline-block' }}>{item.university} - {item.department}</span>}
+                  label={<span style={{ fontWeight: 700, fontSize: 'clamp(15px, 4vw, 18px)', wordBreak: 'break-all', textAlign: 'center', display: 'inline-block' }}>{item.university} - {item.department}</span>}
                   sx={{
                     bgcolor: '#0F9D5822',
                     color: '#0F9D58',
                     fontWeight: 700,
                     fontSize: { xs: 15, sm: 18 },
-                    px: { xs: 1.2, sm: 2.5 },
+                    px: { xs: 1.8, sm: 3 },
                     py: { xs: 0.8, sm: 1.2 },
                     borderRadius: 2,
                     border: '2px solid #0F9D5855',
-                    minWidth: { xs: 80, sm: 110 },
-                    maxWidth: { xs: 160, sm: 220 },
-                    width: 'auto',
+                    width: 'fit-content',
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'center',

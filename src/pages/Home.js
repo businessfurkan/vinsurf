@@ -89,14 +89,22 @@ const Home = () => {
             sx={{ 
               borderRadius: '16px !important', 
               overflow: 'hidden',
-              backgroundColor: '#FFFFFF !important',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05) !important'
+              mb: { xs: 3, sm: 4, md: 5 },
+              background: 'linear-gradient(120deg, #F8FFAE 0%, #43C6AC 100%)',
+              boxShadow: '0 4px 18px 0 rgba(67,198,172,0.13) !important',
+              position: 'relative',
+              minHeight: 220
             }}
           >
             <Box 
               sx={{ 
                 p: { xs: 2, sm: 3, md: 4 },
-                bgcolor: 'background.paper'
+                bgcolor: 'transparent',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 200
               }}
             >
               <Typography 
@@ -106,10 +114,12 @@ const Home = () => {
                 className="heading-font"
                 sx={{ 
                   fontFamily: 'Montserrat, sans-serif',
-                  fontWeight: 600,
-                  color: '#303545',
-                  mb: 2,
-                  fontSize: { xs: '1.4rem', sm: '1.5rem', md: '1.8rem' }
+                  fontWeight: 700,
+                  color: '#2e3856',
+                  mb: 1.5,
+                  fontSize: { xs: '1.5rem', sm: '1.7rem', md: '2rem' },
+                  textShadow: '0 2px 8px #fff5',
+                  letterSpacing: 1
                 }}
               >
                 Analitik Kronometre: Detaylı Çalışma Takibi

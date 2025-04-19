@@ -588,92 +588,165 @@ const AnalyticalStopwatch = () => {
             </Typography>
 
             {/* Timer Card */}
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
-              justifyContent: 'center', 
-              mb: 3,
-              p: 3,
-              borderRadius: 2,
-              bgcolor: 'background.paper',
-              border: '1px solid rgba(0,0,0,0.08)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-            }}>
-              <Typography 
-                variant="h2" 
-                sx={{ 
-                  fontFamily: 'monospace', 
-                  fontWeight: 700,
-                  mb: 2,
-                  fontSize: '3.5rem',
-                  color: isRunning ? 'success.main' : 'text.primary'
-                }}
-              >
-                {formatTime(time)}
-              </Typography>
+            <Box sx={{
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  mb: 3,
+  p: { xs: 2.5, sm: 3.5 },
+  borderRadius: 4,
+  background: 'rgba(255,255,255,0.6)',
+  boxShadow: '0 8px 32px 0 rgba(31,38,135,0.13)',
+  backdropFilter: 'blur(12px)',
+  border: '1px solid rgba(255,255,255,0.18)',
+  minWidth: { xs: 'auto', sm: 340 },
+  maxWidth: 420,
+  mx: 'auto',
+  position: 'relative',
+}}>
+              <Typography
+  variant="h2"
+  sx={{
+    fontFamily: 'Montserrat, monospace',
+    fontWeight: 800,
+    mb: 1.5,
+    fontSize: { xs: '2.6rem', sm: '3.7rem', md: '4.2rem' },
+    color: isRunning ? 'primary.main' : 'secondary.main',
+    textShadow: '0 4px 16px #43C6AC55, 0 1px 0 #fff',
+    letterSpacing: 2,
+    transition: 'color 0.3s',
+    lineHeight: 1.1,
+    userSelect: 'none',
+  }}
+>
+  {formatTime(time)}
+</Typography>
               
-              <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-                {selectedSubject && selectedTopic ? (
-                  <>
-                    <strong>{selectedSubject}</strong> - {selectedTopic}
-                  </>
-                ) : 'Lütfen bir ders ve konu seçin'}
-              </Typography>
+              {selectedSubject && selectedTopic ? (
+  <Box sx={{
+    mb: 2,
+    px: 2.5,
+    py: 0.7,
+    borderRadius: 99,
+    background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)',
+    color: '#2e3856',
+    fontWeight: 600,
+    fontSize: '1rem',
+    boxShadow: '0 2px 8px #43C6AC22',
+    display: 'inline-block',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  }}>
+    <span style={{ fontWeight: 700 }}>{selectedSubject}</span> - {selectedTopic}
+  </Box>
+) : (
+  <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontWeight: 500 }}>
+    Lütfen bir ders ve konu seçin
+  </Typography>
+)}
               
-              <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
-                {!isRunning ? (
-                  <Button 
-                    variant="contained" 
-                    color="success" 
-                    startIcon={<PlayArrowIcon />}
-                    onClick={() => {
-                      if (!selectedSubject || !selectedTopic) {
-                        alert('Lütfen önce bir ders ve konu seçin!');
-                        return;
-                      }
-                      setIsRunning(true);
-                      setStartTime(new Date());
-                    }}
-                    disabled={!selectedSubject || !selectedTopic}
-                    sx={{ borderRadius: 28, px: 3 }}
-                  >
-                    Başlat
-                  </Button>
-                ) : (
-                  <Button 
-                    variant="contained" 
-                    color="warning" 
-                    startIcon={<PauseIcon />}
-                    onClick={handlePause}
-                    sx={{ borderRadius: 28, px: 3 }}
-                  >
-                    Duraklat
-                  </Button>
-                )}
-                
-                <Button 
-                  variant="contained" 
-                  color="error" 
-                  startIcon={<StopIcon />}
-                  onClick={handleStop}
-                  disabled={time === 0}
-                  sx={{ borderRadius: 28, px: 3 }}
-                >
-                  Durdur
-                </Button>
-                
-                <Button 
-                  variant="contained" 
-                  color="info" 
-                  startIcon={<RestartAltIcon />}
-                  onClick={handleReset}
-                  disabled={time === 0}
-                  sx={{ borderRadius: 28, px: 3 }}
-                >
-                  Sıfırla
-                </Button>
-              </Box>
+              <Box sx={{ display: 'flex', gap: 2.5, mt: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
+  {!isRunning ? (
+    <Button
+      variant="contained"
+      startIcon={<PlayArrowIcon sx={{ fontSize: 28 }} />}
+      onClick={() => {
+        if (!selectedSubject || !selectedTopic) {
+          alert('Lütfen önce bir ders ve konu seçin!');
+          return;
+        }
+        setIsRunning(true);
+        setStartTime(new Date());
+      }}
+      disabled={!selectedSubject || !selectedTopic}
+      sx={{
+        borderRadius: 99,
+        px: 4,
+        py: 1.5,
+        fontWeight: 700,
+        fontSize: '1.1rem',
+        background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)',
+        color: '#2e3856',
+        boxShadow: '0 2px 12px #43C6AC33',
+        '&:hover': {
+          background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 80%)',
+          color: '#222',
+        },
+        transition: 'all 0.2s',
+      }}
+    >
+      Başlat
+    </Button>
+  ) : (
+    <Tooltip title="Duraklat" arrow>
+      <IconButton
+        color="warning"
+        onClick={handlePause}
+        sx={{
+          borderRadius: 99,
+          p: 1.3,
+          background: 'linear-gradient(90deg, #F8FFAE 0%, #43C6AC 100%)',
+          color: '#2e3856',
+          boxShadow: '0 2px 10px #43C6AC22',
+          '&:hover': {
+            background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 80%)',
+            color: '#222',
+          },
+          transition: 'all 0.2s',
+        }}
+      >
+        <PauseIcon sx={{ fontSize: 28 }} />
+      </IconButton>
+    </Tooltip>
+  )}
+  <Tooltip title="Durdur" arrow>
+    <span>
+      <IconButton
+        color="error"
+        onClick={handleStop}
+        disabled={time === 0}
+        sx={{
+          borderRadius: 99,
+          p: 1.3,
+          background: 'linear-gradient(90deg, #ffb6b9 0%, #fae3d9 100%)',
+          color: '#a10000',
+          boxShadow: '0 2px 10px #fae3d955',
+          '&:hover': {
+            background: 'linear-gradient(90deg, #fae3d9 0%, #ffb6b9 80%)',
+            color: '#fff',
+          },
+          transition: 'all 0.2s',
+        }}
+      >
+        <StopIcon sx={{ fontSize: 28 }} />
+      </IconButton>
+    </span>
+  </Tooltip>
+  <Tooltip title="Sıfırla" arrow>
+    <span>
+      <IconButton
+        color="info"
+        onClick={handleReset}
+        disabled={time === 0}
+        sx={{
+          borderRadius: 99,
+          p: 1.3,
+          background: 'linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%)',
+          color: '#22577a',
+          boxShadow: '0 2px 10px #a1c4fd33',
+          '&:hover': {
+            background: 'linear-gradient(90deg, #c2e9fb 0%, #a1c4fd 80%)',
+            color: '#222',
+          },
+          transition: 'all 0.2s',
+        }}
+      >
+        <RestartAltIcon sx={{ fontSize: 26 }} />
+      </IconButton>
+    </span>
+  </Tooltip>
+</Box>
             </Box>
           </CardContent>
         </Card>
