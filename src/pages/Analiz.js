@@ -411,20 +411,20 @@ const getSubjectIcon = (subject) => {
               <Card
   key={subject}
   sx={{
-    borderRadius: '18px',
-    background: subjectColor,
+    borderRadius: '20px',
+    background: '#fff',
     color: '#222',
-    boxShadow: '0 4px 18px 0 rgba(30,30,60,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.04)',
-    minHeight: 180,
+    boxShadow: '0 6px 24px 0 rgba(30,30,60,0.13)',
+    minHeight: 210,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
     alignItems: 'stretch',
     cursor: 'pointer',
-    transition: 'transform 0.18s cubic-bezier(.25,.8,.25,1), box-shadow 0.18s cubic-bezier(.25,.8,.25,1)',
+    transition: 'transform 0.17s, box-shadow 0.17s',
     '&:hover': {
-      transform: 'scale(1.035)',
-      boxShadow: '0 8px 28px 0 rgba(30,30,60,0.18)',
+      transform: 'scale(1.025)',
+      boxShadow: '0 14px 32px 0 rgba(30,30,60,0.20)',
     },
   }}
 >
@@ -435,18 +435,23 @@ const getSubjectIcon = (subject) => {
     px: 2.2,
     pt: 2.2,
     pb: 0.5,
+    borderTopLeftRadius: '20px',
+    borderTopRightRadius: '20px',
+    background: subjectColor,
+    minHeight: 60,
   }}>
-    <span style={{ fontSize: 28, marginRight: 6 }}>{subjectIcon}</span>
+    <span style={{ fontSize: 30, marginRight: 10 }}>{subjectIcon}</span>
     <Typography
       sx={{
         fontSize: 22,
         fontWeight: 800,
         color: '#fff',
-        letterSpacing: 0.2,
+        letterSpacing: 0.18,
         textAlign: 'left',
         flex: 1,
         fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-        textShadow: '0 2px 8px rgba(0,0,0,0.13)',
+        textShadow: '0 2px 12px rgba(0,0,0,0.17)',
+        lineHeight: 1.2,
       }}
     >
       {subject}
@@ -455,16 +460,17 @@ const getSubjectIcon = (subject) => {
   <CardContent
     sx={{
       px: 2.2,
-      pt: 1,
+      pt: 1.5,
       pb: 2,
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       background: '#fff',
-      borderRadius: '12px',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-      mt: 1,
+      borderBottomLeftRadius: '20px',
+      borderBottomRightRadius: '20px',
+      boxShadow: 'none',
+      mt: 0,
     }}
   >
     <Typography
