@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Chip, Stack, Paper, Fade } from '@mui/material';
+import { Box, Typography, TextField, Button, Chip, Stack, Paper, Fade, Alert } from '@mui/material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-
-const LOCAL_STORAGE_KEY = 'rankingGoals';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 const goalColors = {
   EA: '#4285F4',
@@ -11,17 +12,33 @@ const goalColors = {
 };
 
 const RankingGoals = () => {
+  const [user] = useAuthState(auth);
   const [goals, setGoals] = useState({ EA: '', SAY: '', SÖZ: '' });
   const [edit, setEdit] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
+  // Firestore'dan hedefleri çek
   useEffect(() => {
-    // Load from localStorage
-    const savedGoals = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (savedGoals) {
-      setGoals(JSON.parse(savedGoals));
-    }
-  }, []);
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    const fetchGoals = async () => {
+      try {
+        const docRef = doc(db, 'users', user.uid, 'profile', 'rankingGoals');
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setGoals(docSnap.data());
+        }
+      } catch (err) {
+        setError('Hedefler yüklenirken hata oluştu.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGoals();
+  }, [user]);
 
   const handleChange = (key, value) => {
     if (/^\d{0,7}$/.test(value.replace(/\./g, ''))) {
@@ -29,11 +46,21 @@ const RankingGoals = () => {
     }
   };
 
-  const handleSave = () => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(goals));
-    setSaved(true);
-    setEdit(false);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    if (!user) return;
+    setLoading(true);
+    setError('');
+    try {
+      const docRef = doc(db, 'users', user.uid, 'profile', 'rankingGoals');
+      await setDoc(docRef, goals, { merge: true });
+      setSaved(true);
+      setEdit(false);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setError('Hedefler kaydedilirken hata oluştu.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -44,7 +71,12 @@ const RankingGoals = () => {
           Hedef Sıralamalarım
         </Typography>
       </Stack>
-      {edit ? (
+      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+      {!user ? (
+        <Alert severity="info">Hedeflerini kaydetmek için giriş yapmalısın.</Alert>
+      ) : loading ? (
+        <Typography color="text.secondary" align="center">Yükleniyor...</Typography>
+      ) : edit ? (
         <Box component="form" onSubmit={e => { e.preventDefault(); handleSave(); }}>
           <Stack spacing={2}>
             {['EA', 'SAY', 'SÖZ'].map((key) => (
@@ -69,7 +101,7 @@ const RankingGoals = () => {
                 }}
               />
             ))}
-            <Button type="submit" variant="contained" color="success" sx={{ fontWeight: 700, borderRadius: 2 }}>
+            <Button type="submit" variant="contained" color="success" sx={{ fontWeight: 700, borderRadius: 2 }} disabled={loading}>
               Kaydet
             </Button>
           </Stack>
