@@ -280,36 +280,6 @@ const RankingGoals = () => {
         )}
       </Paper>
     </Box>
-                      border: `2px solid ${goalColors[key]}55`,
-                      minWidth: { xs: 80, sm: 110 },
-                      maxWidth: { xs: 160, sm: 220 },
-                      width: 'auto',
-                      display: 'flex',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      textAlign: 'center',
-                      overflow: 'visible',
-                      whiteSpace: 'normal',
-                    }}
-                    variant="outlined"
-                  />
-                ))}
-              </Stack>
-            </Stack>
-            {/* Okul hedefleri sağ */}
-            <Stack spacing={2} alignItems="flex-start" justifyContent="center" sx={{ minWidth: 220, flex: 1 }}>
-              <Typography fontWeight={600} fontSize={17} color="#2e3856">Hedef Okul ve Bölümler</Typography>
-              {Array.isArray(schools) && schools.length > 0 ? schools.map((item, idx) => (
-                <Box key={idx} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 1 }, alignItems: { xs: 'stretch', sm: 'center' }, width: '100%' }}>
-                  <Chip
-                    label={<span style={{ fontWeight: 600, fontSize: 'clamp(13px, 3vw, 16px)' }}>{item.university || '—'} <span style={{ color: '#888' }}>/</span> {item.department || '—'}</span>}
-                    sx={{
-                      bgcolor: '#f7fafc',
-                      color: '#2e3856',
-                      fontWeight: 600,
-                      fontSize: { xs: 13, sm: 16 },
-                      px: { xs: 1, sm: 2 },
-                      py: { xs: 0.7, sm: 1 },
                       borderRadius: 2,
                       border: '1.5px solid #e0e0e0',
                       minWidth: { xs: 80, sm: 110 },
