@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
+import { getFirestore, initializeFirestore, CACHE_SIZE_UNLIMITED } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
 // Firebase configuration
@@ -17,26 +17,14 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+// Firestore cache ayarları (yeni yöntem)
+const db = initializeFirestore(app, {
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED,
+  cache: 'persistent', // yeni önerilen yöntem
+});
 const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 
-// Enable offline persistence
-try {
-  enableIndexedDbPersistence(db)
-    .catch((err) => {
-      if (err.code === 'failed-precondition') {
-        // Multiple tabs open, persistence can only be enabled
-        // in one tab at a time.
-        console.log('Persistence failed: Multiple tabs open');
-      } else if (err.code === 'unimplemented') {
-        // The current browser does not support all of the
-        // features required to enable persistence
-        console.log('Persistence not supported by this browser');
-      }
-    });
-} catch (error) {
-  console.error("Error enabling persistence:", error);
-}
+// Yeni Firestore cache yöntemi ile offline persistence otomatik olarak sağlanır. Eski persistence kodu kaldırıldı.
 
 export { auth, db, storage, googleProvider };
