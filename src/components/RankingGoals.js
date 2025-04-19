@@ -287,30 +287,5 @@ const RankingGoals = () => {
         <Button onClick={() => setEditSchools(false)} sx={{ mt: 2, ml: 1 }}>İptal</Button>
       </Paper>
     </Box>
-                      border: '1.5px solid #e0e0e0',
-                      minWidth: { xs: 80, sm: 110 },
-                      maxWidth: { xs: 200, sm: 300 },
-                      width: 'auto',
-                      display: 'flex',
-                      justifyContent: 'flex-start',
-                      alignItems: 'center',
-                      textAlign: 'left',
-                      overflow: 'visible',
-                      whiteSpace: 'normal',
-                    }}
-                    variant="outlined"
-                  />
-                </Box>
-              )) : null}
-            </Stack>
-          </Box>
-          <Button onClick={() => setEdit(true)} variant="outlined" color="primary" sx={{ mt: 3, borderRadius: 2, fontWeight: 600 }}>
-            Hedefleri Düzenle
-          </Button>
-        </>
-      )}
-    </Paper>
-  );
-}
 
 export default RankingGoals;
