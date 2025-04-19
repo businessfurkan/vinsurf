@@ -226,30 +226,6 @@ const RankingGoals = () => {
                     setSchools(updated);
                   }}
                   fullWidth
-                  variant="outlined"
-                  size="small"
-                />
-              </Box>
-            ))}
-            <Button onClick={handleSaveSchools} variant="contained" color="primary" sx={{ mt: 2, borderRadius: 2, fontWeight: 600 }}>
-              Kaydet
-            </Button>
-            <Button onClick={() => setEditSchools(false)} sx={{ mt: 2, ml: 1 }}>İptal</Button>
-          </Box>
-        ) : (
-          <>
-            <Stack spacing={1.5} mb={2}>
-              {schools.map((item, idx) => (
-                <Chip
-                  key={idx}
-                  label={<span style={{ fontWeight: 600, fontSize: 'clamp(13px, 3vw, 16px)' }}>{item.university || '—'} <span style={{ color: '#888' }}>/</span> {item.department || '—'}</span>}
-                  sx={{
-                    bgcolor: '#f7fafc',
-                    color: '#2e3856',
-                    fontWeight: 600,
-                    fontSize: { xs: 13, sm: 16 },
-                    px: { xs: 1, sm: 2 },
-                    py: { xs: 0.7, sm: 1 },
                     borderRadius: 2,
                     border: '1.5px solid #e0e0e0',
                     minWidth: { xs: 80, sm: 110 },
