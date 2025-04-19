@@ -54,6 +54,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 // --- Aşağıda kullanıcıdan gelen TAM dosya içeriği uygulanıyor ---
 
 
+const Analiz = () => {
   const [user] = useAuthState(auth);
   const [studyRecords, setStudyRecords] = useState([]);
   const [analytics, setAnalytics] = useState({});
@@ -1215,5 +1216,7 @@ const getSubjectIcon = (subject) => {
     </React.Fragment>
   );
 };
+
+}
 
 export default Analiz;
