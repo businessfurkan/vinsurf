@@ -346,10 +346,9 @@ const getSubjectIcon = (subject) => {
   alignItems: 'center',
   justifyContent: 'flex-start',
   width: '100%',
-  background: 'linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%)',
+  background: '#fff',
   position: 'relative',
   overflow: 'visible',
-  // Glassmorphism kaldırıldı, tüm kartlar her zaman net görünecek.
   zIndex: 1,
 }}>
       <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{ 
@@ -403,7 +402,7 @@ const getSubjectIcon = (subject) => {
     borderRadius: '20px',
     background: '#fff',
     color: '#222',
-    boxShadow: '0 6px 24px 0 rgba(30,30,60,0.13)',
+    boxShadow: '0 8px 32px 0 rgba(30,30,60,0.16)',
     minHeight: 210,
     display: 'flex',
     flexDirection: 'column',
@@ -440,18 +439,20 @@ const getSubjectIcon = (subject) => {
   }}>
     <span style={{ fontSize: 30, marginRight: 10, filter: 'none', opacity: 1 }}>{subjectIcon}</span>
     <Typography
+      className="subject-satoshi"
       sx={{
-        fontSize: 22,
-        fontWeight: 800,
+        fontSize: 23,
+        fontWeight: 900,
         color: '#fff',
-        letterSpacing: 0.18,
+        letterSpacing: 0.2,
         textAlign: 'left',
         flex: 1,
-        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+        fontFamily: `'Satoshi','Poppins','Inter','Roboto',sans-serif`,
         textShadow: '0 2px 12px rgba(0,0,0,0.17)',
         lineHeight: 1.2,
         filter: 'none',
         opacity: 1,
+        textTransform: 'none',
       }}
     >
       {subject}
@@ -595,6 +596,28 @@ const getSubjectIcon = (subject) => {
           background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' 
         }} />
         
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+          px: 3,
+          pt: 2,
+        }}>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              fontWeight: 700,
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.14)',
+              mb: 1,
+              minWidth: 200
+            }}
+            onClick={() => setTopicDialog(true)}
+          >
+            Konu Bazlı Çalışma Süreleri
+          </Button>
+        </Box>
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
