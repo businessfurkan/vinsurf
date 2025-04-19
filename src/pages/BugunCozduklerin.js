@@ -575,41 +575,41 @@ const BugunCozduklerin = () => {
         )}
       </Dialog>
 
+      <Dialog
+        open={topicDialogOpen}
+        onClose={handleCloseTopicDialog}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
+          }
+        }}
+      >
+        {selectedSubject && selectedTopic && (
+          <>
+            <DialogTitle sx={{ pb: 2 }}>
+              {/* ... (rest of your DialogTitle code) ... */}
+            </DialogTitle>
+            <DialogContent>
+              {/* ... (rest of your DialogContent code) ... */}
+            </DialogContent>
+            <DialogActions>
+              {/* ... (rest of your DialogActions code) ... */}
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
 
-    <Dialog
-      open={topicDialogOpen}
-      onClose={handleCloseTopicDialog}
-      fullWidth
-      maxWidth="xs"
-      PaperProps={{
-        sx: {
-          borderRadius: 2,
-          boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
-        }
-      }}
-    >
-      {selectedSubject && selectedTopic && (
-        <>
-          <DialogTitle sx={{ pb: 2 }}>
-            {/* ... (rest of your DialogTitle code) ... */}
-          </DialogTitle>
-          <DialogContent>
-            {/* ... (rest of your DialogContent code) ... */}
-          </DialogContent>
-          <DialogActions>
-            {/* ... (rest of your DialogActions code) ... */}
-          </DialogActions>
-        </>
-      )}
-    </Dialog>
-    <Snackbar
-      open={snackbarOpen}
-      autoHideDuration={4000}
-      onClose={handleSnackbarClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      message={snackbarMessage}
-    />
-  </>
-);
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        message={snackbarMessage}
+      />
+    </>
+  );
 
 export default BugunCozduklerin;
