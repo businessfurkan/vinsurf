@@ -105,78 +105,76 @@ const RankingGoals = () => {
         <Typography color="text.secondary" align="center">Yükleniyor...</Typography>
       ) : edit ? (
         <Box component="form" onSubmit={e => { e.preventDefault(); handleSave(); }}>
-          <Box sx={{ 
-  display: 'flex', 
-  flexDirection: { xs: 'column', md: 'row' }, 
-  gap: { xs: 2, sm: 3, md: 4 }, 
-  justifyContent: 'center', 
-  alignItems: { xs: 'stretch', md: 'flex-start' },
-  width: '100%' 
-}}>
-            {/* Sıralama hedefleri sol */}
-            <Stack spacing={2} sx={{ minWidth: 220, flex: 1 }}>
-              <Typography fontWeight={600} fontSize={17} color="#2e3856">Sıralama Hedeflerin</Typography>
+          <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            gap: { xs: 2, sm: 3, md: 4 },
+            justifyContent: 'center',
+            alignItems: { xs: 'stretch', md: 'flex-start' },
+            width: '100%'
+          }}>
+            {/* Sıralama hedefleri sol ayrı kart */}
+            <Paper elevation={2} sx={{ flex: 1, minWidth: 220, p: { xs: 2, md: 3 }, borderRadius: 3, mb: { xs: 2, md: 0 } }}>
+              <Typography fontWeight={700} fontSize={17} color="#2e3856" mb={1}>
+                Sıralama Hedeflerin
+              </Typography>
               {['EA', 'SAY', 'SÖZ'].map((key) => (
                 <TextField
                   key={key}
                   label={key}
-                  value={goals && goals[key] !== undefined ? goals[key] : ''}
-                  onChange={e => handleChange(key, e.target.value.replace(/\D/g, ''))}
-                  placeholder={`Örn: ${key === 'EA' ? '80000' : key === 'SAY' ? '150000' : '45000'}`}
-                  InputProps={{
-                    sx: { fontWeight: 700, color: goalColors[key], fontSize: { xs: 16, sm: 18 } },
-                    inputProps: { maxLength: 7 }
-                  }}
-                  variant="outlined"
+                  value={goals[key]}
+                  onChange={e => handleChange(key, e.target.value)}
                   fullWidth
                   sx={{
-                    background: `${goalColors[key]}11`,
-                    borderRadius: 2,
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: `${goalColors[key]}55` },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: goalColors[key] },
-                    '& .MuiInputLabel-root': { color: goalColors[key] },
-                    fontSize: { xs: 15, sm: 17 },
-                    minHeight: { xs: 42, sm: 48 }
+                    input: { fontWeight: 700, color: goalColors[key] },
+                    mb: 1.5,
+                  }}
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    startAdornment: <span style={{ color: goalColors[key], fontWeight: 700 }}>{key}:</span>
                   }}
                 />
               ))}
-            </Stack>
-            {/* Okul hedefleri sağ */}
-            <Stack spacing={2} sx={{ minWidth: 220, flex: 1 }}>
-              <Typography fontWeight={600} fontSize={17} color="#2e3856">Hedef Okul ve Bölümler</Typography>
-              {Array.isArray(schools) && schools.length > 0 ? schools.map((item, idx) => (
-                <Box key={idx} sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 1 }, alignItems: { xs: 'stretch', sm: 'center' }, width: '100%' }}>
+            </Paper>
+            {/* Okul hedefleri sağ ayrı kart */}
+            <Paper elevation={2} sx={{ flex: 1, minWidth: 220, p: { xs: 2, md: 3 }, borderRadius: 3 }}>
+              <Typography fontWeight={700} fontSize={17} color="#2e3856" mb={1}>
+                Hedef Okul ve Bölümler
+              </Typography>
+              {schools.map((item, idx) => (
+                <Box key={idx} sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
                   <TextField
-                    label={`Okul #${idx+1}`}
-                    value={item.university || ''}
+                    label="Üniversite"
+                    value={item.university}
                     onChange={e => {
-                      const arr = [...schools];
-                      arr[idx].university = e.target.value;
-                      setSchools(arr);
+                      const updated = [...schools];
+                      updated[idx].university = e.target.value;
+                      setSchools(updated);
                     }}
-                    placeholder="Üniversite"
-                    variant="outlined"
                     fullWidth
-                    sx={{ background: '#f7fafc', borderRadius: 2, fontSize: { xs: 14, sm: 16 }, minHeight: { xs: 40, sm: 48 } }}
+                    variant="outlined"
+                    size="small"
+                    sx={{ mb: 1 }}
                   />
                   <TextField
-                    label={`Bölüm #${idx+1}`}
-                    value={item.department || ''}
+                    label="Bölüm"
+                    value={item.department}
                     onChange={e => {
-                      const arr = [...schools];
-                      arr[idx].department = e.target.value;
-                      setSchools(arr);
+                      const updated = [...schools];
+                      updated[idx].department = e.target.value;
+                      setSchools(updated);
                     }}
-                    placeholder="Bölüm"
-                    variant="outlined"
                     fullWidth
-                    sx={{ background: '#f7fafc', borderRadius: 2, fontSize: { xs: 14, sm: 16 }, minHeight: { xs: 40, sm: 48 } }}
+                    variant="outlined"
+                    size="small"
+                    sx={{ mb: 1 }}
                   />
                 </Box>
-              )) : null}
-            </Stack>
+              ))}
+            </Paper>
           </Box>
-          <Button type="submit" variant="contained" color="success" sx={{ fontWeight: 700, borderRadius: 2, mt: 3 }} disabled={loading}>
+          <Button type="submit" variant="contained" color="primary" sx={{ mt: 3, borderRadius: 2, fontWeight: 600, width: { xs: '100%', sm: 'auto' } }}>
             Kaydet
           </Button>
         </Box>
