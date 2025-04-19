@@ -18,8 +18,6 @@ import {
   Paper,
   IconButton,
   Snackbar,
-  Tooltip,
-  Popover,
   FormControl,
   Select,
   MenuItem,
@@ -27,8 +25,7 @@ import {
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
-  Slider
+  ListItemIcon
 } from '@mui/material';
 import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -55,6 +52,13 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 
 const Analiz = () => {
+  // ...önceki kodlar
+  // Kart tıklama fonksiyonu
+  const handleCardClick = (subject) => {
+    setSelectedSubject(subject);
+    setTopicDialog(true);
+  };
+
   const [user] = useAuthState(auth);
   const [studyRecords, setStudyRecords] = useState([]);
   const [analytics, setAnalytics] = useState({});
@@ -117,12 +121,13 @@ const Analiz = () => {
   }, [user]);
 
   // Save study target for a subject
-  const saveStudyTarget = async (subject, hours) => {
+   const saveStudyTarget = async (subject, hours) => {
     if (!user || !subject) return;
-    
+
     // Ensure hours is a valid number
-    const validHours = parseInt(hours) || 10;
-    
+    let validHours = parseInt(hours, 10);
+    if (isNaN(validHours)) validHours = 10;
+
     // Check if hours is less than 10
     if (validHours < 10) {
       setLowHoursDialog(true);
@@ -132,23 +137,23 @@ const Analiz = () => {
     try {
       // Convert to seconds for storage (consistent with analytics data)
       const targetSeconds = validHours * 3600;
-      
+
       // Update local state
       const updatedTargets = {
         ...studyTargets,
         [subject]: targetSeconds
       };
-      
+
       setStudyTargets(updatedTargets);
-      
+
       // Save to Firestore
       const targetsRef = doc(db, 'users', user.uid, 'stats', 'targets');
       await setDoc(targetsRef, updatedTargets);
-      
+
       // Show success message
       setSnackbarMessage(`${subject} için ${validHours} saat hedef kaydedildi`);
       setSnackbarOpen(true);
-      
+
       // Reset target hours input
       setTargetHours(10);
     } catch (error) {
@@ -284,6 +289,7 @@ const Analiz = () => {
   };
 
   const getSubjectColor = (subject) => {
+  if (!subject) return '#4285F4';
   const subjectColors = {
     'Matematik': '#1E90FF',
     'Fizik': '#2ECC71',
@@ -301,6 +307,7 @@ const Analiz = () => {
 };
 
 const getSubjectIcon = (subject) => {
+  if (!subject) return '📘';
   const subjectIcons = {
     'Matematik': '📘',
     'Fizik': '⚡',
@@ -351,175 +358,165 @@ const getSubjectIcon = (subject) => {
         justifyContent: 'flex-start',
         width: '100%',
         background: '#fff',
-        position: 'relative',
-        overflow: 'visible',
-        zIndex: 1,
       }}>
-        <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{
-    mb: 3,
-    display: 'flex',
-    alignItems: 'center',
-    '&::before': {
-      content: '""',
-      display: 'block',
-      width: 5,
-      height: 24,
-      backgroundColor: 'primary.main',
-      borderRadius: 4,
-      marginRight: 1.5
-    }
-  }}>
-    Çalışma Analizleri
-  </Typography>
+        {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih',
+          'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map((subject, idx) => {
+          const subjectColor = selectedSubject ? getSubjectColor(subject) : '#4285F4';
+          const subjectIcon = selectedSubject ? getSubjectIcon(subject) : '📘';
+          return (
+            <Card
+              key={subject}
+              elevation={0}
+              sx={{
+                cursor: 'pointer',
+                borderRadius: '16px',
+                background: '#fff',
+                color: '#222',
+                boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
+                minHeight: 150,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                px: 0,
+                py: 0,
+                border: '1.5px solid #f0f1f4',
+                transition: 'box-shadow 0.16s, border-color 0.16s',
+                '&:hover': {
+                  boxShadow: '0 6px 24px 0 rgba(30,30,60,0.11)',
+                  borderColor: '#e0e1e7',
+                },
+              }}
+              onClick={() => handleCardClick(subject)}
+            >
+              <span style={{
+                fontSize: 32,
+                marginBottom: 10,
+                color: subjectColor,
+                filter: 'none',
+                opacity: 1
+              }}>{subjectIcon}</span>
+              <Typography
+                sx={{
+                  fontSize: 20,
+                  fontWeight: 900,
+                  color: '#2c2c2c',
+                  letterSpacing: 0.12,
+                  textAlign: 'center',
+                  fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
+                  lineHeight: 1.13,
+                  filter: 'none',
+                  opacity: 1,
+                  textTransform: 'none',
+                }}
+              >
+                {subject}
+              </Typography>
+            </Card>
+          );
+        })}
+      </Box>
 
-  <Box sx={{
-    display: 'grid',
-    gridTemplateColumns: {
-      xs: 'repeat(1, 1fr)',
-      sm: 'repeat(2, 1fr)',
-      md: 'repeat(3, 1fr)',
-      lg: 'repeat(4, 1fr)'
-    },
-    gap: 3
-  }}>
-    {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih',
-      'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map((subject, idx) => {
-      const subjectColor = getSubjectColor(subject);
-      const subjectIcon = getSubjectIcon(subject);
-      return (
-        <Card
-          key={subject}
-          elevation={0}
+      <Box sx={{ 
+        position: 'absolute', 
+        top: 0, 
+        left: 0, 
+        width: '100%', 
+        height: '5px', 
+        background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' 
+      }} />
+
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        px: 3,
+        pt: 2,
+      }}>
+        <Button
+          variant="contained"
+          color="primary"
           sx={{
-            borderRadius: '16px',
-            background: '#fff',
-            color: '#222',
-            boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
-            minHeight: 150,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            px: 0,
-            py: 0,
-            border: '1.5px solid #f0f1f4',
-            transition: 'box-shadow 0.16s, border-color 0.16s',
-            '&:hover': {
-              boxShadow: '0 6px 24px 0 rgba(30,30,60,0.11)',
-              borderColor: '#e0e1e7',
-            },
+            fontWeight: 700,
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(33, 150, 243, 0.14)',
+            mb: 1,
+            minWidth: 200
           }}
+          onClick={() => setTopicDialog(true)}
         >
-          <span style={{
-            fontSize: 32,
-            marginBottom: 10,
-            color: subjectColor,
-            filter: 'none',
-            opacity: 1
-          }}>{subjectIcon}</span>
-          <Typography
-            sx={{
-              fontSize: 20,
-              fontWeight: 900,
-              color: '#2c2c2c',
-              letterSpacing: 0.12,
-              textAlign: 'center',
-              fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
-              lineHeight: 1.13,
-              filter: 'none',
-              opacity: 1,
-              textTransform: 'none',
-            }}
-          >
-            {subject}
-          </Typography>
-        </Card>
-            );
-          })}
-        </Box>
-      )}
-    </Box>
+          Konu Bazlı Çalışma Süreleri
+        </Button>
+      </Box>
+
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        p: 3, 
+        pb: 0
+      }}>
         <Box sx={{ 
-          position: 'absolute', 
-          top: 0, 
-          left: 0, 
-          width: '100%', 
-          height: '5px', 
-          background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' 
-        }} />
-        
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'flex-end',
+          display: 'flex',
           alignItems: 'center',
-          px: 3,
-          pt: 2,
+          justifyContent: 'center',
+          width: 48,
+          height: 48, 
         }}>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              fontWeight: 700,
-              borderRadius: 2,
-              boxShadow: '0 2px 8px rgba(33, 150, 243, 0.14)',
-              mb: 1,
-              minWidth: 200
-            }}
-            onClick={() => setTopicDialog(true)}
-          >
-            Konu Bazlı Çalışma Süreleri
-          </Button>
+          {/* ... diğer içerikler ... */}
         </Box>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          p: 3, 
-          pb: 0
-        }}>
-          <Box sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 48,
-            height: 48, 
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
-            color: 'white',
-            mr: 2,
-            boxShadow: '0 4px 12px rgba(63, 81, 181, 0.3)'
-          }}>
-            <FlagIcon fontSize="medium" />
-          </Box>
-          <Box>
-            <Typography variant="h6" fontWeight="bold" gutterBottom={false}>
-              Çalışma Hedefi Belirle
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Her ders için hedeflediğin çalışma sürelerini ayarla
-            </Typography>
-          </Box>
-        </Box>
-        
-        <Divider sx={{ my: 3 }} />
-        
-        <Box sx={{ px: 3, pb: 3 }}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={5}>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" fontWeight="600" color="text.primary" gutterBottom>
-                  Ders Seç
-                </Typography>
-                <FormControl fullWidth>
-                  <Select
-                    value={targetSubject}
-                    onChange={(e) => setTargetSubject(e.target.value)}
-                    displayEmpty
-                    sx={{ 
-                      borderRadius: 2,
-                      backgroundColor: '#f5f7fa',
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(0,0,0,0.08)'
-                      },
+      </Box>
+
+      <Dialog
+        open={topicDialog}
+        onClose={handleCloseTopicDialog}
+        maxWidth="sm"
+        fullWidth
+      >
+        {/* ...Dialog içeriği... */}
+      </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+    </Box>
+
+    <Box sx={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      p: 3, 
+      pb: 0
+    }}>
+      <Box sx={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 48,
+        height: 48, 
+      }}>
+        {/* ... diğer içerikler ... */}
+      </Box>
+    </Box>
+
+    <Dialog
+      open={topicDialog}
+      onClose={handleCloseTopicDialog}
+      maxWidth="sm"
+      fullWidth
+    >
+      {/* ...Dialog içeriği... */}
+    </Dialog>
+
+    <Snackbar
+      open={snackbarOpen}
+      autoHideDuration={3000}
+      onClose={handleCloseSnackbar}
+      message={snackbarMessage}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    />
+  </React.Fragment>
+);
+
+export default Analiz;
                       '&:hover .MuiOutlinedInput-notchedOutline': {
                         borderColor: 'rgba(0,0,0,0.18)'
                       },
@@ -791,7 +788,6 @@ const getSubjectIcon = (subject) => {
             </Grid>
           </Grid>
         </Box>
-      </Paper>
       {/* Konu detayları diyaloğu */}
       <Dialog 
         open={topicDialog} 
@@ -1143,80 +1139,25 @@ const getSubjectIcon = (subject) => {
           elevation={0}
           sx={{
             p: 3,
-            borderRadius: 3,
           }}
         >
+          <Typography align="center" color="text.secondary">
+            Bu derse ait konu bazlı analiz bulunamadı.
+          </Typography>
         </Paper>
       )}
-      </Box>
-      {/* Bildirim */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={4000}
-        onClose={handleCloseSnackbar}
-        message={snackbarMessage}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        action={
-          <IconButton size="small" color="inherit" onClick={handleCloseSnackbar}>
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        }
-      />
-      {/* Az saat uyarısı diyaloğu */}
-      <Dialog 
-        open={lowHoursDialog}
-        onClose={() => setLowHoursDialog(false)}
-        fullWidth
-        maxWidth="xs"
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            overflow: 'hidden',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
-          }
-        }}
-      >
-        <DialogTitle sx={{
-          p: 0,
-          position: 'relative'
-        }}>
-          <Box sx={{
-            p: 2,
-            background: 'linear-gradient(135deg, #e53935 0%, #ffb300 100%)',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-          }}>
-            <WarningIcon sx={{ mr: 1.5, fontSize: 24 }} />
-            <Typography variant="h6" fontWeight={600}>
-              Hedef Saat Çok Düşük!
-            </Typography>
-          </Box>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
-            Hedef saat en az 10 olmalıdır. Lütfen daha yüksek bir değer girin.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, justifyContent: 'center' }}>
-          <Button 
-            variant="contained" 
-            onClick={() => setLowHoursDialog(false)}
-            sx={{ 
-              fontWeight: 600,
-              px: 4,
-              borderRadius: 2
-            }}
-          >
-            Anladım
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </React.Fragment>
-  );
-};
-
-}
+      <DialogActions>
+        <Button onClick={handleCloseTopicDialog} color="primary">Kapat</Button>
+      </DialogActions>
+    </Dialog>
+    <Snackbar
+      open={snackbarOpen}
+      autoHideDuration={3000}
+      onClose={handleCloseSnackbar}
+      message={snackbarMessage}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    />
+  </React.Fragment>
+);
 
 export default Analiz;
