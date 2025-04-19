@@ -611,5 +611,6 @@ const BugunCozduklerin = () => {
       />
     </>
   );
+}
 
 export default BugunCozduklerin;
