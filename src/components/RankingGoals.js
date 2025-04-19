@@ -109,27 +109,57 @@ const RankingGoals = () => {
       ) : (
         <Fade in>
           <Stack spacing={2} alignItems="center">
-            <Stack direction="row" spacing={2}>
+            <Stack 
+  direction={{ xs: 'column', sm: 'row' }} 
+  spacing={2} 
+  alignItems="center" 
+  justifyContent="center" 
+  width="100%"
+  flexWrap="wrap"
+>
               {['EA', 'SAY', 'SÖZ'].map((key) => (
-                <Chip
-                  key={key}
-                  label={
-                    <span style={{ fontWeight: 700, fontSize: 18 }}>
-                      {key}: {goals[key] ? goals[key].replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '—'}
-                    </span>
-                  }
-                  sx={{
-                    bgcolor: `${goalColors[key]}22`,
-                    color: goalColors[key],
-                    fontWeight: 700,
-                    fontSize: 18,
-                    px: 2.5,
-                    py: 1.2,
-                    borderRadius: 2,
-                    border: `2px solid ${goalColors[key]}55`,
-                  }}
-                  variant="outlined"
-                />
+                <Box
+  key={key}
+  sx={{
+    minWidth: 110,
+    maxWidth: 170,
+    width: { xs: '100%', sm: 150 },
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    mx: { xs: 0, sm: 1 },
+    my: { xs: 0.5, sm: 0 },
+  }}
+>
+  <Chip
+    label={
+      <span style={{ fontWeight: 700, fontSize: 18, wordBreak: 'break-all', textAlign: 'center', width: '100%', display: 'inline-block' }}>
+        {key}: {goals[key] ? goals[key].replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '—'}
+      </span>
+    }
+    sx={{
+      bgcolor: `${goalColors[key]}22`,
+      color: goalColors[key],
+      fontWeight: 700,
+      fontSize: 18,
+      px: 2.5,
+      py: 1.2,
+      borderRadius: 2,
+      border: `2px solid ${goalColors[key]}55`,
+      width: '100%',
+      maxWidth: 170,
+      minWidth: 110,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      textAlign: 'center',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    }}
+    variant="outlined"
+  />
+</Box>
               ))}
             </Stack>
             <Button onClick={() => setEdit(true)} variant="outlined" color="primary" sx={{ mt: 1, borderRadius: 2, fontWeight: 600 }}>
