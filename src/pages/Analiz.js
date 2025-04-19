@@ -1030,10 +1030,10 @@ const Analiz = () => {
                 </Typography>
               </Box>
               
-              {Object.keys(analytics[selectedSubject].topics).length > 0 ? (
+              {Object.keys(analytics[selectedSubject]?.topics || {}).length > 0 ? (
                 <Box sx={{ maxHeight: '300px', overflowY: 'auto', pr: 1 }}>
-                  {Object.keys(analytics[selectedSubject].topics)
-                    .sort((a, b) => analytics[selectedSubject].topics[b] - analytics[selectedSubject].topics[a])
+                  {Object.keys(analytics[selectedSubject]?.topics || {})
+                    .sort((a, b) => (analytics[selectedSubject]?.topics?.[b] || 0) - (analytics[selectedSubject]?.topics?.[a] || 0))
                     .map((topic, index) => (
                       <Paper 
                         key={topic}
@@ -1208,8 +1208,8 @@ const Analiz = () => {
 
       {Object.keys(analytics[selectedSubject].topics).length > 0 ? (
         <Box sx={{ maxHeight: '300px', overflowY: 'auto', pr: 1 }}>
-          {Object.keys(analytics[selectedSubject].topics)
-            .sort((a, b) => analytics[selectedSubject].topics[b] - analytics[selectedSubject].topics[a])
+          {Object.keys(analytics[selectedSubject]?.topics || {})
+            .sort((a, b) => (analytics[selectedSubject]?.topics?.[b] || 0) - (analytics[selectedSubject]?.topics?.[a] || 0))
             .map((topic, index) => (
               <Paper 
                 key={topic}
