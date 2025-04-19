@@ -5,7 +5,6 @@ import {
   Button, 
   Slider, 
   TextField, 
-  Stack, 
   Grid, 
   IconButton, 
   Tooltip,
@@ -23,10 +22,6 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
-import { playClickSound } from '../utils/soundUtils';
-import { auth } from '../firebase';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { dataService } from '../services/dataService';
 
 const PomodoroTimer = () => {
 
@@ -45,7 +40,7 @@ const PomodoroTimer = () => {
     message: '',
     severity: 'info'
   });
-
+  // Removed unused theme and isLoading variables
 
   // Bildirim gösterme
   const showNotification = (message, severity = 'success') => {
