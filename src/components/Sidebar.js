@@ -38,10 +38,9 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  background: 'linear-gradient(135deg, #F8FFAE 0%, #43C6AC 100%)',
-  backdropFilter: 'blur(10px)',
+  background: '#fff',
   borderRight: 'none',
-  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.10)',
+  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.08)',
 });
 
 const closedMixin = (theme) => ({
@@ -54,10 +53,9 @@ const closedMixin = (theme) => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
-  background: 'linear-gradient(135deg, #F8FFAE 0%, #43C6AC 100%)',
-  backdropFilter: 'blur(10px)',
+  background: '#fff',
   borderRight: 'none',
-  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.10)',
+  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.08)',
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -154,20 +152,15 @@ const Sidebar = () => {
                   justifyContent: open ? 'initial' : 'center',
                   px: open ? 2.7 : 1.2,
                   borderRadius: 99,
-                  background: isActive
-                    ? 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)'
-                    : 'rgba(255,255,255,0.18)',
-                  boxShadow: isActive
-                    ? '0 2px 16px #43C6AC22'
-                    : 'none',
+                  background: isActive ? '#f8fafc' : '#fff',
+                  boxShadow: '0 2px 10px 0 rgba(30,30,60,0.10)',
                   color: isActive ? '#2e3856' : '#222',
                   transition: 'all 0.18s',
                   fontWeight: isActive ? 700 : 500,
                   '&:hover': {
-                    background:
-                      'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)',
+                    background: '#f1f5f9',
                     color: '#2e3856',
-                    boxShadow: '0 2px 12px #43C6AC22',
+                    boxShadow: '0 4px 18px 0 rgba(30,30,60,0.13)',
                   },
                   mb: 0.5,
                 }}
@@ -217,9 +210,8 @@ const Sidebar = () => {
         userSelect: 'none',
         borderBottomLeftRadius: 18,
         borderBottomRightRadius: 18,
-        background: 'rgba(255,255,255,0.22)',
-        backdropFilter: 'blur(7px)',
-        boxShadow: '0 -2px 16px #43C6AC11',
+        background: '#fff',
+        boxShadow: '0 -2px 16px #43C6AC08',
       }}>
         <span>vinsurf YKS &copy; 2025</span>
       </Box>

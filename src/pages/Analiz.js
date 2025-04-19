@@ -422,9 +422,15 @@ const getSubjectIcon = (subject) => {
     alignItems: 'stretch',
     cursor: 'pointer',
     transition: 'transform 0.17s, box-shadow 0.17s',
+    filter: 'none',
+    opacity: 1,
+    backdropFilter: 'none',
     '&:hover': {
       transform: 'scale(1.025)',
       boxShadow: '0 14px 32px 0 rgba(30,30,60,0.20)',
+      filter: 'none',
+      opacity: 1,
+      backdropFilter: 'none',
     },
   }}
 >
@@ -439,8 +445,11 @@ const getSubjectIcon = (subject) => {
     borderTopRightRadius: '20px',
     background: subjectColor,
     minHeight: 60,
+    filter: 'none',
+    opacity: 1,
+    backdropFilter: 'none',
   }}>
-    <span style={{ fontSize: 30, marginRight: 10 }}>{subjectIcon}</span>
+    <span style={{ fontSize: 30, marginRight: 10, filter: 'none', opacity: 1 }}>{subjectIcon}</span>
     <Typography
       sx={{
         fontSize: 22,
@@ -452,6 +461,8 @@ const getSubjectIcon = (subject) => {
         fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
         textShadow: '0 2px 12px rgba(0,0,0,0.17)',
         lineHeight: 1.2,
+        filter: 'none',
+        opacity: 1,
       }}
     >
       {subject}
