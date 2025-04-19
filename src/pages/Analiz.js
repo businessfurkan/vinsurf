@@ -409,206 +409,103 @@ const Analiz = () => {
             
             return (
               <Card 
-  key={subject}
-  sx={{
-    borderRadius: 6,
-    overflow: 'hidden',
-    background: `linear-gradient(135deg, ${subjectColor} 0%, #fff 100%)`,
-    boxShadow: '0 12px 32px 0 rgba(31, 38, 135, 0.13)',
-    backdropFilter: 'blur(13px)',
-    border: `2px solid rgba(255,255,255,0.23)` ,
-    transition: 'all 0.32s cubic-bezier(.25,.8,.25,1)',
-    opacity: hasData ? 1 : 0.92,
-    position: 'relative',
-    zIndex: 2,
-    minHeight: 225,
-    minWidth: 260,
-    maxWidth: 350,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    cursor: 'pointer',
-    '&:hover': {
-      transform: 'translateY(-10px) scale(1.035)',
-      boxShadow: `0 16px 32px 0 ${subjectColor}33`,
-      opacity: 1,
-      borderColor: `${subjectColor}cc`,
-      filter: 'brightness(1.07) saturate(1.08)',
-    },
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: 'rgba(255,255,255,0.13)',
-      pointerEvents: 'none',
->
-<Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{ 
-mb: 3,
-display: 'flex',
-alignItems: 'center',
-'&::before': {
-content: '""',
-display: 'block',
-width: 5,
-height: 24,
-backgroundColor: 'primary.main',
-borderRadius: 4,
-marginRight: 1.5
-}
-}}>
-Çalışma Analizleri
-</Typography>
-
-{isLoading ? (
-<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-<CircularProgress />
-</Box>
-) : (
-<Box sx={{ 
-display: 'grid', 
-gridTemplateColumns: { 
-xs: 'repeat(1, 1fr)', 
-sm: 'repeat(2, 1fr)', 
-md: 'repeat(3, 1fr)', 
-lg: 'repeat(4, 1fr)' 
-},
-gap: 3
-}}>
-{/* Sabit ders listesi - tüm dersler burada yer alacak */}
-{['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 
-'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map(subject => {
-  
-// Ders için veri var mı kontrol et
-const hasData = Object.keys(analytics).includes(subject);
-const totalSubjectTime = hasData ? analytics[subject].totalTime : 0;
-const targetTime = studyTargets[subject] || 0;
-const progressPercent = targetTime > 0 ? Math.floor(Math.min(100, (totalSubjectTime / targetTime) * 100)) : 0;
-const topicCount = hasData ? Object.keys(analytics[subject]?.topics || {}).length : 0;
-  
-// Define subject color based on YKS color scheme
-const subjectColors = {
-'Matematik': '#4285F4',
-'Fizik': '#0F9D58',
-'Kimya': '#DB4437',
-'Biyoloji': '#F4B400',
-'Edebiyat': '#673AB7',
-'Türkçe': '#3F51B5',
-'Tarih': '#FF6D00',
-'Coğrafya': '#00ACC1',
-'Felsefe': '#9E9E9E',
-'Din Kültürü': '#795548',
-'İngilizce': '#607D8B'
-};
-  
-const subjectColor = subjectColors[subject] || '#3F51B5';
-  
-return (
-<Card 
-key={subject}
-sx={{
-borderRadius: 18,
-overflow: 'hidden',
-background: `linear-gradient(135deg, ${subjectColor} 0%, #fff 100%)`,
-boxShadow: '0 12px 32px 0 rgba(31, 38, 135, 0.13)',
-backdropFilter: 'blur(13px)',
-border: `2px solid rgba(255,255,255,0.23)` ,
-transition: 'all 0.32s cubic-bezier(.25,.8,.25,1)',
-opacity: hasData ? 1 : 0.92,
-position: 'relative',
-zIndex: 2,
-minHeight: 300,
-minWidth: 260,
-maxWidth: 350,
-display: 'flex',
-flexDirection: 'column',
-justifyContent: 'flex-start',
-cursor: 'pointer',
-'&:hover': {
-transform: 'translateY(-10px) scale(1.035)',
-boxShadow: `0 16px 32px 0 ${subjectColor}33`,
-opacity: 1,
-borderColor: `${subjectColor}cc`,
-filter: 'brightness(1.07) saturate(1.08)',
-},
-'&::after': {
-content: '""',
-position: 'absolute',
-top: 0,
-left: 0,
-width: '100%',
-height: '100%',
-background: 'rgba(255,255,255,0.13)',
-pointerEvents: 'none',
-zIndex: 1,
-}
-}}
->
-<Box sx={{
-p: 3,
-background: `linear-gradient(120deg, ${subjectColor} 60%, #fff 100%)`,
-color: 'white',
-display: 'flex',
-justifyContent: 'space-between',
-alignItems: 'center',
-borderBottom: `3px solid ${subjectColor}`,
-boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.13)',
-zIndex: 2,
-minHeight: 76,
-borderTopLeftRadius: 18,
-borderTopRightRadius: 18,
-position: 'relative',
-overflow: 'hidden',
-}}>
-<Typography variant="h6" fontWeight="bold" sx={{ letterSpacing: 0.5, fontSize: '1.2rem', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.07))' }}>
-{subject}
-</Typography>
-<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-{studyTargets[subject] > 0 && (
-<Chip 
-label={`${Math.round(studyTargets[subject] / 3600)} saat`}
-size="medium" 
-icon={<AccessTimeIcon style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)' }} />}
-sx={{ 
-bgcolor: 'rgba(255,255,255,0.13)',
-color: 'rgba(255,255,255,0.85)',
-fontWeight: 500,
-border: '1.5px solid rgba(255,255,255,0.18)',
-'& .MuiChip-icon': {
-color: 'rgba(255,255,255,0.8) !important',
-marginLeft: '6px'
-}
-}} 
-/>
-)}
-<Chip 
-label={hasData ? `${formatTime(totalSubjectTime)}` : "0 dakika"} 
-size="medium" 
-sx={{ 
-bgcolor: 'rgba(255,255,255,0.22)',
-color: 'white',
-fontWeight: 700,
-boxShadow: '0 1px 5px rgba(0,0,0,0.10)',
-fontSize: '1rem',
-px: 1.5
-}} 
-/>
-</Box>
-</Box>
-                
-<CardContent sx={{
-p: 2.5,
-background: 'rgba(255,255,255,0.70)',
-backdropFilter: 'blur(6px)',
-borderRadius: 2,
-boxShadow: '0 1.5px 6px rgba(31,38,135,0.08)',
-zIndex: 2,
-  borderRadius: 2,
-  boxShadow: '0 1.5px 6px rgba(31,38,135,0.08)',
-  zIndex: 2,
-}}>
+                key={subject}
+                sx={{
+                  borderRadius: 18,
+                  overflow: 'hidden',
+                  background: `linear-gradient(135deg, ${subjectColor} 0%, #fff 100%)`,
+                  boxShadow: '0 12px 32px 0 rgba(31, 38, 135, 0.13)',
+                  backdropFilter: 'blur(13px)',
+                  border: `2px solid rgba(255,255,255,0.23)` ,
+                  transition: 'all 0.32s cubic-bezier(.25,.8,.25,1)',
+                  opacity: hasData ? 1 : 0.92,
+                  position: 'relative',
+                  zIndex: 2,
+                  minHeight: 300,
+                  minWidth: 260,
+                  maxWidth: 350,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-start',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    transform: 'translateY(-10px) scale(1.035)',
+                    boxShadow: `0 16px 32px 0 ${subjectColor}33`,
+                    opacity: 1,
+                    borderColor: `${subjectColor}cc`,
+                    filter: 'brightness(1.07) saturate(1.08)',
+                  },
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    background: 'rgba(255,255,255,0.13)',
+                    pointerEvents: 'none',
+                    zIndex: 1,
+                  }
+                }}
+              >
+                <Box sx={{
+                  p: 3,
+                  background: `linear-gradient(120deg, ${subjectColor} 60%, #fff 100%)`,
+                  color: 'white',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderBottom: `3px solid ${subjectColor}`,
+                  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.13)',
+                  zIndex: 2,
+                  minHeight: 76,
+                  borderTopLeftRadius: 18,
+                  borderTopRightRadius: 18,
+                  position: 'relative',
+                }}>
+                  <Typography variant="h6" fontWeight="bold" sx={{ letterSpacing: 0.5, fontSize: '1.2rem', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.07))' }}>
+                    {subject}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    {studyTargets[subject] > 0 && (
+                      <Chip 
+                        label={`${Math.round(studyTargets[subject] / 3600)} saat`}
+                        size="medium" 
+                        icon={<AccessTimeIcon style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)' }} />}
+                        sx={{ 
+                          bgcolor: 'rgba(255,255,255,0.13)',
+                          color: 'rgba(255,255,255,0.85)',
+                          fontWeight: 500,
+                          border: '1.5px solid rgba(255,255,255,0.18)',
+                          '& .MuiChip-icon': {
+                            color: 'rgba(255,255,255,0.8) !important',
+                            marginLeft: '6px'
+                          }
+                        }} 
+                      />
+                    )}
+                    <Chip 
+                      label={hasData ? `${formatTime(totalSubjectTime)}` : "0 dakika"} 
+                      size="medium" 
+                      sx={{ 
+                        bgcolor: 'rgba(255,255,255,0.22)',
+                        color: 'white',
+                        fontWeight: 700,
+                        boxShadow: '0 1px 5px rgba(0,0,0,0.10)',
+                        fontSize: '1rem',
+                        px: 1.5
+                      }} 
+                    />
+                  </Box>
+                </Box>
+                <CardContent sx={{
+                  p: 2.5,
+                  background: 'rgba(255,255,255,0.70)',
+                  backdropFilter: 'blur(6px)',
+                  borderRadius: 2,
+                  boxShadow: '0 1.5px 6px rgba(31,38,135,0.08)',
+                  zIndex: 2,
+                }}>
                   <Box sx={{ mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography variant="body2" color="text.secondary">
@@ -1309,8 +1206,7 @@ zIndex: 2,
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
-  );
-};
-
-export default Analiz;
+            </Card>
+          ))}
+        </Box>
+      )}
