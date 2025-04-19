@@ -354,8 +354,7 @@ const getSubjectIcon = (subject) => {
         overflow: 'visible',
         zIndex: 1,
       }}>
-}}>
-  <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{
+        <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{
     mb: 3,
     display: 'flex',
     alignItems: 'center',
