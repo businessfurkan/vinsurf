@@ -502,28 +502,19 @@ const Analiz = () => {
                         {hasData ? `${Math.floor(progressPercent)}%` : "0%"}
                       </Typography>
                     </Box>
-                    <Box sx={{
-  width: '100%',
-  mx: 'auto',
-  maxWidth: '100%',
-  background: 'rgba(255,255,255,0.28)',
-  borderRadius: 3,
-  boxShadow: '0 2px 10px rgba(31,38,135,0.07)',
-  p: 2,
-  mb: 2,
-  backdropFilter: 'blur(4px)',
-}}>
-  <AnalyticalStopwatch />
-</Box>
-                      <Box 
-                        sx={{
-                          width: hasData ? `${progressPercent}%` : '0%',
-                          height: '100%',
-                          bgcolor: subjectColor,
-                          borderRadius: 3,
-                          boxShadow: '0 1px 6px rgba(31,38,135,0.08)',
-                        }}
-                      />
+                    <LinearProgress 
+  variant="determinate" 
+  value={hasData ? progressPercent : 0} 
+  sx={{
+    height: 10,
+    borderRadius: 3,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    '& .MuiLinearProgress-bar': {
+      backgroundColor: subjectColor,
+      borderRadius: 3,
+    }
+  }}
+/>
                     </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
