@@ -281,11 +281,9 @@ const RankingGoals = () => {
             )}
           </>
         )}
-        <Button onClick={handleSaveSchools} variant="contained" color="primary" sx={{ mt: 2, borderRadius: 2, fontWeight: 600 }}>
-          Kaydet
-        </Button>
-        <Button onClick={() => setEditSchools(false)} sx={{ mt: 2, ml: 1 }}>İptal</Button>
       </Paper>
     </Box>
+  );
+}
 
 export default RankingGoals;
