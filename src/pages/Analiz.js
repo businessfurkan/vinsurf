@@ -409,153 +409,160 @@ const getSubjectIcon = (subject) => {
             const subjectIcon = getSubjectIcon(subject);
             return (
               <Card
-                key={subject}
-                sx={{
-                  borderRadius: '20px',
-                  background: subjectColor,
-                  color: '#fff',
-                  boxShadow: '0 4px 20px 0 rgba(30,144,255,0.08)',
-                  transition: 'all 0.2s cubic-bezier(.25,.8,.25,1)',
-                  minHeight: 220,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'flex-start',
-                  alignItems: 'stretch',
-                  cursor: 'pointer',
-                  animation: 'fadeInUp 0.7s',
-                  animationDelay: `${idx * 0.05}s`,
-                  animationFillMode: 'backwards',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    boxShadow: '0 10px 32px 0 rgba(30,144,255,0.16)',
-                  },
-                }}
-              >
-                <Box sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  px: 3,
-                  pt: 3,
-                  pb: 0.5,
-                }}>
-                  <span style={{ fontSize: 28, marginRight: 6 }}>{subjectIcon}</span>
-                  <Typography
-                    sx={{
-                      fontSize: 20,
-                      fontWeight: 700,
-                      color: '#fff',
-                      letterSpacing: 0.5,
-                      textAlign: 'left',
-                      flex: 1,
-                      fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-                    }}
-                  >
-                    {subject}
-                  </Typography>
-                </Box>
-                <CardContent
-                  sx={{
-                    px: 3,
-                    pt: 1,
-                    pb: 2,
-                    flex: 1,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: 15,
-                      fontWeight: 500,
-                      color: '#f5f6fa',
-                      mb: 1,
-                      textAlign: 'left',
-                      fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-                    }}
-                  >
-                    {hasData ? `${formatTime(totalSubjectTime)}` : '0 dakika'}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        color: '#eaeaea',
-                        fontWeight: 400,
-                        flex: 1,
-                        textAlign: 'left',
-                        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-                      }}
-                    >
-                      İlerleme
-                    </Typography>
-                    <Typography
-                      sx={{
-                        fontSize: 13,
-                        color: '#eaeaea',
-                        fontWeight: 400,
-                        textAlign: 'right',
-                        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-                      }}
-                    >
-                      {hasData ? `${Math.floor(progressPercent)}%` : '0%'}
-                    </Typography>
-                  </Box>
-                  <LinearProgress
-                    variant="determinate"
-                    value={hasData ? progressPercent : 0}
-                    sx={{
-                      height: 8,
-                      borderRadius: 4,
-                      background: 'rgba(255,255,255,0.22)',
-                      '& .MuiLinearProgress-bar': {
-                        backgroundColor: '#fff',
-                        borderRadius: 4,
-                      },
-                      mb: 2,
-                    }}
-                  />
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Typography
-                      sx={{
-                        fontSize: 14,
-                        color: '#f5f6fa',
-                        fontWeight: 400,
-                        textAlign: 'left',
-                        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-                      }}
-                    >
-                      {hasData ? `${topicCount} konu` : 'Henüz konu yok'}
-                    </Typography>
-                    <Button
-                      variant="text"
-                      size="small"
-                      sx={{
-                        color: '#fff',
-                        fontWeight: 500,
-                        fontSize: 13,
-                        textTransform: 'none',
-                        '&:hover': {
-                          color: '#fff',
-                          opacity: 0.92,
-                        },
-                        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-                      }}
-                      onClick={() => {
-                        setSelectedSubject(subject);
-                        setTopicDialog(true);
-                      }}
-                      disabled={!hasData}
-                    >
-                      Konular
-                      <Box component="span" sx={{ display: 'inline-flex', ml: 0.5 }}>
-                        <NavigateNextIcon fontSize="small" />
-                      </Box>
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
+  key={subject}
+  sx={{
+    borderRadius: '18px',
+    background: subjectColor,
+    color: '#222',
+    boxShadow: '0 4px 18px 0 rgba(30,30,60,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.04)',
+    minHeight: 180,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    cursor: 'pointer',
+    transition: 'transform 0.18s cubic-bezier(.25,.8,.25,1), box-shadow 0.18s cubic-bezier(.25,.8,.25,1)',
+    '&:hover': {
+      transform: 'scale(1.035)',
+      boxShadow: '0 8px 28px 0 rgba(30,30,60,0.18)',
+    },
+  }}
+>
+  <Box sx={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 1.5,
+    px: 2.2,
+    pt: 2.2,
+    pb: 0.5,
+  }}>
+    <span style={{ fontSize: 28, marginRight: 6 }}>{subjectIcon}</span>
+    <Typography
+      sx={{
+        fontSize: 22,
+        fontWeight: 800,
+        color: '#fff',
+        letterSpacing: 0.2,
+        textAlign: 'left',
+        flex: 1,
+        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+        textShadow: '0 2px 8px rgba(0,0,0,0.13)',
+      }}
+    >
+      {subject}
+    </Typography>
+  </Box>
+  <CardContent
+    sx={{
+      px: 2.2,
+      pt: 1,
+      pb: 2,
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      background: '#fff',
+      borderRadius: '12px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+      mt: 1,
+    }}
+  >
+    <Typography
+      sx={{
+        fontSize: 16,
+        fontWeight: 700,
+        color: '#222',
+        mb: 1,
+        textAlign: 'left',
+        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+        letterSpacing: 0.08,
+      }}
+    >
+      {hasData ? `${formatTime(totalSubjectTime)}` : '0 dakika'}
+    </Typography>
+    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+      <Typography
+        sx={{
+          fontSize: 13,
+          color: '#444',
+          fontWeight: 500,
+          flex: 1,
+          textAlign: 'left',
+          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+          letterSpacing: 0.02,
+        }}
+      >
+        İlerleme
+      </Typography>
+      <Typography
+        sx={{
+          fontSize: 13,
+          color: '#222',
+          fontWeight: 700,
+          textAlign: 'right',
+          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+          letterSpacing: 0.02,
+        }}
+      >
+        {hasData ? `${Math.floor(progressPercent)}%` : '0%'}
+      </Typography>
+    </Box>
+    <LinearProgress
+      variant="determinate"
+      value={hasData ? progressPercent : 0}
+      sx={{
+        height: 11,
+        borderRadius: 6,
+        background: '#e6e6e6',
+        boxShadow: '0 1.5px 7px 0 rgba(0,0,0,0.06)',
+        '& .MuiLinearProgress-bar': {
+          backgroundColor: subjectColor,
+          borderRadius: 6,
+        },
+        mb: 2,
+      }}
+    />
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Typography
+        sx={{
+          fontSize: 13,
+          color: '#666',
+          fontWeight: 500,
+          textAlign: 'left',
+          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+          letterSpacing: 0.01,
+        }}
+      >
+        {hasData ? `${topicCount} konu` : 'Henüz konu yok'}
+      </Typography>
+      <Button
+        variant="text"
+        size="small"
+        sx={{
+          color: subjectColor,
+          fontWeight: 700,
+          fontSize: 13,
+          textTransform: 'none',
+          '&:hover': {
+            color: subjectColor,
+            opacity: 0.8,
+          },
+          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
+        }}
+        onClick={() => {
+          setSelectedSubject(subject);
+          setTopicDialog(true);
+        }}
+        disabled={!hasData}
+      >
+        Konular
+        <Box component="span" sx={{ display: 'inline-flex', ml: 0.5 }}>
+          <NavigateNextIcon fontSize="small" />
+        </Box>
+      </Button>
+    </Box>
+  </CardContent>
+</Card>
             );
           })}
         </Box>
