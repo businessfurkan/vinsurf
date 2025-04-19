@@ -278,54 +278,11 @@ const RankingGoals = () => {
         )}
       </>
     )}
-    </Paper>
-  </Box>
+  </Paper>
+</Box>
 );
 
 export default RankingGoals;
-                    minWidth: { xs: 80, sm: 110 },
-                    maxWidth: { xs: 160, sm: 220 },
-                    width: 'auto',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    textAlign: 'center',
-                    overflow: 'visible',
-                    whiteSpace: 'normal',
-                  }}
-                  variant="outlined"
-                />
-              ))}
-            </Stack>
-            <Button onClick={() => setEditGoals(true)} variant="outlined" color="primary" sx={{ borderRadius: 2, fontWeight: 600 }}>
-              Hedefleri Düzenle
-            </Button>
-            {savedGoals && (
-              <Fade in={!!savedGoals}>
-                <Alert severity="success" sx={{ mt: 2 }}>
-                  Sıralama hedeflerin kaydedildi!
-                </Alert>
-              </Fade>
-            )}
-          </>
-        )}
-      </Paper>
-      {/* Okul ve Bölüm Hedefleri Kartı */}
-      <Paper elevation={3} sx={{ flex: 1, minWidth: 260, maxWidth: 400, p: { xs: 2, md: 3 }, borderRadius: 4, background: '#fff', ml: { md: 2 } }}>
-        <Stack direction="row" alignItems="center" spacing={1} mb={1}>
-          <EmojiEventsIcon sx={{ color: '#0F9D58', fontSize: 28 }} />
-          <Typography fontWeight={700} color="#2e3856" fontSize={18}>
-            Hedef Okul ve Bölümler
-          </Typography>
-        </Stack>
-        {errorSchools && <Alert severity="error" sx={{ mb: 2 }}>{errorSchools}</Alert>}
-        {!user ? (
-          <Alert severity="info">Giriş yapmalısın.</Alert>
-        ) : loadingSchools ? (
-          <Typography color="text.secondary" align="center">Yükleniyor...</Typography>
-        ) : editSchools ? (
-          <Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {schools.map((item, idx) => (
                 <Box key={idx} sx={{ display: 'flex', flexDirection: 'row', gap: 1, mb: 1 }}>
                   <TextField
