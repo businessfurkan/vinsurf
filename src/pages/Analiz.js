@@ -320,7 +320,32 @@ const Analiz = () => {
   }
 
   return (
-    <Box sx={{ py: 3, px: { xs: 2, md: 4 } }}>
+    <Box sx={{
+  minHeight: '100vh',
+  py: 4,
+  px: { xs: 1, sm: 2, md: 4 },
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  width: '100%',
+  background: 'linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%)',
+  position: 'relative',
+  overflow: 'hidden',
+  // Glassmorphism overlay
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(255,255,255,0.35)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 0,
+  },
+  zIndex: 1,
+}}>
       <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{ 
         mb: 3,
         display: 'flex',
@@ -383,29 +408,48 @@ const Analiz = () => {
             
             return (
               <Card 
-                key={subject} 
-                sx={{ 
-                  borderRadius: 2,
-                  overflow: 'hidden',
-                  backgroundColor: 'white',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                  transition: 'all 0.3s ease',
-                  opacity: hasData ? 1 : 0.85,
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    opacity: 1
-                  }
-                }}
-              >
-                <Box sx={{ 
-                  p: 2,
-                  background: subjectColor,
-                  color: 'white',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}>
+  key={subject}
+  sx={{
+    borderRadius: 4,
+    overflow: 'hidden',
+    background: `linear-gradient(135deg, ${subjectColor} 0%, #fff 100%)`,
+    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
+    backdropFilter: 'blur(10px)',
+    border: `1.5px solid rgba(255,255,255,0.25)` ,
+    transition: 'all 0.3s cubic-bezier(.25,.8,.25,1)',
+    opacity: hasData ? 1 : 0.85,
+    position: 'relative',
+    zIndex: 2,
+    '&:hover': {
+      transform: 'translateY(-6px) scale(1.025)',
+      boxShadow: '0 12px 24px 0 rgba(31, 38, 135, 0.18)',
+      opacity: 1,
+      borderColor: `${subjectColor}99`,
+    },
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'rgba(255,255,255,0.12)',
+      pointerEvents: 'none',
+      zIndex: 1,
+    }
+  }}
+>
+                <Box sx={{
+  p: 2,
+  background: `linear-gradient(120deg, ${subjectColor} 60%, #fff 100%)`,
+  color: 'white',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  borderBottom: `2.5px solid ${subjectColor}`,
+  boxShadow: '0 2px 8px 0 rgba(31, 38, 135, 0.12)',
+  zIndex: 2,
+}}>
                   <Typography variant="subtitle1" fontWeight="600">
                     {subject}
                   </Typography>
@@ -440,7 +484,14 @@ const Analiz = () => {
                   </Box>
                 </Box>
                 
-                <CardContent sx={{ p: 2 }}>
+                <CardContent sx={{
+  p: 2.5,
+  background: 'rgba(255,255,255,0.70)',
+  backdropFilter: 'blur(6px)',
+  borderRadius: 2,
+  boxShadow: '0 1.5px 6px rgba(31,38,135,0.08)',
+  zIndex: 2,
+}}>
                   <Box sx={{ mb: 2 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
                       <Typography variant="body2" color="text.secondary">
@@ -450,22 +501,29 @@ const Analiz = () => {
                         {hasData ? `${Math.floor(progressPercent)}%` : "0%"}
                       </Typography>
                     </Box>
-                    <Box sx={{ 
-                      width: '100%', 
-                      height: 8, 
-                      bgcolor: 'rgba(0,0,0,0.05)', 
-                      borderRadius: 1 
-                    }}>
+                    <Box sx={{
+  width: '100%',
+  mx: 'auto',
+  maxWidth: '100%',
+  background: 'rgba(255,255,255,0.28)',
+  borderRadius: 3,
+  boxShadow: '0 2px 10px rgba(31,38,135,0.07)',
+  p: 2,
+  mb: 2,
+  backdropFilter: 'blur(4px)',
+}}>
+  <AnalyticalStopwatch />
+</Box>
                       <Box 
                         sx={{
                           width: hasData ? `${progressPercent}%` : '0%',
                           height: '100%',
                           bgcolor: subjectColor,
-                          borderRadius: 1
+                          borderRadius: 3,
+                          boxShadow: '0 1px 6px rgba(31,38,135,0.08)',
                         }}
                       />
                     </Box>
-                  </Box>
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="body2" color="text.secondary">
@@ -935,19 +993,22 @@ const Analiz = () => {
                       {calculateProgress(analytics[selectedSubject].totalTime, selectedSubject)}%
                     </Typography>
                   </Box>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={calculateProgress(analytics[selectedSubject].totalTime, selectedSubject)} 
-                    sx={{ 
-                      height: 8, 
-                      borderRadius: 4,
-                      bgcolor: 'rgba(0, 0, 0, 0.05)',
-                      '& .MuiLinearProgress-bar': {
-                        bgcolor: getSubjectColor(selectedSubject),
-                        backgroundImage: `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getLighterColor(getSubjectColor(selectedSubject))} 100%)`,
-                      }
-                    }} 
-                  />
+                  <LinearProgress
+  variant="determinate"
+  value={calculateProgress(analytics[selectedSubject].totalTime, selectedSubject)}
+  sx={{
+    height: 10,
+    borderRadius: 6,
+    bgcolor: 'rgba(255,255,255,0.32)',
+    boxShadow: '0 1px 4px rgba(31,38,135,0.10)',
+    '& .MuiLinearProgress-bar': {
+      bgcolor: getSubjectColor(selectedSubject),
+      backgroundImage: `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getLighterColor(getSubjectColor(selectedSubject))} 100%)`,
+      borderRadius: 6,
+      boxShadow: '0 1px 6px rgba(31,38,135,0.08)',
+    },
+  }}
+/>
                 </Box>
               </Paper>
               
@@ -1015,15 +1076,17 @@ const Analiz = () => {
                 </Box>
               ) : (
                 <Paper
-                  elevation={0}
-                  sx={{ 
-                    p: 3, 
-                    borderRadius: 2, 
-                    textAlign: 'center',
-                    bgcolor: 'rgba(245, 247, 250, 0.95)',
-                    border: '1px dashed rgba(0, 0, 0, 0.1)'
-                  }}
-                >
+  elevation={0}
+  sx={{
+    p: 3,
+    borderRadius: 3,
+    textAlign: 'center',
+    bgcolor: 'rgba(255,255,255,0.65)',
+    border: '1.5px dashed #a3bffa',
+    boxShadow: '0 2px 12px rgba(31,38,135,0.04)',
+    backdropFilter: 'blur(3px)',
+  }}
+>               >
                   <AssignmentIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
                   <Typography variant="body1" color="text.secondary" fontWeight={500}>
                     Bu ders için henüz konu çalışması kaydı bulunmuyor.
@@ -1096,7 +1159,13 @@ const Analiz = () => {
             <CloseIcon />
           </Button>
         </DialogTitle>
-        <DialogContent dividers sx={{ p: 3 }}>
+        <DialogContent dividers sx={{
+  p: 3,
+  background: 'linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%)',
+  backdropFilter: 'blur(6px)',
+  borderRadius: 3,
+  boxShadow: '0 2px 12px rgba(31,38,135,0.10)',
+}}>
           <Box sx={{ textAlign: 'center' }}>
             <Box sx={{ mb: 2 }}>
               <Typography variant="h6" color="error.main" gutterBottom fontWeight="bold">

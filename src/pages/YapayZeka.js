@@ -114,7 +114,31 @@ const YapayZeka = () => {
   };
 
   return (
-    <Box sx={{ p: 3, pt: 5, pb: 4 }}>
+    <Box sx={{
+  minHeight: '100vh',
+  py: 4,
+  px: { xs: 1, sm: 2, md: 4 },
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  width: '100%',
+  background: 'linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(255,255,255,0.35)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 0,
+  },
+  zIndex: 1,
+}}>
       <Typography 
         variant="h4" 
         sx={{ 
@@ -143,14 +167,33 @@ const YapayZeka = () => {
       
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Card sx={{ 
-            height: '100%',
-            borderRadius: 3,
-            boxShadow: '0 6px 24px rgba(0,0,0,0.12)',
-            background: 'linear-gradient(to bottom, #ffffff, #f9fafc)',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
+          <Card sx={{
+  height: '100%',
+  borderRadius: 4,
+  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.10)',
+  background: 'linear-gradient(135deg, #ffffff 60%, #e0e7ff 100%)',
+  position: 'relative',
+  overflow: 'hidden',
+  backdropFilter: 'blur(10px)',
+  border: '1.5px solid rgba(255,255,255,0.25)',
+  transition: 'all 0.3s cubic-bezier(.25,.8,.25,1)',
+  '&:hover': {
+    transform: 'translateY(-6px) scale(1.025)',
+    boxShadow: '0 12px 24px 0 rgba(31, 38, 135, 0.18)',
+    borderColor: '#34A85399',
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(255,255,255,0.12)',
+    pointerEvents: 'none',
+    zIndex: 1,
+  }
+}}>
             <Box 
               sx={{
                 position: 'absolute',
@@ -177,28 +220,29 @@ const YapayZeka = () => {
               </Typography>
               
               <TextField
-                label="Yapay zekaya sorunuzu sorun"
-                placeholder="Örnek: YKS hazırlığı için etkili çalışma teknikleri nelerdir?"
-                multiline
-                rows={10}
-                value={prompt}
-                onChange={handlePromptChange}
-                fullWidth
-                sx={{ 
-                  mb: 2.5,
-                  '& .MuiInputBase-root': {
-                    fontWeight: 500,
-                    borderRadius: 2,
-                    backgroundColor: 'white',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-                    '&.Mui-focused': {
-                      boxShadow: '0 4px 16px rgba(66, 133, 244, 0.15)'
-                    }
-                  },
-                  '& .MuiInputLabel-root': {
-                    fontWeight: 500
-                  },
-                  '& .MuiOutlinedInput-root': {
+  label="Yapay zekaya sorunuzu sorun"
+  placeholder="Örnek: YKS hazırlığı için etkili çalışma teknikleri nelerdir?"
+  multiline
+  rows={10}
+  value={prompt}
+  onChange={handlePromptChange}
+  fullWidth
+  sx={{
+    mb: 2.5,
+    '& .MuiInputBase-root': {
+      fontWeight: 500,
+      borderRadius: 3,
+      background: 'rgba(255,255,255,0.85)',
+      boxShadow: '0 2px 12px rgba(31,38,135,0.10)',
+      backdropFilter: 'blur(3px)',
+      '&.Mui-focused': {
+        boxShadow: '0 4px 16px rgba(52, 168, 83, 0.18)'
+      }
+    },
+    '& .MuiInputLabel-root': {
+      fontWeight: 500
+    },
+    '& .MuiOutlinedInput-root': {
                     '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                       borderColor: '#4285F4',
                       borderWidth: 2

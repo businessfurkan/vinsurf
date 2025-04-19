@@ -38,8 +38,10 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  backgroundColor: theme.palette.background.paper,
-  borderRight: '1px solid rgba(0, 0, 0, 0.05)',
+  background: 'linear-gradient(135deg, #F8FFAE 0%, #43C6AC 100%)',
+  backdropFilter: 'blur(10px)',
+  borderRight: 'none',
+  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.10)',
 });
 
 const closedMixin = (theme) => ({
@@ -52,8 +54,10 @@ const closedMixin = (theme) => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
-  backgroundColor: theme.palette.background.paper,
-  borderRight: '1px solid rgba(0, 0, 0, 0.05)',
+  background: 'linear-gradient(135deg, #F8FFAE 0%, #43C6AC 100%)',
+  backdropFilter: 'blur(10px)',
+  borderRight: 'none',
+  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.10)',
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -125,32 +129,6 @@ const Sidebar = () => {
     >
       <DrawerHeader>
         <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            width: '100%',
-            justifyContent: open ? 'space-between' : 'center',
-            px: open ? 2 : 0,
-          }}
-        >
-          {open && (
-            <Typography
-              variant="h6"
-              component="div"
-              noWrap
-              sx={{
-                fontWeight: 700,
-                color: theme.palette.primary.main,
-                fontFamily: 'Montserrat, sans-serif',
-              }}
-            >
-              YKS Asistan
-            </Typography>
-          )}
-          <IconButton onClick={handleDrawerToggle}>
-            {open ? <ChevronLeftIcon /> : <ChevronRightIcon />}
-          </IconButton>
-        </Box>
       </DrawerHeader>
       
       <Divider sx={{ mb: 1 }} />
@@ -158,14 +136,14 @@ const Sidebar = () => {
       <List>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
-          
           return (
-            <ListItem 
-              key={item.text} 
-              disablePadding 
-              sx={{ 
+            <ListItem
+              key={item.text}
+              disablePadding
+              sx={{
                 display: 'block',
-                mb: 0.5,
+                mb: 0.7,
+                mx: 0.5,
               }}
             >
               <ListItemButton
@@ -174,13 +152,24 @@ const Sidebar = () => {
                 sx={{
                   minHeight: 48,
                   justifyContent: open ? 'initial' : 'center',
-                  px: 2.5,
-                  mx: 1,
-                  borderRadius: 1,
-                  backgroundColor: isActive ? 'rgba(91, 143, 185, 0.12)' : 'transparent',
+                  px: open ? 2.7 : 1.2,
+                  borderRadius: 99,
+                  background: isActive
+                    ? 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)'
+                    : 'rgba(255,255,255,0.18)',
+                  boxShadow: isActive
+                    ? '0 2px 16px #43C6AC22'
+                    : 'none',
+                  color: isActive ? '#2e3856' : '#222',
+                  transition: 'all 0.18s',
+                  fontWeight: isActive ? 700 : 500,
                   '&:hover': {
-                    backgroundColor: isActive ? 'rgba(91, 143, 185, 0.20)' : 'rgba(0, 0, 0, 0.04)',
+                    background:
+                      'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)',
+                    color: '#2e3856',
+                    boxShadow: '0 2px 12px #43C6AC22',
                   },
+                  mb: 0.5,
                 }}
               >
                 <ListItemIcon
@@ -189,25 +178,51 @@ const Sidebar = () => {
                     mr: open ? 2 : 'auto',
                     justifyContent: 'center',
                     color: getIconColor(isActive, item.color),
+                    fontSize: 25,
                   }}
                 >
                   {item.icon}
                 </ListItemIcon>
-                <ListItemText 
-                  primary={item.text} 
-                  sx={{ 
+                <ListItemText
+                  primary={item.text}
+                  sx={{
                     opacity: open ? 1 : 0,
+                    ml: open ? 0.5 : 0,
                     '& .MuiTypography-root': {
-                      fontWeight: isActive ? 600 : 500,
-                      color: isActive ? item.color : theme.palette.text.primary,
-                    }
-                  }} 
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? '#2e3856' : theme.palette.text.primary,
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontSize: '1.09rem',
+                      letterSpacing: 0.1,
+                    },
+                  }}
                 />
               </ListItemButton>
             </ListItem>
           );
         })}
       </List>
+      <Divider sx={{ mt: 2, mb: 1, mx: 2, borderColor: '#43C6AC44', borderRadius: 99, boxShadow: '0 2px 12px #43C6AC11' }} />
+      <Box sx={{ flexGrow: 1 }} />
+      <Box sx={{
+        px: open ? 2 : 0.5,
+        py: 1.6,
+        textAlign: open ? 'left' : 'center',
+        fontSize: '0.93rem',
+        color: '#2e3856b0',
+        fontFamily: 'Montserrat, sans-serif',
+        fontWeight: 500,
+        letterSpacing: 0.3,
+        opacity: 0.85,
+        userSelect: 'none',
+        borderBottomLeftRadius: 18,
+        borderBottomRightRadius: 18,
+        background: 'rgba(255,255,255,0.22)',
+        backdropFilter: 'blur(7px)',
+        boxShadow: '0 -2px 16px #43C6AC11',
+      }}>
+        <span>vinsurf YKS &copy; 2025</span>
+      </Box>
     </StyledDrawer>
   );
 };

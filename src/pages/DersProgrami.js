@@ -631,50 +631,68 @@ const DersProgrami = () => {
   };
 
   return (
-    <Box sx={{ p: 3, pt: 5, pb: 4 }}>
-      <Typography 
-        variant="h4" 
-        sx={{ 
-          mb: 4, 
-          mt: 2, 
-          fontWeight: 'bold', 
-          color: 'primary.main',
-          display: 'flex',
-          alignItems: 'center',
-          position: 'relative',
-          pl: 1,
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            width: '30%',
-            height: '3px',
-            backgroundColor: '#3f51b5',
-            bottom: -8,
-            left: 0
-          }
-        }}
-      >
-        <MenuBookIcon sx={{ mr: 1.5, fontSize: 32 }} />
-        Ders Programı
-      </Typography>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        py: 4,
+        px: { xs: 1, sm: 2, md: 4 },
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        width: '100%',
+        background: 'linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'rgba(255,255,255,0.35)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 0,
+        },
+        zIndex: 1,
+      }}
+    >
+      <Box sx={{ p: 3, pt: 5, pb: 4, width: '100%', position: 'relative', zIndex: 2 }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            mb: 4, 
+            mt: 2, 
+            fontWeight: 'bold', 
+            color: 'primary.main',
+            display: 'flex',
+            alignItems: 'center',
+            position: 'relative',
+            pl: 1,
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              width: '30%',
+              height: '3px',
+              backgroundColor: '#3f51b5',
+              bottom: -8,
+              left: 0
+            }
+          }}
+        >
+          <MenuBookIcon sx={{ mr: 1.5, fontSize: 32 }} />
+          Ders Programı
+        </Typography>
 
-      <FilterBar>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6" fontWeight="600" color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <SearchIcon fontSize="small" /> Ders Arama ve Filtreleme
-          </Typography>
-          <Chip 
-            label={`Toplam ${Object.values(schedule).reduce((total, day) => total + day.length, 0)} ders`}
-            color="primary" 
-            variant="outlined"
-            size="small"
-            sx={{ fontWeight: 500, borderRadius: 8, boxShadow: '0 2px 5px rgba(0,0,0,0.06)' }}
-          />
-        </Box>
-        
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={7}>
-            <SearchInput
+        <FilterBar>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" fontWeight="600" color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <SearchIcon fontSize="small" /> Ders Arama ve Filtreleme
+            </Typography>
+            <Chip 
+              label={`Toplam ${Object.values(schedule).reduce((total, day) => total + day.length, 0)} ders`}
+              color="primary" 
               fullWidth
               placeholder="Ders, öğretmen veya konu ara..."
               value={searchText}
@@ -696,13 +714,86 @@ const DersProgrami = () => {
                 )
               }}
             />
-          </Grid>
-          <Grid item xs={12} md={5}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography variant="body2" fontWeight="600" sx={{ mr: 1.5, color: 'text.secondary' }}>
-                Konu Filtresi:
-              </Typography>
-              
+          </Box>
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={7}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" fontWeight="600" sx={{ mr: 1.5, color: 'text.secondary' }}>
+                  Konu Filtresi:
+                </Typography>
+                
+                <FilterButton
+                  aria-controls={openFilterMenu ? 'subject-filter-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={openFilterMenu ? 'true' : undefined}
+                  onClick={handleFilterMenuClick}
+                  endIcon={selectedSubjects.length > 0 ? <Badge color="primary" badgeContent={selectedSubjects.length}>
+                    <FilterListIcon />
+                  </Badge> : <FilterListIcon />}
+                >
+                  {selectedSubjects.length > 0 ? 'Seçili Filtreler' : 'Konuları Filtrele'}
+                </FilterButton>
+                
+                <StyledMenu
+                  id="subject-filter-menu"
+                  anchorEl={anchorEl}
+                  open={openFilterMenu}
+                  onClose={handleFilterMenuClose}
+                  MenuListProps={{
+                    'aria-labelledby': 'filter-button',
+                    sx: { maxHeight: 300 }
+                  }}
+                >
+                  <Box sx={{ px: 1, pb: 1, mb: 1, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Ders Konuları
+                    </Typography>
+                  </Box>
+                  {getUniqueSubjects().map((subject) => (
+                    <StyledMenuItem
+                      key={subject}
+                      selected={selectedSubjects.includes(subject)}
+                      onClick={() => handleFilterToggle(subject)}
+                    >
+                      <Checkbox 
+                        checked={selectedSubjects.includes(subject)} 
+                        color="primary" 
+                        size="small"
+                        sx={{ mr: 1, p: 0.5 }}
+                      />
+                      <Box 
+                        component="span" 
+                        sx={{ 
+                          display: 'inline-block', 
+                          width: 12, 
+                          height: 12, 
+                          borderRadius: '50%', 
+                          backgroundColor: getSubjectColor(subject),
+                          mr: 1,
+                          boxShadow: `0 0 0 2px ${alpha(getSubjectColor(subject), 0.2)}`
+                        }} 
+                      />
+                      {subject}
+                    </StyledMenuItem>
+                  ))}
+                  {selectedSubjects.length > 0 && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                      <Button 
+                        size="small" 
+                        color="primary" 
+                        startIcon={<FilterListOffIcon />}
+                        onClick={() => {
+                          setSelectedSubjects([]);
+                          handleFilterMenuClose();
+                        }}
+                        sx={{ textTransform: 'none' }}
+                      >
+                        Filtreleri Temizle
+                      </Button>
+                    </Box>
+                  )}
+                </StyledMenu>
+                
               <FilterButton
                 aria-controls={openFilterMenu ? 'subject-filter-menu' : undefined}
                 aria-haspopup="true"
@@ -1465,6 +1556,7 @@ const DersProgrami = () => {
           <LinearProgress />
         </Box>
       )}
+        </Box>
     </Box>
   );
 };

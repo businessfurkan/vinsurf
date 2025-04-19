@@ -41,16 +41,24 @@ const PomodoroPage = () => {
         <Paper 
           elevation={0} 
           sx={{ 
-            borderRadius: { xs: 2, sm: 3, md: 4 }, 
+            borderRadius: { xs: 4, sm: 6, md: 8 }, 
             overflow: 'hidden',
             mb: { xs: 3, sm: 4, md: 5 },
-            boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+            background: 'linear-gradient(135deg, #F8FFAE 0%, #43C6AC 100%)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 8px 32px 0 rgba(67,198,172,0.18)',
+            border: '1.5px solid #43C6AC33',
           }}
         >
           <Box 
             sx={{ 
-              p: { xs: 2, sm: 3, md: 4 },
-              bgcolor: 'background.paper'
+              p: { xs: 3, sm: 4, md: 5 },
+              background: 'rgba(255,255,255,0.20)',
+              borderRadius: { xs: 4, sm: 6, md: 8 },
+              boxShadow: '0 2px 8px #43C6AC11',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
             <Typography 
@@ -81,20 +89,28 @@ const PomodoroPage = () => {
             </Typography>
             
             <Box sx={{ 
-              width: '100%', 
-              mx: 'auto', 
-              maxWidth: '100%',
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
-              <PomodoroTimer />
-            </Box>
+               width: '100%', 
+               mx: 'auto', 
+               maxWidth: 420,
+               display: 'flex',
+               justifyContent: 'center',
+               alignItems: 'center',
+               background: 'rgba(255,255,255,0.28)',
+               borderRadius: 7,
+               boxShadow: '0 4px 24px #43C6AC22',
+               p: { xs: 2, sm: 3 },
+               mt: 2,
+               mb: 2
+             }}>
+               <PomodoroTimer />
+             </Box>
           </Box>
         </Paper>
 
         <Paper 
           elevation={0} 
           sx={{ 
+            borderRadius: { xs: 4, sm: 6, md: 8 }, 
             borderRadius: { xs: 2, sm: 3, md: 4 }, 
             overflow: 'hidden',
             boxShadow: '0 6px 18px rgba(0,0,0,0.08)',

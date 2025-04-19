@@ -277,17 +277,6 @@ const BugunCozduklerin = () => {
   };
 
   return (
-    <Box sx={{ p: 3, pt: 5, pb: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3, mt: 2, fontWeight: 'bold', color: 'primary.main' }}>
-        Bugün Çözdüklerin
-      </Typography>
-      
-      <Paper 
-        elevation={0}
-        sx={{
-          p: 3,
-          borderRadius: 2,
-          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
           backgroundColor: '#fff',
           mb: 4
         }}
