@@ -29,8 +29,6 @@ const RankingGoals = () => {
       setSchools(initialSchools);
       return;
     }
-    setLoading(true);
-    setError('');
     const fetchGoals = async () => {
       try {
         const docRef = doc(db, 'users', user.uid, 'profile', 'rankingGoals');
@@ -44,11 +42,8 @@ const RankingGoals = () => {
           setSchools(initialSchools);
         }
       } catch (err) {
-        setError('Hedefler yüklenirken hata oluştu.');
-        setGoals(initialGoals);
-        setSchools(initialSchools);
-      } finally {
-        setLoading(false);
+        setErrorGoals('Hedefler yüklenirken hata oluştu.');
+        setErrorSchools('Hedefler yüklenirken hata oluştu.');
       }
     };
     fetchGoals();
@@ -57,23 +52,6 @@ const RankingGoals = () => {
   const handleChange = (key, value) => {
     if (/^\d{0,7}$/.test(value.replace(/\./g, ''))) {
       setGoals({ ...goals, [key]: value });
-    }
-  };
-
-  const handleSave = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError('');
-    try {
-      const docRef = doc(db, 'users', user.uid, 'profile', 'rankingGoals');
-      await setDoc(docRef, { goals, schools }, { merge: true });
-      setSaved(true);
-      setEdit(false);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      setError('Hedefler kaydedilirken hata oluştu.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -299,22 +277,9 @@ const RankingGoals = () => {
               </Fade>
             )}
           </>
-            {/* Sıralama hedefleri sol */}
-            <Stack spacing={2} alignItems="flex-start" justifyContent="center" sx={{ minWidth: 220, flex: 1 }}>
-              <Typography fontWeight={600} fontSize={17} color="#2e3856">Sıralama Hedeflerin</Typography>
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 1, sm: 2 }} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="flex-start" width="100%" flexWrap="wrap">
-                {['EA', 'SAY', 'SÖZ'].map((key) => (
-                  <Chip
-                    key={key}
-                    label={<span style={{ fontWeight: 700, fontSize: 'clamp(15px, 4vw, 18px)', wordBreak: 'break-all', textAlign: 'center', width: '100%', display: 'inline-block' }}>{key}: {goals && goals[key] ? goals[key].replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '—'}</span>}
-                    sx={{
-                      bgcolor: `${goalColors[key]}22`,
-                      color: goalColors[key],
-                      fontWeight: 700,
-                      fontSize: { xs: 15, sm: 18 },
-                      px: { xs: 1.2, sm: 2.5 },
-                      py: { xs: 0.8, sm: 1.2 },
-                      borderRadius: 2,
+        )}
+      </Paper>
+    </Box>
                       border: `2px solid ${goalColors[key]}55`,
                       minWidth: { xs: 80, sm: 110 },
                       maxWidth: { xs: 160, sm: 220 },
