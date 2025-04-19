@@ -312,7 +312,7 @@ const getSubjectIcon = (subject) => {
     'İngilizce': '🇬🇧',
   };
   return subjectIcons[subject] || '📘';
-};  };
+};
 
   const getLighterColor = (color) => {
     const rgb = hexToRgb(color);
