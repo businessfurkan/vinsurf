@@ -8,8 +8,7 @@ import {
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import LoginTrackerCompact from '../components/LoginTrackerCompact';
-import EmptySpace from '../components/EmptySpace';
+import RankingGoals from '../components/RankingGoals';
 import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 
 const Home = () => {
@@ -30,72 +29,58 @@ const Home = () => {
     >
       <Grid container spacing={isMobile ? 2 : 3}>
         <Grid item xs={12}>
-          <Paper 
-            elevation={0} 
-            className="home-card card-hover"
-            sx={{ 
-              borderRadius: '16px !important', 
-              overflow: 'hidden',
-              mb: { xs: 3, sm: 4, md: 5 },
-              backgroundColor: '#FFFFFF !important',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05) !important'
-            }}
-          >
-            <Box 
-              sx={{ 
-                p: { xs: 2, sm: 3, md: 4 },
-                bgcolor: 'background.paper'
-              }}
-            >
-              <Typography 
-                variant="h5" 
-                component="h2" 
-                gutterBottom 
-                className="heading-font"
-                sx={{ 
-                  fontFamily: 'Montserrat, sans-serif',
-                  fontWeight: 600,
-                  color: '#303545',
-                  mb: 2,
-                  fontSize: { xs: '1.3rem', sm: '1.4rem', md: '1.6rem' }
-                }}
-              >
-                Öğrenci Çalışma Ortamı
-              </Typography>
-              
-              <Typography 
-                variant="body1" 
-                className="body-font"
-                paragraph
-                sx={{ 
-                  fontFamily: 'Glacial Indifference, Montserrat, sans-serif',
-                  color: '#5F6477',
-                  mb: 2,
-                  fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' },
-                  maxWidth: '800px',
-                  lineHeight: 1.5
-                }}
-              >
-                Giriş kaydınızı oluşturarak çalışma günlerinizi takip edin. YouTube entegrasyonu ile çalışırken
-                motivasyon müziklerini dinleyebilirsiniz.
-              </Typography>
-              
-              <Box sx={{ 
-                width: '100%', 
-                mx: 'auto', 
-                maxWidth: '100%',
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                justifyContent: 'space-between',
-                alignItems: { xs: 'center', sm: 'flex-start' },
-                gap: { xs: 3, sm: 2 }
-              }}>
-                <LoginTrackerCompact />
-                <EmptySpace />
-              </Box>
-            </Box>
-          </Paper>
-        </Grid>
+  <Paper 
+    elevation={0} 
+    className="home-card card-hover"
+    sx={{ 
+      borderRadius: '16px !important', 
+      overflow: 'hidden',
+      mb: { xs: 3, sm: 4, md: 5 },
+      background: 'linear-gradient(120deg, #F8FFAE 0%, #43C6AC 100%)',
+      boxShadow: '0 4px 18px 0 rgba(67,198,172,0.13) !important',
+      position: 'relative',
+      minHeight: 220
+    }}
+  >
+    <Box 
+      sx={{ 
+        p: { xs: 2, sm: 3, md: 4 },
+        bgcolor: 'transparent',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 200
+      }}
+    >
+      <Typography 
+        variant="h5" 
+        component="h2" 
+        gutterBottom 
+        className="heading-font"
+        sx={{ 
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: 700,
+          color: '#2e3856',
+          mb: 1.5,
+          fontSize: { xs: '1.5rem', sm: '1.7rem', md: '2rem' },
+          textShadow: '0 2px 8px #fff5',
+          letterSpacing: 1
+        }}
+      >
+        🎯 Sıralama Hedeflerim
+      </Typography>
+      <Typography 
+        variant="body1"
+        sx={{ color: '#4b5c6b', fontSize: { xs: '1rem', sm: '1.1rem' }, mb: 2, fontWeight: 500, textAlign: 'center' }}
+      >
+        Hedeflediğin sıralamaları kaydet, motivasyonunu artır!
+      </Typography>
+      <RankingGoals />
+    </Box>
+  </Paper>
+</Grid>
+
         
         <Grid item xs={12}>
           <Paper 
