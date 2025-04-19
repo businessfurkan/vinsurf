@@ -439,7 +439,6 @@ const getSubjectIcon = (subject) => {
   }}>
     <span style={{ fontSize: 30, marginRight: 10, filter: 'none', opacity: 1 }}>{subjectIcon}</span>
     <Typography
-      className="subject-satoshi"
       sx={{
         fontSize: 23,
         fontWeight: 900,
@@ -447,7 +446,7 @@ const getSubjectIcon = (subject) => {
         letterSpacing: 0.2,
         textAlign: 'left',
         flex: 1,
-        fontFamily: `'Satoshi','Poppins','Inter','Roboto',sans-serif`,
+        fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
         textShadow: '0 2px 12px rgba(0,0,0,0.17)',
         lineHeight: 1.2,
         filter: 'none',
