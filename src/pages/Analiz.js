@@ -46,7 +46,6 @@ const Analiz = () => {
   const [studyRecords, setStudyRecords] = useState([]);
   const [analytics, setAnalytics] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  const [currentMonth, setCurrentMonth] = useState(new Date().toLocaleString('tr-TR', { month: 'long', year: 'numeric' }));
   const [topicDialog, setTopicDialog] = useState(false);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [studyTargets, setStudyTargets] = useState({});

@@ -7,11 +7,7 @@ import {
   ListItemButton, 
   ListItemIcon, 
   ListItemText, 
-  Divider, 
-  IconButton,
-  Typography,
-  useTheme,
-  useMediaQuery
+  Divider, useTheme, useMediaQuery
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Link, useLocation } from 'react-router-dom';
@@ -19,15 +15,15 @@ import HomeIcon from '@mui/icons-material/Home';
 import TimerIcon from '@mui/icons-material/Timer';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import EqualizerIcon from '@mui/icons-material/Equalizer';
+
 import InsightsIcon from '@mui/icons-material/Insights';
 import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+
+
+
+
 
 const drawerWidth = 240;
 

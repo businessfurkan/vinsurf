@@ -5,39 +5,23 @@ import {
   Grid, 
   Button, 
   Paper,
-  ButtonGroup,
-  useTheme,
-  useMediaQuery
+  ButtonGroup
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line
+  PieChart, Pie, Cell
 } from 'recharts';
+import { Link } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { 
-  format, 
-  startOfWeek, 
-  startOfMonth, 
-  subMonths, 
-  isWithinInterval, 
-  startOfDay, 
-  endOfDay, 
-  subDays,
-  addDays,
-  parseISO 
-} from 'date-fns';
+import { format, startOfWeek, startOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay, subDays, addDays, parseISO } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Link } from 'react-router-dom';
 
 const Analytics = () => {
   const [user] = useAuthState(auth);
   const [studyData, setStudyData] = useState([]);
-  const [selectedTab, setSelectedTab] = useState(0);
   const [timeRange, setTimeRange] = useState('week'); // 'week', 'month', 'all'
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const COLORS = [
     '#4285f4', '#34a853', '#fbbc05', '#ea4335', 
@@ -143,27 +127,6 @@ const Analytics = () => {
     }));
   };
 
-  const processDataByTopic = (subject) => {
-    const topicData = {};
-    
-    studyData
-      .filter(record => record.subject === subject)
-      .forEach(record => {
-        if (!topicData[record.topic]) {
-          topicData[record.topic] = 0;
-        }
-        topicData[record.topic] += record.duration;
-      });
-    
-    return Object.keys(topicData).map(topic => ({
-      name: topic,
-      value: Math.round(topicData[topic] / 60), // Convert seconds to minutes
-    }));
-  };
-
-  // Get unique subjects from study data
-  const subjects = [...new Set(studyData.map(record => record.subject))];
-
   // Format minutes to hours and minutes
   const formatMinutes = (minutes) => {
     const hours = Math.floor(minutes / 60);
@@ -190,10 +153,6 @@ const Analytics = () => {
       );
     }
     return null;
-  };
-
-  const handleTabChange = (event, newValue) => {
-    setSelectedTab(newValue);
   };
 
   const handleTimeRangeChange = (range) => {
@@ -326,10 +285,10 @@ const Analytics = () => {
                     sx={{ 
                       fontWeight: 700, 
                       fontFamily: 'Quicksand',
-                      color: theme.palette.primary.main
+                      color: 'primary.main'
                     }}
                   >
-                    Son 7 Gün Çalışma Süreleri
+                    Son 7 G&uuml;n Çalışma Süreleri
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button 

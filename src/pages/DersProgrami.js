@@ -13,7 +13,6 @@ import {
   Dialog,
   DialogContent,
   MenuItem,
-  Select,
   FormControl,
   Grid,
   Snackbar,
@@ -22,7 +21,7 @@ import {
   LinearProgress,
   IconButton,
   Tooltip,
-  Avatar,
+
   styled,
   alpha,
   InputAdornment,
@@ -47,7 +46,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { scheduleService } from '../services/scheduleService';
-import { dataService } from '../services/dataService';
+
 
 // Renk paleti - ders konularına göre
 const subjectColors = {
@@ -89,11 +88,6 @@ const getSubjectColor = (subject) => {
   return key ? subjectColors[key] : defaultColor;
 };
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontWeight: 'medium',
-  padding: '8px 12px',
-  fontSize: '0.825rem',
-}));
 
 const HeaderTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: 'transparent',
@@ -236,39 +230,7 @@ const FilterBar = styled(Paper)(({ theme }) => ({
   }
 }));
 
-const SearchInput = styled(TextField)(({ theme }) => ({
-  '& .MuiInputBase-root': {
-    borderRadius: 12,
-    backgroundColor: 'white',
-    boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
-      transform: 'translateY(-2px)'
-    },
-    '&.Mui-focused': {
-      boxShadow: '0 8px 20px rgba(63, 81, 181, 0.15)',
-      transform: 'translateY(-2px)'
-    }
-  },
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: 'rgba(0, 0, 0, 0.08)'
-  },
-  '& .MuiInputBase-input': {
-    padding: '12px 14px'
-  }
-}));
 
-const FilterChip = styled(Chip)(({ theme, selected }) => ({
-  margin: '0 6px 6px 0',
-  fontWeight: selected ? '600' : '400',
-  boxShadow: selected ? '0 3px 8px rgba(0,0,0,0.12)' : 'none',
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-  }
-}));
 
 const FilterButton = styled(Button)(({ theme }) => ({
   borderRadius: 12,
@@ -414,23 +376,10 @@ const DersProgrami = () => {
     }
   }, [user]);
 
-  const handleOpenViewDialog = (day, classItem, e) => {
-    e.stopPropagation(); // Hücrenin onClick olayını engelle
-    setViewingDay(day);
-    setViewingClass(classItem);
-    setViewClassDialog(true);
-  };
-
   const handleCloseViewDialog = () => {
     setViewClassDialog(false);
     setViewingClass(null);
     setViewingDay('');
-  };
-
-  const handleViewClass = (day, classItem) => {
-    setViewingDay(day);
-    setViewingClass(classItem);
-    setViewClassDialog(true);
   };
 
   const handleStartEdit = () => {
@@ -523,31 +472,6 @@ const DersProgrami = () => {
     } catch (error) {
       console.error('Ders silinirken hata oluştu:', error);
       showNotification('Ders silinirken bir hata oluştu.', 'error');
-    }
-  };
-
-  const handleEditClass = async (day, classId, updatedClass) => {
-    try {
-      const userId = user ? user.uid : 'anonymous';
-      
-      // scheduleService ile sınıf güncelle
-      const updatedSchedule = scheduleService.updateClass(schedule, day, classId, updatedClass);
-      setSchedule(updatedSchedule);
-      
-      // Firestore ve localStorage'a kaydet
-      if (user) {
-        const success = await scheduleService.saveSchedule(updatedSchedule, userId);
-        if (success) {
-          showNotification('Ders başarıyla güncellendi.');
-        }
-      } else {
-        // Anonim kullanıcı için sadece localStorage'a kaydet
-        localStorage.setItem('weeklySchedule_anonymous', JSON.stringify(updatedSchedule));
-        showNotification('Ders başarıyla güncellendi.');
-      }
-    } catch (error) {
-      console.error('Ders güncellenirken hata oluştu:', error);
-      showNotification('Ders güncellenirken bir hata oluştu.', 'error');
     }
   };
 

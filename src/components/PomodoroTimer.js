@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -10,15 +10,13 @@ import {
   IconButton, 
   Tooltip,
   CircularProgress,
-  LinearProgress,
   Snackbar,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions
+  Alert
 } from '@mui/material';
-import { useTheme as useThemeMUI } from '@mui/material/styles';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../firebase';
+import { dataService } from '../services/dataService';
+import { playClickSound } from '../utils/soundUtils';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
@@ -31,7 +29,7 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { dataService } from '../services/dataService';
 
 const PomodoroTimer = () => {
-  const theme = useThemeMUI();
+
   const [user] = useAuthState(auth);
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
@@ -42,19 +40,12 @@ const PomodoroTimer = () => {
     longBreak: 15,
   });
   const [showSettings, setShowSettings] = useState(false);
-  const [completedPomodoros, setCompletedPomodoros] = useState(0);
-  const [muted, setMuted] = useState(false);
-  const [pomodoroStats, setPomodoroStats] = useState({
-    totalCompleted: 0,
-    totalMinutes: 0,
-    lastSession: null
-  });
-  const [isLoading, setIsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
     severity: 'info'
   });
+
 
   // Bildirim gösterme
   const showNotification = (message, severity = 'success') => {

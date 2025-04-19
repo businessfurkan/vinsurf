@@ -14,15 +14,13 @@ import {
   ListItem,
   ListItemText,
   Divider,
-  Paper,
   IconButton,
   useTheme,
-  TextField,
-  Snackbar,
-  Alert,
-  Stack,
   Chip,
-  CircularProgress
+  Stack,
+  TextField,
+  CircularProgress,
+  Snackbar
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import BookIcon from '@mui/icons-material/Book';
@@ -41,8 +39,7 @@ import {
   Timestamp, 
   doc, 
   updateDoc, 
-  deleteDoc, 
-  orderBy 
+  deleteDoc 
 } from 'firebase/firestore';
 
 const BugunCozduklerin = () => {
@@ -59,7 +56,7 @@ const BugunCozduklerin = () => {
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
   const [solvedProblems, setSolvedProblems] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 

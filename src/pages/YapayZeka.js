@@ -409,7 +409,7 @@ const YapayZeka = () => {
                         maxWidth: '80%'
                       }}
                     >
-                      Yapay zeka yanıtları burada görüntülenecek. Bir soru sorun ve "Gönder" düğmesine tıklayın.
+                      Yapay zeka yanıtları burada görüntülenecek. Bir soru sorun ve &quot;Gönder&quot; düğmesine tıklayın.
                     </Typography>
                   </Box>
                 )}

@@ -6,7 +6,6 @@ import {
   TextField,
   Button,
   IconButton,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,23 +22,12 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  Tooltip,
-  Avatar,
-  Card,
-  CardContent,
-  CardActionArea,
-  Stack,
-  Container,
-  Grid,
-  Fade,
-  Collapse
 } from '@mui/material';
 import { useTheme, alpha, styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import BookmarkIcon from '@mui/icons-material/Bookmark';
 import CategoryIcon from '@mui/icons-material/Category';
 import SearchIcon from '@mui/icons-material/Search';
 import EventNoteIcon from '@mui/icons-material/EventNote';
@@ -53,12 +41,9 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { 
-  Timestamp,
-  serverTimestamp
-} from 'firebase/firestore';
+
 import { dataService } from '../services/dataService';
 
 // Kategori renkleri
@@ -224,23 +209,6 @@ const NewNoteButton = styled(Button)(({ theme }) => ({
   }
 }));
 
-const FilterButton = styled(Button)(({ theme }) => ({
-  borderRadius: 12,
-  textTransform: 'none',
-  padding: theme.spacing(1, 2),
-  margin: theme.spacing(0, 1),
-  backgroundColor: alpha(theme.palette.background.paper, 0.9),
-  color: theme.palette.text.secondary,
-  fontWeight: 500,
-  border: '1px solid rgba(0,0,0,0.08)',
-  boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
-  transition: 'all 0.25s ease',
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.background.paper, 0.95),
-    boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-    transform: 'translateY(-2px)'
-  }
-}));
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiPaper-root': {
@@ -441,26 +409,9 @@ const NotDefterim = () => {
     setSelectedMenuNote(null);
   };
 
-  // Kategoriler menüsünü aç
-  const handleCategoryMenuClick = (event) => {
-    setCategoryMenuAnchorEl(event.currentTarget);
-  };
-
   // Kategoriler menüsünü kapat
   const handleCategoryMenuClose = () => {
     setCategoryMenuAnchorEl(null);
-  };
-
-  // Kategori seç
-  const handleCategorySelect = (category) => {
-    setSelectedCategory(category);
-    handleCategoryMenuClose();
-  };
-
-  // Filtreleme temizle
-  const clearFilters = () => {
-    setSelectedCategory('');
-    setSearchTerm('');
   };
 
   // Not kaydetme işlevi

@@ -2,8 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, Button, Card, CardContent, 
   Accordion, AccordionSummary, AccordionDetails,
-  Table, TableBody, TableCell, TableContainer, 
-  TableHead, TableRow, Paper, Chip, Dialog,
   DialogTitle, DialogContent, DialogActions,
   useTheme, CircularProgress, IconButton,
   Tooltip
@@ -13,27 +11,24 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import StopIcon from '@mui/icons-material/Stop';
 import SaveIcon from '@mui/icons-material/Save';
-import BarChartIcon from '@mui/icons-material/BarChart';
+
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import Dialog from '@mui/material/Dialog';
 import { auth, db } from '../firebase';
-import { collection, addDoc, query, where, getDocs, doc, setDoc, getDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useNavigate } from 'react-router-dom';
+
 import yksData from '../utils/yksData';
 
 const AnalyticalStopwatch = () => {
   const [user] = useAuthState(auth);
-  const navigate = useNavigate();
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [studyRecords, setStudyRecords] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [expandedSubject, setExpandedSubject] = useState(null);
-  const [startTime, setStartTime] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [analytics, setAnalytics] = useState({});
   const theme = useTheme();
 
   // Fetch study records from Firestore
@@ -108,29 +103,6 @@ const AnalyticalStopwatch = () => {
     }
   }, [user]);
 
-  // Calculate total study time per subject and topic
-  const calculateAnalytics = useCallback(() => {
-    const analytics = {};
-    
-    studyRecords.forEach(record => {
-      if (!analytics[record.subject]) {
-        analytics[record.subject] = {
-          totalTime: 0,
-          topics: {}
-        };
-      }
-      
-      if (!analytics[record.subject].topics[record.topic]) {
-        analytics[record.subject].topics[record.topic] = 0;
-      }
-      
-      analytics[record.subject].topics[record.topic] += record.duration;
-      analytics[record.subject].totalTime += record.duration;
-    });
-    
-    setAnalytics(analytics);
-  }, [studyRecords]);
-
   // Load study records and active timer state from Firestore
   useEffect(() => {
     const loadData = async () => {
@@ -143,49 +115,6 @@ const AnalyticalStopwatch = () => {
     
     loadData();
   }, [user, fetchStudyRecords, loadActiveTimer]);
-
-  // Calculate analytics whenever study records change
-  useEffect(() => {
-    if (studyRecords.length > 0) {
-      calculateAnalytics();
-    }
-  }, [studyRecords, calculateAnalytics]);
-
-  // Save timer state to Firebase whenever it changes
-  useEffect(() => {
-    const saveTimerState = async () => {
-      if (!user || (!isRunning && time === 0 && !selectedSubject && !selectedTopic)) return;
-      
-      try {
-        const timerDocRef = doc(db, 'activeTimers', user.uid);
-        
-        if (time === 0 && !selectedSubject && !selectedTopic) {
-          // Delete timer if reset
-          await deleteDoc(timerDocRef);
-        } else {
-          // Save current timer state
-          await setDoc(timerDocRef, {
-            userId: user.uid,
-            subject: selectedSubject,
-            topic: selectedTopic,
-            elapsedTime: time,
-            isRunning: isRunning,
-            startTime: startTime ? new Date(startTime) : new Date(),
-            lastUpdated: new Date(),
-            createdAt: new Date(),
-            // Add expiration date - 24 months from now
-            expiresAt: new Date(new Date().setMonth(new Date().getMonth() + 24))
-          });
-        }
-      } catch (error) {
-        console.error('Error saving timer state:', error);
-      }
-    };
-    
-    if (user) {
-      saveTimerState();
-    }
-  }, [user, isRunning, time, selectedSubject, selectedTopic, startTime]);
 
   // Timer effect
   useEffect(() => {
@@ -321,56 +250,6 @@ const AnalyticalStopwatch = () => {
     setSelectedTopic(topic);
   };
 
-  // Function to update study records in Firestore
-  const updateStudyRecordsInFirestore = async (newAnalytics) => {
-    if (!user) return;
-    
-    try {
-      // Get all study records for this user
-      const recordsQuery = query(
-        collection(db, 'studyRecords'),
-        where('userId', '==', user.uid)
-      );
-      
-      const querySnapshot = await getDocs(recordsQuery);
-      
-      // Create a batch to perform multiple operations
-      const batch = writeBatch(db);
-      
-      // Delete records for topics that have been reset
-      querySnapshot.forEach((doc) => {
-        const record = doc.data();
-        
-        // If the subject exists but the topic doesn't, or if the subject doesn't exist at all
-        if (
-          !newAnalytics[record.subject] || 
-          (newAnalytics[record.subject] && !newAnalytics[record.subject].topics[record.topic])
-        ) {
-          batch.delete(doc.ref);
-        }
-      });
-      
-      // Commit the batch
-      await batch.commit();
-      
-      // Refresh study records
-      fetchStudyRecords();
-    } catch (error) {
-      console.error('Error updating study records:', error);
-    }
-  };
-
-  const handleSendToAnalytics = () => {
-    if (time > 0) {
-      handleConfirmSave().then(() => {
-        // Navigate to analytics page after saving
-        navigate('/analiz');
-      });
-    } else {
-      // If no active study session, just navigate
-      navigate('/analiz');
-    }
-  };
 
   const handleReset = () => {
     setTime(0);

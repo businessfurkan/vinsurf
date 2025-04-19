@@ -1,12 +1,5 @@
-import { auth, db } from '../firebase';
-import { 
-  collection, 
-  doc, 
-  setDoc, 
-  getDoc, 
-  onSnapshot,
-  serverTimestamp 
-} from 'firebase/firestore';
+
+import { serverTimestamp } from 'firebase/firestore';
 import { dataService } from './dataService';
 
 /**
