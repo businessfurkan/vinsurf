@@ -351,167 +351,47 @@ const getSubjectIcon = (subject) => {
   overflow: 'visible',
   zIndex: 1,
 }}>
-      <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{ 
-        mb: 3,
-        display: 'flex',
-        alignItems: 'center',
-        '&::before': {
-          content: '""',
-          display: 'block',
-          width: 5,
-          height: 24,
-          backgroundColor: 'primary.main',
-          borderRadius: 4,
-          marginRight: 1.5
-        }
-      }}>
-        Çalışma Analizleri
-      </Typography>
-
-      {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { 
-            xs: 'repeat(1, 1fr)', 
-            sm: 'repeat(2, 1fr)', 
-            md: 'repeat(3, 1fr)', 
-            lg: 'repeat(4, 1fr)' 
-          },
-          gap: 3
-        }}>
-          {/* Sabit ders listesi - tüm dersler burada yer alacak */}
-          {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 
-            'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map((subject, idx) => {
-            
-            // Ders için veri var mı kontrol et
-            const hasData = Object.keys(analytics).includes(subject);
-            const totalSubjectTime = hasData ? analytics[subject].totalTime : 0;
-            const targetTime = studyTargets[subject] || 0;
-            const progressPercent = targetTime > 0 ? Math.floor(Math.min(100, (totalSubjectTime / targetTime) * 100)) : 0;
-            const topicCount = hasData ? Object.keys(analytics[subject]?.topics || {}).length : 0;
-            const subjectColor = getSubjectColor(subject);
-            const subjectIcon = getSubjectIcon(subject);
-            return (
-              <Card
-  key={subject}
-  sx={{
-    borderRadius: '20px',
-    background: '#fff',
-    color: '#222',
-    boxShadow: '0 8px 32px 0 rgba(30,30,60,0.16)',
-    minHeight: 210,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-    alignItems: 'stretch',
-    cursor: 'pointer',
-    transition: 'transform 0.17s, box-shadow 0.17s',
-    filter: 'none',
-    opacity: 1,
-    backdropFilter: 'none',
-    '&:hover': {
-      transform: 'scale(1.025)',
-      boxShadow: '0 14px 32px 0 rgba(30,30,60,0.20)',
-      filter: 'none',
-      opacity: 1,
-      backdropFilter: 'none',
-    },
-  }}
->
-  <Box sx={{
+  <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{
+    mb: 3,
     display: 'flex',
     alignItems: 'center',
-    gap: 1.5,
-    px: 2.2,
-    pt: 2.2,
-    pb: 0.5,
-    borderTopLeftRadius: '20px',
-    borderTopRightRadius: '20px',
-    background: subjectColor,
-    minHeight: 60,
-    filter: 'none',
-    opacity: 1,
-    backdropFilter: 'none',
+    '&::before': {
+      content: '""',
+      display: 'block',
+      width: 5,
+      height: 24,
+      backgroundColor: 'primary.main',
+      borderRadius: 4,
+      marginRight: 1.5
+    }
   }}>
-    <span style={{ fontSize: 30, marginRight: 10, filter: 'none', opacity: 1 }}>{subjectIcon}</span>
-    <Typography
-      sx={{
-        fontSize: 23,
-        fontWeight: 900,
-        color: '#fff',
-        letterSpacing: 0.2,
-        textAlign: 'left',
-        flex: 1,
-        fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
-        textShadow: '0 2px 12px rgba(0,0,0,0.17)',
-        lineHeight: 1.2,
-        filter: 'none',
-        opacity: 1,
-        textTransform: 'none',
-      }}
-    >
-      {subject}
-    </Typography>
-  </Box>
-  <CardContent
-    sx={{
-      px: 2.2,
-      pt: 1.5,
-      pb: 2,
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-between',
-      background: '#fff',
-      borderBottomLeftRadius: '20px',
-      borderBottomRightRadius: '20px',
-      boxShadow: 'none',
-      mt: 0,
-    }}
-  >
-    <Typography
-      sx={{
-        fontSize: 16,
-        fontWeight: 700,
-        color: '#222',
-        mb: 1,
-        textAlign: 'left',
-        fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-        letterSpacing: 0.08,
-      }}
-    >
-      {hasData ? `${formatTime(totalSubjectTime)}` : '0 dakika'}
-    </Typography>
-    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: '#444',
-          fontWeight: 500,
-          flex: 1,
-          textAlign: 'left',
-          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-          letterSpacing: 0.02,
-        }}
-      >
-        İlerleme
-      </Typography>
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: '#222',
-          fontWeight: 700,
-          textAlign: 'right',
-          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-          letterSpacing: 0.02,
-        }}
-      >
-        {hasData ? `${Math.floor(progressPercent)}%` : '0%'}
-      </Typography>
+    Çalışma Analizleri
+  </Typography>
+
+  <Box sx={{
+    display: 'grid',
+    gridTemplateColumns: {
+      xs: 'repeat(1, 1fr)',
+      sm: 'repeat(2, 1fr)',
+      md: 'repeat(3, 1fr)',
+      lg: 'repeat(4, 1fr)'
+    },
+    gap: 3
+  }}>
+    {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih',
+      'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map((subject, idx) => {
+      const subjectColor = getSubjectColor(subject);
+      const subjectIcon = getSubjectIcon(subject);
+      return (
+        <Card
+          key={subject}
+          elevation={0}
+          sx={{
+            borderRadius: '16px',
+            background: '#fff',
+            color: '#222',
+            boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
+            minHeight: 150,
     </Box>
     <LinearProgress
       variant="determinate"
