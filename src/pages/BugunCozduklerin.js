@@ -277,79 +277,79 @@ const BugunCozduklerin = () => {
   };
 
   return (
-    <Box sx={{ backgroundColor: '#fff', mb: 4 }}>
-      <Typography variant="body1" sx={{ mb: 3 }}>
-        Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
-      </Typography>
-      <Grid container spacing={3}>
-        {Object.keys(yksData).map((subject) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={subject}>
-            <Card 
-              onClick={() => handleOpenDialog(subject)}
-              sx={{
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                borderRadius: 2,
-                height: '100%',
-                boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.08)',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.15)',
-                },
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                border: `1px solid ${yksData[subject].color}25`,
-              }}
-            >
-              <CardContent sx={{ 
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center',
-                p: 3
-              }}>
-                <Box
-                  sx={{
-                    backgroundColor: `${yksData[subject].color}15`,
-                    width: 60,
-                    height: 60,
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    mb: 2,
-                  }}
-                >
-                  <BookIcon sx={{ color: yksData[subject].color, fontSize: 28 }} />
-                </Box>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    color: theme.palette.text.primary,
-                  }}
-                >
-                  {subject}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    mt: 1,
-                  }}
-                >
-                  {yksData[subject].topics.length} Konu
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-
-    {/* Dialog for showing topics */}
+    <>
+      <Box sx={{ backgroundColor: '#fff', mb: 4 }}>
+        <Typography variant="body1" sx={{ mb: 3 }}>
+          Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
+        </Typography>
+        <Grid container spacing={3}>
+          {Object.keys(yksData).map((subject) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={subject}>
+              <Card 
+                onClick={() => handleOpenDialog(subject)}
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  borderRadius: 2,
+                  height: '100%',
+                  boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.08)',
+                  '&:hover': {
+                    transform: 'translateY(-5px)',
+                    boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.15)',
+                  },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  border: `1px solid ${yksData[subject].color}25`,
+                }}
+              >
+                <CardContent sx={{ 
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  p: 3
+                }}>
+                  <Box
+                    sx={{
+                      backgroundColor: `${yksData[subject].color}15`,
+                      width: 60,
+                      height: 60,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 2,
+                    }}
+                  >
+                    <BookIcon sx={{ color: yksData[subject].color, fontSize: 28 }} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      color: theme.palette.text.primary,
+                    }}
+                  >
+                    {subject}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      mt: 1,
+                    }}
+                  >
+                    {yksData[subject].topics.length} Konu
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      {/* Dialog for showing topics */}
       <Dialog
         open={dialogOpen}
         onClose={handleCloseDialog}
@@ -582,11 +582,96 @@ const BugunCozduklerin = () => {
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} variant="filled">
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
-    </Box>
-  );
+          borderRadius: 2,
+          boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
+        }
+      }}
+    >
+      {selectedSubject && (
+        <>
+          <DialogTitle sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            bgcolor: `${yksData[selectedSubject].color}15`,
+            pb: 2,
+            pt: 2
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box
+                sx={{
+                  backgroundColor: `${yksData[selectedSubject].color}25`,
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2,
+                }}
+              >
+                <BookIcon sx={{ color: yksData[selectedSubject].color, fontSize: 22 }} />
+              </Box>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                {selectedSubject} Konuları
+              </Typography>
+            </Box>
+            <IconButton
+              edge="end"
+              color="inherit"
+              onClick={handleCloseDialog}
+              aria-label="close"
+              size="large"
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ pt: 0 }}>
+            {/* ... (rest of your DialogContent code) ... */}
+          </DialogContent>
+          <DialogActions sx={{ p: 2.5, bgcolor: 'rgba(245, 247, 250, 0.8)' }}>
+            {/* ... (rest of your DialogActions code) ... */}
+          </DialogActions>
+        </>
+      )}
+    </Dialog>
+    <Dialog
+      open={topicDialogOpen}
+      onClose={handleCloseTopicDialog}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
+        }
+      }}
+    >
+      {selectedSubject && selectedTopic && (
+        <>
+          <DialogTitle sx={{ pb: 2 }}>
+            {/* ... (rest of your DialogTitle code) ... */}
+          </DialogTitle>
+          <DialogContent>
+            {/* ... (rest of your DialogContent code) ... */}
+          </DialogContent>
+          <DialogActions>
+            {/* ... (rest of your DialogActions code) ... */}
+          </DialogActions>
+        </>
+      )}
+    </Dialog>
+    <Snackbar
+      open={snackbarOpen}
+      autoHideDuration={4000}
+      onClose={handleSnackbarClose}
+      anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+    >
+      <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} variant="filled">
+        {snackbarMessage}
+      </Alert>
+    </Snackbar>
+  </>
+);
 
 export default BugunCozduklerin;
