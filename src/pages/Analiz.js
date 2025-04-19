@@ -1081,46 +1081,17 @@ const Analiz = () => {
                 </Box>
               ) : (
                 <Paper
-  elevation={0}
-  sx={{
-    p: 3,
-    borderRadius: 3,
-    textAlign: 'center',
-    bgcolor: 'rgba(255,255,255,0.65)',
-    border: '1.5px dashed #a3bffa',
-    boxShadow: '0 2px 12px rgba(31,38,135,0.04)',
-    backdropFilter: 'blur(3px)',
-  }}
->
-                  <AssignmentIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
-                  <Typography variant="body1" color="text.secondary" fontWeight={500}>
-                    Bu ders için henüz konu çalışması kaydı bulunmuyor.
-                  </Typography>
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: 3,
+                  }}
+                >
                 </Paper>
               )}
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2.5, bgcolor: 'rgba(245, 247, 250, 0.8)' }}>
-          <Button 
-            variant="contained" 
-            onClick={handleCloseTopicDialog}
-            startIcon={<CheckIcon />}
-            sx={{ 
-              fontWeight: 600,
-              px: 3,
-              py: 1,
-              borderRadius: 2,
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-              background: selectedSubject ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getLighterColor(getSubjectColor(selectedSubject))} 100%)` : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
-              '&:hover': {
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
-              }
-            }}
-          >
-            Kapat
-          </Button>
-        </DialogActions>
       </Dialog>
 
       {/* Bildirim */}
@@ -1206,7 +1177,96 @@ const Analiz = () => {
           </Button>
         </DialogActions>
       </Dialog>
-            </Card>
-          ))}
+
+      {/* Bildirim */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        action={
+          <IconButton size="small" color="inherit" onClick={handleCloseSnackbar}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+
+      {/* İçerik */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        mb: 2,
+        pb: 1.5,
+        borderBottom: '1px solid rgba(0, 0, 0, 0.08)'
+      }}>
+        <FormatListBulletedIcon sx={{ mr: 1, color: getSubjectColor(selectedSubject) }} />
+        <Typography variant="subtitle1" fontWeight="700" color="text.primary">
+          Konu Bazlı Çalışma Süreleri
+        </Typography>
+      </Box>
+
+      {Object.keys(analytics[selectedSubject].topics).length > 0 ? (
+        <Box sx={{ maxHeight: '300px', overflowY: 'auto', pr: 1 }}>
+          {Object.keys(analytics[selectedSubject].topics)
+            .sort((a, b) => analytics[selectedSubject].topics[b] - analytics[selectedSubject].topics[a])
+            .map((topic, index) => (
+              <Paper 
+                key={topic}
+                elevation={0}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  p: 2,
+                  borderRadius: 2,
+                  mb: 1.5,
+                  bgcolor: 'white',
+                  border: '1px solid rgba(0, 0, 0, 0.06)',
+                  boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.08)',
+                    borderColor: 'rgba(0, 0, 0, 0.12)',
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{ 
+                    width: 6, 
+                    height: 6, 
+                    borderRadius: '50%', 
+                    bgcolor: getSubjectColor(selectedSubject),
+                    mr: 1.5
+                  }} />
+                  <Typography fontWeight={600} fontSize="0.95rem">{topic}</Typography>
+                </Box>
+                <Chip
+                  label={formatTime(analytics[selectedSubject].topics[topic])}
+                  size="small"
+                  sx={{
+                    fontWeight: 700,
+                    bgcolor: `${getSubjectColor(selectedSubject)}15`,
+                    color: getSubjectColor(selectedSubject),
+                    border: `1px solid ${getSubjectColor(selectedSubject)}30`
+                  }}
+                />
+              </Paper>
+            ))}
         </Box>
+      ) : (
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            borderRadius: 3,
+          }}
+        >
+        </Paper>
       )}
+    </Box>
+  );
+};
+
+export default Analiz;
