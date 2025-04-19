@@ -29,7 +29,11 @@ const RankingGoals = () => {
 
   // Firestore'dan hedefleri çek
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setGoals(initialGoals);
+      setSchools(initialSchools);
+      return;
+    }
     setLoading(true);
     setError('');
     const fetchGoals = async () => {
@@ -38,11 +42,16 @@ const RankingGoals = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setGoals(data.goals || initialGoals);
-          setSchools(data.schools || initialSchools);
+          setGoals(data && data.goals ? data.goals : initialGoals);
+          setSchools(Array.isArray(data && data.schools) ? data.schools : initialSchools);
+        } else {
+          setGoals(initialGoals);
+          setSchools(initialSchools);
         }
       } catch (err) {
         setError('Hedefler yüklenirken hata oluştu.');
+        setGoals(initialGoals);
+        setSchools(initialSchools);
       } finally {
         setLoading(false);
       }
@@ -96,7 +105,7 @@ const RankingGoals = () => {
                 <TextField
                   key={key}
                   label={key}
-                  value={goals[key]}
+                  value={goals && goals[key] !== undefined ? goals[key] : ''}
                   onChange={e => handleChange(key, e.target.value.replace(/\D/g, ''))}
                   placeholder={`Örn: ${key === 'EA' ? '80000' : key === 'SAY' ? '150000' : '45000'}`}
                   InputProps={{
@@ -118,11 +127,11 @@ const RankingGoals = () => {
             {/* Okul hedefleri sağ */}
             <Stack spacing={2} sx={{ minWidth: 220, flex: 1 }}>
               <Typography fontWeight={600} fontSize={17} color="#2e3856">Hedef Okul ve Bölümler</Typography>
-              {schools.map((item, idx) => (
+              {Array.isArray(schools) && schools.length > 0 ? schools.map((item, idx) => (
                 <Box key={idx} sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <TextField
                     label={`Okul #${idx+1}`}
-                    value={item.university}
+                    value={item.university || ''}
                     onChange={e => {
                       const arr = [...schools];
                       arr[idx].university = e.target.value;
@@ -135,7 +144,7 @@ const RankingGoals = () => {
                   />
                   <TextField
                     label={`Bölüm #${idx+1}`}
-                    value={item.department}
+                    value={item.department || ''}
                     onChange={e => {
                       const arr = [...schools];
                       arr[idx].department = e.target.value;
@@ -147,7 +156,7 @@ const RankingGoals = () => {
                     sx={{ background: '#f7fafc', borderRadius: 2 }}
                   />
                 </Box>
-              ))}
+              )) : null}
             </Stack>
           </Box>
           <Button type="submit" variant="contained" color="success" sx={{ fontWeight: 700, borderRadius: 2, mt: 3 }} disabled={loading}>
@@ -164,7 +173,7 @@ const RankingGoals = () => {
                 {['EA', 'SAY', 'SÖZ'].map((key) => (
                   <Chip
                     key={key}
-                    label={<span style={{ fontWeight: 700, fontSize: 18, wordBreak: 'break-all', textAlign: 'center', width: '100%', display: 'inline-block' }}>{key}: {goals[key] ? goals[key].replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '—'}</span>}
+                    label={<span style={{ fontWeight: 700, fontSize: 18, wordBreak: 'break-all', textAlign: 'center', width: '100%', display: 'inline-block' }}>{key}: {goals && goals[key] ? goals[key].replace(/\B(?=(\d{3})+(?!\d))/g, ".") : '—'}</span>}
                     sx={{
                       bgcolor: `${goalColors[key]}22`,
                       color: goalColors[key],
@@ -192,7 +201,7 @@ const RankingGoals = () => {
             {/* Okul hedefleri sağ */}
             <Stack spacing={2} alignItems="flex-start" justifyContent="center" sx={{ minWidth: 220, flex: 1 }}>
               <Typography fontWeight={600} fontSize={17} color="#2e3856">Hedef Okul ve Bölümler</Typography>
-              {schools.map((item, idx) => (
+              {Array.isArray(schools) && schools.length > 0 ? schools.map((item, idx) => (
                 <Box key={idx} sx={{ display: 'flex', gap: 1, alignItems: 'center', width: '100%' }}>
                   <Chip
                     label={<span style={{ fontWeight: 600, fontSize: 16 }}>{item.university || '—'} <span style={{ color: '#888' }}>/</span> {item.department || '—'}</span>}
@@ -218,7 +227,7 @@ const RankingGoals = () => {
                     variant="outlined"
                   />
                 </Box>
-              ))}
+              )) : null}
             </Stack>
           </Box>
           <Button onClick={() => setEdit(true)} variant="outlined" color="primary" sx={{ mt: 3, borderRadius: 2, fontWeight: 600 }}>
