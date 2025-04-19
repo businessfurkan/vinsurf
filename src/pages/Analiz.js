@@ -392,74 +392,48 @@ const getSubjectIcon = (subject) => {
             color: '#222',
             boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
             minHeight: 150,
-    </Box>
-    <LinearProgress
-      variant="determinate"
-      value={hasData ? progressPercent : 0}
-      sx={{
-        height: 11,
-        borderRadius: 6,
-        background: '#e6e6e6',
-        boxShadow: '0 1.5px 7px 0 rgba(0,0,0,0.06)',
-        '& .MuiLinearProgress-bar': {
-          backgroundColor: subjectColor,
-          borderRadius: 6,
-        },
-        mb: 2,
-      }}
-    />
-    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <Typography
-        sx={{
-          fontSize: 13,
-          color: '#666',
-          fontWeight: 500,
-          textAlign: 'left',
-          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-          letterSpacing: 0.01,
-        }}
-      >
-        {hasData ? `${topicCount} konu` : 'Henüz konu yok'}
-      </Typography>
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          color: subjectColor,
-          fontWeight: 700,
-          fontSize: 13,
-          textTransform: 'none',
-          '&:hover': {
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            px: 0,
+            py: 0,
+            border: '1.5px solid #f0f1f4',
+            transition: 'box-shadow 0.16s, border-color 0.16s',
+            '&:hover': {
+              boxShadow: '0 6px 24px 0 rgba(30,30,60,0.11)',
+              borderColor: '#e0e1e7',
+            },
+          }}
+        >
+          <span style={{
+            fontSize: 32,
+            marginBottom: 10,
             color: subjectColor,
-            opacity: 0.8,
-          },
-          fontFamily: `'Inter','Poppins','Roboto',sans-serif`,
-        }}
-        onClick={() => {
-          setSelectedSubject(subject);
-          setTopicDialog(true);
-        }}
-        disabled={!hasData}
-      >
-        Konular
-        <Box component="span" sx={{ display: 'inline-flex', ml: 0.5 }}>
-          <NavigateNextIcon fontSize="small" />
-        </Box>
-      </Button>
-    </Box>
-  </CardContent>
-</Card>
+            filter: 'none',
+            opacity: 1
+          }}>{subjectIcon}</span>
+          <Typography
+            sx={{
+              fontSize: 20,
+              fontWeight: 900,
+              color: '#2c2c2c',
+              letterSpacing: 0.12,
+              textAlign: 'center',
+              fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
+              lineHeight: 1.13,
+              filter: 'none',
+              opacity: 1,
+              textTransform: 'none',
+            }}
+          >
+            {subject}
+          </Typography>
+        </Card>
             );
           })}
         </Box>
       )}
-      {/* Hedef Belirleme Bölümü */}
-      <Paper
-        elevation={0}
-        sx={{
-          mt: 5,
-          p: 0,
-          borderRadius: 3,
           overflow: 'hidden',
           position: 'relative',
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
@@ -822,7 +796,6 @@ const getSubjectIcon = (subject) => {
           </Grid>
         </Box>
       </Paper>
-
       {/* Konu detayları diyaloğu */}
       <Dialog 
         open={topicDialog} 
