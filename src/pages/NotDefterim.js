@@ -105,20 +105,33 @@ const PageContainer = styled(Box)(({ theme }) => ({
 
 const PageHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  justifyContent: 'flex-start',
   marginBottom: theme.spacing(4),
   position: 'relative',
-  padding: theme.spacing(0, 1, 1, 1),
+  padding: theme.spacing(2, 2, 2, 2),
+  background: 'rgba(255,255,255,0.98)',
+  borderRadius: 18,
+  boxShadow: '0 4px 24px rgba(60,60,80,0.07)',
+  border: '1px solid #f1f1f4',
   '&::after': {
     content: '""',
     position: 'absolute',
     width: '120px',
     height: '4px',
     background: 'linear-gradient(to right, #4285F4, #34A853, #FBBC05, #EA4335)',
-    bottom: 0,
-    left: theme.spacing(1)
+    bottom: 8,
+    left: theme.spacing(2)
   }
+}));
+
+const HeaderRow = styled(Box)(({ theme }) => ({
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: theme.spacing(2),
 }));
 
 const SearchBar = styled(Paper)(({ theme }) => ({
@@ -633,31 +646,51 @@ const NotDefterim = () => {
   return (
     <PageContainer>
       <PageHeader>
-        <Typography 
-          variant="h5" 
-          component="h1" 
-          gutterBottom 
-          fontWeight={700} 
-          color="primary"
-          sx={{
-            fontSize: '1.5rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          <EventNoteIcon fontSize="large" />
-          Not Defterim
-        </Typography>
-        
-        <NewNoteButton
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDialog}
-        >
-          Not Ekle
-        </NewNoteButton>
-      </PageHeader>
+  <HeaderRow>
+    <Typography 
+      variant="h4" 
+      component="h1" 
+      gutterBottom 
+      fontWeight={800} 
+      color="primary"
+      sx={{
+        fontSize: { xs: '1.2rem', md: '2rem' },
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        letterSpacing: '0.5px',
+        mb: 0
+      }}
+    >
+      <EventNoteIcon fontSize="large" sx={{ color: '#4285F4' }} />
+      Not Defterim
+    </Typography>
+    <NewNoteButton
+      variant="contained"
+      startIcon={<AddIcon />}
+      onClick={handleOpenDialog}
+      sx={{
+        mt: { xs: 0, md: 0 },
+        py: 1.2,
+        px: 3,
+        fontSize: { xs: '0.95rem', md: '1.1rem' },
+        fontWeight: 700,
+        boxShadow: '0 2px 12px #4285F455',
+        background: 'linear-gradient(90deg, #4285F4 0%, #34A853 100%)',
+        color: '#fff',
+        borderRadius: 3,
+        textTransform: 'none',
+        transition: 'all 0.2s',
+        '&:hover': {
+          background: 'linear-gradient(90deg, #34A853 0%, #4285F4 100%)',
+          boxShadow: '0 4px 16px #4285F433',
+        }
+      }}
+    >
+      Not Ekle
+    </NewNoteButton>
+  </HeaderRow>
+</PageHeader>
       
       <SearchBar elevation={3}>
         <SearchIcon sx={{ mr: 1, color: 'primary.main' }} />
