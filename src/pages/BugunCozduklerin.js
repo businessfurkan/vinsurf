@@ -277,10 +277,8 @@ const BugunCozduklerin = () => {
   };
 
   return (
-          backgroundColor: '#fff',
-          mb: 4
-        }}
-      >
+    <Box sx={{ backgroundColor: '#fff', mb: 4 }}>
+
         <Typography variant="body1" sx={{ mb: 3 }}>
           Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
         </Typography>
@@ -591,7 +589,7 @@ const BugunCozduklerin = () => {
         </Alert>
       </Snackbar>
     </Box>
-  );
-};
+  </Box>
+);
 
 export default BugunCozduklerin;

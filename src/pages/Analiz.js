@@ -30,6 +30,7 @@ import {
   ListItemIcon,
   Slider
 } from '@mui/material';
+import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SubjectIcon from '@mui/icons-material/Subject';
@@ -1086,7 +1087,7 @@ const Analiz = () => {
     boxShadow: '0 2px 12px rgba(31,38,135,0.04)',
     backdropFilter: 'blur(3px)',
   }}
->               >
+>
                   <AssignmentIcon sx={{ fontSize: 40, color: 'text.disabled', mb: 1 }} />
                   <Typography variant="body1" color="text.secondary" fontWeight={500}>
                     Bu ders için henüz konu çalışması kaydı bulunmuyor.

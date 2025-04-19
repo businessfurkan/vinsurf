@@ -128,7 +128,7 @@ const Sidebar = () => {
       onClose={isMobile ? handleDrawerToggle : undefined}
     >
       <DrawerHeader>
-        <Box
+        {/* Add logo or header content here if needed */}
       </DrawerHeader>
       
       <Divider sx={{ mb: 1 }} />
