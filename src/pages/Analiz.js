@@ -51,7 +51,9 @@ import { auth, db } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
-const Analiz = () => {
+// --- Aşağıda kullanıcıdan gelen TAM dosya içeriği uygulanıyor ---
+
+
   const [user] = useAuthState(auth);
   const [studyRecords, setStudyRecords] = useState([]);
   const [analytics, setAnalytics] = useState({});
@@ -337,19 +339,21 @@ const getSubjectIcon = (subject) => {
   }
 
   return (
-    <Box sx={{
-  minHeight: '100vh',
-  py: 4,
-  px: { xs: 1, sm: 2, md: 4 },
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'flex-start',
-  width: '100%',
-  background: '#fff',
-  position: 'relative',
-  overflow: 'visible',
-  zIndex: 1,
+    <React.Fragment>
+      <Box sx={{
+        minHeight: '100vh',
+        py: 4,
+        px: { xs: 1, sm: 2, md: 4 },
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        width: '100%',
+        background: '#fff',
+        position: 'relative',
+        overflow: 'visible',
+        zIndex: 1,
+      }}>
 }}>
   <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom sx={{
     mb: 3,
@@ -434,12 +438,7 @@ const getSubjectIcon = (subject) => {
           })}
         </Box>
       )}
-          overflow: 'hidden',
-          position: 'relative',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-          border: '1px solid rgba(0,0,0,0.02)'
-        }}
-      >
+    </Box>
         <Box sx={{ 
           position: 'absolute', 
           top: 0, 
@@ -671,11 +670,9 @@ const getSubjectIcon = (subject) => {
                       transform: 'translateY(0)',
                       boxShadow: '0 2px 8px rgba(33, 150, 243, 0.15)'
                     },
-                    cursor: targetSubject ? 'pointer' : 'not-allowed',
-                    opacity: targetSubject ? 1 : 0.7
                   }}
                 >
-                  Hedefi Kaydet
+                   Hedefi Kaydet
                 </Button>
               </Box>
             </Grid>
@@ -784,12 +781,12 @@ const getSubjectIcon = (subject) => {
                     </List>
                   )}
                 </Box>
-                <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                  <LightbulbIcon sx={{ color: 'warning.main', mr: 1 }} fontSize="small" />
-                  <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-                    İpucu: Hedeflerini düzenli olarak gözden geçir ve güncelle.
-                  </Typography>
-                </Box>
+              </Box>
+              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+                <LightbulbIcon sx={{ color: 'warning.main', mr: 1 }} fontSize="small" />
+                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                  İpucu: Hedeflerini düzenli olarak gözden geçir ve güncelle.
+                </Typography>
               </Box>
             </Grid>
           </Grid>
@@ -1151,7 +1148,72 @@ const getSubjectIcon = (subject) => {
         >
         </Paper>
       )}
-    </Box>
+      </Box>
+      {/* Bildirim */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={handleCloseSnackbar}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        action={
+          <IconButton size="small" color="inherit" onClick={handleCloseSnackbar}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
+      {/* Az saat uyarısı diyaloğu */}
+      <Dialog 
+        open={lowHoursDialog}
+        onClose={() => setLowHoursDialog(false)}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            overflow: 'hidden',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)'
+          }
+        }}
+      >
+        <DialogTitle sx={{
+          p: 0,
+          position: 'relative'
+        }}>
+          <Box sx={{
+            p: 2,
+            background: 'linear-gradient(135deg, #e53935 0%, #ffb300 100%)',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+          }}>
+            <WarningIcon sx={{ mr: 1.5, fontSize: 24 }} />
+            <Typography variant="h6" fontWeight={600}>
+              Hedef Saat Çok Düşük!
+            </Typography>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 2 }}>
+            Hedef saat en az 10 olmalıdır. Lütfen daha yüksek bir değer girin.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, justifyContent: 'center' }}>
+          <Button 
+            variant="contained" 
+            onClick={() => setLowHoursDialog(false)}
+            sx={{ 
+              fontWeight: 600,
+              px: 4,
+              borderRadius: 2
+            }}
+          >
+            Anladım
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
   );
 };
 
