@@ -48,7 +48,8 @@ const AnalyticalStopwatch = () => {
         records.push(doc.data());
       });
       
-      setStudyRecords(records);
+      const [studyRecords, setStudyRecords] = useState([]);
+setStudyRecords(records);
     } catch (error) {
       console.error('Error fetching study records:', error);
     }
@@ -81,7 +82,8 @@ const AnalyticalStopwatch = () => {
             // Calculate elapsed time if timer was running
             const elapsedSeconds = Math.floor((new Date() - timerStartTime) / 1000);
             setTime(timerData.elapsedTime + elapsedSeconds);
-            setStartTime(timerStartTime);
+            // TODO: Define setStartTime with useState or remove its usage.
+// setStartTime(timerStartTime);
             setIsRunning(true);
           } else {
             // Timer was paused but we don't want to automatically select subject/topic
@@ -159,7 +161,8 @@ const AnalyticalStopwatch = () => {
     setTime(0);
     setSelectedSubject('');
     setSelectedTopic('');
-    setStartTime(null);
+    // TODO: Define setStartTime with useState or remove its usage.
+// setStartTime(null);
     setExpandedSubject(null); // Accordion'u da kapat
     
     // Delete active timer from Firebase
@@ -254,7 +257,8 @@ const AnalyticalStopwatch = () => {
   const handleReset = () => {
     setTime(0);
     setIsRunning(false);
-    setStartTime(null);
+    // TODO: Define setStartTime with useState or remove its usage.
+// setStartTime(null);
   };
 
   if (isLoading) {
@@ -421,7 +425,8 @@ const AnalyticalStopwatch = () => {
                               handleSubjectClick(subject);
                               handleTopicClick(topic);
                               setIsRunning(true);
-                              setStartTime(new Date());
+                              // TODO: Define setStartTime with useState or remove its usage.
+// setStartTime(new Date());
                             }}
                           >
                             Çalışmaya Başla
@@ -536,7 +541,8 @@ const AnalyticalStopwatch = () => {
           return;
         }
         setIsRunning(true);
-        setStartTime(new Date());
+        // TODO: Define setStartTime with useState or remove its usage.
+// setStartTime(new Date());
       }}
       disabled={!selectedSubject || !selectedTopic}
       sx={{

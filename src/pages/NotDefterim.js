@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Collapse from '@mui/material/Collapse';
 import {
   Box,
   Typography,
@@ -270,18 +271,6 @@ const NotDefterim = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showCategories, setShowCategories] = useState(false);
   
-  // Not içeriği görüntüleme için
-  const [viewNoteDialog, setViewNoteDialog] = useState(false);
-  const [viewingNote, setViewingNote] = useState(null);
-  
-  // Kategori menüsü için ayrı değişkenler
-  const [categoryMenuAnchorEl, setCategoryMenuAnchorEl] = useState(null);
-  const categoryMenuOpen = Boolean(categoryMenuAnchorEl);
-  
-  // Not menüsü için ayrı değişkenler
-  const [noteMenuAnchorEl, setNoteMenuAnchorEl] = useState(null);
-  const [selectedMenuNote, setSelectedMenuNote] = useState(null);
-  
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -366,13 +355,11 @@ const NotDefterim = () => {
   const handleOpenEditDialog = (note) => {
     setCurrentNote(note);
     setEditDialogOpen(true);
-    setNoteMenuAnchorEl(null);
   };
 
   const handleOpenConfirmDialog = (noteId) => {
     setSelectedNoteId(noteId);
     setConfirmDialogOpen(true);
-    setNoteMenuAnchorEl(null);
   };
 
   // Dialog'ları kapatma işlevleri
@@ -396,22 +383,6 @@ const NotDefterim = () => {
       ...currentNote,
       [name]: value
     });
-  };
-
-  // Not menüsü işlemleri
-  const handleMenuOpen = (event, note) => {
-    setNoteMenuAnchorEl(event.currentTarget);
-    setSelectedMenuNote(note);
-  };
-
-  const handleMenuClose = () => {
-    setNoteMenuAnchorEl(null);
-    setSelectedMenuNote(null);
-  };
-
-  // Kategoriler menüsünü kapat
-  const handleCategoryMenuClose = () => {
-    setCategoryMenuAnchorEl(null);
   };
 
   // Not kaydetme işlevi

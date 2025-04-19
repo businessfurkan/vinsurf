@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { 
   Box, 
   Typography, 
@@ -9,16 +10,15 @@ import {
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
 } from 'recharts';
-import { Link } from 'react-router-dom';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { format, startOfWeek, startOfMonth, subMonths, isWithinInterval, startOfDay, endOfDay, subDays, addDays, parseISO } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 const Analytics = () => {
+  const theme = useTheme();
   const [user] = useAuthState(auth);
   const [studyData, setStudyData] = useState([]);
   const [timeRange, setTimeRange] = useState('week'); // 'week', 'month', 'all'
@@ -170,7 +170,7 @@ const Analytics = () => {
             sx={{ 
               fontWeight: 700, 
               mb: 3,
-              color: 'primary.main',
+              color: theme.palette.primary.main,
               fontFamily: 'Quicksand'
             }}
           >

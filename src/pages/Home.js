@@ -11,7 +11,7 @@ import RankingGoals from '../components/RankingGoals';
 import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 
 const Home = () => {
-  const theme = useTheme();
+  
   const isMobile = useMediaQuery('(max-width:600px)');
 
   return (

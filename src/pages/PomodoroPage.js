@@ -3,8 +3,7 @@ import {
   Box, 
   Typography, 
   Container, 
-  Paper,
-  useMediaQuery
+  Paper
 } from '@mui/material';
 import PomodoroTimer from '../components/PomodoroTimer';
 
@@ -141,8 +140,8 @@ const PomodoroPage = () => {
                 fontSize: { xs: '0.9rem', sm: '1rem' }
               }}
             >
-              Pomodoro Tekniği, 1980'li yıllarda Francesco Cirillo tarafından geliştirilen bir zaman yönetimi metodudur. 
-              İtalyanca &quot;domates&quot; anlamına gelen &quot;pomodoro&quot; kelimesi, Cirillo&apos;nun üniversite öğrencisiyken kullandığı domates şeklindeki mutfak zamanlayıcısından gelmektedir.
+              Pomodoro Tekniği, 1980&#39;li yıllarda Francesco Cirillo tarafından geliştirilen bir zaman yönetimi metodudur. 
+              İtalyanca &quot;domates&quot; anlamına gelen &quot;pomodoro&quot; kelimesi, Cirillo&#39;nun üniversite öğrencisiyken kullandığı domates şeklindeki mutfak zamanlayıcısından gelmektedir.
             </Typography>
             
             <Typography 

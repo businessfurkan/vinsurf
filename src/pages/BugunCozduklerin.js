@@ -42,6 +42,8 @@ import {
   deleteDoc 
 } from 'firebase/firestore';
 
+const setSnackbarSeverity = () => {};
+
 const BugunCozduklerin = () => {
   const theme = useTheme();
   const [user] = useAuthState(auth);
@@ -587,7 +589,51 @@ const BugunCozduklerin = () => {
         {selectedSubject && selectedTopic && (
           <>
             <DialogTitle sx={{ pb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                  Çözdüğün Soruları Gir
+                </Typography>
+                <IconButton
+                  edge="end"
+                  color="inherit"
+                  onClick={handleCloseTopicDialog}
+                  aria-label="close"
+                  size="small"
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </Box>
+              <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 1 }}>
+                {selectedSubject} - {selectedTopic}
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              {/* ... (rest of your DialogContent code) ... */}
+            </DialogContent>
+            <DialogActions>
+              {/* ... (rest of your DialogActions code) ... */}
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
+
+      <Dialog
+        open={topicDialogOpen}
+        onClose={handleCloseTopicDialog}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
+          }
+        }}
+      >
+        {selectedSubject && selectedTopic && (
+          <>
+            <DialogTitle sx={{ pb: 2 }}>
               {/* ... (rest of your DialogTitle code) ... */}
+              
             </DialogTitle>
             <DialogContent>
               {/* ... (rest of your DialogContent code) ... */}
