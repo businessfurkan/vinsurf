@@ -278,80 +278,78 @@ const BugunCozduklerin = () => {
 
   return (
     <Box sx={{ backgroundColor: '#fff', mb: 4 }}>
+      <Typography variant="body1" sx={{ mb: 3 }}>
+        Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
+      </Typography>
+      <Grid container spacing={3}>
+        {Object.keys(yksData).map((subject) => (
+          <Grid item xs={12} sm={6} md={4} lg={3} key={subject}>
+            <Card 
+              onClick={() => handleOpenDialog(subject)}
+              sx={{
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                borderRadius: 2,
+                height: '100%',
+                boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.08)',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.15)',
+                },
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                border: `1px solid ${yksData[subject].color}25`,
+              }}
+            >
+              <CardContent sx={{ 
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                p: 3
+              }}>
+                <Box
+                  sx={{
+                    backgroundColor: `${yksData[subject].color}15`,
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mb: 2,
+                  }}
+                >
+                  <BookIcon sx={{ color: yksData[subject].color, fontSize: 28 }} />
+                </Box>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                  }}
+                >
+                  {subject}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    mt: 1,
+                  }}
+                >
+                  {yksData[subject].topics.length} Konu
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
 
-        <Typography variant="body1" sx={{ mb: 3 }}>
-          Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
-        </Typography>
-
-        <Grid container spacing={3}>
-          {Object.keys(yksData).map((subject) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={subject}>
-              <Card 
-                onClick={() => handleOpenDialog(subject)}
-                sx={{
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  borderRadius: 2,
-                  height: '100%',
-                  boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.08)',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.15)',
-                  },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  border: `1px solid ${yksData[subject].color}25`,
-                }}
-              >
-                <CardContent sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  p: 3
-                }}>
-                  <Box
-                    sx={{
-                      backgroundColor: `${yksData[subject].color}15`,
-                      width: 60,
-                      height: 60,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mb: 2,
-                    }}
-                  >
-                    <BookIcon sx={{ color: yksData[subject].color, fontSize: 28 }} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                    }}
-                  >
-                    {subject}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      mt: 1,
-                    }}
-                  >
-                    {yksData[subject].topics.length} Konu
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Paper>
-
-      {/* Dialog for showing topics */}
+    {/* Dialog for showing topics */}
       <Dialog
         open={dialogOpen}
         onClose={handleCloseDialog}
@@ -589,7 +587,6 @@ const BugunCozduklerin = () => {
         </Alert>
       </Snackbar>
     </Box>
-  </Box>
-);
+  );
 
 export default BugunCozduklerin;
