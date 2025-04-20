@@ -69,33 +69,43 @@ const Analytics = () => {
           startDate = null;
         }
 
-        let studyQuery;
-        if (startDate) {
-          studyQuery = query(
-            collection(db, 'studyRecords'),
-            where('userId', '==', user.uid),
-            where('timestamp', '>=', startDate),
-            orderBy('timestamp', 'desc')
-          );
-        } else {
-          studyQuery = query(
-            collection(db, 'studyRecords'),
-            where('userId', '==', user.uid),
-            orderBy('timestamp', 'desc')
-          );
-        }
+        // Create a query that works without requiring composite indexes
+        const studyQuery = query(
+          collection(db, 'studyRecords'),
+          where('userId', '==', user.uid)
+        );
 
         const querySnapshot = await getDocs(studyQuery);
-        const records = [];
+        const allRecords = [];
         
         let todayTotalMinutes = 0;
         let weekTotalMinutes = 0;
         
         querySnapshot.forEach((doc) => {
           const record = { id: doc.id, ...doc.data() };
-          records.push(record);
-          
-          // Calculate today's total study time
+          allRecords.push(record);
+        });
+        
+        // Filter and sort records in JavaScript instead of Firestore
+        let records = allRecords;
+        
+        // Apply date filtering based on timeRange
+        if (startDate) {
+          records = records.filter(record => {
+            const recordDate = record.timestamp.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+            return recordDate >= startDate;
+          });
+        }
+        
+        // Sort by timestamp in descending order
+        records.sort((a, b) => {
+          const dateA = a.timestamp.toDate ? a.timestamp.toDate() : new Date(a.timestamp);
+          const dateB = b.timestamp.toDate ? b.timestamp.toDate() : new Date(b.timestamp);
+          return dateB - dateA; // Descending order
+        });
+        
+        // Calculate today's and this week's total study time
+        records.forEach(record => {
           const recordDate = record.timestamp.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
           
           if (isToday(recordDate)) {

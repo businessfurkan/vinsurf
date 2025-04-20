@@ -85,11 +85,10 @@ const BugunCozduklerin = () => {
       }
       todayCutoff.setHours(4, 0, 0, 0);
       
-      // Create a query to get today's solved problems
+      // Create a query to get solved problems without requiring composite indexes
       const q = query(
         collection(db, 'solvedProblems'),
-        where('userId', '==', user.uid),
-        where('date', '>=', todayCutoff)
+        where('userId', '==', user.uid)
       );
       
       const querySnapshot = await getDocs(q);
@@ -97,17 +96,22 @@ const BugunCozduklerin = () => {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        if (!solvedProblemsData[data.subject]) {
-          solvedProblemsData[data.subject] = {};
-        }
+        const recordDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
         
-        solvedProblemsData[data.subject][data.topic] = {
-          correct: data.correct,
-          incorrect: data.incorrect,
-          empty: data.empty,
-          date: data.date.toDate(),
-          id: doc.id
-        };
+        // Only include records from today (after 4 AM cutoff)
+        if (recordDate >= todayCutoff) {
+          if (!solvedProblemsData[data.subject]) {
+            solvedProblemsData[data.subject] = {};
+          }
+          
+          solvedProblemsData[data.subject][data.topic] = {
+            correct: data.correct,
+            incorrect: data.incorrect,
+            empty: data.empty,
+            date: recordDate,
+            id: doc.id
+          };
+        }
       });
       
       setSolvedProblems(solvedProblemsData);
@@ -131,19 +135,18 @@ const BugunCozduklerin = () => {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       thirtyDaysAgo.setHours(4, 0, 0, 0);
       
-      // Create a query to get solved problems from the last 30 days
+      // Create a query to get solved problems without requiring composite indexes
       const q = query(
         collection(db, 'solvedProblems'),
-        where('userId', '==', user.uid),
-        where('date', '>=', thirtyDaysAgo)
+        where('userId', '==', user.uid)
       );
       
       const querySnapshot = await getDocs(q);
-      const historicalData = [];
+      const allData = [];
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        historicalData.push({
+        allData.push({
           subject: data.subject,
           topic: data.topic,
           correct: data.correct || 0,
@@ -155,6 +158,9 @@ const BugunCozduklerin = () => {
           id: doc.id
         });
       });
+      
+      // Filter for the last 30 days in JavaScript
+      const historicalData = allData.filter(item => item.date >= thirtyDaysAgo);
       
       setHistoricalProblems(historicalData);
     } catch (error) {
