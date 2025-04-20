@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Glacial Indifference', 'Montserrat', sans-serif;
-  background-color: #F5F7FA;
+  background-color: #BDDEEC;
   color: #303545;
   line-height: 1.6;
   font-weight: 450; /* Slightly increase the default font weight */
@@ -61,20 +61,20 @@ a {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 16px !important;
   overflow: hidden;
-  background-color: #FFFFFF !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  background-color: #FFFFF0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Make all cards elegant */
 .MuiCard-root, .MuiPaper-root {
   border-radius: 16px !important;
-  background-color: #FFFFFF !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  background-color: #FFFFF0 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Analytics page styles */
@@ -83,23 +83,23 @@ a {
 }
 
 .analytics-card {
-  background-color: #FFFFFF !important;
+  background-color: #FFFFF0 !important;
   border-radius: 16px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .analytics-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 .chart-container {
   padding: 16px;
   border-radius: 16px;
-  background-color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #FFFFF0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
@@ -113,6 +113,8 @@ a {
   left: 0;
   z-index: 1200;
   transition: transform 0.3s ease;
+  background-color: #FFFFF0 !important;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08) !important;
 }
 
 .sidebar-closed {

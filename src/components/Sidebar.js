@@ -34,9 +34,9 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  background: '#fff',
+  background: '#FFFFF0',
   borderRight: 'none',
-  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.08)',
+  boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
 });
 
 const closedMixin = (theme) => ({
@@ -49,9 +49,9 @@ const closedMixin = (theme) => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
-  background: '#fff',
+  background: '#FFFFF0',
   borderRight: 'none',
-  boxShadow: '2px 0 24px 0 rgba(67,198,172,0.08)',
+  boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
 });
 
 const DrawerHeader = styled('div')(({ theme }) => ({
