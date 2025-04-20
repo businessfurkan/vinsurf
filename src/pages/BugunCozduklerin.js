@@ -295,8 +295,9 @@ const BugunCozduklerin = () => {
         // No snackbar for successful save
       }
       
-      // Refresh data
+      // Refresh both current and historical data
       await fetchSolvedProblems();
+      await fetchHistoricalSolvedProblems();
       handleCloseTopicDialog();
       setIsLoading(false);
       
@@ -405,7 +406,8 @@ const BugunCozduklerin = () => {
           empty: 0,
           net: 0,
           color: yksData[item.subject]?.color || '#4285F4',
-          dates: []
+          dates: [],
+          lastUpdated: null
         };
       }
       
@@ -414,9 +416,14 @@ const BugunCozduklerin = () => {
       subjectTopicMap[key].empty += item.empty;
       subjectTopicMap[key].net += item.net;
       subjectTopicMap[key].dates.push(item.date);
+      
+      // Track the most recent update
+      if (!subjectTopicMap[key].lastUpdated || item.date > subjectTopicMap[key].lastUpdated) {
+        subjectTopicMap[key].lastUpdated = item.date;
+      }
     });
     
-    return Object.values(subjectTopicMap).sort((a, b) => b.net - a.net);
+    return Object.values(subjectTopicMap).sort((a, b) => b.lastUpdated - a.lastUpdated);
   }, [historicalProblems]);
 
   return (
@@ -728,7 +735,7 @@ const BugunCozduklerin = () => {
         <Typography 
           variant="h5" 
           sx={{ 
-            mb: 3, 
+            mb: 2, 
             fontWeight: 700, 
             color: '#2e3856',
             textAlign: 'center',
@@ -736,124 +743,151 @@ const BugunCozduklerin = () => {
             borderBottom: '2px solid #f0f0f0'
           }}
         >
-          Son 30 Gün Performansın
+          Çözdüğün Sorular
         </Typography>
         <Typography 
           variant="body1" 
           sx={{ 
-            mb: 4, 
+            mb: 3, 
             textAlign: 'center',
-            fontSize: '1.05rem',
+            fontSize: '1rem',
             color: '#4b5c6b',
             maxWidth: '800px',
             mx: 'auto'
           }}
         >
-          Son 30 gün içinde çözdüğün soruların net skorları ve konu bazlı performansın.
+          Son 30 gün içinde kaydettiğin net skorlar
         </Typography>
         
         {processedHistoricalData.length > 0 ? (
-          <TableContainer component={Paper} sx={{ 
-            boxShadow: '0 4px 20px rgba(0,0,0,0.04)', 
-            borderRadius: 2,
-            overflow: 'hidden',
-            border: '1px solid rgba(0,0,0,0.05)'
-          }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
-                  <TableCell sx={{ fontWeight: 600, color: '#2e3856' }}>Ders</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: '#2e3856' }}>Konu</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Doğru</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Yanlış</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Boş</TableCell>
-                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Net</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {processedHistoricalData.map((item, index) => (
-                  <TableRow key={index} sx={{ 
-                    '&:nth-of-type(odd)': { backgroundColor: alpha('#f8f9fa', 0.3) },
-                    '&:hover': { backgroundColor: alpha(item.color, 0.05) },
-                    transition: 'background-color 0.2s'
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {processedHistoricalData.map((item, index) => (
+              <Paper 
+                key={index} 
+                elevation={0}
+                sx={{ 
+                  p: 2, 
+                  borderRadius: 2, 
+                  border: '1px solid rgba(0,0,0,0.05)',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  gap: 2,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: '4px',
+                    backgroundColor: item.color,
+                    borderTopLeftRadius: 8,
+                    borderBottomLeftRadius: 8,
+                  },
+                  '&:hover': {
+                    backgroundColor: alpha(item.color, 0.03),
+                  }
+                }}
+              >
+                <Box sx={{ 
+                  flex: 2, 
+                  pl: 2,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 0.5
+                }}>
+                  <Typography variant="subtitle1" fontWeight={600} color="#2e3856">
+                    {item.subject}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {item.topic}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ 
+                  flex: 3, 
+                  display: 'flex', 
+                  gap: 2, 
+                  justifyContent: { xs: 'flex-start', sm: 'center' },
+                  flexWrap: 'wrap',
+                  mt: { xs: 1, sm: 0 }
+                }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">Doğru</Typography>
+                    <Chip 
+                      label={item.correct} 
+                      size="small" 
+                      sx={{ 
+                        mt: 0.5,
+                        backgroundColor: alpha('#4caf50', 0.1),
+                        color: '#4caf50',
+                        fontWeight: 600,
+                        minWidth: 40
+                      }} 
+                    />
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">Yanlış</Typography>
+                    <Chip 
+                      label={item.incorrect} 
+                      size="small" 
+                      sx={{ 
+                        mt: 0.5,
+                        backgroundColor: alpha('#f44336', 0.1),
+                        color: '#f44336',
+                        fontWeight: 600,
+                        minWidth: 40
+                      }} 
+                    />
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">Boş</Typography>
+                    <Chip 
+                      label={item.empty} 
+                      size="small" 
+                      sx={{ 
+                        mt: 0.5,
+                        backgroundColor: alpha('#9e9e9e', 0.1),
+                        color: '#9e9e9e',
+                        fontWeight: 600,
+                        minWidth: 40
+                      }} 
+                    />
+                  </Box>
+                </Box>
+                
+                <Box sx={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  justifyContent: 'center',
+                  mt: { xs: 1, sm: 0 }
+                }}>
+                  <Typography variant="caption" color="text.secondary">Net</Typography>
+                  <Box sx={{ 
+                    mt: 0.5,
+                    backgroundColor: alpha('#2196f3', 0.1), 
+                    color: '#2196f3',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    px: 2,
+                    py: 0.5,
+                    borderRadius: 1,
+                    minWidth: 60,
+                    textAlign: 'center'
                   }}>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box 
-                          sx={{ 
-                            width: 12, 
-                            height: 12, 
-                            borderRadius: '50%', 
-                            backgroundColor: item.color,
-                            mr: 1.5,
-                            boxShadow: `0 0 0 2px ${alpha(item.color, 0.2)}`
-                          }} 
-                        />
-                        {item.subject}
-                      </Box>
-                    </TableCell>
-                    <TableCell>{item.topic}</TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Doğru sayısı" arrow>
-                        <Chip 
-                          label={item.correct} 
-                          size="small" 
-                          sx={{ 
-                            backgroundColor: alpha('#4caf50', 0.1),
-                            color: '#4caf50',
-                            fontWeight: 600,
-                            minWidth: 40
-                          }} 
-                        />
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Yanlış sayısı" arrow>
-                        <Chip 
-                          label={item.incorrect} 
-                          size="small" 
-                          sx={{ 
-                            backgroundColor: alpha('#f44336', 0.1),
-                            color: '#f44336',
-                            fontWeight: 600,
-                            minWidth: 40
-                          }} 
-                        />
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Boş sayısı" arrow>
-                        <Chip 
-                          label={item.empty} 
-                          size="small" 
-                          sx={{ 
-                            backgroundColor: alpha('#9e9e9e', 0.1),
-                            color: '#9e9e9e',
-                            fontWeight: 600,
-                            minWidth: 40
-                          }} 
-                        />
-                      </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Tooltip title="Net skor" arrow>
-                        <Chip 
-                          label={item.net.toFixed(2)} 
-                          size="small" 
-                          sx={{ 
-                            backgroundColor: alpha('#2196f3', 0.1),
-                            color: '#2196f3',
-                            fontWeight: 600,
-                            minWidth: 50
-                          }} 
-                        />
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    {item.net.toFixed(2)}
+                  </Box>
+                </Box>
+              </Paper>
+            ))}
+          </Box>
         ) : (
           <Box sx={{ 
             textAlign: 'center', 
@@ -864,10 +898,10 @@ const BugunCozduklerin = () => {
             border: '1px dashed #dee2e6'
           }}>
             <Typography variant="body1">
-              Son 30 günde kaydedilmiş çözülen soru bulunmamaktadır.
+              Henüz kaydedilmiş soru çözümü bulunmamaktadır.
             </Typography>
             <Typography variant="body2" sx={{ mt: 1, color: '#adb5bd' }}>
-              Çözdüğün soruları kaydetmeye başladığında burada görünecektir.
+              Yukarıdaki kartlara tıklayarak soru çözümlerini kaydetmeye başlayabilirsin.
             </Typography>
           </Box>
         )}
