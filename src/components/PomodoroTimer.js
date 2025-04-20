@@ -64,13 +64,13 @@ const PomodoroTimer = () => {
     });
   };
 
-  // Define playSound function before it's used in useEffect
-  const playSound = () => {
+  // Define playSound function with useCallback to prevent recreation on each render
+  const playSound = useCallback(() => {
     if (!muted) {
       const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
       audio.play();
     }
-  };
+  }, [muted]);
 
   // Ayarları ve istatistikleri yükle
   useEffect(() => {
@@ -218,7 +218,7 @@ const PomodoroTimer = () => {
     }
     
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft, mode, completedPomodoros]);
+  }, [isRunning, timeLeft, mode, completedPomodoros, playSound, saveStats]);
 
   const handleStartPause = () => {
     setIsRunning(!isRunning);

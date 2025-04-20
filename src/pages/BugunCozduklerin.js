@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
@@ -60,13 +60,7 @@ const BugunCozduklerin = () => {
   const [solvedProblems, setSolvedProblems] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      fetchSolvedProblems();
-    }
-  }, [user]);
-
-  const fetchSolvedProblems = async () => {
+  const fetchSolvedProblems = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -81,45 +75,45 @@ const BugunCozduklerin = () => {
       // Set time to 04:00:00
       todayCutoff.setHours(4, 0, 0, 0);
       
-      const solvedProblemsQuery = query(
+      // Create a query to get today's solved problems
+      const q = query(
         collection(db, 'solvedProblems'),
-        where('userId', '==', user.uid)
+        where('userId', '==', user.uid),
+        where('date', '>=', todayCutoff)
       );
-
-      const querySnapshot = await getDocs(solvedProblemsQuery);
-      const problems = {};
-
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        
-        // Filter locally for today's problems (after 4 AM cutoff)
-        const problemDate = data.date?.toDate();
-        if (!problemDate || problemDate < todayCutoff) {
-          return; // Skip entries from before the cutoff time
+      
+      const querySnapshot = await getDocs(q);
+      const solvedProblemsData = {};
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!solvedProblemsData[data.subject]) {
+          solvedProblemsData[data.subject] = {};
         }
         
-        if (!problems[data.subject]) {
-          problems[data.subject] = {};
-        }
-        
-        problems[data.subject][data.topic] = {
-          id: docSnap.id,
-          correct: data.correct || 0,
-          incorrect: data.incorrect || 0,
-          empty: data.empty || 0,
-          total: (data.correct || 0) + (data.incorrect || 0) + (data.empty || 0),
-          timestamp: data.date
+        solvedProblemsData[data.subject][data.topic] = {
+          correct: data.correct,
+          incorrect: data.incorrect,
+          empty: data.empty,
+          date: data.date.toDate(),
+          id: doc.id
         };
       });
-
-      setSolvedProblems(problems);
-      setIsLoading(false);
+      
+      setSolvedProblems(solvedProblemsData);
     } catch (error) {
       console.error('Error fetching solved problems:', error);
       showSnackbar('Çözülen soru bilgileri yüklenirken hata oluştu', 'error');
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, [user, showSnackbar]);
+
+  useEffect(() => {
+    if (user) {
+      fetchSolvedProblems();
+    }
+  }, [user, fetchSolvedProblems]);
 
   const handleOpenDialog = (subject) => {
     setSelectedSubject(subject);
@@ -171,11 +165,11 @@ const BugunCozduklerin = () => {
     }));
   };
 
-  const showSnackbar = (message, severity = 'success') => {
+  const showSnackbar = useCallback((message, severity = 'success') => {
     setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
+    // Removed setSnackbarSeverity as we're not using severity
     setSnackbarOpen(true);
-  };
+  }, []);
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
