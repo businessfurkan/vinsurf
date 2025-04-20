@@ -270,7 +270,7 @@ const PomodoroTimer = () => {
   };
 
   return (
-    <Box sx={{ fontFamily: 'Quicksand, sans-serif', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+    <Box sx={{ fontFamily: 'Quicksand, sans-serif', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
       {isLoading ? (
         <CircularProgress 
           size={60}
@@ -352,16 +352,17 @@ const PomodoroTimer = () => {
             </Button>
           </Box>
           
-          {/* Main Timer Display */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+          {/* Main Timer Display - Horizontal Layout */}
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', justifyContent: 'center', mb: 4, width: '100%' }}>
             <Box 
               sx={{ 
                 position: 'relative', 
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center',
-                width: 220,
-                height: 220
+                width: { xs: 220, sm: 200, md: 220 },
+                height: { xs: 220, sm: 200, md: 220 },
+                mr: { xs: 0, sm: 4, md: 6 }
               }}
             >
               <CircularProgress 
@@ -440,7 +441,7 @@ const PomodoroTimer = () => {
           </Box>
           
           {/* Timer Controls */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, gap: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, gap: 2, width: '100%' }}>
             <Button 
               size="large" 
               variant="contained"

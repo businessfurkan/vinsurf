@@ -47,7 +47,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: 'background.default', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', bgcolor: '#BDDEEC', minHeight: '100vh' }}>
           <Sidebar />
           <Box
             component="main"
@@ -56,6 +56,7 @@ const App = () => {
               p: { xs: 2, sm: 3 },
               width: { sm: `calc(100% - ${240}px)` },
               overflow: 'auto',
+              bgcolor: '#BDDEEC',
             }}
           >
             <Header />

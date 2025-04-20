@@ -33,8 +33,8 @@ const Home = () => {
       borderRadius: '16px !important', 
       overflow: 'hidden',
       mb: { xs: 3, sm: 4, md: 5 },
-      background: 'linear-gradient(120deg, #F8FFAE 0%, #43C6AC 100%)',
-      boxShadow: '0 4px 18px 0 rgba(67,198,172,0.13) !important',
+      background: '#FFFFF0',
+      boxShadow: '0 4px 18px 0 rgba(0,0,0,0.08) !important',
       position: 'relative',
       minHeight: 220
     }}
@@ -87,8 +87,8 @@ const Home = () => {
               borderRadius: '16px !important', 
               overflow: 'hidden',
               mb: { xs: 3, sm: 4, md: 5 },
-              background: 'linear-gradient(120deg, #F8FFAE 0%, #43C6AC 100%)',
-              boxShadow: '0 4px 18px 0 rgba(67,198,172,0.13) !important',
+              background: '#FFFFF0',
+              boxShadow: '0 4px 18px 0 rgba(0,0,0,0.08) !important',
               position: 'relative',
               minHeight: 220
             }}

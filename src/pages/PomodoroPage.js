@@ -42,18 +42,18 @@ const PomodoroPage = () => {
             borderRadius: { xs: 4, sm: 6, md: 8 }, 
             overflow: 'hidden',
             mb: { xs: 3, sm: 4, md: 5 },
-            background: 'linear-gradient(135deg, #F8FFAE 0%, #43C6AC 100%)',
+            background: '#FFFFF0',
             backdropFilter: 'blur(12px)',
-            boxShadow: '0 8px 32px 0 rgba(67,198,172,0.18)',
-            border: '1.5px solid #43C6AC33',
+            boxShadow: '0 8px 32px 0 rgba(0,0,0,0.08)',
+            border: '1.5px solid rgba(0,0,0,0.05)',
           }}
         >
           <Box 
             sx={{ 
               p: { xs: 3, sm: 4, md: 5 },
-              background: 'rgba(255,255,255,0.20)',
+              background: 'rgba(255,255,255,0.50)',
               borderRadius: { xs: 4, sm: 6, md: 8 },
-              boxShadow: '0 2px 8px #43C6AC11',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
@@ -93,9 +93,9 @@ const PomodoroPage = () => {
                display: 'flex',
                justifyContent: 'center',
                alignItems: 'center',
-               background: 'rgba(255,255,255,0.28)',
+               background: 'rgba(255,255,255,0.70)',
                borderRadius: 7,
-               boxShadow: '0 4px 24px #43C6AC22',
+               boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
                p: { xs: 2, sm: 3 },
                mt: 2,
                mb: 2
