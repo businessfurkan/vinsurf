@@ -117,7 +117,7 @@ const DayCircle = styled(Box)(({ theme, day }) => {
   // Assign different gradient colors for each day
   const dayColors = {
     'Pazartesi': 'linear-gradient(135deg, #4285F4, #34A853)',
-    'Salı': 'linear-gradient(135deg, #0F9D58, #4285F4)',
+    'Salı': 'linear-gradient(135deg, #EF9B0F, #4285F4)',
     'Çarşamba': 'linear-gradient(135deg, #DB4437, #F4B400)',
     'Perşembe': 'linear-gradient(135deg, #F4B400, #0F9D58)',
     'Cuma': 'linear-gradient(135deg, #673AB7, #4285F4)',
@@ -565,7 +565,7 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: 'linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%)',
+        background: '#FFFFF0',
         position: 'relative',
         overflow: 'hidden',
         '&::before': {

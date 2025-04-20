@@ -65,6 +65,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   borderRadius: theme.spacing(2),
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
   marginBottom: theme.spacing(4),
+  backgroundColor: '#FFFFF0',
 }));
 
 const Profile = () => {
@@ -143,31 +144,31 @@ const Profile = () => {
           setUploadProgress(progress);
         },
         (error) => {
-          console.error('Error uploading file:', error);
-          setError('Profil fotoğrafı yüklenirken bir hata oluştu.');
+          console.error('Error uploading profile picture:', error);
+          setError('Profil resmi yüklenirken bir hata oluştu.');
           setOpenSnackbar(true);
           setIsUploading(false);
         },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
-            try {
-              await updateProfile(user, { photoURL: downloadURL });
-              // Update Firestore user document with the new photo URL
-              await updateDoc(doc(db, 'users', user.uid), {
-                photoURL: downloadURL,
-                updatedAt: new Date(),
-                expiresAt: new Date(new Date().setMonth(new Date().getMonth() + 24))
-              });
-              setSuccess('Profil fotoğrafı başarıyla güncellendi.');
-              setOpenSnackbar(true);
-            } catch (error) {
-              console.error('Error updating profile:', error);
-              setError('Profil güncellenirken bir hata oluştu.');
-              setOpenSnackbar(true);
-            } finally {
-              setIsUploading(false);
-            }
-          });
+        async () => {
+          try {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            await updateProfile(user, { photoURL: downloadURL });
+            
+            // Update the user document in Firestore
+            await updateDoc(doc(db, 'users', user.uid), {
+              photoURL: downloadURL,
+              updatedAt: new Date(),
+            });
+            
+            setSuccess('Profil resmi başarıyla güncellendi.');
+            setOpenSnackbar(true);
+          } catch (error) {
+            console.error('Error updating profile with new picture:', error);
+            setError('Profil resmi güncellenirken bir hata oluştu.');
+            setOpenSnackbar(true);
+          } finally {
+            setIsUploading(false);
+          }
         }
       );
     }
@@ -175,7 +176,7 @@ const Profile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProfileData((prevState) => ({
+    setProfileData(prevState => ({
       ...prevState,
       [name]: value,
     }));
@@ -190,10 +191,8 @@ const Profile = () => {
     playClickSound();
     if (user) {
       try {
-        // Update display name in Firebase Auth
-        await updateProfile(user, {
-          displayName: profileData.displayName,
-        });
+        // Update displayName in Firebase Auth
+        await updateProfile(user, { displayName: profileData.displayName });
         
         // Update user data in Firestore
         await updateDoc(doc(db, 'users', user.uid), {
@@ -204,7 +203,6 @@ const Profile = () => {
           targetDepartment: profileData.targetDepartment,
           bio: profileData.bio,
           updatedAt: new Date(),
-          expiresAt: new Date(new Date().setMonth(new Date().getMonth() + 24))
         });
         
         setSuccess('Profil başarıyla güncellendi.');
@@ -227,17 +225,18 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', backgroundColor: '#FFFFF0' }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, px: 2 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, px: 2, backgroundColor: '#FFFFF0' }}>
       <Typography 
         variant="h4" 
         gutterBottom 
+        align="center"
         sx={{ 
           fontWeight: 700, 
           mb: 4,
@@ -247,9 +246,10 @@ const Profile = () => {
         Profilim
       </Typography>
       
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={4}>
-          <StyledPaper elevation={0}>
+      <Grid container spacing={4} justifyContent="center">
+        {/* Profile Photo and Edit Button Section */}
+        <Grid item xs={12} md={4} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <StyledPaper elevation={0} sx={{ width: '100%' }}>
             <Box sx={{ textAlign: 'center', position: 'relative' }}>
               <Box sx={{ position: 'relative', display: 'inline-block' }}>
                 <ProfileAvatar 
@@ -290,128 +290,108 @@ const Profile = () => {
               </Button>
             </Box>
           </StyledPaper>
-          
-          <Card sx={{ borderRadius: theme.spacing(2), overflow: 'hidden', mb: 2 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                YKS Hazırlık Bilgileri
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="textSecondary">Okul:</Typography>
-                <Typography variant="body2">{profileData.school || 'Belirtilmedi'}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="textSecondary">Sınıf:</Typography>
-                <Typography variant="body2">{profileData.grade || 'Belirtilmedi'}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography variant="body2" color="textSecondary">Hedef Üniversite:</Typography>
-                <Typography variant="body2">{profileData.targetUniversity || 'Belirtilmedi'}</Typography>
-              </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="textSecondary">Hedef Bölüm:</Typography>
-                <Typography variant="body2">{profileData.targetDepartment || 'Belirtilmedi'}</Typography>
-              </Box>
-            </CardContent>
-          </Card>
         </Grid>
         
-        <Grid item xs={12} md={8}>
-          <StyledPaper elevation={0}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Kişisel Bilgiler
-              </Typography>
-            </Box>
-            
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Ad Soyad"
-                  name="displayName"
-                  value={profileData.displayName}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="E-posta"
-                  name="email"
-                  value={profileData.email}
-                  disabled={true} // Email cannot be changed
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Okul"
-                  name="school"
-                  value={profileData.school}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Sınıf"
-                  name="grade"
-                  value={profileData.grade}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Hedef Üniversite"
-                  name="targetUniversity"
-                  value={profileData.targetUniversity}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Hedef Bölüm"
-                  name="targetDepartment"
-                  value={profileData.targetDepartment}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  variant="outlined"
-                  sx={{ mb: 2 }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Hakkımda"
-                  name="bio"
-                  value={profileData.bio}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  multiline
-                  rows={4}
-                  variant="outlined"
-                />
-              </Grid>
+        {/* Personal Information Section - Centered in the page */}
+        <Grid item xs={12}>
+          <Grid container spacing={4} justifyContent="center">
+            <Grid item xs={12} md={8}>
+              <StyledPaper elevation={0}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 600, borderBottom: '2px solid #4285F4', paddingBottom: '8px', textAlign: 'center' }}>
+                    Kişisel Bilgiler
+                  </Typography>
+                </Box>
+                
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Ad Soyad"
+                      name="displayName"
+                      value={profileData.displayName}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="E-posta"
+                      name="email"
+                      value={profileData.email}
+                      disabled={true} // Email cannot be changed
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Okul"
+                      name="school"
+                      value={profileData.school}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Sınıf"
+                      name="grade"
+                      value={profileData.grade}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Hedef Üniversite"
+                      name="targetUniversity"
+                      value={profileData.targetUniversity}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Hedef Bölüm"
+                      name="targetDepartment"
+                      value={profileData.targetDepartment}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      variant="outlined"
+                      sx={{ mb: 2 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Hakkımda"
+                      name="bio"
+                      value={profileData.bio}
+                      onChange={handleInputChange}
+                      disabled={!isEditing}
+                      multiline
+                      rows={4}
+                      variant="outlined"
+                    />
+                  </Grid>
+                </Grid>
+              </StyledPaper>
             </Grid>
-          </StyledPaper>
+          </Grid>
         </Grid>
       </Grid>
       

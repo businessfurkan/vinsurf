@@ -251,17 +251,26 @@ const BugunCozduklerin = () => {
     }
   };
 
+  // Calculate net score (4 wrong answers canceling 1 correct answer)
   const getTopicStats = (subject, topic) => {
     if (
       solvedProblems[subject] && 
       solvedProblems[subject][topic]
     ) {
       const stats = solvedProblems[subject][topic];
+      const correct = stats.correct || 0;
+      const incorrect = stats.incorrect || 0;
+      const empty = stats.empty || 0;
+      
+      // Calculate net score: correct - (incorrect / 4)
+      const netScore = Math.max(0, correct - Math.floor(incorrect / 4));
+      
       return {
-        correct: stats.correct,
-        incorrect: stats.incorrect,
-        empty: stats.empty,
-        total: stats.total
+        correct,
+        incorrect,
+        empty,
+        total: correct + incorrect + empty,
+        net: netScore
       };
     }
     return null;
@@ -269,31 +278,66 @@ const BugunCozduklerin = () => {
 
   return (
     <>
-      <Box sx={{ backgroundColor: '#FFFFF0', mb: 4, p: 3, borderRadius: 2 }}>
-        <Typography variant="body1" sx={{ mb: 3 }}>
+      <Box sx={{ backgroundColor: '#FFFFF0', mb: 4, p: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            mb: 3, 
+            fontWeight: 700, 
+            color: '#2e3856',
+            textAlign: 'center',
+            pb: 1,
+            borderBottom: '2px solid #f0f0f0'
+          }}
+        >
+          Bugün Çözdüklerin
+        </Typography>
+        <Typography 
+          variant="body1" 
+          sx={{ 
+            mb: 4, 
+            textAlign: 'center',
+            fontSize: '1.05rem',
+            color: '#4b5c6b',
+            maxWidth: '800px',
+            mx: 'auto'
+          }}
+        >
           Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
         </Typography>
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
           {Object.keys(yksData).map((subject) => (
-            <Grid item xs={12} sm={6} md={4} lg={2.4} key={subject}>
+            <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={subject}>
               <Card 
                 onClick={() => handleOpenDialog(subject)}
                 sx={{
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
-                  borderRadius: 2,
-                  height: 180, // Fixed height for consistency
+                  borderRadius: 3,
+                  height: 200, // Increased fixed height for all cards
                   width: '100%',
-                  boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.08)',
+                  boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.08)',
                   '&:hover': {
                     transform: 'translateY(-5px)',
-                    boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.15)',
+                    boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.12)',
                   },
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'center',
                   border: `1px solid ${yksData[subject].color}25`,
                   backgroundColor: '#FFFFF0',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '5px',
+                    backgroundColor: yksData[subject].color,
+                    opacity: 0.8
+                  }
                 }}
               >
                 <CardContent sx={{ 
@@ -302,27 +346,32 @@ const BugunCozduklerin = () => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
-                  p: 3
+                  p: 3,
+                  height: '100%'
                 }}>
                   <Box
                     sx={{
                       backgroundColor: `${yksData[subject].color}15`,
-                      width: 60,
-                      height: 60,
+                      width: 70,
+                      height: 70,
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       mb: 2,
+                      boxShadow: `0 4px 12px ${yksData[subject].color}30`
                     }}
                   >
-                    <BookIcon sx={{ color: yksData[subject].color, fontSize: 28 }} />
+                    <BookIcon sx={{ color: yksData[subject].color, fontSize: 32 }} />
                   </Box>
                   <Typography
                     variant="h6"
                     sx={{
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
+                      fontWeight: 700,
+                      color: '#2e3856',
+                      fontSize: '1.2rem',
+                      letterSpacing: '0.3px',
+                      mb: 1
                     }}
                   >
                     {subject}
@@ -330,8 +379,13 @@ const BugunCozduklerin = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: theme.palette.text.secondary,
-                      mt: 1,
+                      color: '#4b5c6b',
+                      fontWeight: 500,
+                      fontSize: '0.95rem',
+                      backgroundColor: `${yksData[subject].color}10`,
+                      px: 2,
+                      py: 0.5,
+                      borderRadius: 10
                     }}
                   >
                     {yksData[subject].topics.length} Konu
@@ -410,7 +464,7 @@ const BugunCozduklerin = () => {
                         } 
                       />
                       {getTopicStats(selectedSubject, topic) && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', ml: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', ml: 1, gap: 1 }}>
                           <Chip 
                             label={`D:${getTopicStats(selectedSubject, topic).correct} Y:${getTopicStats(selectedSubject, topic).incorrect} B:${getTopicStats(selectedSubject, topic).empty}`} 
                             size="small" 
@@ -419,6 +473,17 @@ const BugunCozduklerin = () => {
                             sx={{ 
                               fontWeight: 500,
                               fontSize: '0.75rem'
+                            }}
+                          />
+                          <Chip 
+                            label={`Net: ${getTopicStats(selectedSubject, topic).net}`}
+                            size="small" 
+                            color="success"
+                            sx={{ 
+                              fontWeight: 600,
+                              fontSize: '0.75rem',
+                              backgroundColor: '#34A853',
+                              color: 'white'
                             }}
                           />
                         </Box>
@@ -526,18 +591,39 @@ const BugunCozduklerin = () => {
 
                 <Box sx={{ 
                   display: 'flex', 
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flexDirection: 'column',
+                  gap: 1,
                   bgcolor: 'background.default',
                   p: 2,
                   borderRadius: 1
                 }}>
-                  <Typography variant="body1" fontWeight={500}>
-                    Toplam Soru:
-                  </Typography>
-                  <Typography variant="body1" fontWeight={600} color="primary.main">
-                    {problemStats.correct + problemStats.incorrect + problemStats.empty}
-                  </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body1" fontWeight={500}>
+                      Toplam Soru:
+                    </Typography>
+                    <Typography variant="body1" fontWeight={600} color="primary.main">
+                      {problemStats.correct + problemStats.incorrect + problemStats.empty}
+                    </Typography>
+                  </Box>
+                  
+                  <Divider sx={{ my: 1 }} />
+                  
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Typography variant="body2" fontWeight={500} color="text.secondary">
+                      Net Puan Hesaplama:
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body2" fontWeight={500}>
+                        {problemStats.correct} Doğru - ({problemStats.incorrect} Yanlış ÷ 4) = 
+                      </Typography>
+                      <Typography variant="body1" fontWeight={700} color="success.main">
+                        {Math.max(0, problemStats.correct - Math.floor(problemStats.incorrect / 4))} Net
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, fontStyle: 'italic' }}>
+                      * Her 4 yanlış 1 doğruyu götürür.
+                    </Typography>
+                  </Box>
                 </Box>
               </Stack>
             </DialogContent>
