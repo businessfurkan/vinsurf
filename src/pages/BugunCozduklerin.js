@@ -60,12 +60,11 @@ const BugunCozduklerin = () => {
     incorrect: 0,
     empty: 0
   });
+  const [solvedProblems, setSolvedProblems] = useState({});
+  const [historicalProblems, setHistoricalProblems] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-
-  const [solvedProblems, setSolvedProblems] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-
   const [snackbarSeverity, setSnackbarSeverity] = useState('info');
 
   const showSnackbar = useCallback((message, severity = 'info') => {
