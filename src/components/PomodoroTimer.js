@@ -38,7 +38,7 @@ const PomodoroTimer = () => {
     longBreak: 15,
   });
   const [showSettings, setShowSettings] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Added to fix no-undef errors
+  const [isLoading, setIsLoading] = useState(false);
   // Missing state declarations for no-undef errors
   const [muted, setMuted] = useState(false);
   
@@ -270,366 +270,378 @@ const PomodoroTimer = () => {
   };
 
   return (
-    <Box sx={{ fontFamily: 'Quicksand, sans-serif' }}>
-      {/* Timer Mode Selection */}
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          mb: 4,
-          borderRadius: 4,
-          overflow: 'hidden',
-          border: '1px solid rgba(0, 0, 0, 0.06)',
-          boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)'
-        }}
-      >
-        <Button 
-          onClick={() => { setMode('pomodoro'); playClickSound(); }} 
-          variant={mode === 'pomodoro' ? 'contained' : 'text'}
-          disableElevation
+    <Box sx={{ fontFamily: 'Quicksand, sans-serif', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      {isLoading ? (
+        <CircularProgress 
+          size={60}
           sx={{ 
-            flex: 1, 
-            py: 1.2,
-            borderRadius: 0,
-            color: mode === 'pomodoro' ? 'white' : 'text.secondary',
-            backgroundColor: mode === 'pomodoro' ? '#0067b8' : 'transparent',
-            '&:hover': {
-              backgroundColor: mode === 'pomodoro' ? '#005da6' : 'rgba(0, 0, 0, 0.04)'
-            },
-            fontFamily: 'Quicksand, sans-serif',
-            fontWeight: 600
+            color: '#0067b8',
+            mt: 4
           }}
-        >
-          Pomodoro
-        </Button>
-        <Button 
-          onClick={() => { setMode('shortBreak'); playClickSound(); }} 
-          variant={mode === 'shortBreak' ? 'contained' : 'text'}
-          disableElevation
-          sx={{ 
-            flex: 1, 
-            py: 1.2,
-            borderRadius: 0,
-            color: mode === 'shortBreak' ? 'white' : 'text.secondary',
-            backgroundColor: mode === 'shortBreak' ? '#34a853' : 'transparent',
-            '&:hover': {
-              backgroundColor: mode === 'shortBreak' ? '#2d9549' : 'rgba(0, 0, 0, 0.04)'
-            },
-            fontFamily: 'Quicksand, sans-serif',
-            fontWeight: 600
-          }}
-        >
-          Kısa Mola
-        </Button>
-        <Button 
-          onClick={() => { setMode('longBreak'); playClickSound(); }} 
-          variant={mode === 'longBreak' ? 'contained' : 'text'}
-          disableElevation
-          sx={{ 
-            flex: 1, 
-            py: 1.2,
-            borderRadius: 0,
-            color: mode === 'longBreak' ? 'white' : 'text.secondary',
-            backgroundColor: mode === 'longBreak' ? '#ea4335' : 'transparent',
-            '&:hover': {
-              backgroundColor: mode === 'longBreak' ? '#d33426' : 'rgba(0, 0, 0, 0.04)'
-            },
-            fontFamily: 'Quicksand, sans-serif',
-            fontWeight: 600
-          }}
-        >
-          Uzun Mola
-        </Button>
-      </Box>
-      
-      {/* Main Timer Display */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-        <Box 
-          sx={{ 
-            position: 'relative', 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            width: 220,
-            height: 220
-          }}
-        >
-          <CircularProgress 
-            variant="determinate" 
-            value={calculateProgress()}
-            size={200}
-            thickness={3.5}
-            sx={{ 
-              color: 
-                mode === 'pomodoro' ? '#0067b8' : 
-                mode === 'shortBreak' ? '#34a853' : '#ea4335',
-              position: 'absolute',
-              zIndex: 1
-            }}
-          />
+        />
+      ) : (
+        <>
+          {/* Timer Mode Selection */}
           <Box 
             sx={{ 
-              position: 'absolute',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 2
+              display: 'flex', 
+              justifyContent: 'center', 
+              mb: 4,
+              borderRadius: 4,
+              overflow: 'hidden',
+              border: '1px solid rgba(0, 0, 0, 0.06)',
+              boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)'
             }}
           >
-            <Typography 
-              variant="h1" 
+            <Button 
+              onClick={() => { setMode('pomodoro'); playClickSound(); }} 
+              variant={mode === 'pomodoro' ? 'contained' : 'text'}
+              disableElevation
               sx={{ 
-                fontSize: '5rem', 
-                fontWeight: 900,
-                letterSpacing: '-2px',
-                color: 
-                  mode === 'pomodoro' ? '#0067b8' : 
-                  mode === 'shortBreak' ? '#34a853' : '#ea4335',
-                fontFamily: 'Montserrat, sans-serif'
+                flex: 1, 
+                py: 1.2,
+                borderRadius: 0,
+                color: mode === 'pomodoro' ? 'white' : 'text.secondary',
+                backgroundColor: mode === 'pomodoro' ? '#0067b8' : 'transparent',
+                '&:hover': {
+                  backgroundColor: mode === 'pomodoro' ? '#005da6' : 'rgba(0, 0, 0, 0.04)'
+                },
+                fontFamily: 'Quicksand, sans-serif',
+                fontWeight: 600
               }}
             >
-              {formatTime(timeLeft)}
-            </Typography>
-            
-            <Typography 
-              variant="body2"
-              sx={{
-                color: 'text.secondary',
-                fontWeight: 700,
-                fontSize: '1.1rem',
-                mb: 1,
-                fontFamily: 'Quicksand, sans-serif'
+              Pomodoro
+            </Button>
+            <Button 
+              onClick={() => { setMode('shortBreak'); playClickSound(); }} 
+              variant={mode === 'shortBreak' ? 'contained' : 'text'}
+              disableElevation
+              sx={{ 
+                flex: 1, 
+                py: 1.2,
+                borderRadius: 0,
+                color: mode === 'shortBreak' ? 'white' : 'text.secondary',
+                backgroundColor: mode === 'shortBreak' ? '#34a853' : 'transparent',
+                '&:hover': {
+                  backgroundColor: mode === 'shortBreak' ? '#2d9549' : 'rgba(0, 0, 0, 0.04)'
+                },
+                fontFamily: 'Quicksand, sans-serif',
+                fontWeight: 600
               }}
             >
-              {
-                mode === 'pomodoro' ? 'Çalışma' : 
-                mode === 'shortBreak' ? 'Kısa Mola' : 'Uzun Mola'
-              }
-            </Typography>
+              Kısa Mola
+            </Button>
+            <Button 
+              onClick={() => { setMode('longBreak'); playClickSound(); }} 
+              variant={mode === 'longBreak' ? 'contained' : 'text'}
+              disableElevation
+              sx={{ 
+                flex: 1, 
+                py: 1.2,
+                borderRadius: 0,
+                color: mode === 'longBreak' ? 'white' : 'text.secondary',
+                backgroundColor: mode === 'longBreak' ? '#ea4335' : 'transparent',
+                '&:hover': {
+                  backgroundColor: mode === 'longBreak' ? '#d33426' : 'rgba(0, 0, 0, 0.04)'
+                },
+                fontFamily: 'Quicksand, sans-serif',
+                fontWeight: 600
+              }}
+            >
+              Uzun Mola
+            </Button>
           </Box>
-        </Box>
-        
-        <Box sx={{ display: 'flex', mt: 2, gap: 2 }}>
-          <Tooltip title={muted ? "Sesi Aç" : "Sesi Kapat"}>
-            <IconButton onClick={() => { toggleMute(); playClickSound(); }} color="inherit" size="small">
-              {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
-            </IconButton>
-          </Tooltip>
           
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              color: 'text.secondary',
-              fontFamily: 'Quicksand, sans-serif'
-            }}
-          >
-            {completedPomodoros} pomodoro tamamlandı
-          </Typography>
-        </Box>
-      </Box>
-      
-      {/* Timer Controls */}
-      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, gap: 2 }}>
-        <Button 
-          size="large" 
-          variant="contained"
-          color={isRunning ? "warning" : "primary"}
-          onClick={() => { handleStartPause(); playClickSound(); }}
-          startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
-          sx={{ 
-            borderRadius: 28, 
-            px: 4,
-            py: 1.5,
-            textTransform: 'none',
-            fontSize: '1.1rem',
-            fontWeight: 700,
-            fontFamily: 'Quicksand, sans-serif',
-            boxShadow: isRunning 
-              ? '0 6px 15px rgba(251, 188, 5, 0.4)' 
-              : '0 6px 15px rgba(0, 103, 184, хоме0.4)',
-            backgroundColor: isRunning ? '#fbbc05' : '#0067b8',
-            transition: 'all 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'translateY(-4px) scale(1.03)',
-              backgroundColor: isRunning ? '#f0b400' : '#005da6',
-              boxShadow: isRunning 
-                ? '0 8px 20px rgba(251, 188, 5, 0.5)' 
-                : '0 8px 20px rgba(0, 103, 184, 0.5)'
-            }
-          }}
-        >
-          {isRunning ? "Duraklat" : "Başlat"}
-        </Button>
-        
-        <Button 
-          size="large" 
-          variant="outlined"
-          onClick={() => { handleReset(); playClickSound(); }}
-          startIcon={<RestartAltIcon />}
-          sx={{ 
-            borderRadius: 28, 
-            textTransform: 'none',
-            fontWeight: 600,
-            fontFamily: 'Quicksand, sans-serif',
-            borderColor: 'rgba(0,0,0,0.15)',
-            color: 'text.secondary',
-            '&:hover': {
-              borderColor: 'rgba(0,0,0,0.3)',
-              backgroundColor: 'rgba(0,0,0,0.03)'
-            }
-          }}
-        >
-          Sıfırla
-        </Button>
-        
-        <Button 
-          size="large" 
-          variant="outlined"
-          onClick={() => { setShowSettings(!showSettings); playClickSound(); }}
-          startIcon={<SettingsIcon />}
-          sx={{ 
-            borderRadius: 28, 
-            textTransform: 'none',
-            fontWeight: 600,
-            fontFamily: 'Quicksand, sans-serif',
-            borderColor: 'rgba(0,0,0,0.15)',
-            color: 'text.secondary',
-            '&:hover': {
-              borderColor: 'rgba(0,0,0,0.3)',
-              backgroundColor: 'rgba(0,0,0,0.03)'
-            }
-          }}
-        >
-          Ayarlar
-        </Button>
-      </Box>
-      
-      {/* Settings Dialog */}
-      <Dialog open={showSettings} onClose={() => setShowSettings(false)} maxWidth="sm" fullWidth>
-        <DialogTitle sx={{ fontWeight: 700, fontFamily: 'Quicksand, sans-serif' }}>
-          Pomodoro Ayarları
-        </DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12}>
-              <Typography gutterBottom>
-                Pomodoro Süresi (dakika)
-              </Typography>
-              <Slider
-                value={settings.pomodoro}
-                onChange={(e, value) => handleSettingChange('pomodoro', value)}
-                step={1}
-                marks
-                min={5}
-                max={60}
-                valueLabelDisplay="auto"
-              />
-              <TextField
-                value={settings.pomodoro}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (!isNaN(value) && value >= 5 && value <= 60) {
-                    handleSettingChange('pomodoro', value);
-                  }
+          {/* Main Timer Display */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+            <Box 
+              sx={{ 
+                position: 'relative', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                width: 220,
+                height: 220
+              }}
+            >
+              <CircularProgress 
+                variant="determinate" 
+                value={calculateProgress()}
+                size={200}
+                thickness={3.5}
+                sx={{ 
+                  color: 
+                    mode === 'pomodoro' ? '#0067b8' : 
+                    mode === 'shortBreak' ? '#34a853' : '#ea4335',
+                  position: 'absolute',
+                  zIndex: 1
                 }}
-                type="number"
-                InputProps={{ inputProps: { min: 5, max: 60 } }}
-                size="small"
-                sx={{ width: '80px', mt: 1 }}
               />
-            </Grid>
+              <Box 
+                sx={{ 
+                  position: 'absolute',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2
+                }}
+              >
+                <Typography 
+                  variant="h1" 
+                  sx={{ 
+                    fontSize: '5rem', 
+                    fontWeight: 900,
+                    letterSpacing: '-2px',
+                    color: 
+                      mode === 'pomodoro' ? '#0067b8' : 
+                      mode === 'shortBreak' ? '#34a853' : '#ea4335',
+                    fontFamily: 'Montserrat, sans-serif'
+                  }}
+                >
+                  {formatTime(timeLeft)}
+                </Typography>
+                
+                <Typography 
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    mb: 1,
+                    fontFamily: 'Quicksand, sans-serif'
+                  }}
+                >
+                  {
+                    mode === 'pomodoro' ? 'Çalışma' : 
+                    mode === 'shortBreak' ? 'Kısa Mola' : 'Uzun Mola'
+                  }
+                </Typography>
+              </Box>
+            </Box>
             
-            <Grid item xs={12}>
-              <Typography gutterBottom>
-                Kısa Mola Süresi (dakika)
-              </Typography>
-              <Slider
-                value={settings.shortBreak}
-                onChange={(e, value) => handleSettingChange('shortBreak', value)}
-                step={1}
-                marks
-                min={1}
-                max={15}
-                valueLabelDisplay="auto"
-              />
-              <TextField
-                value={settings.shortBreak}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (!isNaN(value) && value >= 1 && value <= 15) {
-                    handleSettingChange('shortBreak', value);
-                  }
+            <Box sx={{ display: 'flex', mt: 2, gap: 2 }}>
+              <Tooltip title={muted ? "Sesi Aç" : "Sesi Kapat"}>
+                <IconButton onClick={() => { toggleMute(); playClickSound(); }} color="inherit" size="small">
+                  {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
+                </IconButton>
+              </Tooltip>
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: 'text.secondary',
+                  fontFamily: 'Quicksand, sans-serif'
                 }}
-                type="number"
-                InputProps={{ inputProps: { min: 1, max: 15 } }}
-                size="small"
-                sx={{ width: '80px', mt: 1 }}
-              />
-            </Grid>
+              >
+                {completedPomodoros} pomodoro tamamlandı
+              </Typography>
+            </Box>
+          </Box>
+          
+          {/* Timer Controls */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, gap: 2 }}>
+            <Button 
+              size="large" 
+              variant="contained"
+              color={isRunning ? "warning" : "primary"}
+              onClick={() => { handleStartPause(); playClickSound(); }}
+              startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
+              sx={{ 
+                borderRadius: 28, 
+                px: 4,
+                py: 1.5,
+                textTransform: 'none',
+                fontSize: '1.1rem',
+                fontWeight: 700,
+                fontFamily: 'Quicksand, sans-serif',
+                boxShadow: isRunning 
+                  ? '0 6px 15px rgba(251, 188, 5, 0.4)' 
+                  : '0 6px 15px rgba(0, 103, 184, 0.4)',
+                backgroundColor: isRunning ? '#fbbc05' : '#0067b8',
+                transition: 'all 0.3s ease-in-out',
+                '&:hover': {
+                  transform: 'translateY(-4px) scale(1.03)',
+                  backgroundColor: isRunning ? '#f0b400' : '#005da6',
+                  boxShadow: isRunning 
+                    ? '0 8px 20px rgba(251, 188, 5, 0.5)' 
+                    : '0 8px 20px rgba(0, 103, 184, 0.5)'
+                }
+              }}
+            >
+              {isRunning ? "Duraklat" : "Başlat"}
+            </Button>
             
-            <Grid item xs={12}>
-              <Typography gutterBottom>
-                Uzun Mola Süresi (dakika)
-              </Typography>
-              <Slider
-                value={settings.longBreak}
-                onChange={(e, value) => handleSettingChange('longBreak', value)}
-                step={1}
-                marks
-                min={5}
-                max={30}
-                valueLabelDisplay="auto"
-              />
-              <TextField
-                value={settings.longBreak}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (!isNaN(value) && value >= 5 && value <= 30) {
-                    handleSettingChange('longBreak', value);
-                  }
-                }}
-                type="number"
-                InputProps={{ inputProps: { min: 5, max: 30 } }}
-                size="small"
-                sx={{ width: '80px', mt: 1 }}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setShowSettings(false)} color="inherit">
-            İptal
-          </Button>
-          <Button 
-            onClick={() => {
-              saveSettings();
-              setShowSettings(false);
-            }} 
-            variant="contained" 
-            color="primary"
-          >
-            Kaydet
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <Button 
+              size="large" 
+              variant="outlined"
+              onClick={() => { handleReset(); playClickSound(); }}
+              startIcon={<RestartAltIcon />}
+              sx={{ 
+                borderRadius: 28, 
+                textTransform: 'none',
+                fontWeight: 600,
+                fontFamily: 'Quicksand, sans-serif',
+                borderColor: 'rgba(0,0,0,0.15)',
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: 'rgba(0,0,0,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.03)'
+                }
+              }}
+            >
+              Sıfırla
+            </Button>
+            
+            <Button 
+              size="large" 
+              variant="outlined"
+              onClick={() => { setShowSettings(!showSettings); playClickSound(); }}
+              startIcon={<SettingsIcon />}
+              sx={{ 
+                borderRadius: 28, 
+                textTransform: 'none',
+                fontWeight: 600,
+                fontFamily: 'Quicksand, sans-serif',
+                borderColor: 'rgba(0,0,0,0.15)',
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: 'rgba(0,0,0,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.03)'
+                }
+              }}
+            >
+              Ayarlar
+            </Button>
+          </Box>
+          
+          {/* Settings Dialog */}
+          <Dialog open={showSettings} onClose={() => setShowSettings(false)} maxWidth="sm" fullWidth>
+            <DialogTitle sx={{ fontWeight: 700, fontFamily: 'Quicksand, sans-serif' }}>
+              Pomodoro Ayarları
+            </DialogTitle>
+            <DialogContent>
+              <Grid container spacing={3} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <Typography gutterBottom>
+                    Pomodoro Süresi (dakika)
+                  </Typography>
+                  <Slider
+                    value={settings.pomodoro}
+                    onChange={(e, value) => handleSettingChange('pomodoro', value)}
+                    step={1}
+                    marks
+                    min={5}
+                    max={60}
+                    valueLabelDisplay="auto"
+                  />
+                  <TextField
+                    value={settings.pomodoro}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      if (!isNaN(value) && value >= 5 && value <= 60) {
+                        handleSettingChange('pomodoro', value);
+                      }
+                    }}
+                    type="number"
+                    InputProps={{ inputProps: { min: 5, max: 60 } }}
+                    size="small"
+                    sx={{ width: '80px', mt: 1 }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Typography gutterBottom>
+                    Kısa Mola Süresi (dakika)
+                  </Typography>
+                  <Slider
+                    value={settings.shortBreak}
+                    onChange={(e, value) => handleSettingChange('shortBreak', value)}
+                    step={1}
+                    marks
+                    min={1}
+                    max={15}
+                    valueLabelDisplay="auto"
+                  />
+                  <TextField
+                    value={settings.shortBreak}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      if (!isNaN(value) && value >= 1 && value <= 15) {
+                        handleSettingChange('shortBreak', value);
+                      }
+                    }}
+                    type="number"
+                    InputProps={{ inputProps: { min: 1, max: 15 } }}
+                    size="small"
+                    sx={{ width: '80px', mt: 1 }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Typography gutterBottom>
+                    Uzun Mola Süresi (dakika)
+                  </Typography>
+                  <Slider
+                    value={settings.longBreak}
+                    onChange={(e, value) => handleSettingChange('longBreak', value)}
+                    step={1}
+                    marks
+                    min={5}
+                    max={30}
+                    valueLabelDisplay="auto"
+                  />
+                  <TextField
+                    value={settings.longBreak}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      if (!isNaN(value) && value >= 5 && value <= 30) {
+                        handleSettingChange('longBreak', value);
+                      }
+                    }}
+                    type="number"
+                    InputProps={{ inputProps: { min: 5, max: 30 } }}
+                    size="small"
+                    sx={{ width: '80px', mt: 1 }}
+                  />
+                </Grid>
+              </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setShowSettings(false)} color="inherit">
+                İptal
+              </Button>
+              <Button 
+                onClick={() => {
+                  saveSettings();
+                  setShowSettings(false);
+                }} 
+                variant="contained" 
+                color="primary"
+              >
+                Kaydet
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert 
-          onClose={() => setSnackbar({ ...snackbar, open: false })} 
-          severity={snackbar.severity} 
-          variant="filled"
-          sx={{ borderRadius: 2 }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+          {/* Snackbar for notifications */}
+          <Snackbar
+            open={snackbar.open}
+            autoHideDuration={4000}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+          >
+            <Alert 
+              onClose={() => setSnackbar({ ...snackbar, open: false })} 
+              severity={snackbar.severity} 
+              variant="filled"
+              sx={{ borderRadius: 2 }}
+            >
+              {snackbar.message}
+            </Alert>
+          </Snackbar>
+        </>
+      )}
     </Box>
   );
 };
