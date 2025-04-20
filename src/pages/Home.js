@@ -1,19 +1,14 @@
 import React from 'react';
 import { 
   Box, 
-  useMediaQuery,
   Container,
   Paper,
-  Typography,
-  useTheme
+  Typography
 } from '@mui/material';
 import RankingGoals from '../components/RankingGoals';
 import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 
 const Home = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery('(max-width:600px)');
-  const isTablet = useMediaQuery('(max-width:960px)');
 
   return (
     <Box 

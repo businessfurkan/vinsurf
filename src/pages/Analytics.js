@@ -13,23 +13,20 @@ import {
   DialogContent,
   List,
   ListItem,
-  ListItemText,
   Divider,
   IconButton,
   Chip,
-  Tooltip as MuiTooltip,
   CircularProgress
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  Cell, PieChart, Pie
+  Cell
 } from 'recharts';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { format, subDays, isToday, isThisWeek } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import InfoIcon from '@mui/icons-material/Info';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import yksData from '../utils/yksData';
