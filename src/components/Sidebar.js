@@ -25,7 +25,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -45,9 +45,9 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
+  width: `calc(${theme.spacing(8)} + 1px)`,
   [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
+    width: `calc(${theme.spacing(9)} + 1px)`,
   },
   background: '#FFFFF0',
   borderRight: 'none',
@@ -121,96 +121,126 @@ const Sidebar = () => {
       open={open}
       onClose={isMobile ? handleDrawerToggle : undefined}
     >
-      <DrawerHeader>
-        {/* Add logo or header content here if needed */}
+      <DrawerHeader sx={{ 
+        height: 70, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: '#FFFFF0',
+        mb: 1
+      }}>
+        <Box sx={{ 
+          fontWeight: 800, 
+          fontSize: open ? '1.5rem' : '1.2rem', 
+          color: '#4285F4',
+          textAlign: 'center',
+          letterSpacing: '-0.5px',
+          fontFamily: 'Montserrat, sans-serif',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: open ? 1 : 0.9,
+          transition: 'all 0.2s ease',
+        }}>
+          {open ? 'YKS Çalışma Asistanı' : 'YKS'}
+        </Box>
       </DrawerHeader>
       
-      <Divider sx={{ mb: 1 }} />
-      
-      <List>
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.path;
-          return (
-            <ListItem
-              key={item.text}
-              disablePadding
-              sx={{
-                display: 'block',
-                mb: 0.7,
-                mx: 0.5,
-              }}
-            >
-              <ListItemButton
-                component={Link}
-                to={item.path}
+      <Box sx={{ px: open ? 2 : 1, py: 1 }}>
+        <List sx={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: 1.5,
+          mt: 1
+        }}>
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <ListItem
+                key={item.text}
+                disablePadding
                 sx={{
-                  minHeight: 48,
-                  justifyContent: open ? 'initial' : 'center',
-                  px: open ? 2.7 : 1.2,
-                  borderRadius: 99,
-                  background: isActive ? '#FFFFF0' : '#FFFFF0',
-                  boxShadow: '0 3px 10px 0 rgba(0,0,0,0.12)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: isActive ? '#2e3856' : '#222',
-                  transition: 'all 0.18s',
-                  fontWeight: isActive ? 700 : 500,
-                  '&:hover': {
-                    background: '#FFFFF0',
-                    color: '#2e3856',
-                    boxShadow: '0 4px 18px 0 rgba(0,0,0,0.15)',
-                  },
-                  mb: 0.5,
+                  display: 'block',
+                  padding: 0,
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  boxShadow: isActive ? `0 4px 12px ${item.color}30` : 'none',
                 }}
               >
-                <ListItemIcon
+                <ListItemButton
+                  component={Link}
+                  to={item.path}
                   sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : 'auto',
-                    justifyContent: 'center',
-                    color: getIconColor(isActive, item.color),
-                    fontSize: 25,
-                  }}
-                >
-                  {item.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  sx={{
-                    opacity: open ? 1 : 0,
-                    ml: open ? 0.5 : 0,
-                    '& .MuiTypography-root': {
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive ? '#2e3856' : theme.palette.text.primary,
-                      fontFamily: 'Montserrat, sans-serif',
-                      fontSize: '1.09rem',
-                      letterSpacing: 0.1,
+                    minHeight: 50,
+                    justifyContent: open ? 'initial' : 'center',
+                    px: open ? 2 : 2,
+                    py: 1.2,
+                    borderRadius: 2,
+                    background: isActive ? `${item.color}08` : 'transparent',
+                    border: isActive ? `1px solid ${item.color}30` : '1px solid transparent',
+                    color: isActive ? '#2e3856' : '#2e3856cc',
+                    transition: 'all 0.2s ease',
+                    fontWeight: isActive ? 600 : 500,
+                    '&:hover': {
+                      background: `${item.color}15`,
+                      color: '#2e3856',
+                      borderColor: `${item.color}40`,
                     },
                   }}
-                />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
-      <Divider sx={{ mt: 2, mb: 1, mx: 2, borderColor: '#43C6AC44', borderRadius: 99, boxShadow: '0 2px 12px #43C6AC11' }} />
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 36,
+                      mr: open ? 2 : 'auto',
+                      justifyContent: 'center',
+                      color: getIconColor(isActive, item.color),
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    {item.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.text}
+                    sx={{
+                      opacity: open ? 1 : 0,
+                      '& .MuiTypography-root': {
+                        fontWeight: isActive ? 600 : 500,
+                        color: isActive ? '#2e3856' : '#2e3856cc',
+                        fontFamily: 'Montserrat, sans-serif',
+                        fontSize: '0.95rem',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      },
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
+      
       <Box sx={{ flexGrow: 1 }} />
+      
       <Box sx={{
-        px: open ? 2 : 0.5,
-        py: 1.6,
-        textAlign: open ? 'left' : 'center',
-        fontSize: '0.93rem',
-        color: '#2e3856b0',
+        px: open ? 3 : 1,
+        py: 2,
+        textAlign: 'center',
+        fontSize: '0.8rem',
+        color: '#2e3856aa',
         fontFamily: 'Montserrat, sans-serif',
         fontWeight: 500,
-        letterSpacing: 0.3,
-        opacity: 0.85,
+        opacity: 0.9,
         userSelect: 'none',
-        borderBottomLeftRadius: 18,
-        borderBottomRightRadius: 18,
-        background: '#fff',
-        boxShadow: '0 -2px 16px #43C6AC08',
+        mx: 2,
+        mb: 2,
+        borderRadius: 2,
+        background: '#FFFFF0',
+        boxShadow: 'inset 0 0 10px rgba(0,0,0,0.03)',
+        border: '1px solid rgba(0,0,0,0.05)',
       }}>
-        <span>vinsurf YKS &copy; 2025</span>
+        {open ? 'vinsurf YKS © 2025' : 'YKS'}
       </Box>
     </StyledDrawer>
   );

@@ -57,10 +57,17 @@ const BugunCozduklerin = () => {
   const [solvedProblems, setSolvedProblems] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const showSnackbar = useCallback((message, severity = 'success') => {
+  const [snackbarSeverity, setSnackbarSeverity] = useState('info');
+
+  const showSnackbar = useCallback((message, severity = 'info') => {
     setSnackbarMessage(message);
-    // Removed setSnackbarSeverity as we're not using severity
+    setSnackbarSeverity(severity);
     setSnackbarOpen(true);
+    
+    // Only show the snackbar for 5 seconds
+    setTimeout(() => {
+      setSnackbarOpen(false);
+    }, 5000);
   }, []);
 
   const fetchSolvedProblems = useCallback(async () => {
@@ -174,7 +181,7 @@ const BugunCozduklerin = () => {
 
   const handleSaveStats = async () => {
     if (!user) {
-      showSnackbar('Lütfen giriş yapın', 'warning');
+      showSnackbar('Lütfen giriş yapın', 'error');
       return;
     }
 
@@ -201,9 +208,9 @@ const BugunCozduklerin = () => {
           }
           setSolvedProblems(updatedProblems);
           
-          showSnackbar('Kayıt silindi', 'info');
+          // No snackbar for successful deletion
         } else {
-          showSnackbar('Lütfen en az bir soru girin', 'warning');
+          showSnackbar('Lütfen en az bir soru girin', 'error');
           setIsLoading(false);
           return;
         }
@@ -233,7 +240,7 @@ const BugunCozduklerin = () => {
           await addDoc(collection(db, 'solvedProblems'), problemData);
         }
         
-        showSnackbar('Çözdüğün sorular kaydedildi', 'success');
+        // No snackbar for successful save
       }
       
       // Refresh data
@@ -243,7 +250,7 @@ const BugunCozduklerin = () => {
       
     } catch (error) {
       console.error('Error saving solved problems:', error);
-      showSnackbar('Kayıt sırasında bir hata oluştu: ' + (error.message || 'Bilinmeyen hata'), 'error');
+      showSnackbar('Çözülen soru bilgileri yüklenirken hata oluştu', 'error');
       setIsLoading(false);
     }
   };
@@ -889,9 +896,18 @@ const BugunCozduklerin = () => {
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={4000}
+        autoHideDuration={5000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: snackbarSeverity === 'error' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+            color: '#000000',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+            borderRadius: 2,
+            fontWeight: 500
+          }
+        }}
         message={snackbarMessage}
       />
     </>
