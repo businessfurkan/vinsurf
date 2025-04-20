@@ -24,7 +24,7 @@ import {
 } from 'recharts';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { format, subDays, isToday, isThisWeek } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
