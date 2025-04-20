@@ -7,7 +7,7 @@ import {
   ListItemButton, 
   ListItemIcon, 
   ListItemText, 
-  Divider, useTheme, useMediaQuery
+  useTheme, useMediaQuery
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Link, useLocation } from 'react-router-dom';
