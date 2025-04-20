@@ -303,96 +303,134 @@ const BugunCozduklerin = () => {
         >
           Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
         </Typography>
-        <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
-          {Object.keys(yksData).map((subject) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={subject}>
-              <Card 
-                onClick={() => handleOpenDialog(subject)}
-                sx={{
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  borderRadius: 3,
-                  height: 200, // Increased fixed height for all cards
-                  width: '100%',
-                  boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.08)',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0px 10px 25px rgba(0, 0, 0, 0.12)',
-                  },
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  border: `1px solid ${yksData[subject].color}25`,
-                  backgroundColor: '#FFFFF0',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '5px',
-                    backgroundColor: yksData[subject].color,
-                    opacity: 0.8
-                  }
-                }}
-              >
-                <CardContent sx={{ 
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  p: 3,
-                  height: '100%'
-                }}>
-                  <Box
-                    sx={{
-                      backgroundColor: `${yksData[subject].color}15`,
-                      width: 70,
-                      height: 70,
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      mb: 2,
-                      boxShadow: `0 4px 12px ${yksData[subject].color}30`
-                    }}
-                  >
-                    <BookIcon sx={{ color: yksData[subject].color, fontSize: 32 }} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      color: '#2e3856',
-                      fontSize: '1.2rem',
-                      letterSpacing: '0.3px',
-                      mb: 1
-                    }}
-                  >
-                    {subject}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: '#4b5c6b',
-                      fontWeight: 500,
-                      fontSize: '0.95rem',
-                      backgroundColor: `${yksData[subject].color}10`,
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 10
-                    }}
-                  >
-                    {yksData[subject].topics.length} Konu
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 3 }}>
+          {Object.keys(yksData).reduce((rows, subject, index) => {
+            // Create rows of 5 items
+            if (index % 5 === 0) rows.push([]);
+            rows[rows.length - 1].push(subject);
+            return rows;
+          }, []).map((row, rowIndex) => (
+            <Box key={`row-${rowIndex}`} sx={{ 
+              display: 'flex', 
+              width: '100%', 
+              justifyContent: 'center',
+              gap: 3,
+              mb: 3 
+            }}>
+              {row.map((subject) => (
+                <Card 
+                  key={subject}
+                  onClick={() => handleOpenDialog(subject)}
+                  sx={{
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    borderRadius: 3,
+                    height: 240, // Increased fixed height for all cards
+                    width: 220, // Fixed width for all cards
+                    flexShrink: 0, // Prevent shrinking
+                    boxShadow: '0px 8px 20px rgba(0, 0, 0, 0.08)',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0px 14px 28px rgba(0, 0, 0, 0.15)',
+                    },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    border: `1px solid ${yksData[subject].color}25`,
+                    backgroundColor: '#FFFFF0',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '6px',
+                      backgroundColor: yksData[subject].color,
+                      opacity: 0.9
+                    },
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: 0,
+                      right: 0,
+                      width: '30%',
+                      height: '30%',
+                      background: `radial-gradient(circle at bottom right, ${yksData[subject].color}10, transparent 70%)`,
+                      borderTopLeftRadius: '50%',
+                      opacity: 0.7,
+                      zIndex: 0
+                    }
+                  }}
+                >
+                  <CardContent sx={{ 
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    p: 3,
+                    height: '100%',
+                    position: 'relative',
+                    zIndex: 1
+                  }}>
+                    <Box
+                      sx={{
+                        backgroundColor: `${yksData[subject].color}15`,
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2,
+                        boxShadow: `0 6px 16px ${yksData[subject].color}40`,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'rotate(5deg) scale(1.05)',
+                        }
+                      }}
+                    >
+                      <BookIcon sx={{ color: yksData[subject].color, fontSize: 38 }} />
+                    </Box>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 700,
+                        color: '#2e3856',
+                        fontSize: '1.3rem',
+                        letterSpacing: '0.3px',
+                        mb: 1.5
+                      }}
+                    >
+                      {subject}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: '#4b5c6b',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        backgroundColor: `${yksData[subject].color}15`,
+                        px: 2.5,
+                        py: 0.8,
+                        borderRadius: 10,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 0.5
+                      }}
+                    >
+                      <BookIcon sx={{ fontSize: 16 }} />
+                      {yksData[subject].topics.length} Konu
+                    </Typography>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
           ))}
-        </Grid>
+        </Box>
       </Box>
       {/* Dialog for showing topics */}
       <Dialog
@@ -652,76 +690,7 @@ const BugunCozduklerin = () => {
         )}
       </Dialog>
 
-      <Dialog
-        open={topicDialogOpen}
-        onClose={handleCloseTopicDialog}
-        fullWidth
-        maxWidth="xs"
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
-          }
-        }}
-      >
-        {selectedSubject && selectedTopic && (
-          <>
-            <DialogTitle sx={{ pb: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-                  Çözdüğün Soruları Gir
-                </Typography>
-                <IconButton
-                  edge="end"
-                  color="inherit"
-                  onClick={handleCloseTopicDialog}
-                  aria-label="close"
-                  size="small"
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </Box>
-              <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 1 }}>
-                {selectedSubject} - {selectedTopic}
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              {/* ... (rest of your DialogContent code) ... */}
-            </DialogContent>
-            <DialogActions>
-              {/* ... (rest of your DialogActions code) ... */}
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
-
-      <Dialog
-        open={topicDialogOpen}
-        onClose={handleCloseTopicDialog}
-        fullWidth
-        maxWidth="xs"
-        PaperProps={{
-          sx: {
-            borderRadius: 2,
-            boxShadow: '0px 8px 30px rgba(0, 0, 0, 0.12)',
-          }
-        }}
-      >
-        {selectedSubject && selectedTopic && (
-          <>
-            <DialogTitle sx={{ pb: 2 }}>
-              {/* ... (rest of your DialogTitle code) ... */}
-              
-            </DialogTitle>
-            <DialogContent>
-              {/* ... (rest of your DialogContent code) ... */}
-            </DialogContent>
-            <DialogActions>
-              {/* ... (rest of your DialogActions code) ... */}
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+      {/* Removed duplicate dialogs */}
 
       <Snackbar
         open={snackbarOpen}
