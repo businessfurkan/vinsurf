@@ -6,24 +6,46 @@ import {
   Grid, 
   Button, 
   Paper,
-  ButtonGroup
+  ButtonGroup,
+  LinearProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  IconButton,
+  Chip,
+  Tooltip as MuiTooltip,
+  CircularProgress
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  Cell
+  Cell, PieChart, Pie
 } from 'recharts';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { format, subDays } from 'date-fns';
+import { format, subDays, isToday, isThisWeek } from 'date-fns';
 import { tr } from 'date-fns/locale';
-// import { Link } from 'react-router-dom';
+import InfoIcon from '@mui/icons-material/Info';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import yksData from '../utils/yksData';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Analytics = () => {
   const theme = useTheme();
   const [user] = useAuthState(auth);
   const [studyData, setStudyData] = useState([]);
   const [timeRange, setTimeRange] = useState('week'); // 'week', 'month', 'all'
+  const [topicDialogOpen, setTopicDialogOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [topicData, setTopicData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [todayTotal, setTodayTotal] = useState(0);
+  const [weekTotal, setWeekTotal] = useState(0);
 
   const COLORS = [
     '#4285f4', '#34a853', '#fbbc05', '#ea4335', 
@@ -33,6 +55,7 @@ const Analytics = () => {
   useEffect(() => {
     const fetchStudyData = async () => {
       if (!user) return;
+      setIsLoading(true);
 
       try {
         // Get current date
@@ -68,13 +91,32 @@ const Analytics = () => {
         const querySnapshot = await getDocs(studyQuery);
         const records = [];
         
+        let todayTotalMinutes = 0;
+        let weekTotalMinutes = 0;
+        
         querySnapshot.forEach((doc) => {
-          records.push({ id: doc.id, ...doc.data() });
+          const record = { id: doc.id, ...doc.data() };
+          records.push(record);
+          
+          // Calculate today's total study time
+          const recordDate = record.timestamp.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+          
+          if (isToday(recordDate)) {
+            todayTotalMinutes += record.duration / 60; // Convert seconds to minutes
+          }
+          
+          if (isThisWeek(recordDate, { weekStartsOn: 1 })) { // Week starts on Monday
+            weekTotalMinutes += record.duration / 60;
+          }
         });
         
         setStudyData(records);
+        setTodayTotal(Math.round(todayTotalMinutes));
+        setWeekTotal(Math.round(weekTotalMinutes));
+        setIsLoading(false);
       } catch (error) {
         console.error('Error fetching study data:', error);
+        setIsLoading(false);
       }
     };
 
@@ -84,18 +126,73 @@ const Analytics = () => {
   // Process data for charts
   const processDataBySubject = () => {
     const subjectData = {};
+    const topicsBySubject = {};
     
     studyData.forEach(record => {
       if (!subjectData[record.subject]) {
         subjectData[record.subject] = 0;
+        topicsBySubject[record.subject] = {};
       }
+      
       subjectData[record.subject] += record.duration;
+      
+      // Process topic data
+      if (!topicsBySubject[record.subject][record.topic]) {
+        topicsBySubject[record.subject][record.topic] = 0;
+      }
+      topicsBySubject[record.subject][record.topic] += record.duration;
     });
+    
+    // Calculate total study time for percentage calculations
+    const totalStudyTime = Object.values(subjectData).reduce((total, time) => total + time, 0);
     
     return Object.keys(subjectData).map(subject => ({
       name: subject,
       value: Math.round(subjectData[subject] / 60), // Convert seconds to minutes
+      percentage: totalStudyTime > 0 ? Math.round((subjectData[subject] / totalStudyTime) * 100) : 0,
+      topics: topicsBySubject[subject],
+      color: yksData[subject]?.color || COLORS[Object.keys(subjectData).indexOf(subject) % COLORS.length],
+      topicCount: Object.keys(topicsBySubject[subject]).length
     }));
+  };
+  
+  // Get topic data for a specific subject
+  const getTopicDataForSubject = (subject) => {
+    if (!subject) return [];
+    
+    const topicData = {};
+    const subjectRecords = studyData.filter(record => record.subject === subject);
+    
+    subjectRecords.forEach(record => {
+      if (!topicData[record.topic]) {
+        topicData[record.topic] = 0;
+      }
+      topicData[record.topic] += record.duration;
+    });
+    
+    // Calculate total study time for this subject
+    const totalSubjectTime = Object.values(topicData).reduce((total, time) => total + time, 0);
+    
+    return Object.keys(topicData).map(topic => ({
+      name: topic,
+      value: Math.round(topicData[topic] / 60), // Convert seconds to minutes
+      percentage: totalSubjectTime > 0 ? Math.round((topicData[topic] / totalSubjectTime) * 100) : 0,
+      seconds: topicData[topic]
+    }));
+  };
+  
+  // Handle opening the topic dialog
+  const handleOpenTopicDialog = (subject) => {
+    setSelectedSubject(subject);
+    const topics = getTopicDataForSubject(subject);
+    setTopicData(topics);
+    setTopicDialogOpen(true);
+  };
+  
+  // Handle closing the topic dialog
+  const handleCloseTopicDialog = () => {
+    setTopicDialogOpen(false);
+    setSelectedSubject(null);
   };
 
   // Process data for daily study time chart (last 7 days)
@@ -487,19 +584,148 @@ const Analytics = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>
-                <Grid container spacing={2} sx={{ mt: 3 }}>
-                  {processDataBySubject().length === 0 ? (
-                    <Grid item xs={12}>
-                      <Typography
-                        color="text.secondary"
+                {/* Today's and Weekly Study Summary */}
+                <Box sx={{ mb: 4, mt: 2 }}>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Paper
+                        elevation={0}
                         sx={{
-                          fontFamily: 'Quicksand',
-                          textAlign: 'center',
-                          mt: 2
+                          p: 2.5,
+                          borderRadius: 2,
+                          bgcolor: '#E3F2FD',
+                          border: '1px solid #90CAF9',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
                         }}
                       >
-                        Kayıtlı konu bazlı çalışma bulunamadı.
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily: 'Quicksand',
+                            fontWeight: 600,
+                            color: '#1565C0',
+                            mb: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }}
+                        >
+                          <AccessTimeIcon fontSize="small" /> Bugünkü Çalışma
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontFamily: 'Quicksand',
+                            fontWeight: 700,
+                            color: '#0D47A1'
+                          }}
+                        >
+                          {formatMinutes(todayTotal)}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 2.5,
+                          borderRadius: 2,
+                          bgcolor: '#E8F5E9',
+                          border: '1px solid #A5D6A7',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontFamily: 'Quicksand',
+                            fontWeight: 600,
+                            color: '#2E7D32',
+                            mb: 1,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }}
+                        >
+                          <AccessTimeIcon fontSize="small" /> Bu Haftaki Çalışma
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontFamily: 'Quicksand',
+                            fontWeight: 700,
+                            color: '#1B5E20'
+                          }}
+                        >
+                          {formatMinutes(weekTotal)}
+                        </Typography>
+                      </Paper>
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontFamily: 'Quicksand',
+                    fontWeight: 700,
+                    color: theme.palette.text.primary,
+                    mb: 2,
+                    mt: 3,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1
+                  }}
+                >
+                  <MenuBookIcon /> Ders Bazlı Çalışma Analizleri
+                </Typography>
+                
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  {isLoading ? (
+                    <Grid item xs={12} sx={{ textAlign: 'center', py: 4 }}>
+                      <CircularProgress size={40} />
+                      <Typography sx={{ mt: 2, color: 'text.secondary' }}>
+                        Çalışma verileri yükleniyor...
                       </Typography>
+                    </Grid>
+                  ) : processDataBySubject().length === 0 ? (
+                    <Grid item xs={12}>
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 4,
+                          borderRadius: 2,
+                          bgcolor: '#FFFFF0',
+                          border: '1px dashed #FFD54F',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography
+                          color="text.secondary"
+                          sx={{
+                            fontFamily: 'Quicksand',
+                            fontSize: '1.1rem',
+                            mb: 2
+                          }}
+                        >
+                          Henüz kaydedilmiş çalışma verisi bulunmuyor.
+                        </Typography>
+                        <Typography
+                          color="text.secondary"
+                          sx={{
+                            fontFamily: 'Quicksand',
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          Anasayfadaki Analitik Kronometre ile çalışmalarınızı kaydetmeye başlayın.
+                        </Typography>
+                      </Paper>
                     </Grid>
                   ) : (
                     processDataBySubject().map((subject, idx) => (
@@ -507,38 +733,110 @@ const Analytics = () => {
                         <Paper
                           elevation={0}
                           sx={{
-                            p: 2,
+                            p: 3,
                             borderRadius: 2,
-                            bgcolor: `${COLORS[idx % COLORS.length] || theme.palette.info.main}15`,
-                            border: `1px solid ${COLORS[idx % COLORS.length] || theme.palette.info.main}30`,
-                            transition: 'transform 0.2s',
+                            bgcolor: '#FFFFF0',
+                            border: `1px solid ${subject.color}40`,
+                            transition: 'all 0.3s ease',
+                            position: 'relative',
+                            overflow: 'hidden',
                             '&:hover': {
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                              transform: 'translateY(-3px)',
+                              boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+                            },
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: '5px',
+                              height: '100%',
+                              backgroundColor: subject.color,
+                              borderTopLeftRadius: '4px',
+                              borderBottomLeftRadius: '4px'
                             }
                           }}
                         >
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontFamily: 'Quicksand',
+                                fontWeight: 700,
+                                color: subject.color,
+                                mb: 0.5
+                              }}
+                            >
+                              {subject.name}
+                            </Typography>
+                            <Chip 
+                              label={`${subject.percentage}%`}
+                              size="small"
+                              sx={{ 
+                                bgcolor: `${subject.color}20`, 
+                                color: subject.color,
+                                fontWeight: 600,
+                                fontSize: '0.75rem'
+                              }}
+                            />
+                          </Box>
+                          
                           <Typography
-                            variant="subtitle2"
+                            variant="body2"
                             sx={{
                               fontFamily: 'Quicksand',
-                              fontWeight: 600,
-                              color: COLORS[idx % COLORS.length] || theme.palette.info.main,
-                              mb: 1
+                              color: 'text.secondary',
+                              mb: 2,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5
                             }}
                           >
-                            {subject.name}
-                          </Typography>
-                          <Typography
-                            variant="h6"
-                            sx={{
-                              fontFamily: 'Quicksand',
-                              fontWeight: 700,
-                              color: theme.palette.text.primary
-                            }}
-                          >
+                            <AccessTimeIcon fontSize="small" sx={{ fontSize: 16 }} />
                             {formatMinutes(subject.value)}
                           </Typography>
+                          
+                          {/* Progress bar */}
+                          <Box sx={{ mb: 2 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                              <Typography variant="caption" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                                Toplam çalışma içindeki payı
+                              </Typography>
+                            </Box>
+                            <LinearProgress 
+                              variant="determinate" 
+                              value={subject.percentage} 
+                              sx={{ 
+                                height: 8, 
+                                borderRadius: 4,
+                                bgcolor: '#f5f5f5',
+                                '& .MuiLinearProgress-bar': {
+                                  bgcolor: subject.color
+                                }
+                              }}
+                            />
+                          </Box>
+                          
+                          {/* Topics button */}
+                          <Button
+                            variant="outlined"
+                            fullWidth
+                            onClick={() => handleOpenTopicDialog(subject.name)}
+                            sx={{
+                              mt: 1,
+                              borderColor: `${subject.color}60`,
+                              color: subject.color,
+                              '&:hover': {
+                                borderColor: subject.color,
+                                bgcolor: `${subject.color}10`
+                              },
+                              borderRadius: 2,
+                              textTransform: 'none',
+                              fontWeight: 600
+                            }}
+                          >
+                            {subject.topicCount} Konu Göster
+                          </Button>
                         </Paper>
                       </Grid>
                     ))
@@ -547,6 +845,90 @@ const Analytics = () => {
               </Paper>
             </Grid>
           </Grid>
+          
+          {/* Topic Dialog */}
+          <Dialog
+            open={topicDialogOpen}
+            onClose={handleCloseTopicDialog}
+            maxWidth="sm"
+            fullWidth
+            PaperProps={{
+              sx: {
+                borderRadius: 2,
+                bgcolor: '#FFFFF0',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
+              }
+            }}
+          >
+            <DialogTitle sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              borderBottom: '1px solid #f0f0f0',
+              pb: 2
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: yksData[selectedSubject]?.color || '#333' }}>
+                {selectedSubject} Konuları
+              </Typography>
+              <IconButton onClick={handleCloseTopicDialog} size="small">
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ py: 3 }}>
+              {topicData.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography color="text.secondary">
+                    Bu ders için kayıtlı konu bulunamadı.
+                  </Typography>
+                </Box>
+              ) : (
+                <List sx={{ width: '100%' }}>
+                  {topicData.sort((a, b) => b.value - a.value).map((topic, index) => (
+                    <React.Fragment key={topic.name}>
+                      {index > 0 && <Divider component="li" />}
+                      <ListItem sx={{ py: 2 }}>
+                        <Box sx={{ width: '100%' }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              {topic.name}
+                            </Typography>
+                            <Chip 
+                              label={`${topic.percentage}%`}
+                              size="small"
+                              sx={{ 
+                                bgcolor: `${yksData[selectedSubject]?.color || '#333'}20`, 
+                                color: yksData[selectedSubject]?.color || '#333',
+                                fontWeight: 600,
+                                fontSize: '0.75rem'
+                              }}
+                            />
+                          </Box>
+                          
+                          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                            <AccessTimeIcon fontSize="small" sx={{ fontSize: 16 }} />
+                            {formatMinutes(topic.value)}
+                          </Typography>
+                          
+                          <LinearProgress 
+                            variant="determinate" 
+                            value={topic.percentage} 
+                            sx={{ 
+                              height: 6, 
+                              borderRadius: 3,
+                              bgcolor: '#f5f5f5',
+                              '& .MuiLinearProgress-bar': {
+                                bgcolor: yksData[selectedSubject]?.color || '#333'
+                              }
+                            }}
+                          />
+                        </Box>
+                      </ListItem>
+                    </React.Fragment>
+                  ))}
+                </List>
+              )}
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </Box>
