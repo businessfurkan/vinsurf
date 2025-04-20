@@ -42,8 +42,6 @@ import {
   deleteDoc 
 } from 'firebase/firestore';
 
-const setSnackbarSeverity = () => {};
-
 const BugunCozduklerin = () => {
   const theme = useTheme();
   const [user] = useAuthState(auth);
@@ -58,6 +56,7 @@ const BugunCozduklerin = () => {
   });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('info');
 
   const [solvedProblems, setSolvedProblems] = useState({});
   const [isLoading, setIsLoading] = useState(false);

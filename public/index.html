@@ -19,26 +19,36 @@
     <!-- Quicksand Font -->
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Glacial Indifference Font -->
+    <!-- Use Inter font as a replacement for Glacial Indifference -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
+      /* Define Glacial Indifference to use Inter as a fallback */
+      :root {
+        --font-glacial: 'Inter', sans-serif;
+      }
+      
+      /* Override Glacial Indifference with Inter */
       @font-face {
         font-family: 'Glacial Indifference';
-        src: url('./fonts/GlacialIndifference-Regular.otf') format('opentype');
+        src: local('Inter');
         font-weight: normal;
         font-style: normal;
         font-display: swap;
       }
       @font-face {
         font-family: 'Glacial Indifference';
-        src: url('./fonts/GlacialIndifference-Bold.otf') format('opentype');
+        src: local('Inter');
         font-weight: bold;
         font-style: normal;
         font-display: swap;
       }
       @font-face {
         font-family: 'RIG SOLID';
-        src: url('./fonts/RIG-SOLIDMEDIUMFILL.otf') format('opentype');
-        font-weight: normal;
+        src: local('Inter');
+        font-weight: 800;
         font-style: normal;
         font-display: swap;
       }

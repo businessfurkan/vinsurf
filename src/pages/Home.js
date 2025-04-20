@@ -21,10 +21,13 @@ const Home = () => {
         minHeight: '100vh',
         pt: { xs: 2, sm: 3, md: 4 },
         pb: { xs: 4, sm: 5, md: 6 },
-        px: { xs: 1, sm: 2, md: 3 }
+        px: { xs: 1, sm: 2, md: 3 },
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
       }}
     >
-      <Grid container spacing={isMobile ? 2 : 3}>
+      <Grid container spacing={isMobile ? 2 : 3} sx={{ maxWidth: '1200px', mx: 'auto' }}>
         <Grid item xs={12}>
   <Paper 
     elevation={0} 
@@ -36,7 +39,9 @@ const Home = () => {
       background: '#FFFFF0',
       boxShadow: '0 4px 18px 0 rgba(0,0,0,0.08) !important',
       position: 'relative',
-      minHeight: 220
+      minHeight: 220,
+      width: '100%',
+      mx: 'auto'
     }}
   >
     <Box 
@@ -90,7 +95,9 @@ const Home = () => {
               background: '#FFFFF0',
               boxShadow: '0 4px 18px 0 rgba(0,0,0,0.08) !important',
               position: 'relative',
-              minHeight: 220
+              minHeight: 220,
+              width: '100%',
+              mx: 'auto'
             }}
           >
             <Box 
