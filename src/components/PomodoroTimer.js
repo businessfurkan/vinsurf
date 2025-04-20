@@ -174,7 +174,7 @@ const PomodoroTimer = () => {
     } catch (error) {
       console.error('İstatistikler kaydedilirken hata oluştu:', error);
     }
-  }, [user, pomodoroStats, settings.pomodoro, dataService]);
+  }, [user, pomodoroStats, settings.pomodoro]);
 
   // Initialize the timer when mode changes
   useEffect(() => {

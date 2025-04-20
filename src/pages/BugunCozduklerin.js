@@ -146,10 +146,11 @@ const BugunCozduklerin = () => {
         historicalData.push({
           subject: data.subject,
           topic: data.topic,
-          correct: data.correct,
-          incorrect: data.incorrect,
-          empty: data.empty,
-          net: data.correct - Math.floor(data.incorrect / 4),
+          correct: data.correct || 0,
+          incorrect: data.incorrect || 0,
+          empty: data.empty || 0,
+          // Use stored net if available, otherwise calculate it
+          net: data.net !== undefined ? data.net : (data.correct - Math.floor(data.incorrect / 4)),
           date: data.date.toDate(),
           id: doc.id
         });
@@ -158,6 +159,7 @@ const BugunCozduklerin = () => {
       setHistoricalProblems(historicalData);
     } catch (error) {
       console.error('Error fetching historical solved problems:', error);
+      // Don't show error message here to avoid confusion
     } finally {
       setIsLoading(false);
     }
@@ -253,13 +255,17 @@ const BugunCozduklerin = () => {
           }
           setSolvedProblems(updatedProblems);
           
-          // No snackbar for successful deletion
+          // Show success message for deletion
+          showSnackbar('Kayıt başarıyla silindi', 'info');
         } else {
           showSnackbar('Lütfen en az bir soru girin', 'error');
           setIsLoading(false);
           return;
         }
       } else {
+        // Calculate net score
+        const netScore = problemStats.correct - Math.floor(problemStats.incorrect / 4);
+        
         // Data to save
         const problemData = {
           userId: user.uid,
@@ -268,41 +274,72 @@ const BugunCozduklerin = () => {
           correct: problemStats.correct || 0,
           incorrect: problemStats.incorrect || 0,
           empty: problemStats.empty || 0,
+          net: netScore, // Store net score directly in the database
           date: Timestamp.now()
         };
         
-        // Check if we're updating or creating
-        if (
-          solvedProblems[selectedSubject] && 
-          solvedProblems[selectedSubject][selectedTopic] &&
-          solvedProblems[selectedSubject][selectedTopic].id
-        ) {
-          // Update existing record
-          const docRef = doc(db, 'solvedProblems', solvedProblems[selectedSubject][selectedTopic].id);
-          await updateDoc(docRef, problemData);
-        } else {
-          // Create new record
-          await addDoc(collection(db, 'solvedProblems'), problemData);
+        try {
+          // Check if we're updating or creating
+          if (
+            solvedProblems[selectedSubject] && 
+            solvedProblems[selectedSubject][selectedTopic] &&
+            solvedProblems[selectedSubject][selectedTopic].id
+          ) {
+            // Update existing record
+            const docRef = doc(db, 'solvedProblems', solvedProblems[selectedSubject][selectedTopic].id);
+            await updateDoc(docRef, problemData);
+          } else {
+            // Create new record
+            await addDoc(collection(db, 'solvedProblems'), problemData);
+          }
+          
+          // Show success message
+          showSnackbar('Çözdüğün sorular kaydedildi', 'success');
+          
+          // Update local state immediately with the new data
+          const updatedProblems = {...solvedProblems};
+          if (!updatedProblems[selectedSubject]) {
+            updatedProblems[selectedSubject] = {};
+          }
+          
+          updatedProblems[selectedSubject][selectedTopic] = {
+            correct: problemStats.correct,
+            incorrect: problemStats.incorrect,
+            empty: problemStats.empty,
+            date: new Date(),
+            // We'll add the ID after fetching
+          };
+          
+          setSolvedProblems(updatedProblems);
+        } catch (saveError) {
+          console.error('Error saving to Firestore:', saveError);
+          showSnackbar('Veritabanına kaydederken hata oluştu', 'error');
+          setIsLoading(false);
+          return;
         }
-        
-        // No snackbar for successful save
       }
       
       // Refresh both current and historical data
-      await fetchSolvedProblems();
-      await fetchHistoricalSolvedProblems();
-      handleCloseTopicDialog();
+      try {
+        await fetchSolvedProblems();
+        await fetchHistoricalSolvedProblems();
+        handleCloseTopicDialog();
+      } catch (fetchError) {
+        console.error('Error refreshing data:', fetchError);
+        // We don't show an error here since the data was already saved
+      }
+      
       setIsLoading(false);
       
     } catch (error) {
-      console.error('Error saving solved problems:', error);
-      showSnackbar('Çözülen soru bilgileri yüklenirken hata oluştu', 'error');
+      console.error('Error in handleSaveStats:', error);
+      showSnackbar('Beklenmeyen bir hata oluştu', 'error');
       setIsLoading(false);
     }
   };
 
   // Calculate net score (4 wrong answers canceling 1 correct answer)
-  const getTopicStats = (subject, topic) => {
+  const getTopicStats = useCallback((subject, topic) => {
     if (
       solvedProblems[subject] && 
       solvedProblems[subject][topic]
@@ -324,7 +361,7 @@ const BugunCozduklerin = () => {
       };
     }
     return null;
-  };
+  }, [solvedProblems]);
 
   // Group solved problems by subject for display in the panel
   const groupedSolvedProblems = useMemo(() => {
@@ -369,7 +406,7 @@ const BugunCozduklerin = () => {
     });
     
     return result;
-  }, [solvedProblems]);
+  }, [solvedProblems, getTopicStats]);
 
   // Calculate overall totals
   const overallTotals = useMemo(() => {
