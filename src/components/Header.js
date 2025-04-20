@@ -29,8 +29,8 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: theme.palette.background.paper,
-  boxShadow: theme.shadows[1],
+  backgroundColor: '#BDDEEC',
+  boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
   zIndex: theme.zIndex.drawer + 1,
 }));
 

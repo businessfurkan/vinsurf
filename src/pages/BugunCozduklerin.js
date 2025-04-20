@@ -277,20 +277,21 @@ const BugunCozduklerin = () => {
 
   return (
     <>
-      <Box sx={{ backgroundColor: '#fff', mb: 4 }}>
+      <Box sx={{ backgroundColor: '#BDDEEC', mb: 4, p: 3, borderRadius: 2 }}>
         <Typography variant="body1" sx={{ mb: 3 }}>
           Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
         </Typography>
         <Grid container spacing={3}>
           {Object.keys(yksData).map((subject) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={subject}>
+            <Grid item xs={12} sm={6} md={4} lg={2.4} key={subject}>
               <Card 
                 onClick={() => handleOpenDialog(subject)}
                 sx={{
                   cursor: 'pointer',
                   transition: 'all 0.3s ease',
                   borderRadius: 2,
-                  height: '100%',
+                  height: 180, // Fixed height for consistency
+                  width: '100%',
                   boxShadow: '0px 4px 15px rgba(0, 0, 0, 0.08)',
                   '&:hover': {
                     transform: 'translateY(-5px)',
@@ -300,6 +301,7 @@ const BugunCozduklerin = () => {
                   flexDirection: 'column',
                   justifyContent: 'center',
                   border: `1px solid ${yksData[subject].color}25`,
+                  backgroundColor: '#FFFFF0',
                 }}
               >
                 <CardContent sx={{ 

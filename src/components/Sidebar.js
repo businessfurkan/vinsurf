@@ -34,7 +34,7 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  background: '#FFFFF0',
+  background: '#BDDEEC',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
 });
@@ -49,7 +49,7 @@ const closedMixin = (theme) => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
-  background: '#FFFFF0',
+  background: '#BDDEEC',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
 });
@@ -148,15 +148,16 @@ const Sidebar = () => {
                   justifyContent: open ? 'initial' : 'center',
                   px: open ? 2.7 : 1.2,
                   borderRadius: 99,
-                  background: isActive ? '#f8fafc' : '#fff',
-                  boxShadow: '0 2px 10px 0 rgba(30,30,60,0.10)',
+                  background: isActive ? '#FFFFF0' : '#BDDEEC',
+                  boxShadow: '0 3px 10px 0 rgba(0,0,0,0.12)',
+                  border: '1px solid rgba(255,255,255,0.2)',
                   color: isActive ? '#2e3856' : '#222',
                   transition: 'all 0.18s',
                   fontWeight: isActive ? 700 : 500,
                   '&:hover': {
-                    background: '#f1f5f9',
+                    background: '#FFFFF0',
                     color: '#2e3856',
-                    boxShadow: '0 4px 18px 0 rgba(30,30,60,0.13)',
+                    boxShadow: '0 4px 18px 0 rgba(0,0,0,0.15)',
                   },
                   mb: 0.5,
                 }}
