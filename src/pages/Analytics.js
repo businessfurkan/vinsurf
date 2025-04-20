@@ -10,14 +10,14 @@ import {
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell
+  Cell
 } from 'recharts';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { format, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 
 const Analytics = () => {
   const theme = useTheme();
