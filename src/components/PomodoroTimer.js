@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -142,7 +142,7 @@ const PomodoroTimer = () => {
   };
 
   // İstatistikleri kaydet
-  const saveStats = async (newCompletedPomodoros) => {
+  const saveStats = useCallback(async (newCompletedPomodoros) => {
     try {
       const userId = user ? user.uid : 'anonymous';
       
@@ -174,7 +174,7 @@ const PomodoroTimer = () => {
     } catch (error) {
       console.error('İstatistikler kaydedilirken hata oluştu:', error);
     }
-  };
+  }, [user, pomodoroStats, settings.pomodoro, dataService]);
 
   // Initialize the timer when mode changes
   useEffect(() => {
