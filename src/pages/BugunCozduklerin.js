@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { 
   Box, 
   Typography, 
@@ -273,6 +273,63 @@ const BugunCozduklerin = () => {
     return null;
   };
 
+  // Group solved problems by subject for display in the panel
+  const groupedSolvedProblems = useMemo(() => {
+    const result = [];
+    
+    // Process each subject
+    Object.keys(solvedProblems).forEach(subject => {
+      let subjectTotal = {
+        correct: 0,
+        incorrect: 0,
+        empty: 0,
+        net: 0,
+        topics: []
+      };
+      
+      // Process each topic in the subject
+      Object.keys(solvedProblems[subject]).forEach(topic => {
+        const stats = getTopicStats(subject, topic);
+        if (stats) {
+          // Add to subject totals
+          subjectTotal.correct += stats.correct;
+          subjectTotal.incorrect += stats.incorrect;
+          subjectTotal.empty += stats.empty;
+          subjectTotal.net += stats.net;
+          
+          // Add topic details
+          subjectTotal.topics.push({
+            name: topic,
+            ...stats
+          });
+        }
+      });
+      
+      // Add to results
+      if (subjectTotal.topics.length > 0) {
+        result.push({
+          name: subject,
+          color: yksData[subject]?.color || '#4285F4',
+          ...subjectTotal
+        });
+      }
+    });
+    
+    return result;
+  }, [solvedProblems]);
+
+  // Calculate overall totals
+  const overallTotals = useMemo(() => {
+    return groupedSolvedProblems.reduce((totals, subject) => {
+      totals.correct += subject.correct;
+      totals.incorrect += subject.incorrect;
+      totals.empty += subject.empty;
+      totals.net += subject.net;
+      totals.total = totals.correct + totals.incorrect + totals.empty;
+      return totals;
+    }, { correct: 0, incorrect: 0, empty: 0, net: 0, total: 0 });
+  }, [groupedSolvedProblems]);
+
   return (
     <>
       <Box sx={{ backgroundColor: '#FFFFF0', mb: 4, p: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
@@ -431,6 +488,145 @@ const BugunCozduklerin = () => {
           ))}
         </Box>
       </Box>
+
+      {/* ÇÖZDÜKLERİM Panel */}
+      {groupedSolvedProblems.length > 0 && (
+        <Box sx={{ backgroundColor: '#FFFFF0', mb: 4, p: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              mb: 3, 
+              fontWeight: 700, 
+              color: '#2e3856',
+              textAlign: 'center',
+              pb: 1,
+              borderBottom: '2px solid #f0f0f0'
+            }}
+          >
+            ÇÖZDÜKLERİM
+          </Typography>
+          
+          {/* Overall Stats Summary */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: 3, 
+            mb: 4,
+            flexWrap: 'wrap',
+            p: 2,
+            borderRadius: 2,
+            bgcolor: 'rgba(66, 133, 244, 0.08)',
+          }}>
+            <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+              <Typography variant="h6" fontWeight={700} color="primary.main">{overallTotals.total}</Typography>
+              <Typography variant="body2" color="text.secondary">Toplam Soru</Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+              <Typography variant="h6" fontWeight={700} color="success.main">{overallTotals.correct}</Typography>
+              <Typography variant="body2" color="text.secondary">Doğru</Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+              <Typography variant="h6" fontWeight={700} color="error.main">{overallTotals.incorrect}</Typography>
+              <Typography variant="body2" color="text.secondary">Yanlış</Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+              <Typography variant="h6" fontWeight={700} color="text.secondary">{overallTotals.empty}</Typography>
+              <Typography variant="body2" color="text.secondary">Boş</Typography>
+            </Box>
+            <Box sx={{ textAlign: 'center', minWidth: 100 }}>
+              <Typography variant="h6" fontWeight={700} sx={{ color: '#34A853' }}>{overallTotals.net}</Typography>
+              <Typography variant="body2" color="text.secondary">Net</Typography>
+            </Box>
+          </Box>
+          
+          {/* Subject Cards */}
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
+            {groupedSolvedProblems.map((subject) => (
+              <Card 
+                key={subject.name}
+                sx={{
+                  width: 280,
+                  borderRadius: 3,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                  overflow: 'hidden',
+                  border: `1px solid ${subject.color}25`,
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '5px',
+                    backgroundColor: subject.color,
+                  }
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Box
+                      sx={{
+                        backgroundColor: `${subject.color}15`,
+                        width: 40,
+                        height: 40,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2
+                      }}
+                    >
+                      <BookIcon sx={{ color: subject.color, fontSize: 20 }} />
+                    </Box>
+                    <Typography variant="h6" fontWeight={600}>{subject.name}</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Toplam</Typography>
+                      <Typography variant="body1" fontWeight={600}>{subject.correct + subject.incorrect + subject.empty}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Doğru</Typography>
+                      <Typography variant="body1" fontWeight={600} color="success.main">{subject.correct}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Yanlış</Typography>
+                      <Typography variant="body1" fontWeight={600} color="error.main">{subject.incorrect}</Typography>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">Net</Typography>
+                      <Typography variant="body1" fontWeight={700} sx={{ color: '#34A853' }}>{subject.net}</Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>Konular</Typography>
+                  <List dense disablePadding>
+                    {subject.topics.map((topic, index) => (
+                      <ListItem key={topic.name} disablePadding sx={{ 
+                        py: 0.5,
+                        borderBottom: index < subject.topics.length - 1 ? '1px solid #f0f0f0' : 'none'
+                      }}>
+                        <ListItemText 
+                          primary={topic.name} 
+                          secondary={
+                            <Typography variant="caption" component="span">
+                              D:{topic.correct} Y:{topic.incorrect} B:{topic.empty} | Net: <span style={{ fontWeight: 700, color: '#34A853' }}>{topic.net}</span>
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        </Box>
+      )}
+      
       {/* Dialog for showing topics */}
       <Dialog
         open={dialogOpen}
