@@ -15,7 +15,6 @@ import {
   ListItemText,
   Divider,
   IconButton,
-  useTheme,
   Chip,
   Stack,
   TextField,
@@ -43,7 +42,6 @@ import {
 } from 'firebase/firestore';
 
 const BugunCozduklerin = () => {
-  const theme = useTheme();
   const [user] = useAuthState(auth);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [dialogOpen, setDialogOpen] = useState(false);
