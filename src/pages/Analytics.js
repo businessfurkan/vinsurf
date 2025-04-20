@@ -10,12 +10,14 @@ import {
 } from '@mui/material';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  PieChart, Pie, Cell
 } from 'recharts';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { format, subDays } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { Link } from 'react-router-dom';
 
 const Analytics = () => {
   const theme = useTheme();
@@ -246,7 +248,7 @@ const Analytics = () => {
               fontFamily: 'Quicksand'
             }}
           >
-            Analizlerinizi görebilmek için önce Analizli Kronometre'de çalışma kaydetmelisiniz.
+            Analizlerinizi görebilmek için önce Analizli Kronometre\'de çalışma kaydetmelisiniz.
           </Typography>
           <Button 
             variant="contained" 
@@ -288,7 +290,7 @@ const Analytics = () => {
                       color: 'primary.main'
                     }}
                   >
-                    Son 7 G&uuml;n Çalışma Süreleri
+                    Son 7 Gün Çalışma Süreleri
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Button 
@@ -535,7 +537,7 @@ const Analytics = () => {
                     sx={{ 
                       fontWeight: 700, 
                       fontFamily: 'Quicksand',
-                      color: theme.palette.primary.main
+                      color: 'primary.main'
                     }}
                   >
                     Çalışma İstatistikleri

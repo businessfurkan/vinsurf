@@ -24,7 +24,7 @@ import {
   MenuItem,
   ListItemIcon,
 } from '@mui/material';
-import { useTheme, alpha, styled } from '@mui/material/styles';
+import { alpha, styled, useTheme } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -42,9 +42,9 @@ import NoteAddIcon from '@mui/icons-material/NoteAdd';
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import CloseIcon from '@mui/icons-material/Close';
 import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-
 import { dataService } from '../services/dataService';
 
 // Kategori renkleri
@@ -210,7 +210,6 @@ const NewNoteButton = styled(Button)(({ theme }) => ({
   }
 }));
 
-
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiPaper-root': {
     borderRadius: 20,
@@ -252,6 +251,7 @@ const CategoryButton = styled(Button)(({ theme, categorycolor }) => ({
 
 const NotDefterim = () => {
   const theme = useTheme();
+  
   const [user] = useAuthState(auth);
   const [notes, setNotes] = useState([]);
   const [currentNote, setCurrentNote] = useState({
@@ -270,12 +270,25 @@ const NotDefterim = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [showCategories, setShowCategories] = useState(false);
-  
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'info'
-  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+
+  // Eksik state'ler ve fonksiyonlar (no-undef hatası için)
+  const [viewingNote, setViewingNote] = useState(null);
+  const [viewNoteDialog, setViewNoteDialog] = useState(false);
+  const [noteMenuAnchorEl, setNoteMenuAnchorEl] = useState(null);
+  const [selectedMenuNote, setSelectedMenuNote] = useState(null);
+
+  // Menü açma fonksiyonu
+  const handleMenuOpen = (event, note) => {
+    setNoteMenuAnchorEl(event.currentTarget);
+    setSelectedMenuNote(note);
+  };
+
+  // Menü kapama fonksiyonu
+  const handleMenuClose = () => {
+    setNoteMenuAnchorEl(null);
+    setSelectedMenuNote(null);
+  };
 
   // Filtrelenmiş notları al
   const getFilteredNotes = () => {
@@ -568,51 +581,51 @@ const NotDefterim = () => {
   return (
     <PageContainer>
       <PageHeader>
-  <HeaderRow>
-    <Typography 
-      variant="h4" 
-      component="h1" 
-      gutterBottom 
-      fontWeight={800} 
-      color="primary"
-      sx={{
-        fontSize: { xs: '1.2rem', md: '2rem' },
-        display: 'flex',
-        alignItems: 'center',
-        gap: 1,
-        letterSpacing: '0.5px',
-        mb: 0
-      }}
-    >
-      <EventNoteIcon fontSize="large" sx={{ color: '#4285F4' }} />
-      Not Defterim
-    </Typography>
-    <NewNoteButton
-      variant="contained"
-      startIcon={<AddIcon />}
-      onClick={handleOpenDialog}
-      sx={{
-        mt: { xs: 0, md: 0 },
-        py: 1.2,
-        px: 3,
-        fontSize: { xs: '0.95rem', md: '1.1rem' },
-        fontWeight: 700,
-        boxShadow: '0 2px 12px #4285F455',
-        background: 'linear-gradient(90deg, #4285F4 0%, #34A853 100%)',
-        color: '#fff',
-        borderRadius: 3,
-        textTransform: 'none',
-        transition: 'all 0.2s',
-        '&:hover': {
-          background: 'linear-gradient(90deg, #34A853 0%, #4285F4 100%)',
-          boxShadow: '0 4px 16px #4285F433',
-        }
-      }}
-    >
-      Not Ekle
-    </NewNoteButton>
-  </HeaderRow>
-</PageHeader>
+        <HeaderRow>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom 
+            fontWeight={800} 
+            color="primary"
+            sx={{
+              fontSize: { xs: '1.2rem', md: '2rem' },
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              letterSpacing: '0.5px',
+              mb: 0
+            }}
+          >
+            <EventNoteIcon fontSize="large" sx={{ color: '#4285F4' }} />
+            Not Defterim
+          </Typography>
+          <NewNoteButton
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={handleOpenDialog}
+            sx={{
+              mt: { xs: 0, md: 0 },
+              py: 1.2,
+              px: 3,
+              fontSize: { xs: '0.95rem', md: '1.1rem' },
+              fontWeight: 700,
+              boxShadow: '0 2px 12px #4285F455',
+              background: 'linear-gradient(90deg, #4285F4 0%, #34A853 100%)',
+              color: '#fff',
+              borderRadius: 3,
+              textTransform: 'none',
+              transition: 'all 0.2s',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #34A853 0%, #4285F4 100%)',
+                boxShadow: '0 4px 16px #4285F433',
+              }
+            }}
+          >
+            Not Ekle
+          </NewNoteButton>
+        </HeaderRow>
+      </PageHeader>
       
       <SearchBar elevation={3}>
         <SearchIcon sx={{ mr: 1, color: 'primary.main' }} />
@@ -1387,7 +1400,7 @@ const NotDefterim = () => {
               color: (theme) => theme.palette.grey[500],
             }}
           >
-            <MoreVertIcon />
+            <CloseIcon />
           </IconButton>
         </DialogTitle>
         <DialogContent dividers sx={{ maxHeight: '60vh', overflowY: 'auto' }}>

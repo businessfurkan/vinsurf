@@ -28,7 +28,6 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 const PomodoroTimer = () => {
-
   const [user] = useAuthState(auth);
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isRunning, setIsRunning] = useState(false);
@@ -39,6 +38,16 @@ const PomodoroTimer = () => {
     longBreak: 15,
   });
   const [showSettings, setShowSettings] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // Added to fix no-undef errors
+  // Missing state declarations for no-undef errors
+  const [muted, setMuted] = useState(false);
+  
+  const [pomodoroStats, setPomodoroStats] = useState({
+    totalCompleted: 0,
+    totalMinutes: 0,
+    lastSession: null
+  });
+  const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -438,7 +447,7 @@ const PomodoroTimer = () => {
             fontFamily: 'Quicksand, sans-serif',
             boxShadow: isRunning 
               ? '0 6px 15px rgba(251, 188, 5, 0.4)' 
-              : '0 6px 15px rgba(0, 103, 184, 0.4)',
+              : '0 6px 15px rgba(0, 103, 184, хоме0.4)',
             backgroundColor: isRunning ? '#fbbc05' : '#0067b8',
             transition: 'all 0.3s ease-in-out',
             '&:hover': {

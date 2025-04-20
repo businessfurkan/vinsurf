@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
-const handleViewClass = () => {};
-
 import {
   Box,
   Typography,
@@ -24,7 +21,6 @@ import {
   LinearProgress,
   IconButton,
   Tooltip,
-
   styled,
   alpha,
   InputAdornment,
@@ -50,6 +46,7 @@ import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { scheduleService } from '../services/scheduleService';
 
+const handleViewClass = () => {};
 
 // Renk paleti - ders konularına göre
 const subjectColors = {

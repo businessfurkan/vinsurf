@@ -29,6 +29,7 @@ const AnalyticalStopwatch = () => {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [expandedSubject, setExpandedSubject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
   const theme = useTheme();
 
   // Fetch study records from Firestore
@@ -48,8 +49,7 @@ const AnalyticalStopwatch = () => {
         records.push(doc.data());
       });
       
-      const [studyRecords, setStudyRecords] = useState([]);
-setStudyRecords(records);
+
     } catch (error) {
       console.error('Error fetching study records:', error);
     }

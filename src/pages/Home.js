@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   Box, 
   useMediaQuery,
-  useTheme,
   Grid,
   Paper,
   Typography
