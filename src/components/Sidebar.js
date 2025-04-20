@@ -34,7 +34,7 @@ const openedMixin = (theme) => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: 'hidden',
-  background: '#BDDEEC',
+  background: '#FFFFF0',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
 });
@@ -49,7 +49,7 @@ const closedMixin = (theme) => ({
   [theme.breakpoints.up('sm')]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
-  background: '#BDDEEC',
+  background: '#FFFFF0',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
 });
@@ -148,7 +148,7 @@ const Sidebar = () => {
                   justifyContent: open ? 'initial' : 'center',
                   px: open ? 2.7 : 1.2,
                   borderRadius: 99,
-                  background: isActive ? '#FFFFF0' : '#BDDEEC',
+                  background: isActive ? '#FFFFF0' : '#FFFFF0',
                   boxShadow: '0 3px 10px 0 rgba(0,0,0,0.12)',
                   border: '1px solid rgba(255,255,255,0.2)',
                   color: isActive ? '#2e3856' : '#222',

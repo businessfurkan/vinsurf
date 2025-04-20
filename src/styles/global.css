@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Glacial Indifference', 'Montserrat', sans-serif;
-  background-color: #BDDEEC;
+  background-color: #FFFFF0;
   color: #303545;
   line-height: 1.6;
   font-weight: 450; /* Slightly increase the default font weight */
@@ -113,7 +113,7 @@ a {
   left: 0;
   z-index: 1200;
   transition: transform 0.3s ease;
-  background-color: #BDDEEC !important;
+  background-color: #FFFFF0 !important;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08) !important;
 }
 

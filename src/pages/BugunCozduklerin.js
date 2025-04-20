@@ -60,6 +60,12 @@ const BugunCozduklerin = () => {
   const [solvedProblems, setSolvedProblems] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  const showSnackbar = useCallback((message, severity = 'success') => {
+    setSnackbarMessage(message);
+    // Removed setSnackbarSeverity as we're not using severity
+    setSnackbarOpen(true);
+  }, []);
+
   const fetchSolvedProblems = useCallback(async () => {
     if (!user) return;
 
@@ -165,12 +171,6 @@ const BugunCozduklerin = () => {
     }));
   };
 
-  const showSnackbar = useCallback((message, severity = 'success') => {
-    setSnackbarMessage(message);
-    // Removed setSnackbarSeverity as we're not using severity
-    setSnackbarOpen(true);
-  }, []);
-
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
@@ -269,7 +269,7 @@ const BugunCozduklerin = () => {
 
   return (
     <>
-      <Box sx={{ backgroundColor: '#BDDEEC', mb: 4, p: 3, borderRadius: 2 }}>
+      <Box sx={{ backgroundColor: '#FFFFF0', mb: 4, p: 3, borderRadius: 2 }}>
         <Typography variant="body1" sx={{ mb: 3 }}>
           Çözdüğün soruları kaydetmek için ders kutucuklarına tıklayabilirsin.
         </Typography>
