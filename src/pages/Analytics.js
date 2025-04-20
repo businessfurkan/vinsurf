@@ -241,44 +241,24 @@ const Analytics = () => {
             Henüz çalışma kaydınız bulunmuyor
           </Typography>
           <Typography 
-            variant="body1" 
+            variant="body2" 
             color="text.secondary"
-            sx={{ 
-              mb: 3,
-              fontFamily: 'Quicksand'
-            }}
           >
-            Analizlerinizi görebilmek için önce Analizli Kronometre\'de çalışma kaydetmelisiniz.
+            Kayıt ekleyerek analiz sonuçlarını görüntüleyebilirsiniz.
           </Typography>
-          <Button 
-            variant="contained" 
-            component={Link} 
-            to="/"
-            sx={{ 
-              borderRadius: 2,
-              fontFamily: 'Quicksand',
-              fontWeight: 600
-            }}
-          >
-            Ana Sayfaya Dön
-          </Button>
         </Paper>
       ) : (
         <>
-          <Grid container spacing={3}>
+          {/* Daily Study Chart */}
+          <Grid container spacing={3} sx={{ mt: 3 }}>
             <Grid item xs={12}>
-              <Paper 
-                elevation={0} 
+              <Paper
+                elevation={0}
                 sx={{ 
                   p: 3, 
                   borderRadius: 3,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  height: '100%',
-                  transition: 'transform 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 6px 25px rgba(0,0,0,0.12)'
-                  }
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)', 
+                  height: '100%' 
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -292,61 +272,7 @@ const Analytics = () => {
                   >
                     Son 7 Gün Çalışma Süreleri
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button 
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleTimeRangeChange('week')}
-                      sx={{ 
-                        borderRadius: 2,
-                        fontFamily: 'Quicksand',
-                        fontWeight: 600,
-                        borderColor: timeRange === 'week' ? theme.palette.primary.main : 'divider',
-                        color: timeRange === 'week' ? theme.palette.primary.main : 'text.secondary',
-                        '&:hover': {
-                          borderColor: theme.palette.primary.main,
-                        }
-                      }}
-                    >
-                      Haftalık
-                    </Button>
-                    <Button 
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleTimeRangeChange('month')}
-                      sx={{ 
-                        borderRadius: 2,
-                        fontFamily: 'Quicksand',
-                        fontWeight: 600,
-                        borderColor: timeRange === 'month' ? theme.palette.primary.main : 'divider',
-                        color: timeRange === 'month' ? theme.palette.primary.main : 'text.secondary',
-                        '&:hover': {
-                          borderColor: theme.palette.primary.main,
-                        }
-                      }}
-                    >
-                      Aylık
-                    </Button>
-                    <Button 
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleTimeRangeChange('all')}
-                      sx={{ 
-                        borderRadius: 2,
-                        fontFamily: 'Quicksand',
-                        fontWeight: 600,
-                        borderColor: timeRange === 'all' ? theme.palette.primary.main : 'divider',
-                        color: timeRange === 'all' ? theme.palette.primary.main : 'text.secondary',
-                        '&:hover': {
-                          borderColor: theme.palette.primary.main,
-                        }
-                      }}
-                    >
-                      Tümü
-                    </Button>
-                  </Box>
                 </Box>
-                
                 <Box sx={{ height: 400, mt: 2 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
@@ -414,7 +340,6 @@ const Analytics = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>
-
                 <Grid container spacing={2} sx={{ mt: 3 }}>
                   <Grid item xs={12} sm={6}>
                     <Paper
@@ -440,7 +365,7 @@ const Analytics = () => {
                           mb: 1
                         }}
                       >
-                        Toplam Çalışma
+                        Toplam Çalışma Süresi
                       </Typography>
                       <Typography
                         variant="h6"
@@ -450,63 +375,7 @@ const Analytics = () => {
                           color: theme.palette.text.primary
                         }}
                       >
-                        {formatMinutes(processDailyStudyData().reduce((total, day) => total + day.value, 0))}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: 'Quicksand',
-                          color: theme.palette.text.secondary
-                        }}
-                      >
-                        2 çalışma seansında toplam süre
-                      </Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Paper
-                      elevation={0}
-                      sx={{
-                        p: 2,
-                        borderRadius: 2,
-                        bgcolor: `${theme.palette.info.main}15`,
-                        border: `1px solid ${theme.palette.info.main}30`,
-                        transition: 'transform 0.2s',
-                        '&:hover': {
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                        }
-                      }}
-                    >
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontFamily: 'Quicksand',
-                          fontWeight: 600,
-                          color: theme.palette.info.main,
-                          mb: 1
-                        }}
-                      >
-                        Ortalama Günlük Çalışma
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        sx={{
-                          fontFamily: 'Quicksand',
-                          fontWeight: 700,
-                          color: theme.palette.text.primary
-                        }}
-                      >
-                        {formatMinutes(Math.round(processDailyStudyData().reduce((total, day) => total + day.value, 0) / 7))}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontFamily: 'Quicksand',
-                          color: theme.palette.text.secondary
-                        }}
-                      >
-                        Son 7 günde ortalama çalışma süresi
+                        {formatMinutes(processDailyStudyData().reduce((tot, day) => tot + day.value, 0) / 7)}
                       </Typography>
                     </Paper>
                   </Grid>
@@ -515,12 +384,13 @@ const Analytics = () => {
             </Grid>
           </Grid>
 
+          {/* Subject-based Chart */}
           <Grid container spacing={3} sx={{ mt: 3 }}>
             <Grid item xs={12}>
-              <Paper 
-                elevation={0} 
-                sx={{ 
-                  p: 3, 
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
                   borderRadius: 3,
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                   height: '100%',
@@ -532,10 +402,10 @@ const Analytics = () => {
                 }}
               >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      fontWeight: 700, 
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
                       fontFamily: 'Quicksand',
                       color: 'primary.main'
                     }}
@@ -543,20 +413,19 @@ const Analytics = () => {
                     Çalışma İstatistikleri
                   </Typography>
                 </Box>
-                
                 <Box sx={{ height: 400, mt: 2 }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={processDataBySubject()}
                       margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
                     >
-                      <CartesianGrid 
-                        strokeDasharray="3 3" 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
                         stroke={theme.palette.divider}
                       />
-                      <XAxis 
+                      <XAxis
                         dataKey="name"
-                        tick={{ 
+                        tick={{
                           fontFamily: 'Quicksand',
                           fontSize: 12,
                           fill: theme.palette.text.secondary
@@ -564,19 +433,19 @@ const Analytics = () => {
                         tickLine={{ stroke: theme.palette.divider }}
                         axisLine={{ stroke: theme.palette.divider }}
                       />
-                      <YAxis 
-                        label={{ 
-                          value: 'Saat', 
-                          angle: -90, 
+                      <YAxis
+                        label={{
+                          value: 'Dakika',
+                          angle: -90,
                           position: 'insideLeft',
-                          style: { 
+                          style: {
                             textAnchor: 'middle',
                             fontFamily: 'Quicksand',
                             fontSize: 12,
                             fill: theme.palette.text.secondary
                           }
                         }}
-                        tick={{ 
+                        tick={{
                           fontFamily: 'Quicksand',
                           fontSize: 12,
                           fill: theme.palette.text.secondary
@@ -584,152 +453,100 @@ const Analytics = () => {
                         tickLine={{ stroke: theme.palette.divider }}
                         axisLine={{ stroke: theme.palette.divider }}
                       />
-                      <Tooltip 
+                      <Tooltip
                         content={<CustomTooltip />}
-                        cursor={{ 
+                        cursor={{
                           fill: theme.palette.action.hover,
                           radius: 4
                         }}
                       />
-                      <Legend 
+                      <Legend
                         wrapperStyle={{
                           fontFamily: 'Quicksand',
                           fontSize: 12
                         }}
                       />
-                      <Bar 
-                        dataKey="value" 
-                        name="Çalışma Süresi" 
+                      <Bar
+                        dataKey="value"
+                        name="Konu Bazlı Çalışma (Dakika)"
                         radius={[4, 4, 0, 0]}
                         maxBarSize={50}
+                        fill={theme.palette.info.main}
+                        style={{
+                          filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.1))',
+                          cursor: 'pointer'
+                        }}
                       >
-                        {processDataBySubject().map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={COLORS[index % COLORS.length]}
-                            style={{
-                              filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.1))',
-                              cursor: 'pointer'
-                            }}
+                        {processDataBySubject().map((entry, idx) => (
+                          <Cell
+                            key={entry.name}
+                            fill={COLORS[idx % COLORS.length] || theme.palette.info.main}
                           />
                         ))}
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </Box>
-
                 <Grid container spacing={2} sx={{ mt: 3 }}>
-                  {processDataBySubject().map((subject, index) => (
-                    <Grid item xs={12} sm={6} md={4} key={subject.name}>
-                      <Paper
-                        elevation={0}
+                  {processDataBySubject().length === 0 ? (
+                    <Grid item xs={12}>
+                      <Typography
+                        color="text.secondary"
                         sx={{
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: `${COLORS[index % COLORS.length]}15`,
-                          border: `1px solid ${COLORS[index % COLORS.length]}30`,
-                          transition: 'transform 0.2s',
-                          '&:hover': {
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
-                          }
+                          fontFamily: 'Quicksand',
+                          textAlign: 'center',
+                          mt: 2
                         }}
                       >
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontFamily: 'Quicksand',
-                            fontWeight: 600,
-                            color: COLORS[index % COLORS.length],
-                            mb: 1
-                          }}
-                        >
-                          {subject.name}
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontFamily: 'Quicksand',
-                            fontWeight: 700,
-                            color: theme.palette.text.primary
-                          }}
-                        >
-                          {formatMinutes(subject.value)}
-                        </Typography>
-                      </Paper>
+                        Kayıtlı konu bazlı çalışma bulunamadı.
+                      </Typography>
                     </Grid>
-                  ))}
+                  ) : (
+                    processDataBySubject().map((subject, idx) => (
+                      <Grid item xs={12} sm={6} md={4} key={subject.name + idx}>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 2,
+                            borderRadius: 2,
+                            bgcolor: `${COLORS[idx % COLORS.length] || theme.palette.info.main}15`,
+                            border: `1px solid ${COLORS[idx % COLORS.length] || theme.palette.info.main}30`,
+                            transition: 'transform 0.2s',
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+                            }
+                          }}
+                        >
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontFamily: 'Quicksand',
+                              fontWeight: 600,
+                              color: COLORS[idx % COLORS.length] || theme.palette.info.main,
+                              mb: 1
+                            }}
+                          >
+                            {subject.name}
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            sx={{
+                              fontFamily: 'Quicksand',
+                              fontWeight: 700,
+                              color: theme.palette.text.primary
+                            }}
+                          >
+                            {formatMinutes(subject.value)}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))
+                  )}
                 </Grid>
               </Paper>
             </Grid>
           </Grid>
-
-          <Box sx={{ mt: 4 }}>
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                fontWeight: 700, 
-                mb: 3,
-                fontFamily: 'Quicksand',
-                color: theme.palette.primary.main
-              }}
-            >
-              Detaylı Analiz
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
-                <Paper 
-                  elevation={0} 
-                  sx={{ 
-                    p: 3, 
-                    borderRadius: 3,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                    height: '100%',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 6px 25px rgba(0,0,0,0.12)'
-                    }
-                  }}
-                >
-                  <Typography 
-                    variant="subtitle1" 
-                    gutterBottom 
-                    sx={{ 
-                      fontWeight: 600,
-                      fontFamily: 'Quicksand'
-                    }}
-                  >
-                    Ders Bazında Dağılım
-                  </Typography>
-                  <Box sx={{ height: 300 }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={processDataBySubject()}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={100}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {processDataBySubject().map((entry, index) => (
-                            <Cell 
-                              key={`cell-${index}`} 
-                              fill={COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<CustomTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </Box>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Box>
         </>
       )}
     </Box>
