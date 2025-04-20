@@ -92,24 +92,37 @@ const getSubjectColor = (subject) => {
 const HeaderTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: 'transparent',
   color: theme.palette.text.primary,
-  fontWeight: 'bold',
-  padding: '16px',
-  fontSize: '1rem',
+  fontWeight: 600,
+  padding: '18px 16px',
+  fontSize: '1.05rem',
   textAlign: 'center',
   width: '14.28%', // 100% / 7 days
   position: 'relative',
   overflow: 'visible',
   boxShadow: 'none',
   borderBottom: 'none',
+  transition: 'all 0.2s ease',
+  fontFamily: 'Montserrat, sans-serif',
+  letterSpacing: '0.3px',
   '&::after': {
     content: '""',
     position: 'absolute',
     bottom: 0,
-    left: '20%',
-    width: '60%',
+    left: '15%',
+    width: '70%',
     height: '3px',
-    backgroundColor: theme.palette.primary.main,
+    background: 'linear-gradient(90deg, rgba(66,133,244,0.2) 0%, rgba(66,133,244,0.8) 50%, rgba(66,133,244,0.2) 100%)',
     borderRadius: '4px',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 1px 3px rgba(66,133,244,0.3)'
+  },
+  '&:hover': {
+    backgroundColor: 'rgba(66,133,244,0.03)',
+    '&::after': {
+      width: '80%',
+      left: '10%',
+      background: 'linear-gradient(90deg, rgba(66,133,244,0.3) 0%, rgba(66,133,244,1) 50%, rgba(66,133,244,0.3) 100%)',
+    }
   }
 }));
 
@@ -126,8 +139,8 @@ const DayCircle = styled(Box)(({ theme, day }) => {
   };
 
   return {
-    width: '40px',
-    height: '40px',
+    width: '44px',
+    height: '44px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
@@ -136,43 +149,76 @@ const DayCircle = styled(Box)(({ theme, day }) => {
     color: 'white',
     fontWeight: 'bold',
     fontSize: '1.2rem',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    marginBottom: '8px'
+    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
+    marginBottom: '10px',
+    position: 'relative',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: -2,
+      left: -2,
+      right: -2,
+      bottom: -2,
+      borderRadius: '50%',
+      background: 'transparent',
+      border: '2px solid rgba(255,255,255,0.2)',
+      opacity: 0.7
+    }
   };
 });
 
 const ClassCell = styled(TableCell)(({ theme, isEmpty }) => ({
   backgroundColor: isEmpty ? alpha('#f9fafc', 0.8) : theme.palette.background.paper,
   color: isEmpty ? theme.palette.text.secondary : theme.palette.text.primary,
-  cursor: 'pointer',
-  '&:hover': {
-    backgroundColor: isEmpty 
-      ? alpha(theme.palette.action.hover, 0.05)
-      : alpha(theme.palette.action.hover, 0.1),
-  },
-  transition: 'background-color 0.3s, transform 0.2s',
-  padding: '20px',
-  minHeight: '200px',
+  padding: '16px',
+  textAlign: 'center',
   verticalAlign: 'top',
-  borderRadius: '12px',
-  border: `1px solid ${alpha(theme.palette.divider, 0.08)}`,
-  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-  margin: '8px',
+  height: '160px',
+  borderRight: '1px solid rgba(224, 224, 224, 0.2)',
+  borderBottom: '1px solid rgba(224, 224, 224, 0.2)',
+  position: 'relative',
+  cursor: isEmpty ? 'pointer' : 'default',
+  transition: 'all 0.3s ease',
+  boxShadow: isEmpty ? 'none' : 'inset 0 0 0 1px rgba(0,0,0,0.03)',
+  '&:hover': {
+    backgroundColor: isEmpty ? alpha('#f0f4fa', 0.9) : alpha(theme.palette.background.paper, 0.97),
+    boxShadow: isEmpty ? 'inset 0 0 0 1px rgba(66,133,244,0.1)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+  },
+  '&::before': isEmpty ? {
+    content: '""',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '70%',
+    height: '70%',
+    border: '2px dashed rgba(0,0,0,0.06)',
+    borderRadius: '8px',
+    pointerEvents: 'none',
+    opacity: 0.7,
+    transition: 'all 0.3s ease',
+  } : {},
+  '&:hover::before': isEmpty ? {
+    borderColor: 'rgba(66,133,244,0.2)',
+    opacity: 1,
+  } : {},
 }));
 
 const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
-  padding: '14px',
-  borderRadius: '10px',
-  backgroundColor: alpha(theme.palette.background.paper, 0.9),
+  padding: '16px',
+  borderRadius: '12px',
+  backgroundColor: alpha(theme.palette.background.paper, 0.95),
   position: 'relative',
   overflow: 'hidden',
-  marginBottom: '12px',
+  marginBottom: '14px',
   cursor: 'pointer',
-  boxShadow: '0 3px 12px rgba(0,0,0,0.08)',
+  boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
+  border: '1px solid rgba(0,0,0,0.03)',
   transition: 'all 0.3s ease',
   '&:hover': {
-    boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
-    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+    transform: 'translateY(-4px)',
+    borderColor: alpha(color, 0.2),
   },
   '&::before': {
     content: '""',
@@ -180,32 +226,61 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
     top: 0,
     left: 0,
     width: '100%',
-    height: '4px',
+    height: '5px',
     background: `linear-gradient(to right, ${color}, ${alpha(color, 0.7)})`,
+    boxShadow: `0 2px 8px ${alpha(color, 0.3)}`,
+  },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '5px',
+    right: '10px',
+    width: '60px',
+    height: '60px',
+    borderRadius: '50%',
+    background: `radial-gradient(circle, ${alpha(color, 0.08)} 0%, transparent 70%)`,
+    pointerEvents: 'none',
   }
 }));
 
 const AddButton = styled(IconButton)(({ theme }) => ({
   backgroundColor: alpha(theme.palette.primary.main, 0.9),
   color: theme.palette.primary.contrastText,
-  boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+  boxShadow: '0 6px 16px rgba(66,133,244,0.25)',
   '&:hover': {
     backgroundColor: theme.palette.primary.main,
-    transform: 'scale(1.08)',
-    boxShadow: '0 6px 14px rgba(0,0,0,0.2)',
+    transform: 'scale(1.1) rotate(90deg)',
+    boxShadow: '0 8px 20px rgba(66,133,244,0.35)',
   },
-  transition: 'all 0.2s',
-  width: '40px',
-  height: '40px',
+  transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+  width: '46px',
+  height: '46px',
+  border: '2px solid rgba(255,255,255,0.8)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: '-50%',
+    left: '-50%',
+    width: '200%',
+    height: '200%',
+    background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
+    opacity: 0,
+    transition: 'opacity 0.3s ease',
+  },
+  '&:hover::before': {
+    opacity: 1,
+  }
 }));
 
 const FilterBar = styled(Paper)(({ theme }) => ({
-  padding: '18px 22px',
-  borderRadius: '16px',
-  backgroundColor: alpha(theme.palette.background.paper, 0.95),
-  boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-  marginBottom: '28px',
-  background: 'linear-gradient(135deg, #ffffff 0%, #f9fafc 100%)',
+  padding: '20px 24px',
+  borderRadius: '18px',
+  backgroundColor: alpha(theme.palette.background.paper, 0.98),
+  boxShadow: '0 12px 36px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)',
+  marginBottom: '32px',
+  border: '1px solid rgba(0,0,0,0.03)',
   position: 'relative',
   overflow: 'hidden',
   '&::before': {

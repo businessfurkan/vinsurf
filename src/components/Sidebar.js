@@ -25,7 +25,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
 
 
-const drawerWidth = 260;
+const drawerWidth = 290;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -97,11 +97,11 @@ const Sidebar = () => {
   const menuItems = [
     { text: 'Anasayfa', icon: <HomeIcon />, path: '/', color: '#4285F4' }, // Google Mavi
     { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro', color: '#EA4335' }, // Google Kırmızı
-    { text: 'TYT/AYT Net Takibi', icon: <AssessmentIcon />, path: '/tyt-ayt-net-takibi', color: '#FBBC05' }, // Google Sarı
+    { text: 'TYT/AYT Net', icon: <AssessmentIcon />, path: '/tyt-ayt-net-takibi', color: '#FBBC05' }, // Google Sarı - Shortened for better display
     { text: 'Yapay Zeka', icon: <SmartToyIcon />, path: '/yapay-zeka', color: '#34A853' }, // Google Yeşil
     { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' }, // Turuncu
-    { text: 'Çalışma Analizleri', icon: <InsightsIcon />, path: '/analiz', color: '#00BCD4' }, // Turkuaz
-    { text: 'Bugün Çözdüklerin', icon: <AssignmentTurnedInIcon />, path: '/bugun-cozduklerin', color: '#FF5722' }, // Koyu Turuncu
+    { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#00BCD4' }, // Turkuaz - Shortened for better display
+    { text: 'Çözdüklerin', icon: <AssignmentTurnedInIcon />, path: '/bugun-cozduklerin', color: '#FF5722' }, // Koyu Turuncu - Shortened for better display
     { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Mor
     // Teneffüs sekmesi kaldırıldı.
   ];
@@ -173,7 +173,7 @@ const Sidebar = () => {
                   sx={{
                     minHeight: 50,
                     justifyContent: open ? 'initial' : 'center',
-                    px: open ? 2 : 2,
+                    px: open ? 2.5 : 2,
                     py: 1.2,
                     borderRadius: 2,
                     background: isActive ? `${item.color}08` : 'transparent',
@@ -181,6 +181,7 @@ const Sidebar = () => {
                     color: isActive ? '#2e3856' : '#2e3856cc',
                     transition: 'all 0.2s ease',
                     fontWeight: isActive ? 600 : 500,
+                    width: '100%',
                     '&:hover': {
                       background: `${item.color}15`,
                       color: '#2e3856',
@@ -190,8 +191,8 @@ const Sidebar = () => {
                 >
                   <ListItemIcon
                     sx={{
-                      minWidth: 36,
-                      mr: open ? 2 : 'auto',
+                      minWidth: 32,
+                      mr: open ? 1.5 : 'auto',
                       justifyContent: 'center',
                       color: getIconColor(isActive, item.color),
                       transition: 'all 0.2s ease',
@@ -203,14 +204,16 @@ const Sidebar = () => {
                     primary={item.text}
                     sx={{
                       opacity: open ? 1 : 0,
+                      width: '100%',
                       '& .MuiTypography-root': {
                         fontWeight: isActive ? 600 : 500,
                         color: isActive ? '#2e3856' : '#2e3856cc',
                         fontFamily: 'Montserrat, sans-serif',
-                        fontSize: '0.95rem',
+                        fontSize: '0.9rem',
                         whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
+                        overflow: 'visible',
+                        width: '100%',
+                        display: 'block',
                       },
                     }}
                   />

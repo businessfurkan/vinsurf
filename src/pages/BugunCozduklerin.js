@@ -18,7 +18,16 @@ import {
   Stack,
   TextField,
   CircularProgress,
-  Snackbar
+  Snackbar,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  alpha
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import BookIcon from '@mui/icons-material/Book';
@@ -76,13 +85,12 @@ const BugunCozduklerin = () => {
     try {
       setIsLoading(true);
       
-      // Calculate today at 04:00 AM (Turkish time)
+      // Get today's date at 4 AM (cutoff for "today")
       const todayCutoff = new Date();
       if (todayCutoff.getHours() < 4) {
         // If current time is before 4 AM, use previous day at 4 AM
         todayCutoff.setDate(todayCutoff.getDate() - 1);
       }
-      // Set time to 04:00:00
       todayCutoff.setHours(4, 0, 0, 0);
       
       // Create a query to get today's solved problems
@@ -119,11 +127,56 @@ const BugunCozduklerin = () => {
     }
   }, [user, showSnackbar]);
 
+  // Fetch last 30 days of solved problems for the history panel
+  const fetchHistoricalSolvedProblems = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Get date 30 days ago at 4 AM
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      thirtyDaysAgo.setHours(4, 0, 0, 0);
+      
+      // Create a query to get solved problems from the last 30 days
+      const q = query(
+        collection(db, 'solvedProblems'),
+        where('userId', '==', user.uid),
+        where('date', '>=', thirtyDaysAgo)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const historicalData = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        historicalData.push({
+          subject: data.subject,
+          topic: data.topic,
+          correct: data.correct,
+          incorrect: data.incorrect,
+          empty: data.empty,
+          net: data.correct - Math.floor(data.incorrect / 4),
+          date: data.date.toDate(),
+          id: doc.id
+        });
+      });
+      
+      setHistoricalProblems(historicalData);
+    } catch (error) {
+      console.error('Error fetching historical solved problems:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (user) {
       fetchSolvedProblems();
+      fetchHistoricalSolvedProblems();
     }
-  }, [user, fetchSolvedProblems]);
+  }, [user, fetchSolvedProblems, fetchHistoricalSolvedProblems]);
 
   const handleOpenDialog = (subject) => {
     setSelectedSubject(subject);
@@ -336,6 +389,36 @@ const BugunCozduklerin = () => {
       return totals;
     }, { correct: 0, incorrect: 0, empty: 0, net: 0, total: 0 });
   }, [groupedSolvedProblems]);
+  
+  // Process historical data for the 30-day panel
+  const processedHistoricalData = useMemo(() => {
+    const subjectTopicMap = {};
+    
+    historicalProblems.forEach(item => {
+      const key = `${item.subject}-${item.topic}`;
+      
+      if (!subjectTopicMap[key]) {
+        subjectTopicMap[key] = {
+          subject: item.subject,
+          topic: item.topic,
+          correct: 0,
+          incorrect: 0,
+          empty: 0,
+          net: 0,
+          color: yksData[item.subject]?.color || '#4285F4',
+          dates: []
+        };
+      }
+      
+      subjectTopicMap[key].correct += item.correct;
+      subjectTopicMap[key].incorrect += item.incorrect;
+      subjectTopicMap[key].empty += item.empty;
+      subjectTopicMap[key].net += item.net;
+      subjectTopicMap[key].dates.push(item.date);
+    });
+    
+    return Object.values(subjectTopicMap).sort((a, b) => b.net - a.net);
+  }, [historicalProblems]);
 
   return (
     <>
@@ -368,8 +451,8 @@ const BugunCozduklerin = () => {
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 3 }}>
           {Object.keys(yksData).reduce((rows, subject, index) => {
-            // Create rows of 5 items
-            if (index % 5 === 0) rows.push([]);
+            // Create rows of 4 items instead of 5
+            if (index % 4 === 0) rows.push([]);
             rows[rows.length - 1].push(subject);
             return rows;
           }, []).map((row, rowIndex) => (
@@ -634,6 +717,163 @@ const BugunCozduklerin = () => {
         </Box>
       )}
       
+      {/* 30-Day History Panel */}
+      <Box sx={{ 
+        backgroundColor: '#FFFFF0', 
+        mt: 4, 
+        mb: 4, 
+        p: 4, 
+        borderRadius: 3, 
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)' 
+      }}>
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            mb: 3, 
+            fontWeight: 700, 
+            color: '#2e3856',
+            textAlign: 'center',
+            pb: 1,
+            borderBottom: '2px solid #f0f0f0'
+          }}
+        >
+          Son 30 Gün Performansın
+        </Typography>
+        <Typography 
+          variant="body1" 
+          sx={{ 
+            mb: 4, 
+            textAlign: 'center',
+            fontSize: '1.05rem',
+            color: '#4b5c6b',
+            maxWidth: '800px',
+            mx: 'auto'
+          }}
+        >
+          Son 30 gün içinde çözdüğün soruların net skorları ve konu bazlı performansın.
+        </Typography>
+        
+        {processedHistoricalData.length > 0 ? (
+          <TableContainer component={Paper} sx={{ 
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)', 
+            borderRadius: 2,
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.05)'
+          }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f8f9fa' }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#2e3856' }}>Ders</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: '#2e3856' }}>Konu</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Doğru</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Yanlış</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Boş</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 600, color: '#2e3856' }}>Net</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {processedHistoricalData.map((item, index) => (
+                  <TableRow key={index} sx={{ 
+                    '&:nth-of-type(odd)': { backgroundColor: alpha('#f8f9fa', 0.3) },
+                    '&:hover': { backgroundColor: alpha(item.color, 0.05) },
+                    transition: 'background-color 0.2s'
+                  }}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box 
+                          sx={{ 
+                            width: 12, 
+                            height: 12, 
+                            borderRadius: '50%', 
+                            backgroundColor: item.color,
+                            mr: 1.5,
+                            boxShadow: `0 0 0 2px ${alpha(item.color, 0.2)}`
+                          }} 
+                        />
+                        {item.subject}
+                      </Box>
+                    </TableCell>
+                    <TableCell>{item.topic}</TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Doğru sayısı" arrow>
+                        <Chip 
+                          label={item.correct} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: alpha('#4caf50', 0.1),
+                            color: '#4caf50',
+                            fontWeight: 600,
+                            minWidth: 40
+                          }} 
+                        />
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Yanlış sayısı" arrow>
+                        <Chip 
+                          label={item.incorrect} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: alpha('#f44336', 0.1),
+                            color: '#f44336',
+                            fontWeight: 600,
+                            minWidth: 40
+                          }} 
+                        />
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Boş sayısı" arrow>
+                        <Chip 
+                          label={item.empty} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: alpha('#9e9e9e', 0.1),
+                            color: '#9e9e9e',
+                            fontWeight: 600,
+                            minWidth: 40
+                          }} 
+                        />
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Tooltip title="Net skor" arrow>
+                        <Chip 
+                          label={item.net.toFixed(2)} 
+                          size="small" 
+                          sx={{ 
+                            backgroundColor: alpha('#2196f3', 0.1),
+                            color: '#2196f3',
+                            fontWeight: 600,
+                            minWidth: 50
+                          }} 
+                        />
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Box sx={{ 
+            textAlign: 'center', 
+            py: 4, 
+            color: '#6c757d',
+            backgroundColor: alpha('#f8f9fa', 0.5),
+            borderRadius: 2,
+            border: '1px dashed #dee2e6'
+          }}>
+            <Typography variant="body1">
+              Son 30 günde kaydedilmiş çözülen soru bulunmamaktadır.
+            </Typography>
+            <Typography variant="body2" sx={{ mt: 1, color: '#adb5bd' }}>
+              Çözdüğün soruları kaydetmeye başladığında burada görünecektir.
+            </Typography>
+          </Box>
+        )}
+      </Box>
+
       {/* Dialog for showing topics */}
       <Dialog
         open={dialogOpen}
@@ -891,8 +1131,6 @@ const BugunCozduklerin = () => {
           </>
         )}
       </Dialog>
-
-      {/* Removed duplicate dialogs */}
 
       <Snackbar
         open={snackbarOpen}
