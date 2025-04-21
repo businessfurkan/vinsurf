@@ -27,6 +27,8 @@ import {
 } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DeleteIcon from '@mui/icons-material/Delete';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
 
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -628,7 +630,7 @@ const TytAytNetTakibi = () => {
 
             <Box 
               sx={{ 
-                p: 2.5, 
+                p: 3, 
                 background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08) 0%, rgba(63, 81, 181, 0.15) 100%)', 
                 borderRadius: 3, 
                 mt: 3, 
@@ -637,19 +639,46 @@ const TytAytNetTakibi = () => {
                 boxShadow: '0 4px 12px rgba(63, 81, 181, 0.1)',
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center'
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden'
               }}
             >
-              <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+              <Box sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 10.5%)',
+                backgroundSize: '20px 20px',
+                opacity: 0.5,
+                zIndex: 0
+              }} />
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  color: '#3f51b5', 
+                  mb: 0.5, 
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  position: 'relative',
+                  zIndex: 1
+                }}
+              >
                 NET SONUÇ
               </Typography>
               <Typography 
-                variant="h4" 
+                variant="h3" 
                 align="center" 
                 sx={{ 
                   fontWeight: 800, 
                   color: '#3f51b5',
                   fontFamily: 'Poppins, Quicksand, sans-serif',
+                  textShadow: '0 2px 10px rgba(63, 81, 181, 0.2)',
+                  position: 'relative',
+                  zIndex: 1
                 }}
               >
                 {calculateNet(correctCount, incorrectCount)}
@@ -790,59 +819,143 @@ const TytAytNetTakibi = () => {
               </Box>
             ) : (
               <>
-                <TableContainer sx={{ mb: 4, borderRadius: 2, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+                <TableContainer sx={{ mb: 4, borderRadius: 2, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
                   <Table>
                     <TableHead>
-                      <TableRow sx={{ background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08) 0%, rgba(63, 81, 181, 0.15) 100%)' }}>
-                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Deneme</TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Sınav Türü</TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Ders</TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: '#4caf50', py: 1.5 }}>Doğru</TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: '#f44336', py: 1.5 }}>Yanlış</TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Net</TableCell>
-                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Tarih</TableCell>
-                        <TableCell sx={{ py: 1.5 }}></TableCell>
+                      <TableRow sx={{ background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.15) 0%, rgba(63, 81, 181, 0.25) 100%)' }}>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 2, fontSize: '0.95rem' }}>Deneme</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 2, fontSize: '0.95rem' }}>Sınav Türü</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 2, fontSize: '0.95rem' }}>Ders</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#4caf50', py: 2, fontSize: '0.95rem' }}>Doğru</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#f44336', py: 2, fontSize: '0.95rem' }}>Yanlış</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 2, fontSize: '0.95rem' }}>Net</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 2, fontSize: '0.95rem' }}>Tarih</TableCell>
+                        <TableCell sx={{ py: 2 }}></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {netRecords.map((record, index) => (
-                        <TableRow key={record.id} hover>
-                          <TableCell>{record.examName}</TableCell>
-                          <TableCell>
-                            <Chip 
-                              label={record.examType} 
-                              size="small" 
-                              sx={{ 
-                                fontWeight: 600, 
-                                bgcolor: record.examType === 'TYT' ? 'rgba(63, 81, 181, 0.1)' : 'rgba(156, 39, 176, 0.1)',
-                                color: record.examType === 'TYT' ? '#3f51b5' : '#9c27b0',
-                                border: record.examType === 'TYT' ? '1px solid rgba(63, 81, 181, 0.2)' : '1px solid rgba(156, 39, 176, 0.2)',
-                                borderRadius: 1
-                              }} 
-                            />
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 500 }}>{record.subject}</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#4caf50' }}>{record.correctCount}</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: '#f44336' }}>{record.incorrectCount}</TableCell>
-                          <TableCell sx={{ fontWeight: 700, color: '#3f51b5' }}>{record.net}</TableCell>
-                          <TableCell>{record.date instanceof Date ? record.date.toLocaleDateString('tr-TR') : formatDate(record.date)}</TableCell>
-                          <TableCell>
-                            <IconButton 
-                              size="small" 
-                              onClick={() => handleDelete(record.id)}
-                              sx={{
-                                color: 'rgba(244, 67, 54, 0.7)',
-                                '&:hover': {
-                                  bgcolor: 'rgba(244, 67, 54, 0.1)',
-                                  color: '#f44336'
-                                }
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {netRecords.map((record, index) => {
+                        // Her ders için farklı bir renk tonu belirle
+                        const subjectColors = {
+                          'Türkçe': '#3f51b5',
+                          'Sosyal Bilimler': '#673ab7',
+                          'Temel Matematik': '#2196f3',
+                          'Fen Bilimleri': '#009688',
+                          'Matematik': '#2196f3',
+                          'Fizik': '#00bcd4',
+                          'Kimya': '#009688',
+                          'Biyoloji': '#4caf50',
+                          'Edebiyat': '#ff9800',
+                          'Tarih-1': '#795548',
+                          'Coğrafya-1': '#607d8b',
+                          'Tarih-2': '#8d6e63',
+                          'Coğrafya-2': '#78909c',
+                          'Felsefe': '#9c27b0',
+                          'Din Kültürü': '#f44336',
+                          'Yabancı Dil': '#e91e63'
+                        };
+                        
+                        const subjectColor = subjectColors[record.subject] || '#3f51b5';
+                        const rowBgColor = index % 2 === 0 ? 'rgba(0, 0, 0, 0.02)' : 'white';
+                        
+                        return (
+                          <TableRow 
+                            key={record.id} 
+                            sx={{ 
+                              bgcolor: rowBgColor,
+                              '&:hover': { bgcolor: `${subjectColor}10` },
+                              transition: 'background-color 0.2s ease',
+                              borderLeft: `3px solid ${subjectColor}50`
+                            }}
+                          >
+                            <TableCell sx={{ 
+                              fontWeight: 700, 
+                              color: '#333',
+                              fontSize: '0.9rem',
+                              py: 1.8
+                            }}>
+                              {record.examName}
+                            </TableCell>
+                            <TableCell sx={{ py: 1.8 }}>
+                              <Chip 
+                                label={record.examType} 
+                                size="small" 
+                                sx={{ 
+                                  fontWeight: 700, 
+                                  bgcolor: record.examType === 'TYT' ? 'rgba(63, 81, 181, 0.15)' : 'rgba(156, 39, 176, 0.15)',
+                                  color: record.examType === 'TYT' ? '#3f51b5' : '#9c27b0',
+                                  border: record.examType === 'TYT' ? '1px solid rgba(63, 81, 181, 0.3)' : '1px solid rgba(156, 39, 176, 0.3)',
+                                  borderRadius: 1,
+                                  py: 0.8,
+                                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                                }} 
+                              />
+                            </TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 600, 
+                              color: subjectColor,
+                              fontSize: '0.9rem',
+                              py: 1.8
+                            }}>
+                              {record.subject}
+                            </TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 700, 
+                              color: '#4caf50',
+                              fontSize: '1rem',
+                              py: 1.8,
+                              bgcolor: 'rgba(76, 175, 80, 0.05)'
+                            }}>
+                              {record.correctCount}
+                            </TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 700, 
+                              color: '#f44336',
+                              fontSize: '1rem',
+                              py: 1.8,
+                              bgcolor: 'rgba(244, 67, 54, 0.05)'
+                            }}>
+                              {record.incorrectCount}
+                            </TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 800, 
+                              color: subjectColor,
+                              fontSize: '1.1rem',
+                              py: 1.8,
+                              bgcolor: `${subjectColor}10`,
+                              borderRadius: 1,
+                              textAlign: 'center',
+                              boxShadow: 'inset 0 0 5px rgba(0,0,0,0.05)'
+                            }}>
+                              {record.net}
+                            </TableCell>
+                            <TableCell sx={{ 
+                              fontWeight: 500,
+                              fontSize: '0.85rem',
+                              py: 1.8,
+                              color: 'text.secondary'
+                            }}>
+                              {record.date instanceof Date ? record.date.toLocaleDateString('tr-TR') : formatDate(record.date)}
+                            </TableCell>
+                            <TableCell sx={{ py: 1.8 }}>
+                              <IconButton 
+                                size="small" 
+                                onClick={() => handleDelete(record.id)}
+                                sx={{
+                                  color: 'rgba(244, 67, 54, 0.7)',
+                                  '&:hover': {
+                                    bgcolor: 'rgba(244, 67, 54, 0.1)',
+                                    color: '#f44336'
+                                  },
+                                  boxShadow: '0 2px 5px rgba(0,0,0,0.08)'
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 </TableContainer>
@@ -939,15 +1052,34 @@ const TytAytNetTakibi = () => {
                             <Paper 
                               elevation={0}
                               sx={{ 
-                                p: 4, 
+                                p: 5, 
                                 borderRadius: 2, 
                                 textAlign: 'center',
                                 bgcolor: 'rgba(0,0,0,0.02)',
-                                border: '1px dashed rgba(0,0,0,0.1)'
+                                border: '1px dashed rgba(0,0,0,0.1)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 2
                               }}
                             >
-                              <Typography color="text.secondary">
+                              <Box sx={{ 
+                                width: 80, 
+                                height: 80, 
+                                borderRadius: '50%', 
+                                bgcolor: 'rgba(0,0,0,0.04)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                <HelpOutlineIcon sx={{ fontSize: 40, color: 'text.disabled' }} />
+                              </Box>
+                              <Typography color="text.secondary" fontWeight={500} fontSize="1.1rem">
                                 {selectedGraphSubject} dersine ait net verisi bulunamadı.
+                              </Typography>
+                              <Typography color="text.disabled" fontSize="0.9rem" sx={{ maxWidth: 400 }}>
+                                Bu ders için net kaydı oluşturmak için sol taraftaki formu kullanabilirsiniz.
                               </Typography>
                             </Paper>
                           );
@@ -1063,15 +1195,34 @@ const TytAytNetTakibi = () => {
                       <Paper 
                         elevation={0}
                         sx={{ 
-                          p: 4, 
+                          p: 5, 
                           borderRadius: 2, 
                           textAlign: 'center',
                           bgcolor: 'rgba(63, 81, 181, 0.05)',
-                          border: '1px dashed rgba(63, 81, 181, 0.2)'
+                          border: '1px dashed rgba(63, 81, 181, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 2
                         }}
                       >
-                        <Typography color="primary" fontWeight={500}>
+                        <Box sx={{ 
+                          width: 80, 
+                          height: 80, 
+                          borderRadius: '50%', 
+                          bgcolor: 'rgba(63, 81, 181, 0.1)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          <QueryStatsIcon sx={{ fontSize: 40, color: '#3f51b5' }} />
+                        </Box>
+                        <Typography color="primary" fontWeight={600} fontSize="1.1rem">
                           Lütfen grafik görmek istediğiniz dersi yukarıdan seçin.
+                        </Typography>
+                        <Typography color="text.secondary" fontSize="0.9rem" sx={{ maxWidth: 400 }}>
+                          Ders butonlarına tıklayarak ilgili dersin net gelişim grafiğini görebilirsiniz.
                         </Typography>
                       </Paper>
                     )}
