@@ -5,7 +5,6 @@ import {
   Paper,
   Table,
   TableBody,
-  TableCell,
   TableContainer,
   TableHead,
   TableRow,
@@ -14,10 +13,8 @@ import {
   DialogContent,
   MenuItem,
   FormControl,
-  Grid,
   Snackbar,
   Alert,
-  Chip,
   LinearProgress,
   IconButton,
   Tooltip,
@@ -42,6 +39,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { scheduleService } from '../services/scheduleService';
@@ -89,78 +87,13 @@ const getSubjectColor = (subject) => {
 };
 
 
-const HeaderTableCell = styled(TableCell)(({ theme }) => ({
-  backgroundColor: 'transparent',
-  color: theme.palette.text.primary,
-  fontWeight: 600,
-  padding: '18px 16px',
-  fontSize: '1.05rem',
-  textAlign: 'center',
-  width: '14.28%', // 100% / 7 days
-  position: 'relative',
-  overflow: 'visible',
-  boxShadow: 'none',
-  borderBottom: 'none',
-  transition: 'all 0.2s ease',
-  fontFamily: 'Montserrat, sans-serif',
-  letterSpacing: '0.3px',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: 0,
-    left: '15%',
-    width: '70%',
-    height: '3px',
-    background: 'linear-gradient(90deg, rgba(66,133,244,0.2) 0%, rgba(66,133,244,0.8) 50%, rgba(66,133,244,0.2) 100%)',
-    borderRadius: '4px',
-    transition: 'all 0.3s ease',
-    boxShadow: '0 1px 3px rgba(66,133,244,0.3)'
-  },
-  '&:hover': {
-    backgroundColor: 'rgba(66,133,244,0.03)',
-    '&::after': {
-      width: '80%',
-      left: '10%',
-      background: 'linear-gradient(90deg, rgba(66,133,244,0.3) 0%, rgba(66,133,244,1) 50%, rgba(66,133,244,0.3) 100%)',
-    }
-  }
-}));
+// Styled components for table elements
 
-const DayCircle = styled(Box)(({ theme, day }) => {
-  // Assign different gradient colors for each day
-  const dayColors = {
-    'Pazartesi': 'linear-gradient(135deg, #4285F4, #34A853)',
-    'Salı': 'linear-gradient(135deg, #EF9B0F, #4285F4)',
-    'Çarşamba': 'linear-gradient(135deg, #DB4437, #F4B400)',
-    'Perşembe': 'linear-gradient(135deg, #F4B400, #0F9D58)',
-    'Cuma': 'linear-gradient(135deg, #673AB7, #4285F4)',
-    'Cumartesi': 'linear-gradient(135deg, #FF6D00, #F4B400)',
-    'Pazar': 'linear-gradient(135deg, #9C27B0, #673AB7)',
-  };
+// Day styling is now handled directly in the component
 
-  return {
-    width: '44px',
-    height: '44px',
-    borderRadius: '50%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: dayColors[day] || 'linear-gradient(135deg, #3f51b5, #2196f3)',
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: '1.2rem',
-    boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
-    marginBottom: '10px',
-    position: 'relative',
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      top: -2,
-      left: -2,
-      right: -2,
-      bottom: -2,
-      borderRadius: '50%',
-      background: 'transparent',
+const StyledTableCell = styled(Box)(({ theme, isEmpty }) => ({
+  backgroundColor: isEmpty ? alpha('#FFFFF0', 0.8) : alpha('#FFFFF0', 0.95),
+  color: isEmpty ? alpha('#333', 0.6) : '#333',
   padding: '16px',
   textAlign: 'center',
   verticalAlign: 'top',
@@ -533,9 +466,7 @@ const DersProgrami = () => {
     }
   };
 
-  const handleSearchChange = (e) => {
-    setSearchText(e.target.value);
-  };
+    // Search functionality is handled directly in the TextField onChange
 
   const getFilteredSchedule = () => {
     if (!searchText && selectedSubjects.length === 0) {
@@ -718,13 +649,11 @@ const DersProgrami = () => {
                 sx: {
                   borderRadius: '30px',
                   backgroundColor: alpha('#fff', 0.9),
-                  '&:hover': {
-                    backgroundColor: alpha('#fff', 0.95),
-                  },
                   boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                   border: '1px solid rgba(63, 81, 181, 0.15)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
+                    backgroundColor: alpha('#fff', 0.95),
                     boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
                     transform: 'translateY(-2px)'
                   }
@@ -761,10 +690,27 @@ const DersProgrami = () => {
             </Typography>
           </Box>
           {getUniqueSubjects().map((subject) => (
-            <StyledMenuItem
+            <MenuItem
               key={subject}
               selected={selectedSubjects.includes(subject)}
               onClick={() => handleFilterToggle(subject)}
+              sx={{
+                borderRadius: '10px',
+                margin: '3px 0',
+                padding: '8px 10px',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: alpha('#3f51b5', 0.08),
+                  transform: 'translateX(2px)',
+                },
+                '&.Mui-selected': {
+                  backgroundColor: alpha('#3f51b5', 0.12),
+                  fontWeight: 600,
+                  '&:hover': {
+                    backgroundColor: alpha('#3f51b5', 0.16),
+                  },
+                },
+              }}
             >
               <Checkbox 
                 checked={selectedSubjects.includes(subject)} 
@@ -785,7 +731,7 @@ const DersProgrami = () => {
                 }} 
               />
               {subject}
-            </StyledMenuItem>
+            </MenuItem>
           ))}
           {selectedSubjects.length > 0 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid rgba(63, 81, 181, 0.1)' }}>
@@ -1495,7 +1441,6 @@ const DersProgrami = () => {
           <LinearProgress />
         </Box>
       )}
-        </Box>
     </Box>
   );
 };
