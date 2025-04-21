@@ -31,6 +31,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import yksData from '../utils/yksData';
+import { safeColor, safeLength, safeMap } from '../utils/safeAccess';
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { 
@@ -198,16 +199,18 @@ const BugunCozduklerin = () => {
         
         // JavaScript tarafında son 30 günlük kayıtları filtreleme
         if (recordDate >= thirtyDaysAgo) {
-          allData.push({
-            id: doc.id,
-            subject: data.subject,
-            topic: data.topic,
-            correct: data.correct || 0,
-            incorrect: data.incorrect || 0,
-            empty: data.empty || 0,
-            date: recordDate,
-            net: Math.max(0, (data.correct || 0) - ((data.incorrect || 0) / 4))
-          });
+          if (data && data.subject && data.topic) {
+            allData.push({
+              id: doc.id,
+              subject: data.subject,
+              topic: data.topic,
+              correct: parseInt(data.correct) || 0,
+              incorrect: parseInt(data.incorrect) || 0,
+              empty: parseInt(data.empty) || 0,
+              net: parseFloat(data.net) || 0,
+              date: recordDate,
+            });
+          }
         }
       });
       
@@ -241,6 +244,7 @@ const BugunCozduklerin = () => {
   };
 
   const handleOpenTopicDialog = (topic) => {
+    if (!topic) return;
     setSelectedTopic(topic);
     
     // Check if we already have data for this topic and pre-fill the form
@@ -248,10 +252,15 @@ const BugunCozduklerin = () => {
       solvedProblems[selectedSubject] && 
       solvedProblems[selectedSubject][topic]
     ) {
+      const stats = solvedProblems[selectedSubject][topic];
+      const correct = stats.correct || 0;
+      const incorrect = stats.incorrect || 0;
+      const empty = stats.empty || 0;
+      
       setProblemStats({
-        correct: solvedProblems[selectedSubject][topic].correct,
-        incorrect: solvedProblems[selectedSubject][topic].incorrect,
-        empty: solvedProblems[selectedSubject][topic].empty
+        correct,
+        incorrect,
+        empty,
       });
     } else {
       // Reset form if no existing data
@@ -262,6 +271,12 @@ const BugunCozduklerin = () => {
       });
     }
     
+    setTopicDialogOpen(true);
+  };
+  
+  const handleTopicSelect = (topic) => {
+    if (!topic) return;
+    setSelectedTopic(topic);
     setTopicDialogOpen(true);
   };
 
@@ -413,73 +428,105 @@ const BugunCozduklerin = () => {
     return result;
   }, [solvedProblems, getTopicStats]);
 
+  const calculateNet = (correct, incorrect) => {
+    // Ensure inputs are numbers
+    const validCorrect = parseInt(correct) || 0;
+    const validIncorrect = parseInt(incorrect) || 0;
+    return validCorrect - (validIncorrect * 0.25);
+  };
+
   const overallTotals = useMemo(() => {
     return groupedSolvedProblems.reduce((totals, subject) => {
-      totals.correct += subject.correct;
-      totals.incorrect += subject.incorrect;
-      totals.empty += subject.empty;
-      totals.net += subject.net;
+      if (!subject) return totals;
+      
+      totals.correct += parseInt(subject.correct) || 0;
+      totals.incorrect += parseInt(subject.incorrect) || 0;
+      totals.empty += parseInt(subject.empty) || 0;
+      totals.net += parseFloat(subject.net) || 0;
       totals.total = totals.correct + totals.incorrect + totals.empty;
       return totals;
     }, { correct: 0, incorrect: 0, empty: 0, net: 0, total: 0 });
   }, [groupedSolvedProblems]);
-  
+
   const processedHistoricalData = useMemo(() => {
     const subjectTopicMap = {};
     
-    historicalProblems.filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true).forEach(item => {
-      if (!item || !item.subject || !item.topic) return; // Skip invalid items
-      
-      const key = `${item.subject}-${item.topic}`;
-      
-      if (!subjectTopicMap[key]) {
-        // Safely access yksData with fallback for missing subjects
-        const subjectData = yksData[item.subject] || {};
+    if (!Array.isArray(historicalProblems)) return [];
+    
+    historicalProblems.filter(item => {
+      if (!item || !item.subject || !item.topic) return false;
+      return selectedHistorySubject ? item.subject === selectedHistorySubject : true;
+    }).forEach(item => {
+      try {
+        const key = `${item.subject}-${item.topic}`;
         
-        subjectTopicMap[key] = {
-          subject: item.subject,
-          topic: item.topic,
-          correct: 0,
-          incorrect: 0,
-          empty: 0,
-          net: 0,
-          color: subjectData.color || '#4285F4',
-          dates: [],
-          lastUpdated: null
-        };
-      }
+        if (!subjectTopicMap[key]) {
+          subjectTopicMap[key] = {
+            subject: item.subject,
+            topic: item.topic,
+            correct: 0,
+            incorrect: 0,
+            empty: 0,
+            net: 0,
+            color: safeColor(yksData, item.subject),
+            dates: [],
+            lastUpdated: null
+          };
+        }
       
-      subjectTopicMap[key].correct += item.correct;
-      subjectTopicMap[key].incorrect += item.incorrect;
-      subjectTopicMap[key].empty += item.empty;
-      subjectTopicMap[key].net += item.net;
-      subjectTopicMap[key].dates.push(item.date);
-      
-      // Track the most recent update
-      if (!subjectTopicMap[key].lastUpdated || item.date > subjectTopicMap[key].lastUpdated) {
-        subjectTopicMap[key].lastUpdated = item.date;
+        // Safely update the stats with fallbacks for missing values
+        subjectTopicMap[key].correct += parseInt(item.correct) || 0;
+        subjectTopicMap[key].incorrect += parseInt(item.incorrect) || 0;
+        subjectTopicMap[key].empty += parseInt(item.empty) || 0;
+        subjectTopicMap[key].net += parseFloat(item.net) || 0;
+        
+        if (item.date) {
+          subjectTopicMap[key].dates.push(item.date);
+          
+          // Track the most recent update
+          if (!subjectTopicMap[key].lastUpdated || item.date > subjectTopicMap[key].lastUpdated) {
+            subjectTopicMap[key].lastUpdated = item.date;
+          }
+        }
+      } catch (error) {
+        console.error('Error processing historical item:', error);
       }
     });
     
-    return Object.values(subjectTopicMap).sort((a, b) => b.lastUpdated - a.lastUpdated);
+    try {
+      return Object.values(subjectTopicMap).sort((a, b) => {
+        if (!a || !b || !a.lastUpdated || !b.lastUpdated) return 0;
+        return b.lastUpdated - a.lastUpdated;
+      });
+    } catch (error) {
+      console.error('Error sorting historical data:', error);
+      return [];
+    }
   }, [historicalProblems, selectedHistorySubject]);
 
 
 
   // Handle saving problem stats
   const handleSaveStats = async () => {
-    if (!user) {
-      showSnackbar('Lütfen giriş yapın', 'error');
+    if (!user || !selectedSubject || !selectedTopic) {
+      showSnackbar('Lütfen önce bir konu seçin', 'warning');
       return;
     }
+    
+    // Validate problem stats to ensure they are numbers
+    const validatedStats = {
+      correct: parseInt(problemStats.correct) || 0,
+      incorrect: parseInt(problemStats.incorrect) || 0,
+      empty: parseInt(problemStats.empty) || 0
+    };
 
     try {
       setIsLoading(true);
       
       // Null kontrolleri ekleyerek değerlerin sayı olduğundan emin ol
-      const correct = parseInt(problemStats.correct) || 0;
-      const incorrect = parseInt(problemStats.incorrect) || 0;
-      const empty = parseInt(problemStats.empty) || 0;
+      const correct = validatedStats.correct;
+      const incorrect = validatedStats.incorrect;
+      const empty = validatedStats.empty;
       const total = correct + incorrect + empty;
       
       if (total === 0) {
@@ -715,7 +762,7 @@ const BugunCozduklerin = () => {
                       left: 0,
                       width: '100%',
                       height: '6px',
-                      backgroundColor: yksData[subject]?.color || '#4285F4',
+                      backgroundColor: safeColor(yksData, subject),
                       opacity: 0.9
                     },
                     '&::after': {
@@ -725,7 +772,7 @@ const BugunCozduklerin = () => {
                       right: 0,
                       width: '30%',
                       height: '30%',
-                      background: `radial-gradient(circle at bottom right, ${(yksData[subject]?.color || '#4285F4')}10, transparent 70%)`,
+                      background: `radial-gradient(circle at bottom right, ${safeColor(yksData, subject, 'color', '10')}, transparent 70%)`,
                       borderTopLeftRadius: '50%',
                       opacity: 0.7,
                       zIndex: 0
@@ -753,14 +800,14 @@ const BugunCozduklerin = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         mb: 2,
-                        boxShadow: `0 6px 16px ${yksData[subject]?.color || '#4285F4'}40`,
+                        boxShadow: `0 6px 16px ${safeColor(yksData, subject, 'color', '40')}`,
                         transition: 'all 0.3s ease',
                         '&:hover': {
                           transform: 'rotate(5deg) scale(1.05)',
                         }
                       }}
                     >
-                      <BookIcon sx={{ color: yksData[subject]?.color || '#4285F4', fontSize: 38 }} />
+                      <BookIcon sx={{ color: safeColor(yksData, subject), fontSize: 38 }} />
                     </Box>
                     <Typography
                       variant="h6"
@@ -791,7 +838,7 @@ const BugunCozduklerin = () => {
                       }}
                     >
                       <BookIcon sx={{ fontSize: 16 }} />
-                      {yksData[subject]?.topics?.length || 0} Konu
+                      {safeLength(yksData && yksData[subject] ? yksData[subject].topics : [])} Konu
                     </Typography>
                   </CardContent>
                 </Card>
@@ -1023,9 +1070,10 @@ const BugunCozduklerin = () => {
         
         {processedHistoricalData.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {historicalProblems
-              .filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true)
-              .map((item, index) => (
+            {safeMap(Array.isArray(historicalProblems) ? historicalProblems.filter(item => {
+              if (!item) return false;
+              return selectedHistorySubject ? item.subject === selectedHistorySubject : true;
+            }) : [], (item, index) => (
               <Paper 
                 key={index} 
                 elevation={0}
@@ -1203,14 +1251,14 @@ const BugunCozduklerin = () => {
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'space-between',
-              bgcolor: `${yksData[selectedSubject]?.color || '#4285F4'}15`,
+              bgcolor: `${safeColor(yksData, selectedSubject, 'color', '15')}`,
               pb: 2,
               pt: 2
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box
                   sx={{
-                    backgroundColor: `${yksData[selectedSubject]?.color || '#4285F4'}25`,
+                    backgroundColor: `${safeColor(yksData, selectedSubject, 'color', '25')}`,
                     width: 40,
                     height: 40,
                     borderRadius: '50%',
@@ -1220,7 +1268,7 @@ const BugunCozduklerin = () => {
                     mr: 2,
                   }}
                 >
-                  <BookIcon sx={{ color: yksData[selectedSubject]?.color || '#4285F4', fontSize: 22 }} />
+                  <BookIcon sx={{ color: safeColor(yksData, selectedSubject), fontSize: 22 }} />
                 </Box>
                 <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                   {selectedSubject} Konuları
@@ -1237,7 +1285,7 @@ const BugunCozduklerin = () => {
             </DialogTitle>
             <DialogContent sx={{ pt: 2 }}>
               <List>
-                {yksData[selectedSubject]?.topics?.map((topic, index) => (
+                {safeMap(yksData && yksData[selectedSubject] ? yksData[selectedSubject].topics : [], (topic, index) => (
                   <React.Fragment key={topic}>
                     <ListItem 
                       sx={{ py: 1.5 }}
@@ -1277,7 +1325,7 @@ const BugunCozduklerin = () => {
                         </Box>
                       )}
                     </ListItem>
-                    {index < (yksData[selectedSubject]?.topics?.length || 0) - 1 && (
+                    {index < safeLength(yksData && yksData[selectedSubject] ? yksData[selectedSubject].topics : []) - 1 && (
                       <Divider component="li" sx={{ opacity: 0.6 }} />
                     )}
                   </React.Fragment>
