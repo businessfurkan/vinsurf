@@ -20,7 +20,9 @@ import {
   Select,
   MenuItem,
   TextField,
-  List
+  List,
+  Avatar,
+  Tooltip
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
@@ -37,6 +39,16 @@ import SchoolIcon from '@mui/icons-material/School';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import CheckIcon from '@mui/icons-material/Check';
+import FunctionsIcon from '@mui/icons-material/Functions';
+import ScienceIcon from '@mui/icons-material/Science';
+import BiotechIcon from '@mui/icons-material/Biotech';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import LanguageIcon from '@mui/icons-material/Language';
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
+import PublicIcon from '@mui/icons-material/Public';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import TranslateIcon from '@mui/icons-material/Translate';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -217,21 +229,32 @@ const Analiz = () => {
   };
 
   const getSubjectIcon = (subject) => {
-    if (!subject) return <SubjectIcon />;
-    const subjectIcons = {
-      'Matematik': <AssignmentIcon />,
-      'Fizik': <QueryStatsIcon />,
-      'Kimya': <AccessTimeIcon />,
-      'Biyoloji': <SchoolIcon />,
-      'Türkçe': <NavigateNextIcon />,
-      'Tarih': <TargetIcon />,
-      'Coğrafya': <FlagIcon />,
-      'Edebiyat': <CheckIcon />,
-      'Felsefe': <HelpOutlineIcon />,
-      'Din Kültürü': <LightbulbIcon />,
-      'İngilizce': <SchoolIcon />,
-    };
-    return subjectIcons[subject] || <SubjectIcon />;
+    switch (subject) {
+      case 'Matematik':
+        return <FunctionsIcon />;
+      case 'Fizik':
+        return <ScienceIcon />;
+      case 'Kimya':
+        return <ScienceIcon sx={{ transform: 'rotate(45deg)' }} />;
+      case 'Biyoloji':
+        return <BiotechIcon />;
+      case 'Edebiyat':
+        return <MenuBookIcon />;
+      case 'Türkçe':
+        return <LanguageIcon />;
+      case 'Tarih':
+        return <HistoryEduIcon />;
+      case 'Coğrafya':
+        return <PublicIcon />;
+      case 'Felsefe':
+        return <PsychologyIcon />;
+      case 'Din Kültürü':
+        return <AccountBalanceIcon />;
+      case 'İngilizce':
+        return <TranslateIcon />;
+      default:
+        return <SubjectIcon />;
+    }
   };
 
   const getLighterColor = (color) => {
@@ -275,32 +298,114 @@ const Analiz = () => {
         Çalışma Analizleri
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
-        {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map(subject => (
-          <Card
-            key={subject}
-            elevation={0}
-            onClick={() => handleOpenTopicDialog(subject)}
-            sx={{
-              cursor: 'pointer',
-              borderRadius: '16px',
-              background: '#fff',
-              boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
-              minHeight: 150,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              alignItems: 'center',
-              border: '1.5px solid #f0f1f4',
-              transition: 'box-shadow 0.16s, border-color 0.16s',
-              '&:hover': { boxShadow: '0 6px 24px 0 rgba(30,30,60,0.11)', borderColor: '#e0e1e7' },
-            }}
-          >
-            <Box sx={{ fontSize: 32, mb: 1, color: getSubjectColor(subject) }}>{getSubjectIcon(subject)}</Box>
-            <Typography sx={{ fontSize: 20, fontWeight: 900, color: '#2c2c2c', textAlign: 'center', fontFamily: `'Poppins','Inter','Roboto',sans-serif`, lineHeight: 1.13 }}>
-              {subject}
-            </Typography>
-          </Card>
-        ))}
+        {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map(subject => {
+          const subjectData = analytics[subject] || { totalTime: 0 };
+          const progress = calculateProgress(subjectData.totalTime, subject);
+          const hasTarget = studyTargets[subject] > 0;
+          
+          return (
+            <Card
+              key={subject}
+              elevation={0}
+              onClick={() => handleOpenTopicDialog(subject)}
+              sx={{
+                cursor: 'pointer',
+                borderRadius: '16px',
+                background: '#fff',
+                boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
+                minHeight: 180,
+                display: 'flex',
+                flexDirection: 'column',
+                padding: 2,
+                border: '1.5px solid #f0f1f4',
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  boxShadow: '0 8px 28px 0 rgba(30,30,60,0.15)', 
+                  borderColor: getSubjectColor(subject),
+                  transform: 'translateY(-5px)'
+                },
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              <Box 
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '4px',
+                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`
+                }}
+              />
+              
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+                <Avatar
+                  sx={{
+                    bgcolor: `${getSubjectColor(subject)}20`,
+                    color: getSubjectColor(subject),
+                    width: 48,
+                    height: 48,
+                    boxShadow: `0 4px 12px ${getSubjectColor(subject)}30`,
+                    mr: 1.5
+                  }}
+                >
+                  {getSubjectIcon(subject)}
+                </Avatar>
+                <Typography 
+                  sx={{ 
+                    fontSize: 18, 
+                    fontWeight: 800, 
+                    color: '#2c2c2c', 
+                    fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
+                    lineHeight: 1.2
+                  }}
+                >
+                  {subject}
+                </Typography>
+              </Box>
+              
+              {/* Study time display */}
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, mt: 0.5 }}>
+                <AccessTimeIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.7 }} />
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+                  {formatTime(subjectData.totalTime || 0)}
+                </Typography>
+              </Box>
+              
+              {/* Progress bar section */}
+              <Box sx={{ mt: 'auto', width: '100%' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                  <Typography variant="caption" fontWeight={600} color="text.secondary">
+                    {hasTarget ? 'İlerleme' : 'Hedef Yok'}
+                  </Typography>
+                  {hasTarget && (
+                    <Tooltip title={`Hedef: ${Math.round(studyTargets[subject] / 3600)} saat`} arrow placement="top">
+                      <Typography variant="caption" fontWeight={700} color={getSubjectColor(subject)}>
+                        {progress}%
+                      </Typography>
+                    </Tooltip>
+                  )}
+                </Box>
+                
+                <LinearProgress
+                  variant="determinate"
+                  value={hasTarget ? progress : 0}
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: 'rgba(0,0,0,0.05)',
+                    '& .MuiLinearProgress-bar': {
+                      bgcolor: getSubjectColor(subject),
+                      backgroundImage: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`,
+                      borderRadius: 4,
+                    },
+                  }}
+                />
+              </Box>
+            </Card>
+          );
+        })}
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', px: 3, pt: 2 }}>
         <Button
