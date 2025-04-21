@@ -83,6 +83,7 @@ const TytAytNetTakibi = () => {
     severity: 'success'
   });
   const [selectedGraphSubject, setSelectedGraphSubject] = useState('');
+  const [selectedRecordsSubject, setSelectedRecordsSubject] = useState('');
 
   // Calculate net
   const calculateNet = (correct, incorrect) => {
@@ -247,6 +248,8 @@ const TytAytNetTakibi = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
+    // Otomatik olarak yeni kayıt yapıldığında o dersi seçelim
+    setSelectedRecordsSubject(subject);
     if (!validateForm()) return;
     
     try {
@@ -783,28 +786,93 @@ const TytAytNetTakibi = () => {
               height: '4px', 
               background: 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%)' 
             }} />
-            <Typography 
-              variant="h6" 
-              gutterBottom
-              sx={{ 
-                fontWeight: 700, 
-                mb: 2,
-                fontFamily: 'Poppins, Quicksand, sans-serif',
-                display: 'flex',
-                alignItems: 'center',
-                color: '#3f51b5',
-                '&::before': { 
-                  content: '""', 
-                  width: 3, 
-                  height: 18, 
-                  backgroundColor: '#3f51b5', 
-                  borderRadius: 4, 
-                  marginRight: 1.5 
-                },
-              }}
-            >
-              Net Kayıtları
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+              <Typography 
+                variant="h6" 
+                gutterBottom
+                sx={{ 
+                  fontWeight: 700, 
+                  mb: 0,
+                  fontFamily: 'Poppins, Quicksand, sans-serif',
+                  display: 'flex',
+                  alignItems: 'center',
+                  color: '#3f51b5',
+                  '&::before': { 
+                    content: '""', 
+                    width: 3, 
+                    height: 18, 
+                    backgroundColor: '#3f51b5', 
+                    borderRadius: 4, 
+                    marginRight: 1.5 
+                  },
+                }}
+              >
+                Net Kayıtları
+              </Typography>
+              
+              <FormControl sx={{ minWidth: 200 }}>
+                <Select
+                  value={selectedRecordsSubject}
+                  onChange={(e) => setSelectedRecordsSubject(e.target.value)}
+                  displayEmpty
+                  size="small"
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                    '& .MuiSelect-select': { fontWeight: 500, py: 1 }
+                  }}
+                  MenuProps={{ 
+                    PaperProps: { 
+                      sx: { 
+                        borderRadius: 2, 
+                        boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                        mt: 0.5 
+                      } 
+                    } 
+                  }}
+                >
+                  <MenuItem value="" sx={{ borderRadius: 1, my: 0.5, mx: 0.5 }}>
+                    <em>Tüm Dersler</em>
+                  </MenuItem>
+                  {examType === 'TYT' 
+                    ? tytSubjects.map(subj => (
+                        <MenuItem 
+                          key={subj} 
+                          value={subj}
+                          sx={{
+                            borderRadius: 1, 
+                            my: 0.5, 
+                            mx: 0.5, 
+                            fontWeight: selectedRecordsSubject === subj ? 600 : 400,
+                            borderLeft: selectedRecordsSubject === subj ? '3px solid #3f51b5' : 'none',
+                            pl: selectedRecordsSubject === subj ? 1.5 : 2
+                          }}
+                        >
+                          {subj}
+                        </MenuItem>
+                      ))
+                    : aytSubjects.map(subj => (
+                        <MenuItem 
+                          key={subj} 
+                          value={subj}
+                          sx={{
+                            borderRadius: 1, 
+                            my: 0.5, 
+                            mx: 0.5, 
+                            fontWeight: selectedRecordsSubject === subj ? 600 : 400,
+                            borderLeft: selectedRecordsSubject === subj ? '3px solid #3f51b5' : 'none',
+                            pl: selectedRecordsSubject === subj ? 1.5 : 2
+                          }}
+                        >
+                          {subj}
+                        </MenuItem>
+                      ))
+                  }
+                </Select>
+              </FormControl>
+            </Box>
 
             {loading ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
@@ -815,6 +883,37 @@ const TytAytNetTakibi = () => {
                 <Typography variant="body1">Henüz net kaydı bulunmuyor.</Typography>
                 <Typography variant="body2" sx={{ mt: 1 }}>
                   Denemelere girip netlerinizi takip etmek için yukarıdaki formu doldurun.
+                </Typography>
+              </Box>
+            ) : netRecords.filter(record => selectedRecordsSubject ? record.subject === selectedRecordsSubject : true).length === 0 ? (
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                my: 4, 
+                p: 4, 
+                bgcolor: 'rgba(0,0,0,0.02)',
+                borderRadius: 2,
+                border: '1px dashed rgba(0,0,0,0.1)'
+              }}>
+                <Box sx={{ 
+                  width: 60, 
+                  height: 60, 
+                  borderRadius: '50%', 
+                  bgcolor: 'rgba(0,0,0,0.04)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 2
+                }}>
+                  <HelpOutlineIcon sx={{ fontSize: 30, color: 'text.disabled' }} />
+                </Box>
+                <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                  {selectedRecordsSubject} dersine ait kayıt bulunmuyor.
+                </Typography>
+                <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
+                  Bu ders için kayıt oluşturmak için sol taraftaki formu kullanabilirsiniz.
                 </Typography>
               </Box>
             ) : (
@@ -834,7 +933,9 @@ const TytAytNetTakibi = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {netRecords.map((record, index) => {
+                      {netRecords
+                        .filter(record => selectedRecordsSubject ? record.subject === selectedRecordsSubject : true)
+                        .map((record, index) => {
                         // Her ders için farklı bir renk tonu belirle
                         const subjectColors = {
                           'Türkçe': '#3f51b5',
