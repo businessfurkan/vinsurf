@@ -428,9 +428,14 @@ const BugunCozduklerin = () => {
     const subjectTopicMap = {};
     
     historicalProblems.filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true).forEach(item => {
+      if (!item || !item.subject || !item.topic) return; // Skip invalid items
+      
       const key = `${item.subject}-${item.topic}`;
       
       if (!subjectTopicMap[key]) {
+        // Safely access yksData with fallback for missing subjects
+        const subjectData = yksData[item.subject] || {};
+        
         subjectTopicMap[key] = {
           subject: item.subject,
           topic: item.topic,
@@ -438,7 +443,7 @@ const BugunCozduklerin = () => {
           incorrect: 0,
           empty: 0,
           net: 0,
-          color: yksData[item.subject]?.color || '#4285F4',
+          color: subjectData.color || '#4285F4',
           dates: [],
           lastUpdated: null
         };
@@ -699,7 +704,7 @@ const BugunCozduklerin = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
-                    border: `1px solid ${yksData[subject].color}25`,
+                    border: `1px solid ${(yksData[subject]?.color || '#4285F4')}25`,
                     backgroundColor: '#FFFFF0',
                     position: 'relative',
                     overflow: 'hidden',
@@ -710,7 +715,7 @@ const BugunCozduklerin = () => {
                       left: 0,
                       width: '100%',
                       height: '6px',
-                      backgroundColor: yksData[subject].color,
+                      backgroundColor: yksData[subject]?.color || '#4285F4',
                       opacity: 0.9
                     },
                     '&::after': {
@@ -720,7 +725,7 @@ const BugunCozduklerin = () => {
                       right: 0,
                       width: '30%',
                       height: '30%',
-                      background: `radial-gradient(circle at bottom right, ${yksData[subject].color}10, transparent 70%)`,
+                      background: `radial-gradient(circle at bottom right, ${(yksData[subject]?.color || '#4285F4')}10, transparent 70%)`,
                       borderTopLeftRadius: '50%',
                       opacity: 0.7,
                       zIndex: 0
@@ -740,7 +745,7 @@ const BugunCozduklerin = () => {
                   }}>
                     <Box
                       sx={{
-                        backgroundColor: `${yksData[subject].color}15`,
+                        backgroundColor: `${yksData[subject]?.color || '#4285F4'}15`,
                         width: 80,
                         height: 80,
                         borderRadius: '50%',
@@ -748,14 +753,14 @@ const BugunCozduklerin = () => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         mb: 2,
-                        boxShadow: `0 6px 16px ${yksData[subject].color}40`,
+                        boxShadow: `0 6px 16px ${yksData[subject]?.color || '#4285F4'}40`,
                         transition: 'all 0.3s ease',
                         '&:hover': {
                           transform: 'rotate(5deg) scale(1.05)',
                         }
                       }}
                     >
-                      <BookIcon sx={{ color: yksData[subject].color, fontSize: 38 }} />
+                      <BookIcon sx={{ color: yksData[subject]?.color || '#4285F4', fontSize: 38 }} />
                     </Box>
                     <Typography
                       variant="h6"
@@ -775,7 +780,7 @@ const BugunCozduklerin = () => {
                         color: '#4b5c6b',
                         fontWeight: 600,
                         fontSize: '1rem',
-                        backgroundColor: `${yksData[subject].color}15`,
+                        backgroundColor: `${yksData[subject]?.color || '#4285F4'}15`,
                         px: 2.5,
                         py: 0.8,
                         borderRadius: 10,
@@ -786,7 +791,7 @@ const BugunCozduklerin = () => {
                       }}
                     >
                       <BookIcon sx={{ fontSize: 16 }} />
-                      {yksData[subject].topics.length} Konu
+                      {yksData[subject]?.topics?.length || 0} Konu
                     </Typography>
                   </CardContent>
                 </Card>
@@ -1198,14 +1203,14 @@ const BugunCozduklerin = () => {
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'space-between',
-              bgcolor: `${yksData[selectedSubject].color}15`,
+              bgcolor: `${yksData[selectedSubject]?.color || '#4285F4'}15`,
               pb: 2,
               pt: 2
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Box
                   sx={{
-                    backgroundColor: `${yksData[selectedSubject].color}25`,
+                    backgroundColor: `${yksData[selectedSubject]?.color || '#4285F4'}25`,
                     width: 40,
                     height: 40,
                     borderRadius: '50%',
@@ -1215,7 +1220,7 @@ const BugunCozduklerin = () => {
                     mr: 2,
                   }}
                 >
-                  <BookIcon sx={{ color: yksData[selectedSubject].color, fontSize: 22 }} />
+                  <BookIcon sx={{ color: yksData[selectedSubject]?.color || '#4285F4', fontSize: 22 }} />
                 </Box>
                 <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
                   {selectedSubject} Konuları
@@ -1232,7 +1237,7 @@ const BugunCozduklerin = () => {
             </DialogTitle>
             <DialogContent sx={{ pt: 2 }}>
               <List>
-                {yksData[selectedSubject].topics.map((topic, index) => (
+                {yksData[selectedSubject]?.topics?.map((topic, index) => (
                   <React.Fragment key={topic}>
                     <ListItem 
                       sx={{ py: 1.5 }}
@@ -1272,7 +1277,7 @@ const BugunCozduklerin = () => {
                         </Box>
                       )}
                     </ListItem>
-                    {index < yksData[selectedSubject].topics.length - 1 && (
+                    {index < (yksData[selectedSubject]?.topics?.length || 0) - 1 && (
                       <Divider component="li" sx={{ opacity: 0.6 }} />
                     )}
                   </React.Fragment>
