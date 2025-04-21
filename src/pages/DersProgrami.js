@@ -3,11 +3,6 @@ import {
   Box,
   Typography,
   Paper,
-  Table,
-  TableBody,
-  TableContainer,
-  TableHead,
-  TableRow,
   Button,
   Dialog,
   DialogContent,
@@ -17,7 +12,6 @@ import {
   Alert,
   LinearProgress,
   IconButton,
-  Tooltip,
   styled,
   alpha,
   InputAdornment,
@@ -40,6 +34,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PersonIcon from '@mui/icons-material/Person';
 import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { scheduleService } from '../services/scheduleService';
@@ -91,43 +87,7 @@ const getSubjectColor = (subject) => {
 
 // Day styling is now handled directly in the component
 
-const StyledTableCell = styled(Box)(({ theme, isEmpty }) => ({
-  backgroundColor: isEmpty ? alpha('#FFFFF0', 0.8) : alpha('#FFFFF0', 0.95),
-  color: isEmpty ? alpha('#333', 0.6) : '#333',
-  padding: '16px',
-  textAlign: 'center',
-  verticalAlign: 'top',
-  height: '160px',
-  borderRadius: '12px',
-  margin: '6px',
-  position: 'relative',
-  cursor: isEmpty ? 'pointer' : 'default',
-  transition: 'all 0.3s ease',
-  boxShadow: isEmpty ? '0 4px 8px rgba(0,0,0,0.03)' : '0 6px 12px rgba(0,0,0,0.06)',
-  '&:hover': {
-    backgroundColor: isEmpty ? alpha('#FFFFF0', 0.9) : alpha('#FFFFF0', 0.98),
-    boxShadow: isEmpty ? '0 6px 12px rgba(0,0,0,0.06)' : '0 8px 16px rgba(0,0,0,0.08)',
-    transform: 'translateY(-2px)',
-  },
-  '&::before': isEmpty ? {
-    content: '""',
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: '70%',
-    height: '70%',
-    border: '2px dashed rgba(63, 81, 181, 0.2)',
-    borderRadius: '8px',
-    pointerEvents: 'none',
-    opacity: 0.7,
-    transition: 'all 0.3s ease',
-  } : {},
-  '&:hover::before': isEmpty ? {
-    borderColor: 'rgba(63, 81, 181, 0.4)',
-    opacity: 1,
-  } : {},
-}));
+// Artık kullanılmayan bileşen
 
 const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
   padding: '16px',
@@ -791,7 +751,6 @@ const DersProgrami = () => {
           <LinearProgress sx={{ width: '50%', borderRadius: 1 }} />
         </Box>
       ) : (
-        {!isLoading && (
         <Box sx={{ width: '100%', mt: 4 }}>
           <Box sx={{ 
             display: 'flex', 
