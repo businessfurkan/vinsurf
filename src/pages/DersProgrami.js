@@ -161,28 +161,20 @@ const DayCircle = styled(Box)(({ theme, day }) => {
       bottom: -2,
       borderRadius: '50%',
       background: 'transparent',
-      border: '2px solid rgba(255,255,255,0.2)',
-      opacity: 0.7
-    }
-  };
-});
-
-const ClassCell = styled(TableCell)(({ theme, isEmpty }) => ({
-  backgroundColor: isEmpty ? alpha('#f9fafc', 0.8) : theme.palette.background.paper,
-  color: isEmpty ? theme.palette.text.secondary : theme.palette.text.primary,
   padding: '16px',
   textAlign: 'center',
   verticalAlign: 'top',
   height: '160px',
-  borderRight: '1px solid rgba(224, 224, 224, 0.2)',
-  borderBottom: '1px solid rgba(224, 224, 224, 0.2)',
+  borderRadius: '12px',
+  margin: '6px',
   position: 'relative',
   cursor: isEmpty ? 'pointer' : 'default',
   transition: 'all 0.3s ease',
-  boxShadow: isEmpty ? 'none' : 'inset 0 0 0 1px rgba(0,0,0,0.03)',
+  boxShadow: isEmpty ? '0 4px 8px rgba(0,0,0,0.03)' : '0 6px 12px rgba(0,0,0,0.06)',
   '&:hover': {
-    backgroundColor: isEmpty ? alpha('#f0f4fa', 0.9) : alpha(theme.palette.background.paper, 0.97),
-    boxShadow: isEmpty ? 'inset 0 0 0 1px rgba(66,133,244,0.1)' : 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+    backgroundColor: isEmpty ? alpha('#FFFFF0', 0.9) : alpha('#FFFFF0', 0.98),
+    boxShadow: isEmpty ? '0 6px 12px rgba(0,0,0,0.06)' : '0 8px 16px rgba(0,0,0,0.08)',
+    transform: 'translateY(-2px)',
   },
   '&::before': isEmpty ? {
     content: '""',
@@ -192,14 +184,14 @@ const ClassCell = styled(TableCell)(({ theme, isEmpty }) => ({
     transform: 'translate(-50%, -50%)',
     width: '70%',
     height: '70%',
-    border: '2px dashed rgba(0,0,0,0.06)',
+    border: '2px dashed rgba(63, 81, 181, 0.2)',
     borderRadius: '8px',
     pointerEvents: 'none',
     opacity: 0.7,
     transition: 'all 0.3s ease',
   } : {},
   '&:hover::before': isEmpty ? {
-    borderColor: 'rgba(66,133,244,0.2)',
+    borderColor: 'rgba(63, 81, 181, 0.4)',
     opacity: 1,
   } : {},
 }));
@@ -207,18 +199,18 @@ const ClassCell = styled(TableCell)(({ theme, isEmpty }) => ({
 const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
   padding: '16px',
   borderRadius: '12px',
-  backgroundColor: alpha(theme.palette.background.paper, 0.95),
+  backgroundColor: alpha('#FFFFFF', 0.95),
   position: 'relative',
   overflow: 'hidden',
-  marginBottom: '14px',
-  cursor: 'pointer',
-  boxShadow: '0 4px 14px rgba(0,0,0,0.06)',
-  border: '1px solid rgba(0,0,0,0.03)',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  boxShadow: '0 6px 16px rgba(0,0,0,0.06)',
   transition: 'all 0.3s ease',
+  border: '1px solid rgba(63, 81, 181, 0.1)',
   '&:hover': {
-    boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
-    transform: 'translateY(-4px)',
-    borderColor: alpha(color, 0.2),
+    boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+    transform: 'translateY(-3px)',
   },
   '&::before': {
     content: '""',
@@ -227,121 +219,77 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
     left: 0,
     width: '100%',
     height: '5px',
-    background: `linear-gradient(to right, ${color}, ${alpha(color, 0.7)})`,
-    boxShadow: `0 2px 8px ${alpha(color, 0.3)}`,
+    backgroundColor: color,
+    boxShadow: `0 2px 8px ${alpha(color, 0.4)}`,
   },
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    top: '5px',
-    right: '10px',
-    width: '60px',
-    height: '60px',
-    borderRadius: '50%',
-    background: `radial-gradient(circle, ${alpha(color, 0.08)} 0%, transparent 70%)`,
-    pointerEvents: 'none',
-  }
 }));
 
-const AddButton = styled(IconButton)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.primary.main, 0.9),
-  color: theme.palette.primary.contrastText,
-  boxShadow: '0 6px 16px rgba(66,133,244,0.25)',
+const FilterButton = styled(Button)(({ theme }) => ({
+  backgroundColor: alpha('#3f51b5', 0.1),
+  color: '#3f51b5',
+  border: `1px solid ${alpha('#3f51b5', 0.2)}`,
+  borderRadius: '30px',
+  padding: '8px 16px',
+  textTransform: 'none',
+  fontWeight: 600,
+  boxShadow: '0 4px 10px rgba(63, 81, 181, 0.1)',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: theme.palette.primary.main,
-    transform: 'scale(1.1) rotate(90deg)',
-    boxShadow: '0 8px 20px rgba(66,133,244,0.35)',
-  },
-  transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-  width: '46px',
-  height: '46px',
-  border: '2px solid rgba(255,255,255,0.8)',
-  position: 'relative',
-  overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: '-50%',
-    left: '-50%',
-    width: '200%',
-    height: '200%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%)',
-    opacity: 0,
-    transition: 'opacity 0.3s ease',
-  },
-  '&:hover::before': {
-    opacity: 1,
+    backgroundColor: alpha('#3f51b5', 0.15),
+    boxShadow: '0 6px 12px rgba(63, 81, 181, 0.15)',
+    transform: 'translateY(-2px)',
   }
 }));
 
-const FilterBar = styled(Paper)(({ theme }) => ({
-  padding: '20px 24px',
-  borderRadius: '18px',
-  backgroundColor: alpha(theme.palette.background.paper, 0.98),
-  boxShadow: '0 12px 36px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)',
-  marginBottom: '32px',
-  border: '1px solid rgba(0,0,0,0.03)',
+const DayHeader = styled(Box)(({ theme, isToday }) => ({
+  padding: '14px 10px',
+  borderRadius: '16px',
+  backgroundColor: isToday ? alpha('#3f51b5', 0.15) : alpha('#FFFFF0', 0.9),
+  color: isToday ? '#3f51b5' : '#333',
+  fontWeight: isToday ? 700 : 600,
+  textAlign: 'center',
   position: 'relative',
   overflow: 'hidden',
-  '&::before': {
+  boxShadow: isToday ? '0 6px 16px rgba(63, 81, 181, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.05)',
+  margin: '0 6px 12px 6px',
+  transition: 'all 0.3s ease',
+  border: isToday ? `2px solid ${alpha('#3f51b5', 0.3)}` : '1px solid rgba(0,0,0,0.03)',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: isToday ? '0 8px 20px rgba(63, 81, 181, 0.25)' : '0 6px 16px rgba(0, 0, 0, 0.08)',
+  },
+  '&::before': isToday ? {
     content: '""',
     position: 'absolute',
     top: 0,
     left: 0,
     width: '100%',
-    height: '4px',
-    background: 'linear-gradient(to right, #4285F4, #34A853, #FBBC05, #EA4335)',
-  },
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: '150px',
-    height: '150px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(63, 81, 181, 0.03) 0%, rgba(63, 81, 181, 0) 70%)',
-    zIndex: 0
-  }
-}));
-
-
-
-const FilterButton = styled(Button)(({ theme }) => ({
-  borderRadius: 12,
-  textTransform: 'none',
-  padding: '8px 16px',
-  backgroundColor: '#f5f8ff',
-  color: theme.palette.primary.main,
-  fontWeight: 500,
-  boxShadow: '0 2px 6px rgba(0,0,0,0.06)',
-  border: '1px solid rgba(63, 81, 181, 0.12)',
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    backgroundColor: '#eef2ff',
-    boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
-    transform: 'translateY(-2px)'
-  }
+    height: '100%',
+    background: `linear-gradient(135deg, ${alpha('#3f51b5', 0.1)} 0%, transparent 100%)`,
+    pointerEvents: 'none',
+  } : {},
 }));
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiPaper-root': {
-    borderRadius: 12,
-    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-    padding: theme.spacing(1),
-    backgroundColor: alpha(theme.palette.background.paper, 0.97)
-  }
-}));
-
-const StyledMenuItem = styled(MenuItem)(({ theme, selected }) => ({
-  borderRadius: 8,
-  margin: '2px 0',
-  transition: 'background-color 0.2s',
-  padding: '6px 16px',
-  fontSize: '0.95rem',
-  backgroundColor: selected ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
-  '&:hover': {
-    backgroundColor: selected ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.action.hover, 0.1)
+    borderRadius: '16px',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+    padding: '12px',
+    backgroundColor: alpha('#FFFFFF', 0.98),
+    backdropFilter: 'blur(10px)',
+    border: `1px solid ${alpha('#3f51b5', 0.1)}`,
+    minWidth: '220px',
+    maxWidth: '300px',
+    overflow: 'hidden',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '4px',
+      background: 'linear-gradient(90deg, #3f51b5, #5c6bc0)',
+    }
   }
 }));
 
@@ -640,7 +588,7 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: '#FFFFF0',
+        background: 'linear-gradient(135deg, #FFFFF0 0%, #FFFACD 100%)',
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
@@ -650,8 +598,24 @@ const DersProgrami = () => {
           left: 0,
           width: '100%',
           height: '100%',
-          background: 'rgba(255,255,255,0.35)',
-          backdropFilter: 'blur(8px)',
+          backgroundImage: `
+            linear-gradient(rgba(63, 81, 181, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(63, 81, 181, 0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '20px 20px',
+          pointerEvents: 'none',
+          zIndex: 0,
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: '10%',
+          right: '5%',
+          width: '300px',
+          height: '300px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(63,81,181,0.05) 0%, rgba(63,81,181,0) 70%)',
+          pointerEvents: 'none',
           zIndex: 0,
         },
         zIndex: 1,
@@ -684,20 +648,56 @@ const DersProgrami = () => {
           Ders Programı
         </Typography>
 
-        <FilterBar>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" fontWeight="600" color="primary.main" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SearchIcon fontSize="small" /> Ders Arama ve Filtreleme
-            </Typography>
-            <Chip 
-              label={`Toplam ${Object.values(schedule).reduce((total, day) => total + day.length, 0)} ders`}
-              color="primary" 
-              fullWidth
-              placeholder="Ders, öğretmen veya konu ara..."
-              value={searchText}
-              onChange={handleSearchChange}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center', 
+          mb: 3,
+          flexWrap: 'wrap',
+          gap: 2,
+          backgroundColor: alpha('#FFFFF0', 0.8),
+          padding: '16px 20px',
+          borderRadius: '20px',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.05)',
+          border: '1px solid rgba(63, 81, 181, 0.1)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <Box sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '4px',
+            background: 'linear-gradient(90deg, #3f51b5, #5c6bc0, #3f51b5)',
+            backgroundSize: '200% 100%',
+            animation: 'shimmer 2s infinite linear',
+            '@keyframes shimmer': {
+              '0%': { backgroundPosition: '0% 0%' },
+              '100%': { backgroundPosition: '200% 0%' }
+            }
+          }} />
+          
+          <Typography variant="h5" component="h1" sx={{ 
+            fontWeight: 700, 
+            color: '#3f51b5',
+            display: 'flex',
+            alignItems: 'center',
+            '& svg': {
+              fontSize: '1.8rem',
+              marginRight: '10px'
+            }
+          }}>
+            <CalendarMonthIcon />
+            Ders Programı
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <TextField
+              placeholder="Ders Arama ve Filtreleme"
               variant="outlined"
               size="small"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -706,180 +706,105 @@ const DersProgrami = () => {
                 ),
                 endAdornment: searchText && (
                   <InputAdornment position="end">
-                    <IconButton size="small" onClick={() => setSearchText('')} sx={{ color: 'text.secondary' }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => setSearchText('')}
+                      edge="end"
+                    >
                       <CloseIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
-                )
+                ),
+                sx: {
+                  borderRadius: '30px',
+                  backgroundColor: alpha('#fff', 0.9),
+                  '&:hover': {
+                    backgroundColor: alpha('#fff', 0.95),
+                  },
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                  border: '1px solid rgba(63, 81, 181, 0.15)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+                    transform: 'translateY(-2px)'
+                  }
+                }
               }}
+              sx={{ minWidth: { xs: '100%', sm: '260px' } }}
             />
+            <FilterButton
+              aria-controls={openFilterMenu ? 'subject-filter-menu' : undefined}
+              aria-haspopup="true"
+              aria-expanded={openFilterMenu ? 'true' : undefined}
+              onClick={handleFilterMenuClick}
+              endIcon={selectedSubjects.length > 0 ? <Badge color="primary" badgeContent={selectedSubjects.length}>
+                <FilterListIcon />
+              </Badge> : <FilterListIcon />}
+            >
+              {selectedSubjects.length > 0 ? 'Seçili Filtreler' : 'Konuları Filtrele'}
+            </FilterButton>
           </Box>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={7}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="body2" fontWeight="600" sx={{ mr: 1.5, color: 'text.secondary' }}>
-                  Konu Filtresi:
-                </Typography>
-                
-                <FilterButton
-                  aria-controls={openFilterMenu ? 'subject-filter-menu' : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={openFilterMenu ? 'true' : undefined}
-                  onClick={handleFilterMenuClick}
-                  endIcon={selectedSubjects.length > 0 ? <Badge color="primary" badgeContent={selectedSubjects.length}>
-                    <FilterListIcon />
-                  </Badge> : <FilterListIcon />}
-                >
-                  {selectedSubjects.length > 0 ? 'Seçili Filtreler' : 'Konuları Filtrele'}
-                </FilterButton>
-                
-                <StyledMenu
-                  id="subject-filter-menu"
-                  anchorEl={anchorEl}
-                  open={openFilterMenu}
-                  onClose={handleFilterMenuClose}
-                  MenuListProps={{
-                    'aria-labelledby': 'filter-button',
-                    sx: { maxHeight: 300 }
-                  }}
-                >
-                  <Box sx={{ px: 1, pb: 1, mb: 1, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                      Ders Konuları
-                    </Typography>
-                  </Box>
-                  {getUniqueSubjects().map((subject) => (
-                    <StyledMenuItem
-                      key={subject}
-                      selected={selectedSubjects.includes(subject)}
-                      onClick={() => handleFilterToggle(subject)}
-                    >
-                      <Checkbox 
-                        checked={selectedSubjects.includes(subject)} 
-                        color="primary" 
-                        size="small"
-                        sx={{ mr: 1, p: 0.5 }}
-                      />
-                      <Box 
-                        component="span" 
-                        sx={{ 
-                          display: 'inline-block', 
-                          width: 12, 
-                          height: 12, 
-                          borderRadius: '50%', 
-                          backgroundColor: getSubjectColor(subject),
-                          mr: 1,
-                          boxShadow: `0 0 0 2px ${alpha(getSubjectColor(subject), 0.2)}`
-                        }} 
-                      />
-                      {subject}
-                    </StyledMenuItem>
-                  ))}
-                  {selectedSubjects.length > 0 && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                      <Button 
-                        size="small" 
-                        color="primary" 
-                        startIcon={<FilterListOffIcon />}
-                        onClick={() => {
-                          setSelectedSubjects([]);
-                          handleFilterMenuClose();
-                        }}
-                        sx={{ textTransform: 'none' }}
-                      >
-                        Filtreleri Temizle
-                      </Button>
-                    </Box>
-                  )}
-                </StyledMenu>
-                
-              <FilterButton
-                aria-controls={openFilterMenu ? 'subject-filter-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={openFilterMenu ? 'true' : undefined}
-                onClick={handleFilterMenuClick}
-                endIcon={selectedSubjects.length > 0 ? <Badge color="primary" badgeContent={selectedSubjects.length}>
-                  <FilterListIcon />
-                </Badge> : <FilterListIcon />}
-              >
-                {selectedSubjects.length > 0 ? 'Seçili Filtreler' : 'Konuları Filtrele'}
-              </FilterButton>
-              
-              <StyledMenu
-                id="subject-filter-menu"
-                anchorEl={anchorEl}
-                open={openFilterMenu}
-                onClose={handleFilterMenuClose}
-                MenuListProps={{
-                  'aria-labelledby': 'filter-button',
-                  sx: { maxHeight: 300 }
+        </Box>
+        <StyledMenu
+          id="subject-filter-menu"
+          anchorEl={anchorEl}
+          open={openFilterMenu}
+          onClose={handleFilterMenuClose}
+          MenuListProps={{
+            'aria-labelledby': 'filter-button',
+            sx: { maxHeight: 300 }
+          }}
+        >
+          <Box sx={{ px: 2, pb: 1, mb: 1, borderBottom: '1px solid rgba(63, 81, 181, 0.1)' }}>
+            <Typography variant="subtitle1" color="primary" sx={{ mb: 1, fontWeight: 600 }}>
+              Ders Konuları
+            </Typography>
+          </Box>
+          {getUniqueSubjects().map((subject) => (
+            <StyledMenuItem
+              key={subject}
+              selected={selectedSubjects.includes(subject)}
+              onClick={() => handleFilterToggle(subject)}
+            >
+              <Checkbox 
+                checked={selectedSubjects.includes(subject)} 
+                color="primary" 
+                size="small"
+                sx={{ mr: 1, p: 0.5 }}
+              />
+              <Box 
+                component="span" 
+                sx={{ 
+                  display: 'inline-block', 
+                  width: 12, 
+                  height: 12, 
+                  borderRadius: '50%', 
+                  backgroundColor: getSubjectColor(subject),
+                  mr: 1,
+                  boxShadow: `0 0 0 2px ${alpha(getSubjectColor(subject), 0.2)}`
+                }} 
+              />
+              {subject}
+            </StyledMenuItem>
+          ))}
+          {selectedSubjects.length > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid rgba(63, 81, 181, 0.1)' }}>
+              <Button 
+                size="small" 
+                color="primary" 
+                startIcon={<FilterListOffIcon />}
+                onClick={() => {
+                  setSelectedSubjects([]);
+                  handleFilterMenuClose();
                 }}
+                sx={{ textTransform: 'none' }}
               >
-                <Box sx={{ px: 1, pb: 1, mb: 1, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
-                    Ders Konuları
-                  </Typography>
-                </Box>
-                {getUniqueSubjects().map((subject) => (
-                  <StyledMenuItem
-                    key={subject}
-                    selected={selectedSubjects.includes(subject)}
-                    onClick={() => handleFilterToggle(subject)}
-                  >
-                    <Checkbox 
-                      checked={selectedSubjects.includes(subject)} 
-                      color="primary" 
-                      size="small"
-                      sx={{ mr: 1, p: 0.5 }}
-                    />
-                    <Box 
-                      component="span" 
-                      sx={{ 
-                        display: 'inline-block', 
-                        width: 12, 
-                        height: 12, 
-                        borderRadius: '50%', 
-                        backgroundColor: getSubjectColor(subject),
-                        mr: 1,
-                        boxShadow: `0 0 0 2px ${alpha(getSubjectColor(subject), 0.2)}`
-                      }} 
-                    />
-                    {subject}
-                  </StyledMenuItem>
-                ))}
-                {selectedSubjects.length > 0 && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1, pt: 1, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-                    <Button 
-                      size="small" 
-                      color="primary" 
-                      startIcon={<FilterListOffIcon />}
-                      onClick={() => {
-                        setSelectedSubjects([]);
-                        handleFilterMenuClose();
-                      }}
-                      sx={{ textTransform: 'none' }}
-                    >
-                      Filtreleri Temizle
-                    </Button>
-                  </Box>
-                )}
-              </StyledMenu>
-              
-              {selectedSubjects.length > 0 && (
-                <Tooltip title="Filtreleri Temizle">
-                  <IconButton 
-                    size="small" 
-                    onClick={() => setSelectedSubjects([])}
-                    sx={{ ml: 1, color: 'text.secondary' }}
-                  >
-                    <FilterListOffIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              )}
+                Filtreleri Temizle
+              </Button>
             </Box>
-          </Grid>
-        </Grid>
-      </FilterBar>
+          )}
+        </StyledMenu>
+      </Box>
       
       {isLoading ? (
         <Box sx={{ my: 4, display: 'flex', justifyContent: 'center' }}>
@@ -901,21 +826,16 @@ const DersProgrami = () => {
             <TableHead>
               <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.02)' }}>
                 {daysOfWeek.map(day => (
-                  <HeaderTableCell key={day} align="center">
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                      <DayCircle day={day}>
-                        {day.charAt(0)}
-                      </DayCircle>
-                      {day}
-                    </Box>
-                  </HeaderTableCell>
+                  <DayHeader key={day} isToday={false}>
+                    {day}
+                  </DayHeader>
                 ))}
               </TableRow>
             </TableHead>
             <TableBody>
               <TableRow>
                 {daysOfWeek.map(day => (
-                  <ClassCell 
+                  <StyledTableCell 
                     key={day} 
                     isEmpty={!filteredSchedule[day] || filteredSchedule[day].length === 0} 
                     onClick={() => handleAddClass(day)}
@@ -1043,12 +963,22 @@ const DersProgrami = () => {
                         ))}
                         
                         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                          <AddButton onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddClass(day);
-                          }}>
-                            <AddCircleOutlineIcon />
-                          </AddButton>
+                          <IconButton
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddClass(day);
+                            }}
+                            sx={{ 
+                              p: 0.5,
+                              color: alpha('#3f51b5', 0.8),
+                              backgroundColor: alpha('#3f51b5', 0.1),
+                              '&:hover': {
+                                backgroundColor: alpha('#3f51b5', 0.2),
+                              }
+                            }}
+                          >
+                            <AddCircleOutlineIcon fontSize="small" />
+                          </IconButton>
                         </Box>
                       </Box>
                     ) : (
@@ -1060,12 +990,22 @@ const DersProgrami = () => {
                         height: '100%',
                         minHeight: 200
                       }}>
-                        <AddButton onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddClass(day);
-                        }}>
-                          <AddCircleOutlineIcon />
-                        </AddButton>
+                        <IconButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddClass(day);
+                          }}
+                          sx={{ 
+                            p: 0.5,
+                            color: alpha('#3f51b5', 0.8),
+                            backgroundColor: alpha('#3f51b5', 0.1),
+                            '&:hover': {
+                              backgroundColor: alpha('#3f51b5', 0.2),
+                            }
+                          }}
+                        >
+                          <AddCircleOutlineIcon fontSize="small" />
+                        </IconButton>
                         <Typography 
                           variant="body2" 
                           color="text.secondary" 
@@ -1078,7 +1018,7 @@ const DersProgrami = () => {
                         </Typography>
                       </Box>
                     )}
-                  </ClassCell>
+                  </StyledTableCell>
                 ))}
               </TableRow>
             </TableBody>
