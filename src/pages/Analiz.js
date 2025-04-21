@@ -25,11 +25,8 @@ import {
   Tooltip
 } from '@mui/material';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SubjectIcon from '@mui/icons-material/Subject';
 import CloseIcon from '@mui/icons-material/Close';
-import TargetIcon from '@mui/icons-material/Flag';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import FlagIcon from '@mui/icons-material/Flag';
 import SaveIcon from '@mui/icons-material/Save';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -37,8 +34,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import SchoolIcon from '@mui/icons-material/School';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import CheckIcon from '@mui/icons-material/Check';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ScienceIcon from '@mui/icons-material/Science';
 import BiotechIcon from '@mui/icons-material/Biotech';
