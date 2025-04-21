@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useTheme } from '@mui/material/styles';
+
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { 
@@ -66,7 +66,6 @@ const aytSubjects = [
 
 const TytAytNetTakibi = () => {
   const [user] = useAuthState(auth);
-  const theme = useTheme();
   const [examType, setExamType] = useState('TYT');
   const [subject, setSubject] = useState('');
   const [correctCount, setCorrectCount] = useState('');
@@ -407,16 +406,25 @@ const TytAytNetTakibi = () => {
   };
 
   return (
-    <Box sx={{ p: 3, pt: 5, pb: 4 }}>
+    <Box sx={{ p: 3, pt: 5, pb: 4, background: '#FFFFF0', minHeight: '100vh' }}>
+      <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)' }} />
       <Typography 
-        variant="h4" 
+        variant="h5" 
+        fontWeight="bold"
         gutterBottom
         sx={{ 
-          fontWeight: 700, 
-          color: theme.palette.primary.main,
-          fontFamily: 'Quicksand',
-          mb: 3,
-          mt: 2
+          mb: 3, 
+          display: 'flex', 
+          alignItems: 'center', 
+          '&::before': { 
+            content: '""', 
+            width: 5, 
+            height: 24, 
+            backgroundColor: 'primary.main', 
+            borderRadius: 4, 
+            marginRight: 1.5 
+          },
+          fontFamily: 'Poppins, Quicksand, sans-serif',
         }}
       >
         TYT-AYT Net Takibi
@@ -429,16 +437,39 @@ const TytAytNetTakibi = () => {
             sx={{ 
               p: 3, 
               borderRadius: 3,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+              background: 'linear-gradient(145deg, #ffffff 0%, #f5f8ff 100%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(63, 81, 181, 0.15)',
+              border: '1px solid rgba(63, 81, 181, 0.1)',
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
+            <Box sx={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              width: '100%', 
+              height: '4px', 
+              background: 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%)' 
+            }} />
             <Typography 
               variant="h6" 
               gutterBottom
               sx={{ 
-                fontWeight: 600, 
+                fontWeight: 700, 
                 mb: 2,
-                fontFamily: 'Quicksand'
+                fontFamily: 'Poppins, Quicksand, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                color: '#3f51b5',
+                '&::before': { 
+                  content: '""', 
+                  width: 3, 
+                  height: 18, 
+                  backgroundColor: '#3f51b5', 
+                  borderRadius: 4, 
+                  marginRight: 1.5 
+                },
               }}
             >
               Yeni Net Ekle
@@ -453,9 +484,25 @@ const TytAytNetTakibi = () => {
                   setSubject('');
                 }}
                 label="Sınav Türü"
+                sx={{
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                  '& .MuiSelect-select': { fontWeight: 500 }
+                }}
+                MenuProps={{ 
+                  PaperProps: { 
+                    sx: { 
+                      borderRadius: 2, 
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                      mt: 0.5 
+                    } 
+                  } 
+                }}
               >
-                <MenuItem value="TYT">TYT</MenuItem>
-                <MenuItem value="AYT">AYT</MenuItem>
+                <MenuItem value="TYT" sx={{ borderRadius: 1, my: 0.5, mx: 0.5, fontWeight: examType === 'TYT' ? 600 : 400 }}>TYT</MenuItem>
+                <MenuItem value="AYT" sx={{ borderRadius: 1, my: 0.5, mx: 0.5, fontWeight: examType === 'AYT' ? 600 : 400 }}>AYT</MenuItem>
               </Select>
             </FormControl>
 
@@ -465,10 +512,57 @@ const TytAytNetTakibi = () => {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 label="Ders"
+                sx={{
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                  '& .MuiSelect-select': { fontWeight: 500 }
+                }}
+                MenuProps={{ 
+                  PaperProps: { 
+                    sx: { 
+                      borderRadius: 2, 
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                      mt: 0.5,
+                      maxHeight: 300
+                    } 
+                  } 
+                }}
               >
                 {examType === 'TYT' 
-                  ? tytSubjects.map(subj => <MenuItem key={subj} value={subj}>{subj}</MenuItem>)
-                  : aytSubjects.map(subj => <MenuItem key={subj} value={subj}>{subj}</MenuItem>)
+                  ? tytSubjects.map(subj => (
+                      <MenuItem 
+                        key={subj} 
+                        value={subj}
+                        sx={{
+                          borderRadius: 1, 
+                          my: 0.5, 
+                          mx: 0.5, 
+                          fontWeight: subject === subj ? 600 : 400,
+                          borderLeft: subject === subj ? '3px solid #3f51b5' : 'none',
+                          pl: subject === subj ? 1.5 : 2
+                        }}
+                      >
+                        {subj}
+                      </MenuItem>
+                    ))
+                  : aytSubjects.map(subj => (
+                      <MenuItem 
+                        key={subj} 
+                        value={subj}
+                        sx={{
+                          borderRadius: 1, 
+                          my: 0.5, 
+                          mx: 0.5, 
+                          fontWeight: subject === subj ? 600 : 400,
+                          borderLeft: subject === subj ? '3px solid #3f51b5' : 'none',
+                          pl: subject === subj ? 1.5 : 2
+                        }}
+                      >
+                        {subj}
+                      </MenuItem>
+                    ))
                 }
               </Select>
               {errors.subject && <FormHelperText>{errors.subject}</FormHelperText>}
@@ -485,7 +579,21 @@ const TytAytNetTakibi = () => {
                   margin="normal"
                   error={!!errors.correctCount}
                   helperText={errors.correctCount}
-                  InputProps={{ inputProps: { min: 0 } }}
+                  InputProps={{ 
+                    inputProps: { min: 0 },
+                    sx: { 
+                      borderRadius: 2,
+                      '& input': { fontWeight: 600, textAlign: 'center', fontSize: '1.1rem', color: '#4caf50' }
+                    }
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#4caf50' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#4caf50' },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#4caf50' }
+                  }}
                 />
               </Grid>
               <Grid item xs={6}>
@@ -498,14 +606,52 @@ const TytAytNetTakibi = () => {
                   margin="normal"
                   error={!!errors.incorrectCount}
                   helperText={errors.incorrectCount}
-                  InputProps={{ inputProps: { min: 0 } }}
+                  InputProps={{ 
+                    inputProps: { min: 0 },
+                    sx: { 
+                      borderRadius: 2,
+                      '& input': { fontWeight: 600, textAlign: 'center', fontSize: '1.1rem', color: '#f44336' }
+                    }
+                  }}
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#f44336' },
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#f44336' },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': { color: '#f44336' }
+                  }}
                 />
               </Grid>
             </Grid>
 
-            <Box sx={{ p: 2, bgcolor: 'rgba(38, 166, 154, 0.1)', borderRadius: 2, mt: 2, mb: 2 }}>
-              <Typography variant="body1" align="center" sx={{ fontWeight: 'bold', color: '#26a69a' }}>
-                NET: {calculateNet(correctCount, incorrectCount)}
+            <Box 
+              sx={{ 
+                p: 2.5, 
+                background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08) 0%, rgba(63, 81, 181, 0.15) 100%)', 
+                borderRadius: 3, 
+                mt: 3, 
+                mb: 3,
+                border: '1px solid rgba(63, 81, 181, 0.2)',
+                boxShadow: '0 4px 12px rgba(63, 81, 181, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center'
+              }}
+            >
+              <Typography variant="subtitle2" sx={{ color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                NET SONUÇ
+              </Typography>
+              <Typography 
+                variant="h4" 
+                align="center" 
+                sx={{ 
+                  fontWeight: 800, 
+                  color: '#3f51b5',
+                  fontFamily: 'Poppins, Quicksand, sans-serif',
+                }}
+              >
+                {calculateNet(correctCount, incorrectCount)}
               </Typography>
             </Box>
 
@@ -517,6 +663,19 @@ const TytAytNetTakibi = () => {
               margin="normal"
               error={!!errors.examName}
               helperText={errors.examName}
+              InputProps={{ 
+                sx: { 
+                  borderRadius: 2,
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
+              }}
             />
 
             <TextField
@@ -529,6 +688,19 @@ const TytAytNetTakibi = () => {
               InputLabelProps={{ shrink: true }}
               error={!!errors.examDate}
               helperText={errors.examDate}
+              InputProps={{ 
+                sx: { 
+                  borderRadius: 2,
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
+              }}
             />
 
             <Button
@@ -539,8 +711,19 @@ const TytAytNetTakibi = () => {
                 mt: 3,
                 borderRadius: 2,
                 py: 1.5,
-                fontFamily: 'Quicksand',
-                fontWeight: 600
+                fontFamily: 'Poppins, Quicksand, sans-serif',
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
+                boxShadow: '0 4px 12px rgba(63, 81, 181, 0.3)',
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  boxShadow: '0 6px 16px rgba(63, 81, 181, 0.4)', 
+                  transform: 'translateY(-2px)'
+                },
+                '&:active': { 
+                  transform: 'translateY(0)', 
+                  boxShadow: '0 2px 8px rgba(63, 81, 181, 0.3)' 
+                },
               }}
             >
               Kaydet
@@ -554,17 +737,40 @@ const TytAytNetTakibi = () => {
             sx={{ 
               p: 3, 
               borderRadius: 3,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-              height: '100%'
+              background: 'linear-gradient(145deg, #ffffff 0%, #f5f8ff 100%)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(63, 81, 181, 0.15)',
+              border: '1px solid rgba(63, 81, 181, 0.1)',
+              height: '100%',
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
+            <Box sx={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              width: '100%', 
+              height: '4px', 
+              background: 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%)' 
+            }} />
             <Typography 
               variant="h6" 
               gutterBottom
               sx={{ 
-                fontWeight: 600, 
+                fontWeight: 700, 
                 mb: 2,
-                fontFamily: 'Quicksand'
+                fontFamily: 'Poppins, Quicksand, sans-serif',
+                display: 'flex',
+                alignItems: 'center',
+                color: '#3f51b5',
+                '&::before': { 
+                  content: '""', 
+                  width: 3, 
+                  height: 18, 
+                  backgroundColor: '#3f51b5', 
+                  borderRadius: 4, 
+                  marginRight: 1.5 
+                },
               }}
             >
               Net Kayıtları
@@ -583,44 +789,53 @@ const TytAytNetTakibi = () => {
               </Box>
             ) : (
               <>
-                <TableContainer sx={{ mb: 4 }}>
+                <TableContainer sx={{ mb: 4, borderRadius: 2, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
                   <Table>
                     <TableHead>
-                      <TableRow>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Deneme</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Sınav Türü</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Ders</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Doğru</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Yanlış</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Net</TableCell>
-                        <TableCell sx={{ fontWeight: 'bold' }}>Tarih</TableCell>
-                        <TableCell></TableCell>
+                      <TableRow sx={{ background: 'linear-gradient(135deg, rgba(63, 81, 181, 0.08) 0%, rgba(63, 81, 181, 0.15) 100%)' }}>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Deneme</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Sınav Türü</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Ders</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#4caf50', py: 1.5 }}>Doğru</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#f44336', py: 1.5 }}>Yanlış</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Net</TableCell>
+                        <TableCell sx={{ fontWeight: 700, color: '#3f51b5', py: 1.5 }}>Tarih</TableCell>
+                        <TableCell sx={{ py: 1.5 }}></TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {netRecords.map((record) => (
+                      {netRecords.map((record, index) => (
                         <TableRow key={record.id} hover>
                           <TableCell>{record.examName}</TableCell>
                           <TableCell>
                             <Chip 
                               label={record.examType} 
                               size="small" 
-                              color={record.examType === 'TYT' ? 'primary' : 'secondary'}
-                              variant="outlined"
+                              sx={{ 
+                                fontWeight: 600, 
+                                bgcolor: record.examType === 'TYT' ? 'rgba(63, 81, 181, 0.1)' : 'rgba(156, 39, 176, 0.1)',
+                                color: record.examType === 'TYT' ? '#3f51b5' : '#9c27b0',
+                                border: record.examType === 'TYT' ? '1px solid rgba(63, 81, 181, 0.2)' : '1px solid rgba(156, 39, 176, 0.2)',
+                                borderRadius: 1
+                              }} 
                             />
                           </TableCell>
-                          <TableCell>{record.subject}</TableCell>
-                          <TableCell>{record.correctCount}</TableCell>
-                          <TableCell>{record.incorrectCount}</TableCell>
-                          <TableCell sx={{ fontWeight: 'bold' }}>
-                            {record.net}
-                          </TableCell>
-                          <TableCell>{formatDate(record.date)}</TableCell>
+                          <TableCell sx={{ fontWeight: 500 }}>{record.subject}</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#4caf50' }}>{record.correctCount}</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: '#f44336' }}>{record.incorrectCount}</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#3f51b5' }}>{record.net}</TableCell>
+                          <TableCell>{record.date instanceof Date ? record.date.toLocaleDateString('tr-TR') : formatDate(record.date)}</TableCell>
                           <TableCell>
                             <IconButton 
                               size="small" 
                               onClick={() => handleDelete(record.id)}
-                              color="error"
+                              sx={{
+                                color: 'rgba(244, 67, 54, 0.7)',
+                                '&:hover': {
+                                  bgcolor: 'rgba(244, 67, 54, 0.1)',
+                                  color: '#f44336'
+                                }
+                              }}
                             >
                               <DeleteIcon fontSize="small" />
                             </IconButton>
@@ -637,62 +852,132 @@ const TytAytNetTakibi = () => {
                       variant="h6" 
                       gutterBottom
                       sx={{ 
-                        fontWeight: 600, 
+                        fontWeight: 700, 
                         mb: 3,
-                        fontFamily: 'Quicksand'
+                        fontFamily: 'Poppins, Quicksand, sans-serif',
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: '#3f51b5',
+                        '&::before': { 
+                          content: '""', 
+                          width: 3, 
+                          height: 18, 
+                          backgroundColor: '#3f51b5', 
+                          borderRadius: 4, 
+                          marginRight: 1.5 
+                        },
                       }}
                     >
                       Net Gelişim Grafiği
                     </Typography>
                     
-                    {chartData.map((item, index) => (
-                      <Card 
-                        key={item.subject} 
-                        sx={{ 
-                          mb: 3, 
-                          borderRadius: 2,
-                          boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
-                        }}
-                      >
-                        <CardContent>
-                          <Typography 
-                            variant="subtitle1" 
-                            gutterBottom
-                            sx={{ 
-                              fontWeight: 600, 
-                              color: theme.palette.primary.main,
-                              fontFamily: 'Quicksand'
-                            }}
-                          >
-                            {item.subject}
-                          </Typography>
-                          
-                          <Box sx={{ height: 300 }}>
-                            <ResponsiveContainer width="100%" height="100%">
-                              <BarChart
-                                data={item.data}
-                                margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
-                              >
-                                <CartesianGrid strokeDasharray="3 3" stroke={theme.palette.divider} />
-                                <XAxis 
-                                  dataKey="name" 
-                                  angle={-45} 
-                                  textAnchor="end"
-                                  height={70}
-                                  tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
-                                />
-                                <YAxis 
-                                  tick={{ fontSize: 12, fill: theme.palette.text.secondary }}
-                                />
-                                <Tooltip />
-                                <Legend />
-                                <Bar dataKey="net" name="Net" fill={theme.palette.primary.main} radius={[4, 4, 0, 0]} />
-                              </BarChart>
-                            </ResponsiveContainer>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    {chartData.map((item, index) => {
+                      // Her ders için farklı bir renk tonu belirle
+                      const subjectColors = {
+                        'Türkçe': '#3f51b5',
+                        'Sosyal Bilimler': '#673ab7',
+                        'Temel Matematik': '#2196f3',
+                        'Fen Bilimleri': '#009688',
+                        'Matematik': '#2196f3',
+                        'Fizik': '#00bcd4',
+                        'Kimya': '#009688',
+                        'Biyoloji': '#4caf50',
+                        'Edebiyat': '#ff9800',
+                        'Tarih-1': '#795548',
+                        'Coğrafya-1': '#607d8b',
+                        'Tarih-2': '#8d6e63',
+                        'Coğrafya-2': '#78909c',
+                        'Felsefe': '#9c27b0',
+                        'Din Kültürü': '#f44336',
+                        'Yabancı Dil': '#e91e63'
+                      };
+                      
+                      const color = subjectColors[item.subject] || '#3f51b5';
+                      const lightColor = `${color}20`;
+                      
+                      return (
+                        <Card 
+                          key={item.subject} 
+                          sx={{ 
+                            mb: 3, 
+                            borderRadius: 2,
+                            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                            border: `1px solid ${color}30`,
+                            overflow: 'hidden',
+                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 12px 32px rgba(0,0,0,0.12)'
+                            }
+                          }}
+                        >
+                          <Box sx={{ 
+                            p: 0.5, 
+                            background: `linear-gradient(90deg, ${color} 0%, ${color}90 100%)`,
+                          }} />
+                          <CardContent sx={{ p: 2.5 }}>
+                            <Typography 
+                              variant="subtitle1" 
+                              gutterBottom
+                              sx={{ 
+                                fontWeight: 700, 
+                                color: color,
+                                fontFamily: 'Poppins, Quicksand, sans-serif',
+                                fontSize: '1.1rem',
+                                mb: 2
+                              }}
+                            >
+                              {item.subject}
+                            </Typography>
+                            
+                            <Box sx={{ 
+                              height: 300, 
+                              background: `linear-gradient(145deg, #ffffff 0%, ${lightColor} 100%)`,
+                              borderRadius: 2,
+                              p: 2,
+                              boxShadow: 'inset 0 1px 8px rgba(0,0,0,0.05)'
+                            }}>
+                              <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                  data={item.data}
+                                  margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                                >
+                                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                                  <XAxis 
+                                    dataKey="name" 
+                                    angle={-45} 
+                                    textAnchor="end"
+                                    height={70}
+                                    tick={{ fontSize: 12, fill: '#666' }}
+                                    axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+                                  />
+                                  <YAxis 
+                                    tick={{ fontSize: 12, fill: '#666' }}
+                                    axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+                                  />
+                                  <Tooltip 
+                                    contentStyle={{ 
+                                      borderRadius: 8, 
+                                      boxShadow: '0 4px 16px rgba(0,0,0,0.15)', 
+                                      border: 'none' 
+                                    }} 
+                                  />
+                                  <Legend wrapperStyle={{ paddingTop: 10 }} />
+                                  <Bar 
+                                    dataKey="net" 
+                                    name="Net" 
+                                    fill={color} 
+                                    radius={[6, 6, 0, 0]} 
+                                    barSize={30}
+                                    animationDuration={1500}
+                                  />
+                                </BarChart>
+                              </ResponsiveContainer>
+                            </Box>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
                   </Box>
                 )}
               </>

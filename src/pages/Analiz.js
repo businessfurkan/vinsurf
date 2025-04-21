@@ -282,7 +282,7 @@ const Analiz = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#fff' }}>
+    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#FFFFF0' }}>
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' }} />
       <Typography
         variant="h5"
@@ -306,16 +306,16 @@ const Analiz = () => {
               sx={{
                 cursor: 'pointer',
                 borderRadius: '16px',
-                background: '#fff',
-                boxShadow: '0 2px 12px 0 rgba(30,30,60,0.07)',
+                background: `linear-gradient(145deg, #FFFFF0 0%, ${getSubjectColor(subject)}10 100%)`,
+                boxShadow: `0 8px 20px 0 rgba(0,0,0,0.1), 0 2px 10px 0 ${getSubjectColor(subject)}30`,
                 minHeight: 180,
                 display: 'flex',
                 flexDirection: 'column',
                 padding: 2,
-                border: '1.5px solid #f0f1f4',
+                border: `1.5px solid ${getSubjectColor(subject)}30`,
                 transition: 'all 0.3s ease',
                 '&:hover': { 
-                  boxShadow: '0 8px 28px 0 rgba(30,30,60,0.15)', 
+                  boxShadow: `0 12px 32px 0 rgba(0,0,0,0.15), 0 4px 12px 0 ${getSubjectColor(subject)}40`, 
                   borderColor: getSubjectColor(subject),
                   transform: 'translateY(-5px)'
                 },
