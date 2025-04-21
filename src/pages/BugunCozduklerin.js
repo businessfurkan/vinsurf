@@ -20,7 +20,10 @@ import {
   CircularProgress,
   Snackbar,
   Paper,
-  alpha
+  alpha,
+  Select,
+  MenuItem,
+  FormControl
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import BookIcon from '@mui/icons-material/Book';
@@ -48,6 +51,7 @@ const BugunCozduklerin = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [topicDialogOpen, setTopicDialogOpen] = useState(false);
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedHistorySubject, setSelectedHistorySubject] = useState('');
   const [problemStats, setProblemStats] = useState({
     correct: 0,
     incorrect: 0,
@@ -430,7 +434,7 @@ const BugunCozduklerin = () => {
   const processedHistoricalData = useMemo(() => {
     const subjectTopicMap = {};
     
-    historicalProblems.forEach(item => {
+    historicalProblems.filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true).forEach(item => {
       const key = `${item.subject}-${item.topic}`;
       
       if (!subjectTopicMap[key]) {
@@ -460,7 +464,7 @@ const BugunCozduklerin = () => {
     });
     
     return Object.values(subjectTopicMap).sort((a, b) => b.lastUpdated - a.lastUpdated);
-  }, [historicalProblems]);
+  }, [historicalProblems, selectedHistorySubject]);
 
   return (
     <>
@@ -624,19 +628,63 @@ const BugunCozduklerin = () => {
       {/* ÇÖZDÜKLERİM Panel */}
       {groupedSolvedProblems.length > 0 && (
         <Box sx={{ backgroundColor: '#FFFFF0', mb: 4, p: 4, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-          <Typography 
-            variant="h5" 
-            sx={{ 
-              mb: 3, 
-              fontWeight: 700, 
-              color: '#2e3856',
-              textAlign: 'center',
-              pb: 1,
-              borderBottom: '2px solid #f0f0f0'
-            }}
-          >
-            ÇÖZDÜKLERİM
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, pb: 1, borderBottom: '2px solid #f0f0f0' }}>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontWeight: 700, 
+                color: '#2e3856',
+              }}
+            >
+              Çözdüğün Sorular
+            </Typography>
+            
+            <Box sx={{ minWidth: 200 }}>
+              <FormControl fullWidth variant="outlined" size="small">
+                <Select
+                  value={selectedHistorySubject}
+                  onChange={(e) => setSelectedHistorySubject(e.target.value)}
+                  displayEmpty
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                    '& .MuiSelect-select': { fontWeight: 500, py: 1 }
+                  }}
+                  MenuProps={{ 
+                    PaperProps: { 
+                      sx: { 
+                        borderRadius: 2, 
+                        boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                        mt: 0.5 
+                      } 
+                    } 
+                  }}
+                >
+                  <MenuItem value="" sx={{ borderRadius: 1, my: 0.5, mx: 0.5 }}>
+                    <em>Tüm Dersler</em>
+                  </MenuItem>
+                  {groupedSolvedProblems.map((subject) => (
+                    <MenuItem 
+                      key={subject.name} 
+                      value={subject.name}
+                      sx={{
+                        borderRadius: 1, 
+                        my: 0.5, 
+                        mx: 0.5, 
+                        fontWeight: selectedHistorySubject === subject.name ? 600 : 400,
+                        borderLeft: selectedHistorySubject === subject.name ? `3px solid ${subject.color}` : 'none',
+                        pl: selectedHistorySubject === subject.name ? 1.5 : 2
+                      }}
+                    >
+                      {subject.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
           
           {/* Overall Stats Summary */}
           <Box sx={{ 
@@ -662,7 +710,7 @@ const BugunCozduklerin = () => {
               <Typography variant="body2" color="text.secondary">Yanlış</Typography>
             </Box>
             <Box sx={{ textAlign: 'center', minWidth: 100 }}>
-              <Typography variant="h6" fontWeight={700} color="text.secondary">{overallTotals.empty}</Typography>
+              <Typography variant="body2" color="text.secondary">{overallTotals.empty}</Typography>
               <Typography variant="body2" color="text.secondary">Boş</Typography>
             </Box>
             <Box sx={{ textAlign: 'center', minWidth: 100 }}>
@@ -673,7 +721,9 @@ const BugunCozduklerin = () => {
           
           {/* Subject Cards */}
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
-            {groupedSolvedProblems.map((subject) => (
+            {groupedSolvedProblems
+              .filter(subject => selectedHistorySubject ? subject.name === selectedHistorySubject : true)
+              .map((subject) => (
               <Card 
                 key={subject.name}
                 sx={{
@@ -797,7 +847,9 @@ const BugunCozduklerin = () => {
         
         {processedHistoricalData.length > 0 ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {processedHistoricalData.map((item, index) => (
+            {historicalProblems
+              .filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true)
+              .map((item, index) => (
               <Paper 
                 key={index} 
                 elevation={0}
@@ -933,12 +985,25 @@ const BugunCozduklerin = () => {
             borderRadius: 2,
             border: '1px dashed #dee2e6'
           }}>
-            <Typography variant="body1">
-              Henüz kaydedilmiş soru çözümü bulunmamaktadır.
-            </Typography>
-            <Typography variant="body2" sx={{ mt: 1, color: '#adb5bd' }}>
-              Yukarıdaki kartlara tıklayarak soru çözümlerini kaydetmeye başlayabilirsin.
-            </Typography>
+            {selectedHistorySubject ? (
+              <>
+                <Typography variant="body1">
+                  {selectedHistorySubject} dersine ait kaydedilmiş soru çözümü bulunmamaktadır.
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1, color: '#adb5bd' }}>
+                  Yukarıdaki {selectedHistorySubject} kartına tıklayarak soru çözümlerini kaydetmeye başlayabilirsin.
+                </Typography>
+              </>
+            ) : (
+              <>
+                <Typography variant="body1">
+                  Henüz kaydedilmiş soru çözümü bulunmamaktadır.
+                </Typography>
+                <Typography variant="body2" sx={{ mt: 1, color: '#adb5bd' }}>
+                  Yukarıdaki kartlara tıklayarak soru çözümlerini kaydetmeye başlayabilirsin.
+                </Typography>
+              </>
+            )}
           </Box>
         )}
       </Box>

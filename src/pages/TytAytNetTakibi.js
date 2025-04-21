@@ -3,13 +3,15 @@ import {
   Box, 
   Typography, 
   TextField, 
-  Button, 
-  Paper, 
-  Grid, 
-  MenuItem, 
-  Select, 
-  FormControl, 
+  Button,
+  ButtonGroup,
+  FormControl,
+  Select,
+  MenuItem,
+  Tooltip, 
   InputLabel,
+  Grid,
+  Paper,
   Table,
   TableBody,
   TableCell,
@@ -25,10 +27,11 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from 'recharts';
 import DeleteIcon from '@mui/icons-material/Delete';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 import { auth, db } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -84,6 +87,7 @@ const TytAytNetTakibi = () => {
   });
   const [selectedGraphSubject, setSelectedGraphSubject] = useState('');
   const [selectedRecordsSubject, setSelectedRecordsSubject] = useState('');
+  const [selectedExamType, setSelectedExamType] = useState('');
 
   // Calculate net
   const calculateNet = (correct, incorrect) => {
@@ -810,68 +814,129 @@ const TytAytNetTakibi = () => {
                 Net Kayıtları
               </Typography>
               
-              <FormControl sx={{ minWidth: 200 }}>
-                <Select
-                  value={selectedRecordsSubject}
-                  onChange={(e) => setSelectedRecordsSubject(e.target.value)}
-                  displayEmpty
-                  size="small"
-                  sx={{
-                    borderRadius: 2,
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
-                    '& .MuiSelect-select': { fontWeight: 500, py: 1 }
-                  }}
-                  MenuProps={{ 
-                    PaperProps: { 
-                      sx: { 
-                        borderRadius: 2, 
-                        boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
-                        mt: 0.5 
-                      } 
-                    } 
-                  }}
-                >
-                  <MenuItem value="" sx={{ borderRadius: 1, my: 0.5, mx: 0.5 }}>
-                    <em>Tüm Dersler</em>
-                  </MenuItem>
-                  {examType === 'TYT' 
-                    ? tytSubjects.map(subj => (
-                        <MenuItem 
-                          key={subj} 
-                          value={subj}
-                          sx={{
-                            borderRadius: 1, 
-                            my: 0.5, 
-                            mx: 0.5, 
-                            fontWeight: selectedRecordsSubject === subj ? 600 : 400,
-                            borderLeft: selectedRecordsSubject === subj ? '3px solid #3f51b5' : 'none',
-                            pl: selectedRecordsSubject === subj ? 1.5 : 2
-                          }}
-                        >
-                          {subj}
-                        </MenuItem>
-                      ))
-                    : aytSubjects.map(subj => (
-                        <MenuItem 
-                          key={subj} 
-                          value={subj}
-                          sx={{
-                            borderRadius: 1, 
-                            my: 0.5, 
-                            mx: 0.5, 
-                            fontWeight: selectedRecordsSubject === subj ? 600 : 400,
-                            borderLeft: selectedRecordsSubject === subj ? '3px solid #3f51b5' : 'none',
-                            pl: selectedRecordsSubject === subj ? 1.5 : 2
-                          }}
-                        >
-                          {subj}
-                        </MenuItem>
-                      ))
-                  }
-                </Select>
-              </FormControl>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {/* Sınav Türü Butonları */}
+                <ButtonGroup variant="outlined" size="small">
+                  <Button 
+                    onClick={() => {
+                      setSelectedExamType('TYT');
+                      setSelectedRecordsSubject('');
+                    }}
+                    sx={{
+                      backgroundColor: selectedExamType === 'TYT' ? 'rgba(63, 81, 181, 0.1)' : 'transparent',
+                      borderColor: 'rgba(63, 81, 181, 0.3)',
+                      color: selectedExamType === 'TYT' ? '#3f51b5' : 'text.secondary',
+                      fontWeight: selectedExamType === 'TYT' ? 600 : 400,
+                      '&:hover': {
+                        backgroundColor: 'rgba(63, 81, 181, 0.08)',
+                        borderColor: 'rgba(63, 81, 181, 0.5)',
+                      }
+                    }}
+                  >
+                    TYT
+                  </Button>
+                  <Button 
+                    onClick={() => {
+                      setSelectedExamType('AYT');
+                      setSelectedRecordsSubject('');
+                    }}
+                    sx={{
+                      backgroundColor: selectedExamType === 'AYT' ? 'rgba(63, 81, 181, 0.1)' : 'transparent',
+                      borderColor: 'rgba(63, 81, 181, 0.3)',
+                      color: selectedExamType === 'AYT' ? '#3f51b5' : 'text.secondary',
+                      fontWeight: selectedExamType === 'AYT' ? 600 : 400,
+                      '&:hover': {
+                        backgroundColor: 'rgba(63, 81, 181, 0.08)',
+                        borderColor: 'rgba(63, 81, 181, 0.5)',
+                      }
+                    }}
+                  >
+                    AYT
+                  </Button>
+                </ButtonGroup>
+                
+                {/* Ders Seçim Menüsü */}
+                {selectedExamType && (
+                  <FormControl sx={{ minWidth: 180 }}>
+                    <Select
+                      value={selectedRecordsSubject}
+                      onChange={(e) => setSelectedRecordsSubject(e.target.value)}
+                      displayEmpty
+                      size="small"
+                      sx={{
+                        borderRadius: 2,
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                        '& .MuiSelect-select': { fontWeight: 500, py: 1 }
+                      }}
+                      MenuProps={{ 
+                        PaperProps: { 
+                          sx: { 
+                            borderRadius: 2, 
+                            boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                            mt: 0.5 
+                          } 
+                        } 
+                      }}
+                    >
+                      <MenuItem value="" sx={{ borderRadius: 1, my: 0.5, mx: 0.5 }}>
+                        <em>Tüm {selectedExamType} Dersleri</em>
+                      </MenuItem>
+                      {selectedExamType === 'TYT' 
+                        ? tytSubjects.map(subj => (
+                            <MenuItem 
+                              key={subj} 
+                              value={subj}
+                              sx={{
+                                borderRadius: 1, 
+                                my: 0.5, 
+                                mx: 0.5, 
+                                fontWeight: selectedRecordsSubject === subj ? 600 : 400,
+                                borderLeft: selectedRecordsSubject === subj ? '3px solid #3f51b5' : 'none',
+                                pl: selectedRecordsSubject === subj ? 1.5 : 2
+                              }}
+                            >
+                              {subj}
+                            </MenuItem>
+                          ))
+                        : aytSubjects.map(subj => (
+                            <MenuItem 
+                              key={subj} 
+                              value={subj}
+                              sx={{
+                                borderRadius: 1, 
+                                my: 0.5, 
+                                mx: 0.5, 
+                                fontWeight: selectedRecordsSubject === subj ? 600 : 400,
+                                borderLeft: selectedRecordsSubject === subj ? '3px solid #3f51b5' : 'none',
+                                pl: selectedRecordsSubject === subj ? 1.5 : 2
+                              }}
+                            >
+                              {subj}
+                            </MenuItem>
+                          ))
+                      }
+                    </Select>
+                  </FormControl>
+                )}
+                
+                {/* Sıfırlama Butonu */}
+                {(selectedExamType || selectedRecordsSubject) && (
+                  <Tooltip title="Filtreleri Sıfırla">
+                    <IconButton 
+                      size="small" 
+                      onClick={() => {
+                        setSelectedExamType('');
+                        setSelectedRecordsSubject('');
+                      }}
+                      sx={{ color: 'text.secondary' }}
+                    >
+                      <RestartAltIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
             </Box>
 
             {loading ? (
@@ -909,12 +974,34 @@ const TytAytNetTakibi = () => {
                 }}>
                   <HelpOutlineIcon sx={{ fontSize: 30, color: 'text.disabled' }} />
                 </Box>
-                <Typography variant="body1" color="text.secondary" fontWeight={500}>
-                  {selectedRecordsSubject} dersine ait kayıt bulunmuyor.
-                </Typography>
-                <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
-                  Bu ders için kayıt oluşturmak için sol taraftaki formu kullanabilirsiniz.
-                </Typography>
+                {selectedRecordsSubject ? (
+                  <>
+                    <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                      {selectedRecordsSubject} dersine ait kayıt bulunmuyor.
+                    </Typography>
+                    <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
+                      Bu ders için kayıt oluşturmak için sol taraftaki formu kullanabilirsiniz.
+                    </Typography>
+                  </>
+                ) : selectedExamType ? (
+                  <>
+                    <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                      {selectedExamType} sınavına ait kayıt bulunmuyor.
+                    </Typography>
+                    <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
+                      {selectedExamType} dersleri için kayıt oluşturmak için sol taraftaki formu kullanabilirsiniz.
+                    </Typography>
+                  </>
+                ) : (
+                  <>
+                    <Typography variant="body1" color="text.secondary" fontWeight={500}>
+                      Henüz net kaydı bulunmuyor.
+                    </Typography>
+                    <Typography variant="body2" color="text.disabled" sx={{ mt: 1 }}>
+                      Denemelere girip netlerinizi takip etmek için yukarıdaki formu doldurun.
+                    </Typography>
+                  </>
+                )}
               </Box>
             ) : (
               <>
@@ -934,7 +1021,13 @@ const TytAytNetTakibi = () => {
                     </TableHead>
                     <TableBody>
                       {netRecords
-                        .filter(record => selectedRecordsSubject ? record.subject === selectedRecordsSubject : true)
+                        .filter(record => {
+                          // Önce sınav türüne göre filtrele
+                          const examTypeMatch = selectedExamType ? record.examType === selectedExamType : true;
+                          // Sonra derse göre filtrele
+                          const subjectMatch = selectedRecordsSubject ? record.subject === selectedRecordsSubject : true;
+                          return examTypeMatch && subjectMatch;
+                        })
                         .map((record, index) => {
                         // Her ders için farklı bir renk tonu belirle
                         const subjectColors = {
@@ -1251,9 +1344,14 @@ const TytAytNetTakibi = () => {
                                 <ResponsiveContainer width="100%" height="100%">
                                   <BarChart
                                     data={selectedData.data}
-                                    margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                                    margin={{
+                                      top: 5,
+                                      right: 30,
+                                      left: 20,
+                                      bottom: 5,
+                                    }}
                                   >
-                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                                    <CartesianGrid strokeDasharray="3 3" />
                                     <XAxis 
                                       dataKey="name" 
                                       angle={-45} 
@@ -1268,6 +1366,9 @@ const TytAytNetTakibi = () => {
                                       tick={{ fontSize: 12, fill: '#666' }}
                                       axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
                                     />
+                                    <RechartsTooltip />
+                                    <Legend />
+                                    <Bar dataKey="net" fill={color} />
                                     <Tooltip 
                                       formatter={(value) => [Math.round(value), 'Net']}
                                       contentStyle={{ 
