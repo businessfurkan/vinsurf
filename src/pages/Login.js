@@ -219,7 +219,7 @@ const Login = () => {
       setLoading(true);
       setError('');
       await signInWithPopup(auth, googleProvider);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       console.error('Google login error:', error);
       setError('Giriş yapılırken bir hata oluştu. Lütfen tekrar deneyin.');
@@ -275,8 +275,8 @@ const Login = () => {
       className="login-container"
       sx={{ 
         width: '100%',
-        minHeight: '100vh',
-        overflow: 'hidden',
+        height: '100vh', // Sabit yükseklik
+        overflow: 'hidden', // Taşma olmasın
         background: `linear-gradient(135deg, #FFFFF0 0%, #FFFACD 100%)`,
         position: 'relative',
         display: 'flex',
@@ -307,8 +307,8 @@ const Login = () => {
         zIndex: 0,
       }} />
 
-      <Container maxWidth="xl" sx={{ py: { xs: 4, md: 6 }, position: 'relative', zIndex: 1 }}>
-        <Grid container spacing={4} sx={{ minHeight: '90vh' }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 }, position: 'relative', zIndex: 1, height: '100%' }}>
+        <Grid container spacing={2} sx={{ height: '100%' }}>
           {/* Sol panel - Giriş Formu */}
           <Grid 
             item 
@@ -318,7 +318,7 @@ const Login = () => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              p: { xs: 3, sm: 4 },
+              p: { xs: 2, sm: 3 },
               position: 'relative',
             }}
           >
@@ -340,8 +340,8 @@ const Login = () => {
                     component="h1" 
                     sx={{ 
                       fontWeight: 800, 
-                      fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' },
-                      mb: 2,
+                      fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                      mb: 1,
                       letterSpacing: '-0.5px',
                       lineHeight: 1.2
                     }}
@@ -354,7 +354,7 @@ const Login = () => {
                     sx={{ 
                       fontWeight: 600, 
                       color: '#3f51b5',
-                      mb: 3,
+                      mb: 2,
                       letterSpacing: '0.5px'
                     }}
                   >
@@ -364,12 +364,13 @@ const Login = () => {
                   <Typography 
                     variant="body1" 
                     sx={{ 
-                      color: '#555', 
-                      mb: 4,
-                      lineHeight: 1.6,
-                      fontSize: '1.05rem',
+                      color: '#333', // Daha koyu renk
+                      mb: 2,
+                      lineHeight: 1.5,
+                      fontSize: '1rem',
                       maxWidth: '500px',
-                      mx: { xs: 'auto', md: 0 }
+                      mx: { xs: 'auto', md: 0 },
+                      fontWeight: 500 // Daha kalın font
                     }}
                   >
                     Pomodoro tekniği ve analitik çalışma takibi ile sınav başarınızı artırın. Düzenli çalışma ve detaylı istatistiklerle performansınızı maksimum seviyeye çıkarın.
@@ -379,7 +380,7 @@ const Login = () => {
                     display: 'flex', 
                     flexDirection: 'column', 
                     alignItems: { xs: 'center', md: 'flex-start' },
-                    mt: 4
+                    mt: 2
                   }}>
                     <GradientButton
                       variant="contained"
@@ -414,7 +415,7 @@ const Login = () => {
                     )}
                   </Box>
                   
-                  <Box sx={{ mt: 5 }}>
+                  <Box sx={{ mt: 3 }}>
                     {highlights.map((highlight, index) => (
                       <Box 
                         key={index}
@@ -439,7 +440,7 @@ const Login = () => {
                         >
                           {highlight.icon}
                         </IconButton>
-                        <Typography variant="body2" sx={{ color: '#555' }}>
+                        <Typography variant="body2" sx={{ color: '#333', fontWeight: 500 }}>
                           {highlight.text}
                         </Typography>
                       </Box>
@@ -451,8 +452,9 @@ const Login = () => {
                     sx={{ 
                       display: 'block', 
                       mt: 4, 
-                      color: '#666',
+                      color: '#444',
                       fontSize: '0.8rem',
+                      fontWeight: 500,
                       opacity: 0.9,
                       maxWidth: '450px',
                       lineHeight: 1.5,
@@ -473,6 +475,7 @@ const Login = () => {
             className="login-right-panel"
             sx={{ 
               display: { xs: 'none', md: 'flex' },
+              maxHeight: '100vh',
               position: 'relative',
               flexDirection: 'column',
               alignItems: 'center',
@@ -514,15 +517,15 @@ const Login = () => {
                   maxWidth: 500,
                   width: '100%',
                   textAlign: 'center',
-                  mb: 6
+                  mb: 3
                 }}
               >
                 <Typography 
                   variant="h3" 
                   sx={{ 
                     fontWeight: 700,
-                    mb: 3,
-                    fontSize: { md: '2.2rem', lg: '2.5rem' },
+                    mb: 2,
+                    fontSize: { md: '1.8rem', lg: '2.2rem' },
                     textShadow: '0 2px 10px rgba(0,0,0,0.1)',
                     color: '#FFFFF0'
                   }}
@@ -533,11 +536,11 @@ const Login = () => {
                 <Typography 
                   variant="body1" 
                   sx={{ 
-                    fontWeight: 400,
-                    fontSize: '1.1rem',
-                    lineHeight: 1.7,
-                    opacity: 0.9,
-                    mb: 5,
+                    fontWeight: 500,
+                    fontSize: '1rem',
+                    lineHeight: 1.5,
+                    opacity: 0.95,
+                    mb: 3,
                     color: '#FFFFF0'
                   }}
                 >
@@ -547,7 +550,7 @@ const Login = () => {
               </Box>
             </Fade>
             
-            <Grid container spacing={3} sx={{ maxWidth: 500, mb: 6 }}>
+            <Grid container spacing={2} sx={{ maxWidth: 500, mb: 3 }}>
               {stats.map((stat, index) => (
                 <Grid item xs={4} key={stat.label}>
                   <Grow in={true} timeout={1000 + (index * 300)}>
@@ -556,8 +559,8 @@ const Login = () => {
                         <Avatar
                           sx={{
                             bgcolor: 'rgba(255, 255, 255, 0.15)',
-                            width: 48,
-                            height: 48,
+                            width: 40,
+                            height: 40,
                             mx: 'auto',
                             mb: 1,
                             '& .MuiSvgIcon-root': { fontSize: 24 }
@@ -570,9 +573,9 @@ const Login = () => {
                         variant="h3" 
                         sx={{ 
                           fontWeight: 800, 
-                          fontSize: '2.5rem', 
+                          fontSize: '2rem', 
                           color: '#FFFFF0',
-                          mb: 1,
+                          mb: 0.5,
                           textShadow: '0 2px 10px rgba(0,0,0,0.1)'
                         }}
                       >
@@ -596,27 +599,28 @@ const Login = () => {
             </Grid>
           
             <Fade in={true} timeout={1800}>
-              <Box sx={{ width: '100%', maxWidth: 500 }}>
-                <Grid container spacing={3}>
+              <Box sx={{ width: '100%', maxWidth: 500, overflow: 'hidden' }}>
+                <Grid container spacing={2}>
                   {features.map((feature, index) => (
                     <Grid item xs={12} sm={6} key={feature.title}>
                       <Grow in={true} timeout={1500 + (index * 200)}>
                         <FeatureCard>
                           <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                            <FeatureIcon color={feature.color}>
+                            <FeatureIcon color={feature.color} sx={{ width: 50, height: 50, '& .MuiSvgIcon-root': { fontSize: 28 } }}>
                               {feature.icon}
                             </FeatureIcon>
                             <Typography variant="h6" sx={{ 
                               fontWeight: 600, 
-                              fontSize: '1.1rem', 
-                              mb: 1.5,
+                              fontSize: '1rem', 
+                              mb: 1,
                               color: '#333'
                             }}>
                               {feature.title}
                             </Typography>
                             <Typography variant="body2" sx={{ 
-                              fontSize: '0.9rem',
-                              color: '#555',
+                              fontSize: '0.85rem',
+                              color: '#333',
+                              fontWeight: 500,
                               lineHeight: 1.6
                             }}>
                               {feature.description}
