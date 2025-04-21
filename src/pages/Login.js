@@ -58,7 +58,7 @@ const fadeIn = keyframes`
 
 // Özel stil bileşenleri
 const FeatureCard = styled(Card)(({ theme }) => ({
-  backgroundColor: '#FFFFF0',
+  backgroundColor: '#FFFFFF',
   borderRadius: 16,
   overflow: 'hidden',
   height: '100%',
@@ -111,15 +111,19 @@ const FloatingShape = styled(Box)(({ theme, delay, size, top, left, right, botto
 }));
 
 const StatsBox = styled(Box)(({ theme }) => ({
-  backgroundColor: '#FFFFF0',
+  backgroundColor: '#FFFFFF',
   borderRadius: 16,
-  padding: '24px 16px',
-  margin: '12px 0',
+  padding: '16px',
+  margin: '8px 0',
   textAlign: 'center',
   boxShadow: '0 8px 25px rgba(77, 77, 0, 0.08)',
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   position: 'relative',
   overflow: 'hidden',
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
   animation: `${fadeIn} 0.6s ease-out`,
   '&:hover': {
     transform: 'translateY(-5px)',
@@ -431,7 +435,7 @@ const Login = () => {
                           size="small" 
                           sx={{ 
                             mr: 1.5, 
-                            color: '#3f51b5',
+                            color: '#000000',
                             bgcolor: 'rgba(63, 81, 181, 0.08)',
                             '&:hover': {
                               bgcolor: 'rgba(63, 81, 181, 0.12)'
@@ -440,7 +444,7 @@ const Login = () => {
                         >
                           {highlight.icon}
                         </IconButton>
-                        <Typography variant="body2" sx={{ color: '#333', fontWeight: 500 }}>
+                        <Typography variant="body2" sx={{ color: '#000000', fontWeight: 500 }}>
                           {highlight.text}
                         </Typography>
                       </Box>
@@ -452,7 +456,7 @@ const Login = () => {
                     sx={{ 
                       display: 'block', 
                       mt: 4, 
-                      color: '#444',
+                      color: '#000000',
                       fontSize: '0.8rem',
                       fontWeight: 500,
                       opacity: 0.9,
@@ -479,10 +483,11 @@ const Login = () => {
               position: 'relative',
               flexDirection: 'column',
               alignItems: 'center',
-              justifyContent: 'center',
+              justifyContent: 'flex-start',
               background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
-              color: '#FFFFF0',
+              color: '#000000',
               p: { md: 3, lg: 4 },
+              pt: { md: 4, lg: 5 },
               borderRadius: '16px',
               overflow: 'hidden',
               boxShadow: '0 10px 30px rgba(63, 81, 181, 0.2)',
@@ -527,7 +532,7 @@ const Login = () => {
                     mb: 1,
                     fontSize: { md: '1.6rem', lg: '1.8rem' },
                     textShadow: '0 2px 10px rgba(0,0,0,0.1)',
-                    color: '#FFFFF0'
+                    color: '#000000'
                   }}
                 >
                   Başarının anahtarı etkili çalışmadır
@@ -541,7 +546,7 @@ const Login = () => {
                     lineHeight: 1.4,
                     opacity: 0.95,
                     mb: 2,
-                    color: '#FFFFF0'
+                    color: '#000000'
                   }}
                 >
                   YKS Çalışma Takip uygulaması ile çalışma sürenizi optimize edin, 
@@ -550,7 +555,7 @@ const Login = () => {
               </Box>
             </Fade>
             
-            <Grid container spacing={1} sx={{ maxWidth: 500, mb: 2 }}>
+            <Grid container spacing={2} sx={{ maxWidth: 500, mb: 2 }}>
               {stats.map((stat, index) => (
                 <Grid item xs={4} key={stat.label}>
                   <Grow in={true} timeout={1000 + (index * 300)}>
@@ -574,7 +579,7 @@ const Login = () => {
                         sx={{ 
                           fontWeight: 800, 
                           fontSize: '1.5rem', 
-                          color: '#FFFFF0',
+                          color: '#000000',
                           mb: 0.5,
                           textShadow: '0 2px 10px rgba(0,0,0,0.1)'
                         }}
@@ -585,7 +590,7 @@ const Login = () => {
                         variant="body2" 
                         sx={{ 
                           fontSize: '0.9rem', 
-                          color: '#FFFFF0', 
+                          color: '#000000', 
                           fontWeight: 500,
                           opacity: 0.9
                         }}
@@ -599,13 +604,13 @@ const Login = () => {
             </Grid>
           
             <Fade in={true} timeout={1800}>
-              <Box sx={{ width: '100%', maxWidth: 500, overflow: 'hidden', mt: 1 }}>
-                <Grid container spacing={1}>
+              <Box sx={{ width: '100%', maxWidth: 500, overflow: 'visible', mt: 2 }}>
+                <Grid container spacing={2}>
                   {features.map((feature, index) => (
-                    <Grid item xs={12} sm={6} key={feature.title}>
+                    <Grid item xs={12} sm={6} key={feature.title} sx={{ height: '100%' }}>
                       <Grow in={true} timeout={1500 + (index * 200)}>
-                        <FeatureCard>
-                          <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                        <FeatureCard sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                          <CardContent sx={{ p: 2, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <FeatureIcon color={feature.color} sx={{ width: 40, height: 40, '& .MuiSvgIcon-root': { fontSize: 22 } }}>
                               {feature.icon}
                             </FeatureIcon>
