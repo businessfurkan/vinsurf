@@ -426,24 +426,116 @@ const PomodoroTimer = () => {
                 display: 'flex', 
                 justifyContent: 'center', 
                 alignItems: 'center',
-                width: { xs: 220, sm: 200, md: 220 },
-                height: { xs: 220, sm: 200, md: 220 },
+                width: { xs: 220, sm: 220, md: 250 },
+                height: { xs: 120, sm: 120, md: 130 },
                 mr: { xs: 0, sm: 4, md: 6 }
               }}
             >
-              <CircularProgress 
-                variant="determinate" 
-                value={calculateProgress()}
-                size={200}
-                thickness={3.5}
-                sx={{ 
-                  color: 
-                    mode === 'pomodoro' ? '#0067b8' : 
-                    mode === 'shortBreak' ? '#34a853' : '#ea4335',
+              {/* Yarım daire şeklinde ilerleme çubuğu */}
+              <Box
+                sx={{
                   position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                   zIndex: 1
                 }}
-              />
+              >
+                <Box
+                  sx={{
+                    position: 'relative',
+                    width: 200,
+                    height: 100,
+                    overflow: 'hidden'
+                  }}
+                >
+                  {/* Başlangıç noktası */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      left: 0,
+                      bottom: 0,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: mode === 'pomodoro' ? '#0067b8' : 
+                              mode === 'shortBreak' ? '#34a853' : '#ea4335',
+                      zIndex: 3,
+                      boxShadow: '0 0 5px rgba(0,0,0,0.2)'
+                    }}
+                  />
+                  
+                  {/* Bitiş noktası */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      right: 0,
+                      bottom: 0,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      bgcolor: mode === 'pomodoro' ? '#0067b8' : 
+                              mode === 'shortBreak' ? '#34a853' : '#ea4335',
+                      zIndex: 3,
+                      boxShadow: '0 0 5px rgba(0,0,0,0.2)'
+                    }}
+                  />
+                  
+                  {/* İlerleme arkaplanı */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      width: '100%',
+                      height: 4,
+                      bgcolor: 'rgba(0,0,0,0.1)',
+                      borderRadius: 2,
+                      zIndex: 1
+                    }}
+                  />
+                  
+                  {/* İlerleme çubuğu */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      width: `${calculateProgress()}%`,
+                      height: 4,
+                      bgcolor: mode === 'pomodoro' ? '#0067b8' : 
+                              mode === 'shortBreak' ? '#34a853' : '#ea4335',
+                      borderRadius: 2,
+                      transition: 'width 1s linear',
+                      zIndex: 2,
+                      boxShadow: `0 0 10px ${mode === 'pomodoro' ? 'rgba(0,103,184,0.5)' : 
+                                mode === 'shortBreak' ? 'rgba(52,168,83,0.5)' : 'rgba(234,67,53,0.5)'}`
+                    }}
+                  />
+                  
+                  {/* Yarım daire */}
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      width: 200,
+                      height: 200,
+                      borderRadius: '50%',
+                      border: `2px solid ${mode === 'pomodoro' ? '#0067b8' : 
+                                        mode === 'shortBreak' ? '#34a853' : '#ea4335'}`,
+                      borderBottom: 'none',
+                      borderLeft: 'none',
+                      borderRight: 'none',
+                      transform: 'rotate(-180deg)',
+                      boxSizing: 'border-box',
+                      opacity: 0.3
+                    }}
+                  />
+                </Box>
+              </Box>
               <Box 
                 sx={{ 
                   position: 'absolute',

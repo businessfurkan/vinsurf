@@ -459,6 +459,8 @@ const BugunCozduklerin = () => {
     return Object.values(subjectTopicMap).sort((a, b) => b.lastUpdated - a.lastUpdated);
   }, [historicalProblems, selectedHistorySubject]);
 
+
+
   // Handle saving problem stats
   const handleSaveStats = async () => {
     if (!user) {
@@ -468,7 +470,12 @@ const BugunCozduklerin = () => {
 
     try {
       setIsLoading(true);
-      const total = problemStats.correct + problemStats.incorrect + problemStats.empty;
+      
+      // Null kontrolleri ekleyerek değerlerin sayı olduğundan emin ol
+      const correct = parseInt(problemStats.correct) || 0;
+      const incorrect = parseInt(problemStats.incorrect) || 0;
+      const empty = parseInt(problemStats.empty) || 0;
+      const total = correct + incorrect + empty;
       
       if (total === 0) {
         // If all values are 0, delete the record if it exists
@@ -499,33 +506,108 @@ const BugunCozduklerin = () => {
         }
       } else {
         try {
-          // Composite index hatasını önlemek için saveSolvedProblems fonksiyonunu kullan
-          await saveSolvedProblems(
-            selectedSubject,
-            selectedTopic,
-            problemStats.correct || 0,
-            problemStats.incorrect || 0,
-            problemStats.empty || 0
-          );
-          
-          // Show success message
-          showSnackbar('Çözdüğün sorular kaydedildi', 'success');
-          
-          // Update local state immediately with the new data
-          const updatedProblems = {...solvedProblems};
-          if (!updatedProblems[selectedSubject]) {
-            updatedProblems[selectedSubject] = {};
+          // Konu ve başlık kontrolü
+          if (!selectedSubject || !selectedTopic) {
+            showSnackbar('Konu veya başlık seçilmedi', 'error');
+            setIsLoading(false);
+            return;
           }
           
-          updatedProblems[selectedSubject][selectedTopic] = {
-            correct: problemStats.correct,
-            incorrect: problemStats.incorrect,
-            empty: problemStats.empty,
-            date: new Date(),
-            // We'll add the ID after fetching
-          };
-          
-          setSolvedProblems(updatedProblems);
+          // Verileri kaydet - saveSolvedProblems fonksiyonunu kullan
+          if (typeof saveSolvedProblems === 'function') {
+            const docId = await saveSolvedProblems(
+              selectedSubject,
+              selectedTopic,
+              correct,
+              incorrect,
+              empty
+            );
+            
+            // Show success message
+            showSnackbar('Çözdüğün sorular kaydedildi', 'success');
+            
+            // Update local state immediately with the new data
+            const updatedProblems = {...solvedProblems};
+            if (!updatedProblems[selectedSubject]) {
+              updatedProblems[selectedSubject] = {};
+            }
+            
+            updatedProblems[selectedSubject][selectedTopic] = {
+              correct: correct,
+              incorrect: incorrect,
+              empty: empty,
+              date: new Date(),
+              id: docId
+            };
+            
+            setSolvedProblems(updatedProblems);
+          } else {
+            // saveSolvedProblems fonksiyonu yoksa, doğrudan Firebase'e kaydet
+            try {
+              // Önce mevcut kayıt var mı diye kontrol et
+              const q = query(
+                collection(db, 'solvedProblems'),
+                where('userId', '==', user.uid)
+              );
+              
+              const querySnapshot = await getDocs(q);
+              
+              // JavaScript tarafında subject ve topic eşleşmesini kontrol ediyoruz
+              const matchingDoc = querySnapshot.docs.find(doc => {
+                const data = doc.data();
+                return data.subject === selectedSubject && data.topic === selectedTopic;
+              });
+              
+              let docId;
+              
+              if (matchingDoc) {
+                // Mevcut kaydı güncelle
+                docId = matchingDoc.id;
+                await updateDoc(doc(db, 'solvedProblems', docId), {
+                  correct: correct,
+                  incorrect: incorrect,
+                  empty: empty,
+                  date: Timestamp.now()
+                });
+              } else {
+                // Yeni kayıt oluştur
+                const docRef = await addDoc(collection(db, 'solvedProblems'), {
+                  userId: user.uid,
+                  subject: selectedSubject,
+                  topic: selectedTopic,
+                  correct: correct,
+                  incorrect: incorrect,
+                  empty: empty,
+                  date: Timestamp.now()
+                });
+                docId = docRef.id;
+              }
+              
+              // Show success message
+              showSnackbar('Çözdüğün sorular kaydedildi', 'success');
+              
+              // Update local state immediately with the new data
+              const updatedProblems = {...solvedProblems};
+              if (!updatedProblems[selectedSubject]) {
+                updatedProblems[selectedSubject] = {};
+              }
+              
+              updatedProblems[selectedSubject][selectedTopic] = {
+                correct: correct,
+                incorrect: incorrect,
+                empty: empty,
+                date: new Date(),
+                id: docId
+              };
+              
+              setSolvedProblems(updatedProblems);
+            } catch (firebaseError) {
+              console.error('Firebase error:', firebaseError);
+              showSnackbar('Veritabanına kaydederken hata oluştu', 'error');
+              setIsLoading(false);
+              return;
+            }
+          }
         } catch (saveError) {
           console.error('Error saving to Firestore:', saveError);
           showSnackbar('Veritabanına kaydederken hata oluştu', 'error');
@@ -537,7 +619,9 @@ const BugunCozduklerin = () => {
       // Refresh both current and historical data
       try {
         await fetchSolvedProblems();
-        await fetchHistoricalSolvedProblems();
+        if (typeof fetchHistoricalSolvedProblems === 'function') {
+          await fetchHistoricalSolvedProblems();
+        }
         handleCloseTopicDialog();
       } catch (fetchError) {
         console.error('Error refreshing data:', fetchError);
