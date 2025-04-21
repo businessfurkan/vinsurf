@@ -358,6 +358,14 @@ const DersProgrami = () => {
     setAutoSaveTimeout(newTimeout);
   };
 
+  const handleUrlClick = (url) => {
+    if (!url) return;
+    
+    // URL'nin http veya https ile başlayıp başlamadığını kontrol et
+    const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(formattedUrl, '_blank');
+  };
+
   const handleAddClass = (day) => {
     setCurrentDay(day);
     setClassDetails({
@@ -851,6 +859,21 @@ const DersProgrami = () => {
                               e.stopPropagation();
                               handleViewClass(day, classItem);
                             }}
+                            sx={{ 
+                              cursor: 'pointer',
+                              position: 'relative',
+                              '&::after': classItem.location ? {
+                                content: '""',
+                                position: 'absolute',
+                                top: 12,
+                                right: 12,
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                backgroundColor: '#4caf50',
+                                boxShadow: '0 0 0 2px rgba(76, 175, 80, 0.3)'
+                              } : {}
+                            }}
                           >
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
                               <Typography variant="subtitle1" fontWeight="600" sx={{ 
@@ -1224,20 +1247,21 @@ const DersProgrami = () => {
         maxWidth="sm"
         PaperProps={{
           sx: {
-            borderRadius: 2.5,
-            boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+            borderRadius: '20px',
+            boxShadow: '0 15px 50px rgba(0,0,0,0.15)',
             background: 'linear-gradient(to bottom, #ffffff, #f9fafc)',
             overflow: 'hidden'
           }
         }}
       >
         <Box sx={{
-          p: 2.5,
+          p: 3,
           background: viewingClass ? `linear-gradient(45deg, ${alpha(getSubjectColor(viewingClass.subject), 0.9)} 0%, ${alpha(getSubjectColor(viewingClass.subject), 0.7)} 100%)` : 'linear-gradient(45deg, #3f51b5, #2196f3)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
         }}>
+          {/* Dekoratif elementler */}
           <Box 
             sx={{
               position: 'absolute',
@@ -1262,16 +1286,22 @@ const DersProgrami = () => {
               zIndex: 0
             }}
           />
+          
+          {/* Başlık ve Kapat Butonu */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <Typography 
-              variant="h6" 
+              variant="h5" 
               component="div" 
-              fontWeight={600}
+              fontWeight={700}
               sx={{
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                textShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
               }}
             >
-              {viewingClass?.subject}
+              <SchoolIcon fontSize="large" />
+              {viewingClass?.subject || 'Ders Detayları'}
             </Typography>
             <IconButton
               aria-label="close"
@@ -1281,143 +1311,294 @@ const DersProgrami = () => {
                 backgroundColor: 'rgba(255,255,255,0.15)',
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.25)',
-                }
+                  transform: 'rotate(90deg)'
+                },
+                transition: 'all 0.3s ease'
               }}
             >
               <CloseIcon />
             </IconButton>
           </Box>
+          
+          {/* Gün Bilgisi */}
           <Typography 
-            variant="body2" 
+            variant="body1" 
             sx={{
               opacity: 0.9,
-              mt: 0.5,
+              mt: 1,
               textTransform: 'capitalize',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5
             }}
           >
+            <CalendarMonthIcon fontSize="small" />
             {viewingDay}
           </Typography>
         </Box>
+        
         <DialogContent sx={{ px: 3, py: 3 }}>
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column', 
             gap: 2.5
           }}>
-            <Box sx={{ 
-              display: 'flex',
-              alignItems: 'center',
-              p: 2,
-              borderRadius: 2,
-              backgroundColor: 'rgba(0,0,0,0.02)',
-              border: '1px solid rgba(0,0,0,0.05)'
+            {/* Öğretmen Bilgisi */}
+            <Paper elevation={0} sx={{ 
+              p: 2.5,
+              borderRadius: '16px',
+              backgroundColor: alpha('#f5f5f5', 0.5),
+              border: '1px solid rgba(0,0,0,0.05)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                backgroundColor: alpha('#f5f5f5', 0.7),
+              }
             }}>
-              <SchoolIcon sx={{ color: 'primary.main', opacity: 0.7, mr: 2, fontSize: '1.8rem' }} />
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Öğretmen
-                </Typography>
-                <Typography variant="body1" fontWeight={500}>
-                  {viewingClass?.teacher || 'Belirtilmemiş'}
-                </Typography>
-              </Box>
-            </Box>
-            
-            {viewingClass?.location && (
-              <Box sx={{ 
-                display: 'flex',
-                alignItems: 'center',
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: 'rgba(0,0,0,0.02)',
-                border: '1px solid rgba(0,0,0,0.05)'
-              }}>
-                <LocationOnIcon sx={{ color: '#e53935', opacity: 0.7, mr: 2, fontSize: '1.8rem' }} />
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '12px',
+                  backgroundColor: alpha(getSubjectColor(viewingClass?.subject), 0.15),
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mr: 2
+                }}>
+                  <PersonIcon sx={{ color: getSubjectColor(viewingClass?.subject), fontSize: '1.8rem' }} />
+                </Box>
                 <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    Ders Videosu
+                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                    Öğretmen
                   </Typography>
-                  {viewingClass.location ? (
-                    <a 
-                      href={viewingClass.location.startsWith('http') ? viewingClass.location : `https://${viewingClass.location}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{
-                        color: '#1976d2',
-                        textDecoration: 'none',
-                        fontWeight: 500
+                  <Typography variant="h6" fontWeight={600}>
+                    {viewingClass?.teacher || 'Belirtilmemiş'}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+            
+            {/* Video URL */}
+            {viewingClass?.location && (
+              <Paper elevation={0} sx={{ 
+                p: 2.5,
+                borderRadius: '16px',
+                backgroundColor: alpha('#f5f5f5', 0.5),
+                border: '1px solid rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease',
+                cursor: viewingClass.location ? 'pointer' : 'default',
+                '&:hover': viewingClass.location ? {
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  backgroundColor: alpha('#f0f7ff', 0.7),
+                  transform: 'translateY(-2px)'
+                } : {}
+              }}
+              onClick={() => viewingClass?.location && handleUrlClick(viewingClass.location)}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '12px',
+                    backgroundColor: alpha('#f44336', 0.15),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2
+                  }}>
+                    <LocationOnIcon sx={{ color: '#f44336', fontSize: '1.8rem' }} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      Video URL
+                    </Typography>
+                    <Typography 
+                      variant="h6" 
+                      fontWeight={600}
+                      sx={{
+                        color: viewingClass.location ? '#1976d2' : 'text.primary',
+                        textDecoration: viewingClass.location ? 'none' : 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        '&:hover': viewingClass.location ? {
+                          textDecoration: 'underline'
+                        } : {}
                       }}
                     >
-                      {viewingClass.location}
-                    </a>
-                  ) : (
-                    <Typography variant="body1" fontWeight={500}>
-                      Belirtilmemiş
+                      {viewingClass.location ? (
+                        <>
+                          {viewingClass.location.length > 40 
+                            ? `${viewingClass.location.substring(0, 40)}...` 
+                            : viewingClass.location}
+                          <Box component="span" sx={{ color: '#1976d2', display: 'inline-flex', alignItems: 'center', ml: 1 }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                              <polyline points="15 3 21 3 21 9"></polyline>
+                              <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                          </Box>
+                        </>
+                      ) : (
+                        'Belirtilmemiş'
+                      )}
                     </Typography>
-                  )}
+                  </Box>
                 </Box>
-              </Box>
+              </Paper>
             )}
             
-            {viewingClass?.notes && (
-              <Box sx={{ 
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: 'rgba(0,0,0,0.02)',
-                border: '1px solid rgba(0,0,0,0.05)'
+            {/* Zaman Bilgisi */}
+            {viewingClass?.time && (
+              <Paper elevation={0} sx={{ 
+                p: 2.5,
+                borderRadius: '16px',
+                backgroundColor: alpha('#f5f5f5', 0.5),
+                border: '1px solid rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  backgroundColor: alpha('#f5f5f5', 0.7),
+                }
               }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                  <NotesIcon sx={{ color: '#ff9800', opacity: 0.7, mr: 1.5, fontSize: '1.5rem' }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Konu adı
-                  </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '12px',
+                    backgroundColor: alpha('#4caf50', 0.15),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2
+                  }}>
+                    <AccessTimeIcon sx={{ color: '#4caf50', fontSize: '1.8rem' }} />
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
+                      Ders Saati
+                    </Typography>
+                    <Typography variant="h6" fontWeight={600}>
+                      {viewingClass.time}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Typography 
-                  variant="body1" 
-                  component="div" 
-                  fontWeight={500}
-                  sx={{ 
-                    p: 2,
-                    borderRadius: 1.5,
-                    backgroundColor: 'white',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                    border: '1px solid rgba(0,0,0,0.07)',
-                    whiteSpace: 'pre-line'
-                  }}
-                >
-                  {viewingClass.notes}
-                </Typography>
-              </Box>
+              </Paper>
+            )}
+            
+            {/* Notlar */}
+            {viewingClass?.notes && (
+              <Paper elevation={0} sx={{ 
+                p: 2.5,
+                borderRadius: '16px',
+                backgroundColor: alpha('#f5f5f5', 0.5),
+                border: '1px solid rgba(0,0,0,0.05)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                  backgroundColor: alpha('#f5f5f5', 0.7),
+                }
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                  <Box sx={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: '12px',
+                    backgroundColor: alpha('#ff9800', 0.15),
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mr: 2,
+                    mt: 0.5
+                  }}>
+                    <NotesIcon sx={{ color: '#ff9800', fontSize: '1.8rem' }} />
+                  </Box>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+                      Notlar
+                    </Typography>
+                    <Typography 
+                      variant="body1" 
+                      component="div" 
+                      sx={{ 
+                        p: 2,
+                        borderRadius: '12px',
+                        backgroundColor: 'white',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(0,0,0,0.07)',
+                        whiteSpace: 'pre-line',
+                        fontWeight: 500,
+                        lineHeight: 1.6
+                      }}
+                    >
+                      {viewingClass.notes}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Paper>
             )}
           </Box>
         </DialogContent>
+        
         <Box 
           sx={{ 
             display: 'flex', 
             justifyContent: 'space-between',
-            p: 2.5,
-            background: 'rgba(0,0,0,0.02)',
-            borderTop: '1px solid rgba(0,0,0,0.05)'
+            p: 3,
+            borderTop: '1px solid rgba(0,0,0,0.05)',
+            background: 'linear-gradient(to bottom, rgba(245,245,245,0.5), rgba(250,250,250,0.8))'
           }}
         >
           <Button 
             onClick={handleCloseViewDialog}
             sx={{ 
-              borderRadius: 2,
+              borderRadius: '30px',
               px: 3,
+              py: 1,
               color: 'rgba(0,0,0,0.6)',
-              fontWeight: 500,
+              fontWeight: 600,
               textTransform: 'none',
+              backgroundColor: 'rgba(0,0,0,0.03)',
               '&:hover': {
-                backgroundColor: 'rgba(0,0,0,0.05)'
-              }
+                backgroundColor: 'rgba(0,0,0,0.06)',
+                transform: 'translateY(-2px)'
+              },
+              transition: 'all 0.3s ease'
             }}
           >
             Kapat
           </Button>
-          <Box>
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
+            {viewingClass?.location && (
+              <Button 
+                onClick={() => viewingClass?.location && handleUrlClick(viewingClass.location)}
+                variant="contained"
+                startIcon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>}
+                sx={{ 
+                  borderRadius: '30px',
+                  px: 3,
+                  py: 1,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  backgroundColor: '#1976d2',
+                  '&:hover': {
+                    backgroundColor: '#1565c0',
+                    transform: 'translateY(-2px)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+              >
+                Videoyu Aç
+              </Button>
+            )}
             <Button 
               onClick={() => {
                 handleStartEdit();
@@ -1426,13 +1607,19 @@ const DersProgrami = () => {
               variant="outlined"
               startIcon={<EditIcon />}
               sx={{ 
-                borderRadius: 2,
-                mr: 1.5,
-                px: 2.5,
-                fontWeight: 500,
+                borderRadius: '30px',
+                px: 3,
+                py: 1,
+                fontWeight: 600,
                 textTransform: 'none',
-                borderColor: 'rgba(0,0,0,0.2)',
-                color: 'rgba(0,0,0,0.7)'
+                borderColor: alpha('#3f51b5', 0.5),
+                color: '#3f51b5',
+                '&:hover': {
+                  borderColor: '#3f51b5',
+                  backgroundColor: alpha('#3f51b5', 0.05),
+                  transform: 'translateY(-2px)'
+                },
+                transition: 'all 0.3s ease'
               }}
             >
               Düzenle
@@ -1445,14 +1632,17 @@ const DersProgrami = () => {
               variant="contained"
               startIcon={<DeleteIcon />}
               sx={{ 
-                borderRadius: 2,
-                px: 2.5,
+                borderRadius: '30px',
+                px: 3,
+                py: 1,
+                fontWeight: 600,
                 textTransform: 'none',
-                fontWeight: 500,
                 bgcolor: '#f44336',
                 '&:hover': {
-                  bgcolor: '#d32f2f'
-                }
+                  bgcolor: '#d32f2f',
+                  transform: 'translateY(-2px)'
+                },
+                transition: 'all 0.3s ease'
               }}
             >
               Sil
