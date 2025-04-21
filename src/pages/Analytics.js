@@ -130,61 +130,96 @@ const Analytics = () => {
     fetchStudyData();
   }, [user, timeRange]);
 
-  // Process data for charts
+  // Process data by subject for the chart
   const processDataBySubject = () => {
     const subjectData = {};
-    const topicsBySubject = {};
     
-    studyData.forEach(record => {
-      if (!subjectData[record.subject]) {
-        subjectData[record.subject] = 0;
-        topicsBySubject[record.subject] = {};
-      }
+    // Ensure studyData is an array
+    if (!Array.isArray(studyData)) {
+      console.error('studyData is not an array:', studyData);
+      return [];
+    }
+    
+    // Filter data based on selected time range
+    const filteredData = studyData.filter(record => {
+      if (!record || !record.timestamp) return false;
       
-      subjectData[record.subject] += record.duration;
-      
-      // Process topic data
-      if (!topicsBySubject[record.subject][record.topic]) {
-        topicsBySubject[record.subject][record.topic] = 0;
+      let recordDate;
+      try {
+        // Güvenli bir şekilde tarihi dönüştür
+        if (record.timestamp.toDate && typeof record.timestamp.toDate === 'function') {
+          recordDate = record.timestamp.toDate();
+        } else if (record.timestamp.seconds) {
+          recordDate = new Date(record.timestamp.seconds * 1000);
+        } else {
+          recordDate = new Date(record.timestamp);
+        }
+        
+        const today = new Date();
+        
+        if (timeRange === 'week') {
+          return isThisWeek(recordDate);
+        } else if (timeRange === 'month') {
+          const thirtyDaysAgo = subDays(today, 30);
+          return recordDate >= thirtyDaysAgo;
+        }
+        return true; // 'all' time range
+      } catch (error) {
+        console.error('Error processing record date for filtering:', error, record);
+        return false;
       }
-      topicsBySubject[record.subject][record.topic] += record.duration;
     });
     
-    // Calculate total study time for percentage calculations
-    const totalStudyTime = Object.values(subjectData).reduce((total, time) => total + time, 0);
+    // Aggregate by subject
+    filteredData.forEach(record => {
+      if (!record) return;
+      
+      const subject = record.subject || 'Diğer';
+      if (!subjectData[subject]) {
+        subjectData[subject] = 0;
+      }
+      // Ensure duration is a number
+      const duration = typeof record.duration === 'number' ? record.duration : 0;
+      subjectData[subject] += duration / 60; // Convert seconds to minutes
+    });
     
-    return Object.keys(subjectData).map(subject => ({
-      name: subject,
-      value: Math.round(subjectData[subject] / 60), // Convert seconds to minutes
-      percentage: totalStudyTime > 0 ? Math.round((subjectData[subject] / totalStudyTime) * 100) : 0,
-      topics: topicsBySubject[subject],
-      color: yksData[subject]?.color || COLORS[Object.keys(subjectData).indexOf(subject) % COLORS.length],
-      topicCount: Object.keys(topicsBySubject[subject]).length
-    }));
+    // Convert to array format for chart
+    return Object.keys(subjectData)
+      .map(subject => ({
+        name: subject,
+        value: Math.round(subjectData[subject] || 0), // Round to whole minutes and ensure it's not NaN
+      }))
+      .sort((a, b) => b.value - a.value); // Sort by value (descending)
   };
+
   
   // Get topic data for a specific subject
   const getTopicDataForSubject = (subject) => {
-    if (!subject) return [];
+    if (!subject || !Array.isArray(studyData)) return [];
     
     const topicData = {};
-    const subjectRecords = studyData.filter(record => record.subject === subject);
+    const subjectRecords = studyData.filter(record => 
+      record && record.subject === subject && record.topic
+    );
     
     subjectRecords.forEach(record => {
-      if (!topicData[record.topic]) {
-        topicData[record.topic] = 0;
+      const topic = record.topic || 'Belirtilmemiş';
+      if (!topicData[topic]) {
+        topicData[topic] = 0;
       }
-      topicData[record.topic] += record.duration;
+      // Ensure duration is a number
+      const duration = typeof record.duration === 'number' ? record.duration : 0;
+      topicData[topic] += duration;
     });
     
     // Calculate total study time for this subject
-    const totalSubjectTime = Object.values(topicData).reduce((total, time) => total + time, 0);
+    const totalSubjectTime = Object.values(topicData).reduce((total, time) => total + (time || 0), 0);
     
     return Object.keys(topicData).map(topic => ({
-      name: topic,
-      value: Math.round(topicData[topic] / 60), // Convert seconds to minutes
-      percentage: totalSubjectTime > 0 ? Math.round((topicData[topic] / totalSubjectTime) * 100) : 0,
-      seconds: topicData[topic]
+      name: topic || 'Belirtilmemiş',
+      value: Math.round((topicData[topic] || 0) / 60), // Convert seconds to minutes
+      percentage: totalSubjectTime > 0 ? Math.round(((topicData[topic] || 0) / totalSubjectTime) * 100) : 0,
+      seconds: topicData[topic] || 0
     }));
   };
   
@@ -215,21 +250,40 @@ const Analytics = () => {
     }
     
     // Fill in study data
-    studyData.forEach(record => {
-      const recordDate = record.timestamp.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
-      const recordDateStr = format(recordDate, 'dd/MM', { locale: tr });
-      
-      // Check if this record is from the last 7 days
-      const sevenDaysAgo = subDays(today, 7);
-      if (recordDate >= sevenDaysAgo && dailyData[recordDateStr] !== undefined) {
-        dailyData[recordDateStr] += record.duration / 60; // Convert seconds to minutes
-      }
-    });
+    if (Array.isArray(studyData)) {
+      studyData.forEach(record => {
+        if (!record || !record.timestamp) return;
+        
+        let recordDate;
+        try {
+          // Güvenli bir şekilde tarihi dönüştür
+          if (record.timestamp.toDate && typeof record.timestamp.toDate === 'function') {
+            recordDate = record.timestamp.toDate();
+          } else if (record.timestamp.seconds) {
+            recordDate = new Date(record.timestamp.seconds * 1000);
+          } else {
+            recordDate = new Date(record.timestamp);
+          }
+          
+          const recordDateStr = format(recordDate, 'dd/MM', { locale: tr });
+          
+          // Check if this record is from the last 7 days
+          const sevenDaysAgo = subDays(today, 7);
+          if (recordDate >= sevenDaysAgo && dailyData[recordDateStr] !== undefined) {
+            // Ensure duration is a number
+            const duration = typeof record.duration === 'number' ? record.duration : 0;
+            dailyData[recordDateStr] += duration / 60; // Convert seconds to minutes
+          }
+        } catch (error) {
+          console.error('Error processing record date:', error, record);
+        }
+      });
+    }
     
     // Convert to array format for chart
     return Object.keys(dailyData).map(date => ({
       name: date,
-      value: Math.round(dailyData[date]), // Round to whole minutes
+      value: Math.round(dailyData[date] || 0), // Round to whole minutes and ensure it's not NaN
     }));
   };
 
@@ -246,14 +300,14 @@ const Analytics = () => {
 
   // Custom tooltip for charts
   const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length && payload[0]) {
       return (
         <Paper sx={{ p: 1.5, boxShadow: 3, bgcolor: 'background.paper' }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {label || payload[0].name}
+            {label || (payload[0].name || 'Bilinmiyor')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {formatMinutes(payload[0].value)}
+            {formatMinutes(payload[0].value || 0)}
           </Typography>
         </Paper>
       );
@@ -479,7 +533,7 @@ const Analytics = () => {
                           color: theme.palette.text.primary
                         }}
                       >
-                        {formatMinutes(processDailyStudyData().reduce((tot, day) => tot + day.value, 0) / 7)}
+                        {formatMinutes(processDailyStudyData().reduce((tot, day) => tot + (day.value || 0), 0) / 7)}
                       </Typography>
                     </Paper>
                   </Grid>
@@ -583,7 +637,7 @@ const Analytics = () => {
                       >
                         {processDataBySubject().map((entry, idx) => (
                           <Cell
-                            key={entry.name}
+                            key={`cell-${idx}`}
                             fill={COLORS[idx % COLORS.length] || theme.palette.info.main}
                           />
                         ))}

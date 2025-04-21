@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Collapse from '@mui/material/Collapse';
 import {
   Box,
@@ -351,7 +351,7 @@ const NotDefterim = () => {
   // Sayfa yüklendiğinde notları çek
   useEffect(() => {
     fetchNotes();
-  }, [user]);
+  }, [user, fetchNotes]);
 
   // Dialog'ları açma işlevleri
   const handleOpenDialog = () => {

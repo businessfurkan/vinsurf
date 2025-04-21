@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   Typography,
@@ -248,7 +248,7 @@ const DersProgrami = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openFilterMenu = Boolean(anchorEl);
   
-  const daysOfWeek = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+  const daysOfWeek = useMemo(() => ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'], []);
 
   // Bildirim gösterme
   const showNotification = (message, severity = 'success') => {
@@ -324,7 +324,7 @@ const DersProgrami = () => {
         setSchedule(emptySchedule);
       }
     }
-  }, [user]);
+  }, [user, daysOfWeek]);
 
   const handleCloseViewDialog = () => {
     setViewClassDialog(false);
