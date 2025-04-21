@@ -304,16 +304,16 @@ const NotDefterim = () => {
   };
 
   // Notları göster
-  const showNotification = (message, severity = 'success') => {
+  const showNotification = useCallback((message, severity = 'success') => {
     setSnackbar({
       open: true,
       message,
       severity
     });
-  };
+  }, []);
 
   // Firebase'den notları çek
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async () => {
     setIsLoading(true);
     
     try {
@@ -346,7 +346,7 @@ const NotDefterim = () => {
     }
     
     setIsLoading(false);
-  };
+  }, [user, showNotification]);
 
   // Sayfa yüklendiğinde notları çek
   useEffect(() => {
