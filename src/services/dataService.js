@@ -5,7 +5,6 @@ import {
   query, 
   where, 
   getDocs, 
-  orderBy, 
   deleteDoc, 
   doc, 
   updateDoc,
@@ -111,13 +110,44 @@ class DataService {
       
       // Firestore'dan verileri çek
       let q;
-      if (orderByField) {
-        q = query(
-          collection(db, collectionName),
-          where('userId', '==', userId),
-          orderBy(orderByField, orderDirection)
-        );
-      } else {
+      try {
+        if (orderByField) {
+          // Composite index hatası almamak için daha güvenli bir yaklaşım
+          // Önce userId filtresini uygula
+          const baseQuery = query(
+            collection(db, collectionName),
+            where('userId', '==', userId)
+          );
+          
+          // Sonuçları JavaScript tarafında sırala
+          const querySnapshot = await getDocs(baseQuery);
+          const records = [];
+          
+          querySnapshot.forEach((doc) => {
+            records.push({
+              id: doc.id,
+              ...doc.data()
+            });
+          });
+          
+          // JavaScript tarafında sırala
+          records.sort((a, b) => {
+            const valueA = a[orderByField] instanceof Date ? a[orderByField] : new Date(a[orderByField] || 0);
+            const valueB = b[orderByField] instanceof Date ? b[orderByField] : new Date(b[orderByField] || 0);
+            
+            return orderDirection === 'desc' ? valueB - valueA : valueA - valueB;
+          });
+          
+          return records;
+        } else {
+          q = query(
+            collection(db, collectionName),
+            where('userId', '==', userId)
+          );
+        }
+      } catch (queryError) {
+        console.error('Sorgu oluşturulurken hata:', queryError);
+        // Hata durumunda basit sorgu kullan
         q = query(
           collection(db, collectionName),
           where('userId', '==', userId)

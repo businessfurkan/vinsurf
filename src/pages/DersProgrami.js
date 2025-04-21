@@ -1053,7 +1053,7 @@ const DersProgrami = () => {
       >
         <Box sx={{
           p: 3,
-          background: `linear-gradient(45deg, ${alpha(getSubjectColor(classDetails.subject || 'default'), 0.9)} 0%, ${alpha(getSubjectColor(classDetails.subject || 'default'), 0.7)} 100%)`,
+          background: classDetails.subject ? `linear-gradient(45deg, ${alpha(getSubjectColor(classDetails.subject), 0.9)} 0%, ${alpha(getSubjectColor(classDetails.subject), 0.7)} 100%)` : 'linear-gradient(45deg, #3f51b5, #2196f3)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
@@ -1256,7 +1256,7 @@ const DersProgrami = () => {
       >
         <Box sx={{
           p: 3,
-          background: viewingClass ? `linear-gradient(45deg, ${alpha(getSubjectColor(viewingClass.subject), 0.9)} 0%, ${alpha(getSubjectColor(viewingClass.subject), 0.7)} 100%)` : 'linear-gradient(45deg, #3f51b5, #2196f3)',
+          background: viewingClass ? `linear-gradient(45deg, ${alpha(getSubjectColor(viewingClass?.subject || 'default'), 0.9)} 0%, ${alpha(getSubjectColor(viewingClass?.subject || 'default'), 0.7)} 100%)` : 'linear-gradient(45deg, #3f51b5, #2196f3)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
@@ -1363,13 +1363,13 @@ const DersProgrami = () => {
                   width: 48,
                   height: 48,
                   borderRadius: '12px',
-                  backgroundColor: alpha(getSubjectColor(viewingClass?.subject), 0.15),
+                  backgroundColor: alpha(getSubjectColor(viewingClass?.subject || 'default'), 0.15),
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   mr: 2
                 }}>
-                  <PersonIcon sx={{ color: getSubjectColor(viewingClass?.subject), fontSize: '1.8rem' }} />
+                  <PersonIcon sx={{ color: getSubjectColor(viewingClass?.subject || 'default'), fontSize: '1.8rem' }} />
                 </Box>
                 <Box>
                   <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 0.5 }}>
