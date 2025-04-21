@@ -100,18 +100,27 @@ const BugunCozduklerin = () => {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        const recordDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
+        // Tarih alanını doğru şekilde dönüştürme
+        let recordDate;
+        try {
+          // Firestore Timestamp nesnesini Date'e çevirme
+          recordDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
+        } catch (error) {
+          console.error('Date conversion error:', error);
+          // Hata durumunda geçerli bir tarih kullan
+          recordDate = new Date();
+        }
         
-        // Only include records from today (after 4 AM cutoff)
+        // JavaScript tarafında son 30 günlük kayıtları filtreleme
         if (recordDate >= todayCutoff) {
           if (!solvedProblemsData[data.subject]) {
             solvedProblemsData[data.subject] = {};
           }
           
           solvedProblemsData[data.subject][data.topic] = {
-            correct: data.correct,
-            incorrect: data.incorrect,
-            empty: data.empty,
+            correct: data.correct || 0,
+            incorrect: data.incorrect || 0,
+            empty: data.empty || 0,
             date: recordDate,
             id: doc.id
           };
@@ -139,7 +148,8 @@ const BugunCozduklerin = () => {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       thirtyDaysAgo.setHours(4, 0, 0, 0);
       
-      // Create a query to get solved problems without requiring composite indexes
+      // Sadece userId'ye göre sorgulama yapıyoruz, tarih filtresi JavaScript tarafında uygulanacak
+      // Bu şekilde composite index gerektiren bir sorgu yapmıyoruz
       const q = query(
         collection(db, 'solvedProblems'),
         where('userId', '==', user.uid)
@@ -150,23 +160,37 @@ const BugunCozduklerin = () => {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        allData.push({
-          subject: data.subject,
-          topic: data.topic,
-          correct: data.correct || 0,
-          incorrect: data.incorrect || 0,
-          empty: data.empty || 0,
-          // Use stored net if available, otherwise calculate it
-          net: data.net !== undefined ? data.net : (data.correct - Math.floor(data.incorrect / 4)),
-          date: data.date.toDate(),
-          id: doc.id
-        });
+        // Tarih alanını doğru şekilde dönüştürme
+        let recordDate;
+        try {
+          // Firestore Timestamp nesnesini Date'e çevirme
+          recordDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
+        } catch (error) {
+          console.error('Date conversion error:', error);
+          // Hata durumunda geçerli bir tarih kullan
+          recordDate = new Date();
+        }
+        
+        // JavaScript tarafında son 30 günlük kayıtları filtreleme
+        if (recordDate >= thirtyDaysAgo) {
+          allData.push({
+            id: doc.id,
+            subject: data.subject,
+            topic: data.topic,
+            correct: data.correct || 0,
+            incorrect: data.incorrect || 0,
+            empty: data.empty || 0,
+            date: recordDate,
+            net: Math.max(0, (data.correct || 0) - ((data.incorrect || 0) / 4))
+          });
+        }
       });
       
-      // Filter for the last 30 days in JavaScript
-      const historicalData = allData.filter(item => item.date >= thirtyDaysAgo);
+      // allData zaten son 30 günlük verileri içeriyor, tekrar filtrelemeye gerek yok
+      setHistoricalProblems(allData);
       
-      setHistoricalProblems(historicalData);
+      // Verileri tarihe göre sırala (en yeniden en eskiye)
+      allData.sort((a, b) => b.date - a.date);
     } catch (error) {
       console.error('Error fetching historical solved problems:', error);
       // Don't show error message here to avoid confusion
