@@ -14,7 +14,12 @@ import {
   Tooltip,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  Paper,
+  Zoom,
+  Card,
+  CardContent,
+  Divider
 } from '@mui/material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../firebase';
@@ -26,6 +31,12 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import FlagIcon from '@mui/icons-material/Flag';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import SendIcon from '@mui/icons-material/Send';
 
 const PomodoroTimer = () => {
   const [user] = useAuthState(auth);
@@ -53,7 +64,11 @@ const PomodoroTimer = () => {
     message: '',
     severity: 'info'
   });
-  // Removed unused theme and isLoading variables
+  // Hedef sistemi için state'ler
+  const [goal, setGoal] = useState('');
+  const [showGoalInput, setShowGoalInput] = useState(false);
+  const [showGoalResult, setShowGoalResult] = useState(false);
+  const [currentGoal, setCurrentGoal] = useState('');
 
   // Bildirim gösterme
   const showNotification = (message, severity = 'success') => {
@@ -191,36 +206,58 @@ const PomodoroTimer = () => {
   // Timer logic
   useEffect(() => {
     let timer = null;
+    
     if (isRunning && timeLeft > 0) {
       timer = setInterval(() => {
         setTimeLeft(timeLeft - 1);
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (isRunning && timeLeft === 0) {
       setIsRunning(false);
       playSound();
       
+      // Pomodoro tamamlandığında istatistikleri güncelle
       if (mode === 'pomodoro') {
-        const newCompletedPomodoros = completedPomodoros + 1;
-        setCompletedPomodoros(newCompletedPomodoros);
+        setCompletedPomodoros(prev => prev + 1);
+        saveStats();
         
-        // İstatistikleri kaydet
-        saveStats(newCompletedPomodoros);
-        
-        // After 4 pomodoros, take a long break
-        if (newCompletedPomodoros % 4 === 0) {
+        // Eğer aktif bir hedef varsa, hedef sonuç ekranını göster
+        if (currentGoal) {
+          setShowGoalResult(true);
+        }
+      }
+      
+      // Otomatik olarak bir sonraki moda geç
+      if (mode === 'pomodoro') {
+        // 4 pomodoro tamamlandığında uzun mola, değilse kısa mola
+        if ((completedPomodoros + 1) % 4 === 0) {
           setMode('longBreak');
+          setTimeLeft(settings.longBreak * 60);
         } else {
           setMode('shortBreak');
+          setTimeLeft(settings.shortBreak * 60);
         }
       } else {
+        // Mola bittiğinde pomodoro moduna geri dön
         setMode('pomodoro');
+        setTimeLeft(settings.pomodoro * 60);
       }
     }
     
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft, mode, completedPomodoros, playSound, saveStats]);
+  }, [isRunning, timeLeft, mode, completedPomodoros, playSound, saveStats, currentGoal]);
 
   const handleStartPause = () => {
+    // Eğer pomodoro modundaysa ve timer çalışmıyorsa ve hedef belirlenmemişse
+    if (mode === 'pomodoro' && !isRunning && !currentGoal) {
+      setShowGoalInput(true);
+    } else if (showGoalResult) {
+      setShowGoalResult(false);
+      setCurrentGoal('');
+      setGoal('');
+      handleReset();
+      return;
+    }
+    
     setIsRunning(!isRunning);
   };
 
@@ -266,7 +303,36 @@ const PomodoroTimer = () => {
     } else {
       totalSeconds = settings.longBreak * 60;
     }
+    
     return ((totalSeconds - timeLeft) / totalSeconds) * 100;
+  };
+
+  // Hedef belirleme fonksiyonu
+  const handleGoalSubmit = () => {
+    if (goal.trim()) {
+      setCurrentGoal(goal);
+      setShowGoalInput(false);
+      setIsRunning(true);
+    } else {
+      showNotification('Lütfen bir hedef belirleyin', 'warning');
+    }
+  };
+
+  // Hedef başarı durumunu işleme fonksiyonu
+  const handleGoalResult = (completed) => {
+    setShowGoalResult(false);
+    
+    // Başarı durumuna göre bildirim göster
+    if (completed) {
+      showNotification('Tebrikler! Hedefinizi başarıyla tamamladınız! 🎉', 'success');
+    } else {
+      showNotification('Sorun değil, bir dahaki sefere daha iyi olacak! 💪', 'info');
+    }
+    
+    // Yeni bir pomodoro için hazırlan
+    setCurrentGoal('');
+    setGoal('');
+    handleReset();
   };
 
   return (
@@ -403,6 +469,21 @@ const PomodoroTimer = () => {
                   {formatTime(timeLeft)}
                 </Typography>
                 
+                {/* Pomodoro sayısı göstergesi */}
+                {mode === 'pomodoro' && (
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      mt: -1, 
+                      color: 'text.secondary',
+                      fontSize: '0.85rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    {completedPomodoros} pomodoro tamamlandı
+                  </Typography>
+                )}
+                
                 <Typography 
                   variant="body2"
                   sx={{
@@ -439,6 +520,129 @@ const PomodoroTimer = () => {
               </Typography>
             </Box>
           </Box>
+          
+          {/* Aktif hedef gösterimi */}
+          {currentGoal && !showGoalResult && mode === 'pomodoro' && (
+            <Paper 
+              elevation={0}
+              sx={{ 
+                p: 2, 
+                mb: 3, 
+                borderRadius: 3,
+                border: '1px solid rgba(0,0,0,0.08)',
+                bgcolor: 'rgba(0,0,0,0.02)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                width: '100%',
+                maxWidth: 500
+              }}
+            >
+              <FlagIcon sx={{ color: '#0067b8' }} />
+              <Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, display: 'block', mb: 0.5 }}>
+                  Mevcut Hedefiniz:
+                </Typography>
+                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  {currentGoal}
+                </Typography>
+              </Box>
+            </Paper>
+          )}
+          
+          {/* Hedef sonuç ekranı */}
+          {showGoalResult && (
+            <Zoom in={showGoalResult}>
+              <Card 
+                elevation={3}
+                sx={{ 
+                  mb: 3, 
+                  borderRadius: 4,
+                  overflow: 'hidden',
+                  maxWidth: 500,
+                  width: '100%',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      mb: 2, 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1,
+                      fontWeight: 700,
+                      color: '#0067b8'
+                    }}
+                  >
+                    <EmojiEventsIcon />
+                    Pomodoro Tamamlandı!
+                  </Typography>
+                  
+                  <Divider sx={{ mb: 2 }} />
+                  
+                  <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
+                    Hedefiniz şuydu:
+                  </Typography>
+                  
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 2, 
+                      mb: 3, 
+                      borderRadius: 2,
+                      bgcolor: 'rgba(0,0,0,0.03)',
+                      border: '1px solid rgba(0,0,0,0.08)'
+                    }}
+                  >
+                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                      {currentGoal}
+                    </Typography>
+                  </Paper>
+                  
+                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+                    Bu hedefe ulaştınız mı?
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleGoalResult(true)}
+                      startIcon={<CheckCircleIcon />}
+                      sx={{ 
+                        borderRadius: 6, 
+                        py: 1.2, 
+                        px: 3,
+                        fontWeight: 600,
+                        boxShadow: '0 4px 12px rgba(52,168,83,0.3)',
+                        textTransform: 'none'
+                      }}
+                    >
+                      Evet, başardım!
+                    </Button>
+                    
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleGoalResult(false)}
+                      startIcon={<CancelIcon />}
+                      sx={{ 
+                        borderRadius: 6, 
+                        py: 1.2, 
+                        px: 3,
+                        fontWeight: 600,
+                        textTransform: 'none'
+                      }}
+                    >
+                      Hayır, tamamlayamadım
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Zoom>
+          )}
           
           {/* Timer Controls */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, gap: 2, width: '100%' }}>
@@ -516,8 +720,86 @@ const PomodoroTimer = () => {
             </Button>
           </Box>
           
+          {/* Hedef giriş diyaloğu */}
+          <Dialog 
+            open={showGoalInput} 
+            onClose={() => setShowGoalInput(false)}
+            PaperProps={{
+              sx: {
+                borderRadius: 4,
+                maxWidth: 500,
+                width: '100%',
+                p: 1
+              }
+            }}
+          >
+            <DialogTitle sx={{ pb: 1, pt: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <AssignmentIcon color="primary" />
+                Bu Pomodoro için hedefiniz nedir?
+              </Typography>
+            </DialogTitle>
+            
+            <DialogContent>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                Bu 25 dakikalık süre içinde ne yapmayı planlıyorsunuz? Hedefinizi belirlemek motivasyonunuzu artıracak ve odaklanmanıza yardımcı olacaktır.
+              </Typography>
+              
+              <TextField
+                autoFocus
+                fullWidth
+                label="Hedefiniz"
+                placeholder="Örn: Matematik konusundan 20 soru çözmek"
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                variant="outlined"
+                sx={{ mb: 1 }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleGoalSubmit();
+                  }
+                }}
+              />
+            </DialogContent>
+            
+            <DialogActions sx={{ px: 3, pb: 3 }}>
+              <Button 
+                onClick={() => {
+                  setShowGoalInput(false);
+                  setIsRunning(true);
+                }} 
+                color="inherit"
+                sx={{ borderRadius: 6, fontWeight: 500, textTransform: 'none' }}
+              >
+                Hedefsiz Başlat
+              </Button>
+              
+              <Button 
+                onClick={handleGoalSubmit} 
+                variant="contained" 
+                color="primary"
+                disabled={!goal.trim()}
+                endIcon={<SendIcon />}
+                sx={{ 
+                  borderRadius: 6, 
+                  fontWeight: 600, 
+                  px: 3,
+                  boxShadow: '0 4px 12px rgba(0,103,184,0.3)',
+                  textTransform: 'none'
+                }}
+              >
+                Hedefi Belirle ve Başlat
+              </Button>
+            </DialogActions>
+          </Dialog>
+          
           {/* Settings Dialog */}
-          <Dialog open={showSettings} onClose={() => setShowSettings(false)} maxWidth="sm" fullWidth>
+          <Dialog
+            open={showSettings}
+            onClose={() => setShowSettings(false)}
+            maxWidth="sm"
+            fullWidth
+          >
             <DialogTitle sx={{ fontWeight: 700, fontFamily: 'Quicksand, sans-serif' }}>
               Pomodoro Ayarları
             </DialogTitle>
