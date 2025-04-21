@@ -5,6 +5,8 @@ import {
   Button, 
   Grid,
   CircularProgress,
+  useTheme,
+  Paper,
   Container,
   Fade,
   Grow,
@@ -207,11 +209,20 @@ const HeroSection = styled(Box)(({ theme }) => ({
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [animationComplete, setAnimationComplete] = useState(false);
+  const theme = useTheme();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Animasyonları kademeli olarak başlatmak için zamanlayıcı
+    const timer = setTimeout(() => {
+      setAnimationComplete(true);
+    }, 500);
+    
     // Sayfa yüklendiğinde yukarı kaydırma
     window.scrollTo(0, 0);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const handleGoogleLogin = async () => {
