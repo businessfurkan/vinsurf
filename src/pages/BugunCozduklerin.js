@@ -105,7 +105,17 @@ const BugunCozduklerin = () => {
           let recordDate;
           try {
             // Firestore Timestamp nesnesini Date'e çevirme
-            recordDate = data.date && data.date.toDate ? data.date.toDate() : new Date(data.date || Date.now());
+            if (data.date) {
+              if (data.date.toDate) {
+                recordDate = data.date.toDate();
+              } else if (data.date.seconds) {
+                recordDate = new Date(data.date.seconds * 1000);
+              } else {
+                recordDate = new Date(data.date);
+              }
+            } else {
+              recordDate = new Date();
+            }
           } catch (error) {
             console.error('Date conversion error:', error);
             // Hata durumunda geçerli bir tarih kullan
@@ -165,16 +175,26 @@ const BugunCozduklerin = () => {
       
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        // Tarih alanını doğru şekilde dönüştürme
-        let recordDate;
-        try {
-          // Firestore Timestamp nesnesini Date'e çevirme
-          recordDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
-        } catch (error) {
-          console.error('Date conversion error:', error);
-          // Hata durumunda geçerli bir tarih kullan
-          recordDate = new Date();
-        }
+          // Tarih alanını doğru şekilde dönüştürme
+          let recordDate;
+          try {
+            // Firestore Timestamp nesnesini Date'e çevirme
+            if (data.date) {
+              if (data.date.toDate) {
+                recordDate = data.date.toDate();
+              } else if (data.date.seconds) {
+                recordDate = new Date(data.date.seconds * 1000);
+              } else {
+                recordDate = new Date(data.date);
+              }
+            } else {
+              recordDate = new Date();
+            }
+          } catch (error) {
+            console.error('Date conversion error:', error);
+            // Hata durumunda geçerli bir tarih kullan
+            recordDate = new Date();
+          }
         
         // JavaScript tarafında son 30 günlük kayıtları filtreleme
         if (recordDate >= thirtyDaysAgo) {
@@ -251,10 +271,15 @@ const BugunCozduklerin = () => {
   };
 
   const handleInputChange = (field, value) => {
-    // Ensure value is a non-negative integer
-    const numValue = value === '' ? 0 : parseInt(value);
-    if (numValue < 0 || isNaN(numValue)) return;
-
+    // Boş veya geçersiz değerleri kontrol et
+    let numValue = 0;
+    if (value !== undefined && value !== null && value !== '') {
+      numValue = parseInt(value, 10) || 0;
+    }
+    
+    // Negatif değerleri önle
+    numValue = Math.max(0, numValue);
+    
     setProblemStats(prev => ({
       ...prev,
       [field]: numValue
@@ -265,6 +290,176 @@ const BugunCozduklerin = () => {
     setSnackbarOpen(false);
   };
 
+  // Save solved problems to Firebase - Bu fonksiyon composite index hatasını önlemek için yeniden düzenlendi
+  const saveSolvedProblems = useCallback(async (subject, topic, correct, incorrect, empty) => {
+    if (!user) return;
+
+    try {
+      // Burada composite index hatasını önlemek için farklı bir yaklaşım kullanıyoruz
+      // Önce tüm kayıtları çekip JavaScript tarafında filtreleme yapacağız
+      const q = query(
+        collection(db, 'solvedProblems'),
+        where('userId', '==', user.uid)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      // JavaScript tarafında subject ve topic eşleşmesini kontrol ediyoruz
+      const matchingDoc = querySnapshot.docs.find(doc => {
+        const data = doc.data();
+        return data.subject === subject && data.topic === topic;
+      });
+      
+      if (matchingDoc) {
+        // Update existing record
+        const docRef = doc(db, 'solvedProblems', matchingDoc.id);
+        const existingData = matchingDoc.data();
+        
+        await updateDoc(docRef, {
+          correct: (existingData.correct || 0) + correct,
+          incorrect: (existingData.incorrect || 0) + incorrect,
+          empty: (existingData.empty || 0) + empty,
+          date: Timestamp.now()
+        });
+      } else {
+        // Create new record
+        await addDoc(collection(db, 'solvedProblems'), {
+          userId: user.uid,
+          subject,
+          topic,
+          correct,
+          incorrect,
+          empty,
+          date: Timestamp.now()
+        });
+      }
+      
+      // Refresh the data
+      await fetchSolvedProblems();
+      await fetchHistoricalSolvedProblems();
+      
+      showSnackbar('Sonuçlar kaydedildi', 'success');
+    } catch (error) {
+      console.error('Error saving solved problems:', error);
+      showSnackbar('Sonuçlar kaydedilirken hata oluştu', 'error');
+    }
+  }, [user, fetchSolvedProblems, fetchHistoricalSolvedProblems, showSnackbar]);
+
+  const getTopicStats = useCallback((subject, topic) => {
+    if (
+      solvedProblems[subject] && 
+      solvedProblems[subject][topic]
+    ) {
+      const stats = solvedProblems[subject][topic];
+      const correct = stats.correct || 0;
+      const incorrect = stats.incorrect || 0;
+      const empty = stats.empty || 0;
+      
+      // Calculate net score: correct - (incorrect / 4)
+      const netScore = Math.max(0, correct - Math.floor(incorrect / 4));
+      
+      return {
+        correct,
+        incorrect,
+        empty,
+        total: correct + incorrect + empty,
+        net: netScore
+      };
+    }
+    return null;
+  }, [solvedProblems]);
+
+  const groupedSolvedProblems = useMemo(() => {
+    const result = [];
+    
+    // Process each subject
+    Object.keys(solvedProblems).forEach(subject => {
+      let subjectTotal = {
+        correct: 0,
+        incorrect: 0,
+        empty: 0,
+        net: 0,
+        topics: []
+      };
+      
+      // Process each topic in the subject
+      Object.keys(solvedProblems[subject]).forEach(topic => {
+        const stats = getTopicStats(subject, topic);
+        if (stats) {
+          // Add to subject totals
+          subjectTotal.correct += stats.correct;
+          subjectTotal.incorrect += stats.incorrect;
+          subjectTotal.empty += stats.empty;
+          subjectTotal.net += stats.net;
+          
+          // Add topic details
+          subjectTotal.topics.push({
+            name: topic,
+            ...stats
+          });
+        }
+      });
+      
+      // Add to results
+      if (subjectTotal.topics.length > 0) {
+        result.push({
+          name: subject,
+          color: yksData[subject]?.color || '#4285F4',
+          ...subjectTotal
+        });
+      }
+    });
+    
+    return result;
+  }, [solvedProblems, getTopicStats]);
+
+  const overallTotals = useMemo(() => {
+    return groupedSolvedProblems.reduce((totals, subject) => {
+      totals.correct += subject.correct;
+      totals.incorrect += subject.incorrect;
+      totals.empty += subject.empty;
+      totals.net += subject.net;
+      totals.total = totals.correct + totals.incorrect + totals.empty;
+      return totals;
+    }, { correct: 0, incorrect: 0, empty: 0, net: 0, total: 0 });
+  }, [groupedSolvedProblems]);
+  
+  const processedHistoricalData = useMemo(() => {
+    const subjectTopicMap = {};
+    
+    historicalProblems.filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true).forEach(item => {
+      const key = `${item.subject}-${item.topic}`;
+      
+      if (!subjectTopicMap[key]) {
+        subjectTopicMap[key] = {
+          subject: item.subject,
+          topic: item.topic,
+          correct: 0,
+          incorrect: 0,
+          empty: 0,
+          net: 0,
+          color: yksData[item.subject]?.color || '#4285F4',
+          dates: [],
+          lastUpdated: null
+        };
+      }
+      
+      subjectTopicMap[key].correct += item.correct;
+      subjectTopicMap[key].incorrect += item.incorrect;
+      subjectTopicMap[key].empty += item.empty;
+      subjectTopicMap[key].net += item.net;
+      subjectTopicMap[key].dates.push(item.date);
+      
+      // Track the most recent update
+      if (!subjectTopicMap[key].lastUpdated || item.date > subjectTopicMap[key].lastUpdated) {
+        subjectTopicMap[key].lastUpdated = item.date;
+      }
+    });
+    
+    return Object.values(subjectTopicMap).sort((a, b) => b.lastUpdated - a.lastUpdated);
+  }, [historicalProblems, selectedHistorySubject]);
+
+  // Handle saving problem stats
   const handleSaveStats = async () => {
     if (!user) {
       showSnackbar('Lütfen giriş yapın', 'error');
@@ -278,6 +473,7 @@ const BugunCozduklerin = () => {
       if (total === 0) {
         // If all values are 0, delete the record if it exists
         if (
+          solvedProblems && 
           solvedProblems[selectedSubject] && 
           solvedProblems[selectedSubject][selectedTopic] &&
           solvedProblems[selectedSubject][selectedTopic].id
@@ -302,35 +498,15 @@ const BugunCozduklerin = () => {
           return;
         }
       } else {
-        // Calculate net score
-        const netScore = problemStats.correct - Math.floor(problemStats.incorrect / 4);
-        
-        // Data to save
-        const problemData = {
-          userId: user.uid,
-          subject: selectedSubject,
-          topic: selectedTopic,
-          correct: problemStats.correct || 0,
-          incorrect: problemStats.incorrect || 0,
-          empty: problemStats.empty || 0,
-          net: netScore, // Store net score directly in the database
-          date: Timestamp.now()
-        };
-        
         try {
-          // Check if we're updating or creating
-          if (
-            solvedProblems[selectedSubject] && 
-            solvedProblems[selectedSubject][selectedTopic] &&
-            solvedProblems[selectedSubject][selectedTopic].id
-          ) {
-            // Update existing record
-            const docRef = doc(db, 'solvedProblems', solvedProblems[selectedSubject][selectedTopic].id);
-            await updateDoc(docRef, problemData);
-          } else {
-            // Create new record
-            await addDoc(collection(db, 'solvedProblems'), problemData);
-          }
+          // Composite index hatasını önlemek için saveSolvedProblems fonksiyonunu kullan
+          await saveSolvedProblems(
+            selectedSubject,
+            selectedTopic,
+            problemStats.correct || 0,
+            problemStats.incorrect || 0,
+            problemStats.empty || 0
+          );
           
           // Show success message
           showSnackbar('Çözdüğün sorular kaydedildi', 'success');
@@ -376,124 +552,6 @@ const BugunCozduklerin = () => {
       setIsLoading(false);
     }
   };
-
-  // Calculate net score (4 wrong answers canceling 1 correct answer)
-  const getTopicStats = useCallback((subject, topic) => {
-    if (
-      solvedProblems[subject] && 
-      solvedProblems[subject][topic]
-    ) {
-      const stats = solvedProblems[subject][topic];
-      const correct = stats.correct || 0;
-      const incorrect = stats.incorrect || 0;
-      const empty = stats.empty || 0;
-      
-      // Calculate net score: correct - (incorrect / 4)
-      const netScore = Math.max(0, correct - Math.floor(incorrect / 4));
-      
-      return {
-        correct,
-        incorrect,
-        empty,
-        total: correct + incorrect + empty,
-        net: netScore
-      };
-    }
-    return null;
-  }, [solvedProblems]);
-
-  // Group solved problems by subject for display in the panel
-  const groupedSolvedProblems = useMemo(() => {
-    const result = [];
-    
-    // Process each subject
-    Object.keys(solvedProblems).forEach(subject => {
-      let subjectTotal = {
-        correct: 0,
-        incorrect: 0,
-        empty: 0,
-        net: 0,
-        topics: []
-      };
-      
-      // Process each topic in the subject
-      Object.keys(solvedProblems[subject]).forEach(topic => {
-        const stats = getTopicStats(subject, topic);
-        if (stats) {
-          // Add to subject totals
-          subjectTotal.correct += stats.correct;
-          subjectTotal.incorrect += stats.incorrect;
-          subjectTotal.empty += stats.empty;
-          subjectTotal.net += stats.net;
-          
-          // Add topic details
-          subjectTotal.topics.push({
-            name: topic,
-            ...stats
-          });
-        }
-      });
-      
-      // Add to results
-      if (subjectTotal.topics.length > 0) {
-        result.push({
-          name: subject,
-          color: yksData[subject]?.color || '#4285F4',
-          ...subjectTotal
-        });
-      }
-    });
-    
-    return result;
-  }, [solvedProblems, getTopicStats]);
-
-  // Calculate overall totals
-  const overallTotals = useMemo(() => {
-    return groupedSolvedProblems.reduce((totals, subject) => {
-      totals.correct += subject.correct;
-      totals.incorrect += subject.incorrect;
-      totals.empty += subject.empty;
-      totals.net += subject.net;
-      totals.total = totals.correct + totals.incorrect + totals.empty;
-      return totals;
-    }, { correct: 0, incorrect: 0, empty: 0, net: 0, total: 0 });
-  }, [groupedSolvedProblems]);
-  
-  // Process historical data for the 30-day panel
-  const processedHistoricalData = useMemo(() => {
-    const subjectTopicMap = {};
-    
-    historicalProblems.filter(item => selectedHistorySubject ? item.subject === selectedHistorySubject : true).forEach(item => {
-      const key = `${item.subject}-${item.topic}`;
-      
-      if (!subjectTopicMap[key]) {
-        subjectTopicMap[key] = {
-          subject: item.subject,
-          topic: item.topic,
-          correct: 0,
-          incorrect: 0,
-          empty: 0,
-          net: 0,
-          color: yksData[item.subject]?.color || '#4285F4',
-          dates: [],
-          lastUpdated: null
-        };
-      }
-      
-      subjectTopicMap[key].correct += item.correct;
-      subjectTopicMap[key].incorrect += item.incorrect;
-      subjectTopicMap[key].empty += item.empty;
-      subjectTopicMap[key].net += item.net;
-      subjectTopicMap[key].dates.push(item.date);
-      
-      // Track the most recent update
-      if (!subjectTopicMap[key].lastUpdated || item.date > subjectTopicMap[key].lastUpdated) {
-        subjectTopicMap[key].lastUpdated = item.date;
-      }
-    });
-    
-    return Object.values(subjectTopicMap).sort((a, b) => b.lastUpdated - a.lastUpdated);
-  }, [historicalProblems, selectedHistorySubject]);
 
   return (
     <>
@@ -1202,6 +1260,7 @@ const BugunCozduklerin = () => {
                     ),
                   }}
                   inputProps={{ min: 0 }}
+                  sx={{ mb: 2 }}
                 />
                 <TextField
                   label="Yanlış"
@@ -1215,6 +1274,7 @@ const BugunCozduklerin = () => {
                     ),
                   }}
                   inputProps={{ min: 0 }}
+                  sx={{ mb: 2 }}
                 />
                 <TextField
                   label="Boş"
@@ -1228,6 +1288,7 @@ const BugunCozduklerin = () => {
                     ),
                   }}
                   inputProps={{ min: 0 }}
+                  sx={{ mb: 2 }}
                 />
 
                 <Box sx={{ 
