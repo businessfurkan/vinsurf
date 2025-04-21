@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { keyframes } from '@mui/system';
 import { 
   Box, 
   Typography, 
@@ -68,6 +69,22 @@ const aytSubjects = [
   'Din Kültürü',
   'Yabancı Dil'
 ];
+
+// Nabız atışı animasyonu
+const pulse = keyframes`
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(63, 81, 181, 0.3);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(63, 81, 181, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(63, 81, 181, 0);
+  }
+`;
 
 const TytAytNetTakibi = () => {
   const [user] = useAuthState(auth);
@@ -943,6 +960,53 @@ const TytAytNetTakibi = () => {
               <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
                 <CircularProgress />
               </Box>
+            ) : selectedExamType && !selectedRecordsSubject ? (
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                my: 4, 
+                p: 4, 
+                bgcolor: 'rgba(63, 81, 181, 0.04)',
+                borderRadius: 2,
+                border: '1px dashed rgba(63, 81, 181, 0.2)'
+              }}>
+                <Box sx={{ 
+                  width: 80, 
+                  height: 80, 
+                  borderRadius: '50%', 
+                  bgcolor: 'rgba(63, 81, 181, 0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mb: 2,
+                  animation: `${pulse} 1.5s infinite`
+                }}>
+                  <QueryStatsIcon sx={{ fontSize: 40, color: '#3f51b5' }} />
+                </Box>
+                <Typography variant="h6" color="primary" fontWeight={600} textAlign="center">
+                  Lütfen verileri görmek istediğiniz dersi seçiniz
+                </Typography>
+                <Typography variant="body1" color="text.secondary" sx={{ mt: 1, textAlign: 'center' }}>
+                  {selectedExamType === 'TYT' ? 'TYT' : 'AYT'} derslerinden birini seçtiğinizde ilgili kayıtlar burada görünecek 📊
+                </Typography>
+                <Box sx={{ 
+                  mt: 3,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  bgcolor: 'rgba(63, 81, 181, 0.08)',
+                  p: 1.5,
+                  px: 2,
+                  borderRadius: 2
+                }}>
+                  <HelpOutlineIcon fontSize="small" color="primary" />
+                  <Typography variant="body2" color="text.secondary">
+                    İpucu: Yukarıdaki menüden bir ders seçin
+                  </Typography>
+                </Box>
+              </Box>
             ) : netRecords.length === 0 ? (
               <Box sx={{ textAlign: 'center', my: 4, color: 'text.secondary' }}>
                 <Typography variant="body1">Henüz net kaydı bulunmuyor.</Typography>
@@ -950,7 +1014,18 @@ const TytAytNetTakibi = () => {
                   Denemelere girip netlerinizi takip etmek için yukarıdaki formu doldurun.
                 </Typography>
               </Box>
-            ) : netRecords.filter(record => selectedRecordsSubject ? record.subject === selectedRecordsSubject : true).length === 0 ? (
+            ) : netRecords.filter(record => {
+              // Hem sınav türü hem de ders seçildiğinde kayıtları göster
+              if (selectedExamType && selectedRecordsSubject) {
+                return record.examType === selectedExamType && record.subject === selectedRecordsSubject;
+              }
+              // Hiçbir filtre seçilmediğinde tüm kayıtları göster
+              if (!selectedExamType && !selectedRecordsSubject) {
+                return true;
+              }
+              // Diğer durumlarda hiçbir kayıt gösterme
+              return false;
+            }).length === 0 ? (
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
@@ -1022,11 +1097,12 @@ const TytAytNetTakibi = () => {
                     <TableBody>
                       {netRecords
                         .filter(record => {
-                          // Önce sınav türüne göre filtrele
-                          const examTypeMatch = selectedExamType ? record.examType === selectedExamType : true;
-                          // Sonra derse göre filtrele
-                          const subjectMatch = selectedRecordsSubject ? record.subject === selectedRecordsSubject : true;
-                          return examTypeMatch && subjectMatch;
+                          // Hem sınav türü hem de ders seçildiğinde kayıtları göster
+                          if (selectedExamType && selectedRecordsSubject) {
+                            return record.examType === selectedExamType && record.subject === selectedRecordsSubject;
+                          }
+                          // Diğer durumlarda hiçbir kayıt gösterme
+                          return false;
                         })
                         .map((record, index) => {
                         // Her ders için farklı bir renk tonu belirle
