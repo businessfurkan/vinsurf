@@ -135,15 +135,16 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
   backgroundColor: alpha('#FFFFFF', 0.95),
   position: 'relative',
   overflow: 'hidden',
-  height: '100%',
   display: 'flex',
   flexDirection: 'column',
-  boxShadow: '0 6px 16px rgba(0,0,0,0.06)',
+  boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
   transition: 'all 0.3s ease',
-  border: '1px solid rgba(63, 81, 181, 0.1)',
+  border: '1px solid rgba(255,255,255,0.5)',
+  margin: '8px 0',
   '&:hover': {
-    boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-    transform: 'translateY(-3px)',
+    boxShadow: '0 12px 28px rgba(0,0,0,0.1)',
+    transform: 'translateY(-3px) scale(1.02)',
+    backgroundColor: alpha('#FFFFFF', 0.99),
   },
   '&::before': {
     content: '""',
@@ -152,9 +153,20 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
     left: 0,
     width: '100%',
     height: '5px',
-    backgroundColor: color,
+    background: `linear-gradient(90deg, ${color}, ${alpha(color, 0.7)})`,
     boxShadow: `0 2px 8px ${alpha(color, 0.4)}`,
   },
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '5px',
+    right: '10px',
+    width: '40px',
+    height: '40px',
+    borderRadius: '50%',
+    background: `radial-gradient(circle, ${alpha(color, 0.1)} 0%, transparent 70%)`,
+    pointerEvents: 'none',
+  }
 }));
 
 const FilterButton = styled(Button)(({ theme }) => ({
@@ -174,34 +186,56 @@ const FilterButton = styled(Button)(({ theme }) => ({
   }
 }));
 
-const DayHeader = styled(Box)(({ theme, isToday }) => ({
-  padding: '14px 10px',
-  borderRadius: '16px',
-  backgroundColor: isToday ? alpha('#3f51b5', 0.15) : alpha('#FFFFF0', 0.9),
-  color: isToday ? '#3f51b5' : '#333',
-  fontWeight: isToday ? 700 : 600,
-  textAlign: 'center',
-  position: 'relative',
-  overflow: 'hidden',
-  boxShadow: isToday ? '0 6px 16px rgba(63, 81, 181, 0.2)' : '0 4px 12px rgba(0, 0, 0, 0.05)',
-  margin: '0 6px 12px 6px',
-  transition: 'all 0.3s ease',
-  border: isToday ? `2px solid ${alpha('#3f51b5', 0.3)}` : '1px solid rgba(0,0,0,0.03)',
-  '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: isToday ? '0 8px 20px rgba(63, 81, 181, 0.25)' : '0 6px 16px rgba(0, 0, 0, 0.08)',
-  },
-  '&::before': isToday ? {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    background: `linear-gradient(135deg, ${alpha('#3f51b5', 0.1)} 0%, transparent 100%)`,
-    pointerEvents: 'none',
-  } : {},
-}));
+const DayHeader = styled(Box)(({ theme, isToday, dayIndex = 0 }) => {
+  // Her gün için farklı renkler
+  const dayColors = [
+    '#FF9A8B', // Pazartesi
+    '#FAD0C4', // Salı
+    '#FEE140', // Çarşamba
+    '#A0E7E5', // Perşembe
+    '#B5EAD7', // Cuma
+    '#C7CEEA', // Cumartesi
+    '#FFDAC1'  // Pazar
+  ];
+  
+  const dayColor = dayColors[dayIndex % dayColors.length];
+  
+  return {
+    padding: '16px 10px',
+    borderRadius: '16px 16px 0 0',
+    background: `linear-gradient(135deg, ${dayColor} 0%, ${alpha(dayColor, 0.7)} 100%)`,
+    color: '#333',
+    fontWeight: 700,
+    fontSize: '1.1rem',
+    textAlign: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+    transition: 'all 0.3s ease',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderBottom: 'none',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
+      pointerEvents: 'none',
+    },
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: 0,
+      left: '10%',
+      width: '80%',
+      height: '3px',
+      background: 'rgba(255,255,255,0.7)',
+      borderRadius: '3px',
+    }
+  };
+});
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiPaper-root': {
@@ -519,7 +553,7 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: 'linear-gradient(135deg, #FFFFF0 0%, #FFFACD 100%)',
+        background: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
         position: 'relative',
         overflow: 'hidden',
         '&::before': {
@@ -530,8 +564,8 @@ const DersProgrami = () => {
           width: '100%',
           height: '100%',
           backgroundImage: `
-            linear-gradient(rgba(63, 81, 181, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(63, 81, 181, 0.03) 1px, transparent 1px)
+            linear-gradient(rgba(255, 154, 139, 0.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 154, 139, 0.05) 1px, transparent 1px)
           `,
           backgroundSize: '20px 20px',
           pointerEvents: 'none',
@@ -545,7 +579,7 @@ const DersProgrami = () => {
           width: '300px',
           height: '300px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(63,81,181,0.05) 0%, rgba(63,81,181,0) 70%)',
+          background: 'radial-gradient(circle, rgba(255,154,139,0.1) 0%, rgba(255,154,139,0) 70%)',
           pointerEvents: 'none',
           zIndex: 0,
         },
@@ -757,221 +791,269 @@ const DersProgrami = () => {
           <LinearProgress sx={{ width: '50%', borderRadius: 1 }} />
         </Box>
       ) : (
-        <TableContainer 
-          component={Paper} 
-          elevation={0}
-          sx={{ 
-            borderRadius: 3,
-            overflow: 'hidden',
-            boxShadow: '0 5px 25px rgba(0,0,0,0.05)',
-            border: '1px solid rgba(0,0,0,0.04)',
-            background: 'linear-gradient(to bottom, #ffffff, #f9fafc)'
-          }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: 'rgba(0,0,0,0.02)' }}>
-                {daysOfWeek.map(day => (
-                  <DayHeader key={day} isToday={false}>
-                    {day}
-                  </DayHeader>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                {daysOfWeek.map(day => (
-                  <StyledTableCell 
-                    key={day} 
-                    isEmpty={!filteredSchedule[day] || filteredSchedule[day].length === 0} 
-                    onClick={() => handleAddClass(day)}
-                  >
+        {!isLoading && (
+        <Box sx={{ width: '100%', mt: 4 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 3, 
+            justifyContent: 'center',
+            width: '100%',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: '-50px',
+              left: '-50px',
+              width: '150px',
+              height: '150px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(255,154,139,0.2) 0%, transparent 70%)',
+              zIndex: 0
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: '-50px',
+              right: '-50px',
+              width: '200px',
+              height: '200px',
+              borderRadius: '50%',
+              background: 'radial-gradient(circle, rgba(199,206,234,0.2) 0%, transparent 70%)',
+              zIndex: 0
+            }
+          }}>
+            {daysOfWeek.map(day => (
+              <Box 
+                key={day}
+                sx={{
+                  width: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.33% - 16px)', lg: 'calc(14.28% - 16px)' },
+                  minWidth: { xs: '100%', sm: '280px', md: '220px' },
+                  display: 'flex',
+                  flexDirection: 'column',
+                  mb: 3,
+                  transition: 'all 0.3s ease',
+                  position: 'relative',
+                  '&:hover': {
+                    transform: 'translateY(-5px)'
+                  },
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '-10px',
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                    background: `radial-gradient(circle, ${alpha(getSubjectColor(day) || '#3f51b5', 0.2)} 0%, transparent 70%)`,
+                    zIndex: 0
+                  }
+                }}
+              >
+                <DayHeader isToday={false} dayIndex={daysOfWeek.indexOf(day)} sx={{ mb: 0 }}>
+                  {day}
+                </DayHeader>
+                
+                <Paper
+                  sx={{
+                    borderRadius: '0 0 16px 16px',
+                    overflow: 'hidden',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    borderTop: 'none',
+                    height: '100%',
+                    minHeight: '400px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <Box sx={{ 
+                    p: 2, 
+                    flex: 1, 
+                    display: 'flex', 
+                    flexDirection: 'column',
+                    overflowY: 'auto',
+                    maxHeight: '500px'
+                  }}>
                     {filteredSchedule[day] && filteredSchedule[day].length > 0 ? (
-                      <Box>
-                        {filteredSchedule[day].map((classItem, index) => (
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        gap: 2,
+                        height: '100%'
+                      }}>
+                        {filteredSchedule[day].map(classItem => (
                           <ClassCard 
-                            key={classItem.id || index} 
+                            key={classItem.id}
                             color={getSubjectColor(classItem.subject)}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleViewClass(day, classItem);
                             }}
                           >
-                            <Box sx={{ position: 'relative' }}>
-                              <Typography 
-                                variant="subtitle1" 
-                                sx={{ 
-                                  fontWeight: 600, 
-                                  color: getSubjectColor(classItem.subject),
-                                  mb: 0.5,
-                                  display: 'flex',
-                                  alignItems: 'center'
-                                }}
-                              >
-                                <Box 
-                                  sx={{ 
-                                    width: 12, 
-                                    height: 12, 
-                                    borderRadius: '50%', 
-                                    backgroundColor: getSubjectColor(classItem.subject),
-                                    mr: 1,
-                                    boxShadow: `0 0 0 2px ${alpha(getSubjectColor(classItem.subject), 0.2)}`
-                                  }} 
-                                />
-                                {classItem.subject}
-                              </Typography>
-                              
-                              {classItem.teacher && (
-                                <Typography 
-                                  variant="body2" 
-                                  color="text.secondary"
-                                  sx={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center',
-                                    gap: 1,
-                                    mb: 0.5 
-                                  }}
-                                >
-                                  <SchoolIcon fontSize="small" sx={{ opacity: 0.7, fontSize: '0.9rem' }} />
-                                  {classItem.teacher}
-                                </Typography>
-                              )}
-                              
-                              {classItem.notes && (
-                                <Tooltip title={classItem.notes}>
-                                  <Typography 
-                                    variant="body2" 
-                                    color="text.secondary"
-                                    sx={{ 
-                                      display: 'flex', 
-                                      alignItems: 'center',
-                                      gap: 1,
-                                      mb: 0.5,
-                                      maxWidth: '100%',
-                                      overflow: 'hidden',
-                                      textOverflow: 'ellipsis',
-                                      whiteSpace: 'nowrap'
-                                    }}
-                                  >
-                                    <NotesIcon fontSize="small" sx={{ opacity: 0.7, fontSize: '0.9rem' }} />
-                                    {classItem.notes}
-                                  </Typography>
-                                </Tooltip>
-                              )}
-                              
-                              <Box sx={{ 
-                                display: 'flex', 
-                                justifyContent: 'flex-end',
-                                mt: 1
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                              <Typography variant="subtitle1" fontWeight="600" sx={{ 
+                                color: getSubjectColor(classItem.subject),
+                                display: 'flex',
+                                alignItems: 'center',
+                                mb: 0.5
                               }}>
-                                <IconButton
-                                  size="small"
+                                <SchoolIcon sx={{ mr: 1, fontSize: '1.1rem' }} />
+                                {classItem.subject || 'Belirtilmemiş'}
+                              </Typography>
+                              <Box>
+                                <IconButton 
+                                  size="small" 
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setViewingDay(day);
-                                    setViewingClass(classItem);
-                                    setOpenDialog(true);
-                                    setCurrentDay(day);
-                                    setClassDetails(classItem);
+                                    handleStartEdit(day, classItem);
                                   }}
-                                  sx={{ 
-                                    p: 0.5,
-                                    color: alpha(getSubjectColor(classItem.subject), 0.8),
-                                    backgroundColor: alpha(getSubjectColor(classItem.subject), 0.1),
-                                    mr: 1,
-                                    '&:hover': {
-                                      backgroundColor: alpha(getSubjectColor(classItem.subject), 0.2),
-                                    }
-                                  }}
+                                  sx={{ mr: 0.5 }}
                                 >
                                   <EditIcon fontSize="small" />
                                 </IconButton>
-                                <IconButton
-                                  size="small"
+                                <IconButton 
+                                  size="small" 
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleDeleteClass(day, classItem.id);
                                   }}
-                                  sx={{ 
-                                    p: 0.5,
-                                    color: '#f44336',
-                                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                                    '&:hover': {
-                                      backgroundColor: 'rgba(244, 67, 54, 0.2)',
-                                    }
-                                  }}
+                                  color="error"
                                 >
                                   <DeleteIcon fontSize="small" />
                                 </IconButton>
                               </Box>
                             </Box>
+                            {classItem.time && (
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                sx={{ 
+                                  mb: 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  fontSize: '0.85rem'
+                                }}
+                              >
+                                <AccessTimeIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
+                                {classItem.time}
+                              </Typography>
+                            )}
+                            {classItem.location && (
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                sx={{ 
+                                  mb: 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  fontSize: '0.85rem'
+                                }}
+                              >
+                                <LocationOnIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
+                                {classItem.location}
+                              </Typography>
+                            )}
+                            {classItem.teacher && (
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                sx={{ 
+                                  mb: 1,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  fontSize: '0.85rem'
+                                }}
+                              >
+                                <PersonIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
+                                {classItem.teacher}
+                              </Typography>
+                            )}
+                            {classItem.notes && (
+                              <Typography 
+                                variant="body2" 
+                                color="text.secondary" 
+                                sx={{ 
+                                  fontSize: '0.85rem',
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                  textOverflow: 'ellipsis',
+                                  mt: 1,
+                                  pt: 1,
+                                  borderTop: '1px dashed rgba(0,0,0,0.1)'
+                                }}
+                              >
+                                <NotesIcon sx={{ mr: 0.5, fontSize: '0.9rem', verticalAlign: 'text-top' }} />
+                                {classItem.notes}
+                              </Typography>
+                            )}
                           </ClassCard>
                         ))}
-                        
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleAddClass(day);
-                            }}
-                            sx={{ 
-                              p: 0.5,
-                              color: alpha('#3f51b5', 0.8),
-                              backgroundColor: alpha('#3f51b5', 0.1),
-                              '&:hover': {
-                                backgroundColor: alpha('#3f51b5', 0.2),
-                              }
-                            }}
-                          >
-                            <AddCircleOutlineIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
                       </Box>
                     ) : (
-                      <Box sx={{ 
+                      <Box sx={{
                         display: 'flex', 
-                        flexDirection: 'column', 
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'center', 
+                        justifyContent: 'center',
                         height: '100%',
-                        minHeight: 200
+                        minHeight: '300px'
                       }}>
-                        <IconButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddClass(day);
-                          }}
-                          sx={{ 
-                            p: 0.5,
-                            color: alpha('#3f51b5', 0.8),
-                            backgroundColor: alpha('#3f51b5', 0.1),
-                            '&:hover': {
-                              backgroundColor: alpha('#3f51b5', 0.2),
-                            }
-                          }}
-                        >
-                          <AddCircleOutlineIcon fontSize="small" />
-                        </IconButton>
                         <Typography 
                           variant="body2" 
                           color="text.secondary" 
-                          align="center"
-                          sx={{ mt: 2, opacity: 0.7, fontWeight: 500 }}
+                          sx={{ 
+                            textAlign: 'center',
+                            maxWidth: '80%',
+                            mb: 2
+                          }}
                         >
-                          {searchText || selectedSubjects.length > 0 
-                            ? 'Filtreye uygun ders bulunamadı'
-                            : 'Ders eklemek için tıklayın'}
+                          Bu gün için ders bulunmuyor
                         </Typography>
                       </Box>
                     )}
-                  </StyledTableCell>
-                ))}
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
+                  </Box>
+                  
+                  <Box sx={{ 
+                    p: 2, 
+                    borderTop: '1px solid rgba(255,255,255,0.2)',
+                    background: 'rgba(255,255,255,0.3)',
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex',
+                    justifyContent: 'center'
+                  }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<AddCircleOutlineIcon />}
+                      onClick={() => handleAddClass(day)}
+                      sx={{ 
+                        borderRadius: '30px',
+                        textTransform: 'none',
+                        padding: '8px 20px',
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        backgroundColor: getSubjectColor(day) || '#3f51b5',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        '&:hover': {
+                          backgroundColor: getSubjectColor(day) || '#3f51b5',
+                          boxShadow: '0 8px 16px rgba(0,0,0,0.2)',
+                          transform: 'translateY(-2px)'
+                        }
+                      }}
+                    >
+                      Ders Ekle
+                    </Button>
+                  </Box>
+                </Paper>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       )}
-      
       {/* Ders Ekleme/Düzenleme Diyaloğu */}
       <Dialog 
         open={openDialog} 
