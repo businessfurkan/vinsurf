@@ -21,7 +21,7 @@ const Home = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        background: 'linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%)',
+        backgroundColor: '#FFFFF0',
       }}
     >
       <Container 
@@ -41,7 +41,7 @@ const Home = () => {
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
             background: '#FFFFF0',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,
             width: '100%',
@@ -49,7 +49,7 @@ const Home = () => {
             transform: 'translateZ(0)',
             transition: 'transform 0.3s, box-shadow 0.3s',
             '&:hover': {
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 3px 12px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 12px 40px rgba(77, 77, 0, 0.12), 0 3px 12px rgba(77, 77, 0, 0.08)',
               transform: 'translateY(-2px) translateZ(0)'
             }
           }}
@@ -119,7 +119,7 @@ const Home = () => {
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
             background: '#FFFFF0',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)',
+            boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,
             width: '100%',
@@ -127,7 +127,7 @@ const Home = () => {
             transform: 'translateZ(0)',
             transition: 'transform 0.3s, box-shadow 0.3s',
             '&:hover': {
-              boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 3px 12px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 12px 40px rgba(77, 77, 0, 0.12), 0 3px 12px rgba(77, 77, 0, 0.08)',
               transform: 'translateY(-2px) translateZ(0)'
             }
           }}

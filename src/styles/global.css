@@ -62,19 +62,19 @@ a {
   border-radius: 16px !important;
   overflow: hidden;
   background-color: #FFFFF0 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
 }
 
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
 }
 
 /* Make all cards elegant */
 .MuiCard-root, .MuiPaper-root {
   border-radius: 16px !important;
   background-color: #FFFFF0 !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
 }
 
 /* Analytics page styles */
@@ -85,14 +85,14 @@ a {
 .analytics-card {
   background-color: #FFFFF0 !important;
   border-radius: 16px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .analytics-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
 }
 
 .chart-container {
@@ -204,15 +204,15 @@ a {
 /* Home page specific styles */
 .home-card {
   border-radius: 16px !important;
-  background-color: #FFFFFF !important;
+  background-color: #FFFFF0 !important;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .home-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
 }
 
 /* Table container styles */
@@ -424,7 +424,7 @@ a {
 
 /* Shadows */
 .shadow-sm {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 2px 4px rgba(77, 77, 0, 0.05) !important;
 }
 
 .shadow-md {
@@ -432,7 +432,7 @@ a {
 }
 
 .shadow-lg {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
 }
 
 /* Dividers */

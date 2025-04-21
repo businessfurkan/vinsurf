@@ -11,9 +11,13 @@ const server = http.createServer(app);
 // CORS ayarları
 app.use(cors());
 
+// Static dosyaları serve et
+app.use(express.static(path.join(__dirname, 'build')));
 
-// Eğer production ortamındaysa static dosyaları serve et
-
+// Client-side routing için tüm GET isteklerini index.html'e yönlendir
+app.get('/*', function(req, res) {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 
 // Sunucuyu başlat
 const PORT = process.env.PORT || 3001;
