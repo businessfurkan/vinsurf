@@ -307,8 +307,8 @@ const Login = () => {
         zIndex: 0,
       }} />
 
-      <Container maxWidth="xl" sx={{ py: { xs: 2, md: 3 }, position: 'relative', zIndex: 1, height: '100%' }}>
-        <Grid container spacing={2} sx={{ height: '100%' }}>
+      <Container maxWidth="xl" sx={{ py: { xs: 1, md: 2 }, position: 'relative', zIndex: 1, height: '100%' }}>
+        <Grid container spacing={1} sx={{ height: '100%' }}>
           {/* Sol panel - Giriş Formu */}
           <Grid 
             item 
@@ -318,7 +318,7 @@ const Login = () => {
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
-              p: { xs: 2, sm: 3 },
+              p: { xs: 2, sm: 2 },
               position: 'relative',
             }}
           >
@@ -475,14 +475,14 @@ const Login = () => {
             className="login-right-panel"
             sx={{ 
               display: { xs: 'none', md: 'flex' },
-              maxHeight: '100vh',
+              height: '100%',
               position: 'relative',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
               background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
               color: '#FFFFF0',
-              p: 6,
+              p: { md: 3, lg: 4 },
               borderRadius: '16px',
               overflow: 'hidden',
               boxShadow: '0 10px 30px rgba(63, 81, 181, 0.2)',
@@ -517,15 +517,15 @@ const Login = () => {
                   maxWidth: 500,
                   width: '100%',
                   textAlign: 'center',
-                  mb: 3
+                  mb: 2
                 }}
               >
                 <Typography 
                   variant="h3" 
                   sx={{ 
                     fontWeight: 700,
-                    mb: 2,
-                    fontSize: { md: '1.8rem', lg: '2.2rem' },
+                    mb: 1,
+                    fontSize: { md: '1.6rem', lg: '1.8rem' },
                     textShadow: '0 2px 10px rgba(0,0,0,0.1)',
                     color: '#FFFFF0'
                   }}
@@ -537,10 +537,10 @@ const Login = () => {
                   variant="body1" 
                   sx={{ 
                     fontWeight: 500,
-                    fontSize: '1rem',
-                    lineHeight: 1.5,
+                    fontSize: '0.9rem',
+                    lineHeight: 1.4,
                     opacity: 0.95,
-                    mb: 3,
+                    mb: 2,
                     color: '#FFFFF0'
                   }}
                 >
@@ -550,7 +550,7 @@ const Login = () => {
               </Box>
             </Fade>
             
-            <Grid container spacing={2} sx={{ maxWidth: 500, mb: 3 }}>
+            <Grid container spacing={1} sx={{ maxWidth: 500, mb: 2 }}>
               {stats.map((stat, index) => (
                 <Grid item xs={4} key={stat.label}>
                   <Grow in={true} timeout={1000 + (index * 300)}>
@@ -559,8 +559,8 @@ const Login = () => {
                         <Avatar
                           sx={{
                             bgcolor: 'rgba(255, 255, 255, 0.15)',
-                            width: 40,
-                            height: 40,
+                            width: 32,
+                            height: 32,
                             mx: 'auto',
                             mb: 1,
                             '& .MuiSvgIcon-root': { fontSize: 24 }
@@ -573,7 +573,7 @@ const Login = () => {
                         variant="h3" 
                         sx={{ 
                           fontWeight: 800, 
-                          fontSize: '2rem', 
+                          fontSize: '1.5rem', 
                           color: '#FFFFF0',
                           mb: 0.5,
                           textShadow: '0 2px 10px rgba(0,0,0,0.1)'
@@ -599,29 +599,29 @@ const Login = () => {
             </Grid>
           
             <Fade in={true} timeout={1800}>
-              <Box sx={{ width: '100%', maxWidth: 500, overflow: 'hidden' }}>
-                <Grid container spacing={2}>
+              <Box sx={{ width: '100%', maxWidth: 500, overflow: 'hidden', mt: 1 }}>
+                <Grid container spacing={1}>
                   {features.map((feature, index) => (
                     <Grid item xs={12} sm={6} key={feature.title}>
                       <Grow in={true} timeout={1500 + (index * 200)}>
                         <FeatureCard>
-                          <CardContent sx={{ p: 3, textAlign: 'center' }}>
-                            <FeatureIcon color={feature.color} sx={{ width: 50, height: 50, '& .MuiSvgIcon-root': { fontSize: 28 } }}>
+                          <CardContent sx={{ p: 2, textAlign: 'center' }}>
+                            <FeatureIcon color={feature.color} sx={{ width: 40, height: 40, '& .MuiSvgIcon-root': { fontSize: 22 } }}>
                               {feature.icon}
                             </FeatureIcon>
                             <Typography variant="h6" sx={{ 
                               fontWeight: 600, 
-                              fontSize: '1rem', 
-                              mb: 1,
+                              fontSize: '0.85rem', 
+                              mb: 0.5,
                               color: '#333'
                             }}>
                               {feature.title}
                             </Typography>
                             <Typography variant="body2" sx={{ 
-                              fontSize: '0.85rem',
+                              fontSize: '0.75rem',
                               color: '#333',
                               fontWeight: 500,
-                              lineHeight: 1.6
+                              lineHeight: 1.4
                             }}>
                               {feature.description}
                             </Typography>
