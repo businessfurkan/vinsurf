@@ -80,6 +80,7 @@ const TytAytNetTakibi = () => {
     message: '',
     severity: 'success'
   });
+  const [selectedGraphSubject, setSelectedGraphSubject] = useState('');
 
   // Calculate net
   const calculateNet = (correct, incorrect) => {
@@ -871,113 +872,209 @@ const TytAytNetTakibi = () => {
                       Net Gelişim Grafiği
                     </Typography>
                     
-                    {chartData.map((item, index) => {
-                      // Her ders için farklı bir renk tonu belirle
-                      const subjectColors = {
-                        'Türkçe': '#3f51b5',
-                        'Sosyal Bilimler': '#673ab7',
-                        'Temel Matematik': '#2196f3',
-                        'Fen Bilimleri': '#009688',
-                        'Matematik': '#2196f3',
-                        'Fizik': '#00bcd4',
-                        'Kimya': '#009688',
-                        'Biyoloji': '#4caf50',
-                        'Edebiyat': '#ff9800',
-                        'Tarih-1': '#795548',
-                        'Coğrafya-1': '#607d8b',
-                        'Tarih-2': '#8d6e63',
-                        'Coğrafya-2': '#78909c',
-                        'Felsefe': '#9c27b0',
-                        'Din Kültürü': '#f44336',
-                        'Yabancı Dil': '#e91e63'
-                      };
-                      
-                      const color = subjectColors[item.subject] || '#3f51b5';
-                      const lightColor = `${color}20`;
-                      
-                      return (
-                        <Card 
-                          key={item.subject} 
-                          sx={{ 
-                            mb: 3, 
-                            borderRadius: 2,
-                            boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
-                            border: `1px solid ${color}30`,
-                            overflow: 'hidden',
-                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                            '&:hover': {
-                              transform: 'translateY(-4px)',
-                              boxShadow: '0 12px 32px rgba(0,0,0,0.12)'
-                            }
-                          }}
-                        >
-                          <Box sx={{ 
-                            p: 0.5, 
-                            background: `linear-gradient(90deg, ${color} 0%, ${color}90 100%)`,
-                          }} />
-                          <CardContent sx={{ p: 2.5 }}>
-                            <Typography 
-                              variant="subtitle1" 
-                              gutterBottom
+                    {/* Ders seçim butonları */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexWrap: 'wrap', 
+                      gap: 1, 
+                      mb: 3,
+                      justifyContent: { xs: 'center', sm: 'flex-start' }
+                    }}>
+                      {chartData.map((item) => {
+                        // Her ders için farklı bir renk tonu belirle
+                        const subjectColors = {
+                          'Türkçe': '#3f51b5',
+                          'Sosyal Bilimler': '#673ab7',
+                          'Temel Matematik': '#2196f3',
+                          'Fen Bilimleri': '#009688',
+                          'Matematik': '#2196f3',
+                          'Fizik': '#00bcd4',
+                          'Kimya': '#009688',
+                          'Biyoloji': '#4caf50',
+                          'Edebiyat': '#ff9800',
+                          'Tarih-1': '#795548',
+                          'Coğrafya-1': '#607d8b',
+                          'Tarih-2': '#8d6e63',
+                          'Coğrafya-2': '#78909c',
+                          'Felsefe': '#9c27b0',
+                          'Din Kültürü': '#f44336',
+                          'Yabancı Dil': '#e91e63'
+                        };
+                        
+                        const color = subjectColors[item.subject] || '#3f51b5';
+                        const isSelected = selectedGraphSubject === item.subject;
+                        
+                        return (
+                          <Button 
+                            key={item.subject}
+                            variant={isSelected ? "contained" : "outlined"}
+                            onClick={() => setSelectedGraphSubject(item.subject)}
+                            sx={{
+                              borderRadius: 2,
+                              px: 2,
+                              py: 1,
+                              fontWeight: 600,
+                              borderColor: isSelected ? color : `${color}50`,
+                              color: isSelected ? 'white' : color,
+                              backgroundColor: isSelected ? color : 'transparent',
+                              '&:hover': {
+                                backgroundColor: isSelected ? color : `${color}15`,
+                                borderColor: color,
+                              },
+                              boxShadow: isSelected ? `0 4px 12px ${color}40` : 'none',
+                            }}
+                          >
+                            {item.subject}
+                          </Button>
+                        );
+                      })}
+                    </Box>
+                    
+                    {/* Seçilen dersin grafiği */}
+                    {selectedGraphSubject ? (
+                      (() => {
+                        const selectedData = chartData.find(item => item.subject === selectedGraphSubject);
+                        if (!selectedData || selectedData.data.length === 0) {
+                          return (
+                            <Paper 
+                              elevation={0}
                               sx={{ 
-                                fontWeight: 700, 
-                                color: color,
-                                fontFamily: 'Poppins, Quicksand, sans-serif',
-                                fontSize: '1.1rem',
-                                mb: 2
+                                p: 4, 
+                                borderRadius: 2, 
+                                textAlign: 'center',
+                                bgcolor: 'rgba(0,0,0,0.02)',
+                                border: '1px dashed rgba(0,0,0,0.1)'
                               }}
                             >
-                              {item.subject}
-                            </Typography>
-                            
-                            <Box sx={{ 
-                              height: 300, 
-                              background: `linear-gradient(145deg, #ffffff 0%, ${lightColor} 100%)`,
+                              <Typography color="text.secondary">
+                                {selectedGraphSubject} dersine ait net verisi bulunamadı.
+                              </Typography>
+                            </Paper>
+                          );
+                        }
+                        
+                        const subjectColors = {
+                          'Türkçe': '#3f51b5',
+                          'Sosyal Bilimler': '#673ab7',
+                          'Temel Matematik': '#2196f3',
+                          'Fen Bilimleri': '#009688',
+                          'Matematik': '#2196f3',
+                          'Fizik': '#00bcd4',
+                          'Kimya': '#009688',
+                          'Biyoloji': '#4caf50',
+                          'Edebiyat': '#ff9800',
+                          'Tarih-1': '#795548',
+                          'Coğrafya-1': '#607d8b',
+                          'Tarih-2': '#8d6e63',
+                          'Coğrafya-2': '#78909c',
+                          'Felsefe': '#9c27b0',
+                          'Din Kültürü': '#f44336',
+                          'Yabancı Dil': '#e91e63'
+                        };
+                        
+                        const color = subjectColors[selectedData.subject] || '#3f51b5';
+                        const lightColor = `${color}20`;
+                        
+                        return (
+                          <Card 
+                            sx={{ 
                               borderRadius: 2,
-                              p: 2,
-                              boxShadow: 'inset 0 1px 8px rgba(0,0,0,0.05)'
-                            }}>
-                              <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                  data={item.data}
-                                  margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
-                                >
-                                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
-                                  <XAxis 
-                                    dataKey="name" 
-                                    angle={-45} 
-                                    textAnchor="end"
-                                    height={70}
-                                    tick={{ fontSize: 12, fill: '#666' }}
-                                    axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
-                                  />
-                                  <YAxis 
-                                    tick={{ fontSize: 12, fill: '#666' }}
-                                    axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
-                                  />
-                                  <Tooltip 
-                                    contentStyle={{ 
-                                      borderRadius: 8, 
-                                      boxShadow: '0 4px 16px rgba(0,0,0,0.15)', 
-                                      border: 'none' 
-                                    }} 
-                                  />
-                                  <Legend wrapperStyle={{ paddingTop: 10 }} />
-                                  <Bar 
-                                    dataKey="net" 
-                                    name="Net" 
-                                    fill={color} 
-                                    radius={[6, 6, 0, 0]} 
-                                    barSize={30}
-                                    animationDuration={1500}
-                                  />
-                                </BarChart>
-                              </ResponsiveContainer>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
+                              boxShadow: '0 8px 24px rgba(0,0,0,0.08)',
+                              border: `1px solid ${color}30`,
+                              overflow: 'hidden',
+                              transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                              '&:hover': {
+                                transform: 'translateY(-4px)',
+                                boxShadow: '0 12px 32px rgba(0,0,0,0.12)'
+                              }
+                            }}
+                          >
+                            <Box sx={{ 
+                              p: 0.5, 
+                              background: `linear-gradient(90deg, ${color} 0%, ${color}90 100%)`,
+                            }} />
+                            <CardContent sx={{ p: 2.5 }}>
+                              <Typography 
+                                variant="subtitle1" 
+                                gutterBottom
+                                sx={{ 
+                                  fontWeight: 700, 
+                                  color: color,
+                                  fontFamily: 'Poppins, Quicksand, sans-serif',
+                                  fontSize: '1.1rem',
+                                  mb: 2
+                                }}
+                              >
+                                {selectedData.subject} Net Gelişimi
+                              </Typography>
+                              
+                              <Box sx={{ 
+                                height: 350, 
+                                background: `linear-gradient(145deg, #ffffff 0%, ${lightColor} 100%)`,
+                                borderRadius: 2,
+                                p: 2,
+                                boxShadow: 'inset 0 1px 8px rgba(0,0,0,0.05)'
+                              }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <BarChart
+                                    data={selectedData.data}
+                                    margin={{ top: 10, right: 30, left: 0, bottom: 20 }}
+                                  >
+                                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                                    <XAxis 
+                                      dataKey="name" 
+                                      angle={-45} 
+                                      textAnchor="end"
+                                      height={70}
+                                      tick={{ fontSize: 12, fill: '#666' }}
+                                      axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+                                    />
+                                    <YAxis 
+                                      domain={[0, 40]}
+                                      allowDecimals={false}
+                                      tick={{ fontSize: 12, fill: '#666' }}
+                                      axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+                                    />
+                                    <Tooltip 
+                                      formatter={(value) => [Math.round(value), 'Net']}
+                                      contentStyle={{ 
+                                        borderRadius: 8, 
+                                        boxShadow: '0 4px 16px rgba(0,0,0,0.15)', 
+                                        border: 'none' 
+                                      }} 
+                                    />
+                                    <Legend wrapperStyle={{ paddingTop: 10 }} />
+                                    <Bar 
+                                      dataKey="net" 
+                                      name="Net" 
+                                      fill={color} 
+                                      radius={[6, 6, 0, 0]} 
+                                      barSize={30}
+                                      animationDuration={1500}
+                                    />
+                                  </BarChart>
+                                </ResponsiveContainer>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        );
+                      })()
+                    ) : (
+                      <Paper 
+                        elevation={0}
+                        sx={{ 
+                          p: 4, 
+                          borderRadius: 2, 
+                          textAlign: 'center',
+                          bgcolor: 'rgba(63, 81, 181, 0.05)',
+                          border: '1px dashed rgba(63, 81, 181, 0.2)'
+                        }}
+                      >
+                        <Typography color="primary" fontWeight={500}>
+                          Lütfen grafik görmek istediğiniz dersi yukarıdan seçin.
+                        </Typography>
+                      </Paper>
+                    )}
                   </Box>
                 )}
               </>
