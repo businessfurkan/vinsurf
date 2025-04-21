@@ -89,45 +89,50 @@ const BugunCozduklerin = () => {
       }
       todayCutoff.setHours(4, 0, 0, 0);
       
-      // Create a query to get solved problems without requiring composite indexes
-      const q = query(
-        collection(db, 'solvedProblems'),
-        where('userId', '==', user.uid)
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const solvedProblemsData = {};
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        // Tarih alanını doğru şekilde dönüştürme
-        let recordDate;
-        try {
-          // Firestore Timestamp nesnesini Date'e çevirme
-          recordDate = data.date.toDate ? data.date.toDate() : new Date(data.date);
-        } catch (error) {
-          console.error('Date conversion error:', error);
-          // Hata durumunda geçerli bir tarih kullan
-          recordDate = new Date();
-        }
+      try {
+        // Create a query to get solved problems without requiring composite indexes
+        const q = query(
+          collection(db, 'solvedProblems'),
+          where('userId', '==', user.uid)
+        );
         
-        // JavaScript tarafında son 30 günlük kayıtları filtreleme
-        if (recordDate >= todayCutoff) {
-          if (!solvedProblemsData[data.subject]) {
-            solvedProblemsData[data.subject] = {};
+        const querySnapshot = await getDocs(q);
+        const solvedProblemsData = {};
+        
+        querySnapshot.forEach((docSnapshot) => {
+          const data = docSnapshot.data();
+          // Tarih alanını doğru şekilde dönüştürme
+          let recordDate;
+          try {
+            // Firestore Timestamp nesnesini Date'e çevirme
+            recordDate = data.date && data.date.toDate ? data.date.toDate() : new Date(data.date || Date.now());
+          } catch (error) {
+            console.error('Date conversion error:', error);
+            // Hata durumunda geçerli bir tarih kullan
+            recordDate = new Date();
           }
           
-          solvedProblemsData[data.subject][data.topic] = {
-            correct: data.correct || 0,
-            incorrect: data.incorrect || 0,
-            empty: data.empty || 0,
-            date: recordDate,
-            id: doc.id
-          };
-        }
-      });
-      
-      setSolvedProblems(solvedProblemsData);
+          // JavaScript tarafında son 30 günlük kayıtları filtreleme
+          if (recordDate >= todayCutoff) {
+            if (!solvedProblemsData[data.subject]) {
+              solvedProblemsData[data.subject] = {};
+            }
+            
+            solvedProblemsData[data.subject][data.topic] = {
+              correct: data.correct || 0,
+              incorrect: data.incorrect || 0,
+              empty: data.empty || 0,
+              date: recordDate,
+              id: docSnapshot.id
+            };
+          }
+        });
+        
+        setSolvedProblems(solvedProblemsData);
+      } catch (firestoreError) {
+        console.error('Firestore error:', firestoreError);
+        showSnackbar('Veritabanı bağlantısında hata oluştu', 'error');
+      }
     } catch (error) {
       console.error('Error fetching solved problems:', error);
       showSnackbar('Çözülen soru bilgileri yüklenirken hata oluştu', 'error');
@@ -148,7 +153,7 @@ const BugunCozduklerin = () => {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       thirtyDaysAgo.setHours(4, 0, 0, 0);
       
-      // Sadece userId'ye göre sorgulama yapıyoruz, tarih filtresi JavaScript tarafında uygulanacak
+      // CORS hatalarını önlemek için try-catch bloğu içinde sorgulama yapıyoruz
       // Bu şekilde composite index gerektiren bir sorgu yapmıyoruz
       const q = query(
         collection(db, 'solvedProblems'),
@@ -204,7 +209,7 @@ const BugunCozduklerin = () => {
       fetchSolvedProblems();
       fetchHistoricalSolvedProblems();
     }
-  }, [user, fetchSolvedProblems, fetchHistoricalSolvedProblems]);
+  }, [fetchSolvedProblems, fetchHistoricalSolvedProblems, user]);
 
   const handleOpenDialog = (subject) => {
     setSelectedSubject(subject);
@@ -1297,9 +1302,9 @@ const BugunCozduklerin = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         sx={{
           '& .MuiSnackbarContent-root': {
-            backgroundColor: snackbarSeverity === 'error' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-            color: '#000000',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+            backgroundColor: snackbarSeverity === 'error' ? 'rgba(211, 47, 47, 0.9)' : 'rgba(46, 125, 50, 0.9)',
+            color: '#FFFFFF',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)',
             borderRadius: 2,
             fontWeight: 500
           }
