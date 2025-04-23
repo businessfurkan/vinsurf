@@ -555,7 +555,7 @@ const PuanHesapla = () => {
       {activeTab === 0 && (
         <Box>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={8}>
+            <Grid xs={12} md={8}>
               <Paper elevation={0} sx={{ 
                 p: { xs: 3, md: 4 }, 
                 borderRadius: { xs: 3, md: 4 }, 
@@ -575,12 +575,12 @@ const PuanHesapla = () => {
                 
                 <Grid container spacing={3}>
                   {/* Türkçe */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Türkçe (40 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -591,7 +591,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleTytChange('turkce', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -606,12 +606,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Sosyal Bilimler */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Sosyal Bilimler (20 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -622,7 +622,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleTytChange('sosyal', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -637,12 +637,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Matematik */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Matematik (40 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -653,7 +653,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleTytChange('matematik', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -668,12 +668,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Fen Bilimleri */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Fen Bilimleri (20 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -684,7 +684,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleTytChange('fen', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -819,12 +819,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Matematik */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Matematik (40 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -835,7 +835,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('matematik', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -850,12 +850,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Fizik */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Fizik (14 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -866,7 +866,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('fizik', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -881,12 +881,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Kimya */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Kimya (13 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -897,7 +897,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('kimya', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -912,12 +912,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Biyoloji */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Biyoloji (13 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -928,7 +928,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('biyoloji', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -951,12 +951,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Edebiyat */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Türk Dili ve Edebiyatı (24 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -967,7 +967,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('edebiyat', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -982,12 +982,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Tarih-1 */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Tarih-1 (10 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -998,7 +998,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('tarih1', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -1013,12 +1013,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Coğrafya-1 */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Coğrafya-1 (6 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -1029,7 +1029,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('cografya1', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -1044,12 +1044,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Tarih-2 */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Tarih-2 (11 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -1060,7 +1060,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('tarih2', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -1075,12 +1075,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Coğrafya-2 */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Coğrafya-2 (5 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -1091,7 +1091,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('cografya2', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -1106,12 +1106,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Felsefe */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Felsefe (12 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -1122,7 +1122,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('felsefe', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -1137,12 +1137,12 @@ const PuanHesapla = () => {
                   </Grid>
                   
                   {/* Din Kültürü */}
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
                       Din Kültürü (6 Soru)
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Doğru"
                           type="number"
@@ -1153,7 +1153,7 @@ const PuanHesapla = () => {
                           onChange={(e) => handleAytChange('din', 'dogru', e.target.value)}
                         />
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid xs={6}>
                         <TextField
                           label="Yanlış"
                           type="number"
@@ -1304,7 +1304,7 @@ const PuanHesapla = () => {
                 </Box>
                 
                 <Grid container spacing={4}>
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Card sx={{ 
                       borderRadius: 4, 
                       boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
@@ -1331,7 +1331,7 @@ const PuanHesapla = () => {
                     </Card>
                   </Grid>
                   
-                  <Grid item xs={12} sm={6}>
+                  <Grid xs={12} sm={4}>
                     <Card sx={{ 
                       borderRadius: 4, 
                       boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
@@ -1358,7 +1358,7 @@ const PuanHesapla = () => {
                     </Card>
                   </Grid>
                   
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <Card sx={{ 
                       borderRadius: 3, 
                       boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
@@ -1400,7 +1400,7 @@ const PuanHesapla = () => {
                   
                   <Grid container spacing={3}>
                     {/* EA Sonuçları */}
-                    <Grid item xs={12} md={4}>
+                    <Grid xs={12} md={4}>
                       <Card sx={{ 
                         borderRadius: 4, 
                         boxShadow: '0 8px 20px rgba(66, 133, 244, 0.15)',
@@ -1454,7 +1454,7 @@ const PuanHesapla = () => {
                     </Grid>
                     
                     {/* SAY Sonuçları */}
-                    <Grid item xs={12} md={4}>
+                    <Grid xs={12} md={4}>
                       <Card sx={{ 
                         borderRadius: 4, 
                         boxShadow: '0 8px 20px rgba(52, 168, 83, 0.15)',
@@ -1508,7 +1508,7 @@ const PuanHesapla = () => {
                     </Grid>
                     
                     {/* SÖZ Sonuçları */}
-                    <Grid item xs={12} md={4}>
+                    <Grid xs={12} md={4}>
                       <Card sx={{ 
                         borderRadius: 4, 
                         boxShadow: '0 8px 20px rgba(234, 67, 53, 0.15)',

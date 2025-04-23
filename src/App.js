@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from './firebase';
@@ -34,10 +34,16 @@ const App = () => {
 
   // Protected route component
   const ProtectedRoute = ({ children }) => {
+    const navigate = useNavigate();
+    
     if (loading) return <div>Loading...</div>;
     
     if (!user) {
-      return <Navigate to="/login" replace />;
+      // React Router v7 için startTransition kullanımı
+      React.startTransition(() => {
+        navigate('/login', { replace: true });
+      });
+      return null;
     }
     
     return children;
