@@ -688,72 +688,115 @@ const KonuTakip = () => {
         </Box>
 
         {/* Ders Kartları Grid */}
-        <Grid container spacing={3}>
-          {dersler
-            .filter(ders => ders.type === examType)
-            .map((ders) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={ders.id}>
-                <Card 
-                  elevation={3}
-                  sx={{ 
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: 2,
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
-                    },
-                    border: `2px solid ${ders.color}20`
-                  }}
-                >
-                  <CardActionArea 
-                    onClick={() => handleOpenDialog(ders)}
-                    sx={{ 
-                      flexGrow: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'stretch',
-                      justifyContent: 'flex-start'
-                    }}
-                  >
-                    <Box 
-                      sx={{ 
-                        backgroundColor: ders.color,
-                        color: 'white',
-                        py: 2,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center'
-                      }}
-                    >
-                      <Typography variant="h6" component="h2" align="center" sx={{ fontWeight: 600 }}>
-                        {ders.ad}
-                      </Typography>
-                    </Box>
-                    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
-                        {ders.konular.length} konu
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                        <Chip 
-                          label={`${calculateProgress(ders.id)}% Tamamlandı`} 
-                          size="small"
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          {/* Wrap the grid items in groups of 4 */}
+          {(() => {
+            const filteredDersler = dersler.filter(ders => ders.type === examType);
+            const rows = [];
+            
+            for (let i = 0; i < filteredDersler.length; i += 4) {
+              const rowItems = filteredDersler.slice(i, i + 4);
+              rows.push(
+                <Grid container item spacing={3} key={`row-${i}`} sx={{ mb: 3 }}>
+                  {rowItems.map((ders) => (
+                    <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ display: 'flex' }}>
+                      <Card 
+                        elevation={4}
+                        sx={{ 
+                          width: '100%',
+                          height: 220, // Fixed height for consistency
+                          display: 'flex',
+                          flexDirection: 'column',
+                          borderRadius: 3,
+                          overflow: 'hidden',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'translateY(-8px)',
+                            boxShadow: '0 12px 28px rgba(0,0,0,0.15)'
+                          },
+                          position: 'relative',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            background: `linear-gradient(135deg, ${ders.color}05 0%, ${ders.color}15 100%)`,
+                            zIndex: 0
+                          }
+                        }}
+                      >
+                        <CardActionArea 
+                          onClick={() => handleOpenDialog(ders)}
                           sx={{ 
-                            backgroundColor: `${ders.color}20`,
-                            color: ders.color,
-                            fontWeight: 'bold',
-                            borderRadius: '4px'
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'stretch',
+                            justifyContent: 'flex-start',
+                            zIndex: 1
                           }}
-                        />
-                      </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
-            ))}
+                        >
+                          <Box 
+                            sx={{ 
+                              backgroundColor: ders.color,
+                              color: 'white',
+                              py: 2.5,
+                              display: 'flex',
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                            }}
+                          >
+                            <Typography variant="h6" component="h2" align="center" sx={{ fontWeight: 700 }}>
+                              {ders.ad}
+                            </Typography>
+                          </Box>
+                          <CardContent sx={{ 
+                            flexGrow: 1, 
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            justifyContent: 'space-between',
+                            p: 3
+                          }}>
+                            <Typography 
+                              variant="body1" 
+                              color="text.primary" 
+                              align="center" 
+                              sx={{ 
+                                mb: 2, 
+                                fontWeight: 500,
+                                fontSize: '1rem'
+                              }}
+                            >
+                              {ders.konular.length} konu
+                            </Typography>
+                            
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                              <Chip 
+                                label={`${calculateProgress(ders.id)}% Tamamlandı`} 
+                                sx={{ 
+                                  backgroundColor: ders.color,
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                  borderRadius: '20px',
+                                  py: 0.5,
+                                  px: 1
+                                }}
+                              />
+                            </Box>
+                          </CardContent>
+                        </CardActionArea>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              );
+            }
+            
+            return rows;
+          })()}
         </Grid>
       </Container>
 

@@ -136,22 +136,14 @@ const KacGunKaldi = () => {
         </Typography>
       </Paper>
       
-      <Box sx={{ position: 'relative', mb: 6 }}>
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: -15, 
-            left: '50%', 
-            transform: 'translateX(-50%)',
-            zIndex: 2,
-            animation: animate ? 'pulse 1.5s infinite' : 'none',
-            '@keyframes pulse': {
-              '0%': { transform: 'translateX(-50%) scale(1)' },
-              '50%': { transform: 'translateX(-50%) scale(1.05)' },
-              '100%': { transform: 'translateX(-50%) scale(1)' }
-            }
-          }}
-        >
+      <Box sx={{ position: 'relative', mb: 6, display: 'flex', flexDirection: 'column' }}>
+        {/* Moved the date information to the right side */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'flex-end',
+          mb: 2,
+          mr: 2
+        }}>
           <Paper 
             elevation={3} 
             sx={{ 
@@ -161,7 +153,13 @@ const KacGunKaldi = () => {
               background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
               color: 'white',
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              animation: animate ? 'pulse 1.5s infinite' : 'none',
+              '@keyframes pulse': {
+                '0%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.05)' },
+                '100%': { transform: 'scale(1)' }
+              }
             }}
           >
             <AccessTimeIcon sx={{ mr: 1 }} />
