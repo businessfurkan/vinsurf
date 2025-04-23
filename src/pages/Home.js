@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   Box, 
   Container,
@@ -7,8 +7,56 @@ import {
 } from '@mui/material';
 import RankingGoals from '../components/RankingGoals';
 import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { useNotifications } from '../context/NotificationContext';
 
 const Home = () => {
+  const [user] = useAuthState(auth);
+  const { addNotification } = useNotifications() || { addNotification: () => {} };
+  
+  // Kullanıcı 3 gün veya daha uzun süre giriş yapmadıysa bildirim gönder
+  useEffect(() => {
+    const checkInactivity = async () => {
+      if (!user) return;
+      
+      try {
+        // Kullanıcı profil dökümanına referans
+        const userRef = doc(db, 'userProfiles', user.uid);
+        
+        // Kullanıcı profil dökümanını al
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const daysSinceLastLogin = userData.daysSinceLastLogin || 0;
+          const displayName = userData.displayName || user.displayName || user.email?.split('@')[0] || 'Kullanıcı';
+          const targetRank = userData.targetRank || 150000;
+          
+          // 3 gün veya daha uzun süre giriş yapılmadıysa bildirim gönder
+          if (daysSinceLastLogin >= 3) {
+            const message = `${displayName}, seni ${daysSinceLastLogin} gündür görmüyoruz. Hedefin hâlâ ${targetRank.toLocaleString()} sıralamaya girmek mi yoksa?`;
+            
+            // Bildirim gönder
+            if (addNotification) {
+              addNotification(message, 'warning', {
+                type: 'inactivity',
+                daysSinceLastLogin,
+                targetRank
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Kullanıcı inaktivite kontrolü sırasında hata:', error);
+      }
+    };
+    
+    if (user) {
+      checkInactivity();
+    }
+  }, [user, addNotification]);
 
   return (
     <Box 

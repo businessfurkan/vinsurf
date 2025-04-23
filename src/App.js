@@ -5,7 +5,8 @@ import { NotificationProvider } from './context/NotificationContext';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from './firebase';
+import { auth, db } from './firebase';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -21,6 +22,7 @@ import DersProgrami from './pages/DersProgrami';
 import Analiz from './pages/Analiz';
 import NotDefterim from './pages/NotDefterim';
 import KacGunKaldi from './pages/KacGunKaldi';
+import KonuTakip from './pages/KonuTakip';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 
@@ -32,6 +34,60 @@ import './styles/global.css';
 
 const App = () => {
   const [user, loading] = useAuthState(auth);
+  
+  // Kullanıcı giriş takibi
+  React.useEffect(() => {
+    const trackUserLogin = async () => {
+      if (!user) return;
+      
+      try {
+        // Kullanıcı profil dökümanına referans
+        const userRef = doc(db, 'userProfiles', user.uid);
+        
+        // Kullanıcı profil dökümanını al
+        const userDoc = await getDoc(userRef);
+        
+        // Şimdiki zaman
+        const now = new Date();
+        
+        if (userDoc.exists()) {
+          // Kullanıcı profili varsa güncelle
+          const userData = userDoc.data();
+          const lastLogin = userData.lastLogin?.toDate ? userData.lastLogin.toDate() : new Date(userData.lastLogin?.seconds * 1000 || 0);
+          
+          // Son giriş ve şimdiki zaman arasındaki fark (gün olarak)
+          const daysSinceLastLogin = Math.floor((now - lastLogin) / (1000 * 60 * 60 * 24));
+          
+          // Kullanıcı profilini güncelle
+          await updateDoc(userRef, {
+            lastLogin: serverTimestamp(),
+            previousLogin: userData.lastLogin || serverTimestamp(),
+            daysSinceLastLogin: daysSinceLastLogin,
+            displayName: user.displayName || userData.displayName || user.email?.split('@')[0] || 'Kullanıcı'
+          });
+        } else {
+          // Kullanıcı profili yoksa oluştur
+          await setDoc(userRef, {
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName || user.email?.split('@')[0] || 'Kullanıcı',
+            photoURL: user.photoURL || '',
+            createdAt: serverTimestamp(),
+            lastLogin: serverTimestamp(),
+            previousLogin: serverTimestamp(),
+            daysSinceLastLogin: 0,
+            targetRank: 150000 // Varsayılan hedef sıralama
+          });
+        }
+      } catch (error) {
+        console.error('Kullanıcı giriş takibi sırasında hata:', error);
+      }
+    };
+    
+    if (user && !loading) {
+      trackUserLogin();
+    }
+  }, [user, loading]);
 
   // Protected route component
   const ProtectedRoute = ({ children }) => {
@@ -79,6 +135,7 @@ const App = () => {
                 <Route path="/analiz" element={<ProtectedRoute><Analiz /></ProtectedRoute>} />
                 <Route path="/not-defterim" element={<ProtectedRoute><NotDefterim /></ProtectedRoute>} />
                 <Route path="/kac-gun-kaldi" element={<ProtectedRoute><KacGunKaldi /></ProtectedRoute>} />
+                <Route path="/konu-takip" element={<ProtectedRoute><KonuTakip /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
