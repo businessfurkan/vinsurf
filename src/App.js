@@ -19,7 +19,6 @@ import YapayZeka from './pages/YapayZeka';
 import DersProgrami from './pages/DersProgrami';
 import Analiz from './pages/Analiz';
 import NotDefterim from './pages/NotDefterim';
-import PuanHesapla from './pages/PuanHesapla';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 
@@ -76,7 +75,6 @@ const App = () => {
                 <Route path="/performans" element={<ProtectedRoute><DersProgrami /></ProtectedRoute>} />
                 <Route path="/analiz" element={<ProtectedRoute><Analiz /></ProtectedRoute>} />
                 <Route path="/not-defterim" element={<ProtectedRoute><NotDefterim /></ProtectedRoute>} />
-                <Route path="/puan-hesapla" element={<ProtectedRoute><PuanHesapla /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
