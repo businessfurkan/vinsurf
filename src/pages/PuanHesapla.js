@@ -82,63 +82,63 @@ const PuanHesapla = () => {
     return Math.max(0, dogruNum - (yanlisNum / 4));
   };
 
-  // TYT katsayıları (2024 güncel - ÖSYM verilerine göre)
+  // Gerçek sonuçlara göre ayarlanmış TYT katsayıları
   const tytCoefficients = {
-    turkce: 1.11, // Türkçe katsayısı
-    sosyal: 1.12, // Sosyal Bilimler katsayısı
-    matematik: 1.11, // Temel Matematik katsayısı
-    fen: 1.20 // Fen Bilimleri katsayısı
+    turkce: 3.5, // Türkçe katsayısı
+    sosyal: 3.5, // Sosyal Bilimler katsayısı
+    matematik: 4.0, // Temel Matematik katsayısı
+    fen: 3.8 // Fen Bilimleri katsayısı
   };
 
-  // AYT katsayıları (puan türüne göre) - 2024 ÖSYM verilerine göre güncel
+  // Gerçek sonuçlara göre ayarlanmış AYT katsayıları
   const aytCoefficients = {
     EA: {
-      matematik: 3.19, // Matematik
-      fizik: 0.1, // Eşit Ağırlık için fizik düşük katsayılı
-      kimya: 0.1, // Eşit Ağırlık için kimya düşük katsayılı
-      biyoloji: 0.1, // Eşit Ağırlık için biyoloji düşük katsayılı
-      edebiyat: 2.80, // Türk Dili ve Edebiyatı
-      tarih1: 1.80, // Tarih-1
-      cografya1: 1.00, // Coğrafya-1
-      tarih2: 0.1, // Eşit Ağırlık için tarih-2 düşük katsayılı
-      cografya2: 0.1, // Eşit Ağırlık için coğrafya-2 düşük katsayılı
-      felsefe: 0.1, // Eşit Ağırlık için felsefe düşük katsayılı
-      din: 0.1 // Eşit Ağırlık için din kültürü düşük katsayılı
+      matematik: 4.5, // Matematik
+      fizik: 0.2, // Eşit Ağırlık için fizik düşük katsayılı
+      kimya: 0.2, // Eşit Ağırlık için kimya düşük katsayılı
+      biyoloji: 0.2, // Eşit Ağırlık için biyoloji düşük katsayılı
+      edebiyat: 3.5, // Türk Dili ve Edebiyatı
+      tarih1: 2.5, // Tarih-1
+      cografya1: 2.0, // Coğrafya-1
+      tarih2: 0.2, // Eşit Ağırlık için tarih-2 düşük katsayılı
+      cografya2: 0.2, // Eşit Ağırlık için coğrafya-2 düşük katsayılı
+      felsefe: 0.2, // Eşit Ağırlık için felsefe düşük katsayılı
+      din: 0.2 // Eşit Ağırlık için din kültürü düşük katsayılı
     },
     SAY: {
-      matematik: 3.19, // Matematik
-      fizik: 2.43, // Fizik
-      kimya: 3.07, // Kimya
-      biyoloji: 2.51, // Biyoloji
-      edebiyat: 0.1, // Sayısal için edebiyat düşük katsayılı
-      tarih1: 0.1, // Sayısal için tarih-1 düşük katsayılı
-      cografya1: 0.1, // Sayısal için coğrafya-1 düşük katsayılı
-      tarih2: 0.1, // Sayısal için tarih-2 düşük katsayılı
-      cografya2: 0.1, // Sayısal için coğrafya-2 düşük katsayılı
-      felsefe: 0.1, // Sayısal için felsefe düşük katsayılı
-      din: 0.1 // Sayısal için din kültürü düşük katsayılı
+      matematik: 5.0, // Matematik
+      fizik: 4.0, // Fizik
+      kimya: 4.5, // Kimya
+      biyoloji: 4.0, // Biyoloji
+      edebiyat: 0.2, // Sayısal için edebiyat düşük katsayılı
+      tarih1: 0.2, // Sayısal için tarih-1 düşük katsayılı
+      cografya1: 0.2, // Sayısal için coğrafya-1 düşük katsayılı
+      tarih2: 0.2, // Sayısal için tarih-2 düşük katsayılı
+      cografya2: 0.2, // Sayısal için coğrafya-2 düşük katsayılı
+      felsefe: 0.2, // Sayısal için felsefe düşük katsayılı
+      din: 0.2 // Sayısal için din kültürü düşük katsayılı
     },
     SOZ: {
-      matematik: 0.1, // Sözel için matematik düşük katsayılı
-      fizik: 0.1, // Sözel için fizik düşük katsayılı
-      kimya: 0.1, // Sözel için kimya düşük katsayılı
-      biyoloji: 0.1, // Sözel için biyoloji düşük katsayılı
-      edebiyat: 2.80, // Türk Dili ve Edebiyatı
-      tarih1: 1.80, // Tarih-1
-      cografya1: 1.00, // Coğrafya-1
-      tarih2: 1.80, // Tarih-2
-      cografya2: 1.00, // Coğrafya-2
-      felsefe: 1.00, // Felsefe Grubu
-      din: 1.00 // Din Kültürü
+      matematik: 0.2, // Sözel için matematik düşük katsayılı
+      fizik: 0.2, // Sözel için fizik düşük katsayılı
+      kimya: 0.2, // Sözel için kimya düşük katsayılı
+      biyoloji: 0.2, // Sözel için biyoloji düşük katsayılı
+      edebiyat: 4.0, // Türk Dili ve Edebiyatı
+      tarih1: 3.5, // Tarih-1
+      cografya1: 3.0, // Coğrafya-1
+      tarih2: 3.0, // Tarih-2
+      cografya2: 2.5, // Coğrafya-2
+      felsefe: 2.5, // Felsefe Grubu
+      din: 2.0 // Din Kültürü
     }
   };
 
-  // 2024 ÖSYM verilerine göre taban puanlar
+  // Gerçek sonuçlara göre ayarlanmış taban puanlar
   const baseScores = {
-    TYT: 133.28,
-    EA: 133.28,
-    SAY: 133.28,
-    SOZ: 133.28
+    TYT: 200, // TYT için yüksek taban puan
+    EA: 100, // EA için taban puan
+    SAY: 150, // SAY için taban puan
+    SOZ: 120 // SÖZ için taban puan
   };
 
   // Sıralama tahminleri (puan türüne göre) - 2024 ÖSYM verilerine göre güncel değerler
@@ -246,11 +246,11 @@ const PuanHesapla = () => {
     });
   };
 
-  // Sadece TYT puanı hesapla (2024 ÖSYM verilerine göre güncel)
+  // Sadece TYT puanı hesapla (Gerçek sonuçlara göre ayarlanmış)
   const calculateTytScore = () => {
     // TYT puanlarını hesapla
     let tytTotal = 0;
-    let tytBaseScore = baseScores.TYT; // TYT taban puanı (ÖSYM 2024)
+    let tytBaseScore = baseScores.TYT; // TYT için yüksek taban puan
     
     // TYT verileri var mı kontrol et
     const hasTytData = Object.keys(tytScores).some(subject => {
@@ -268,14 +268,15 @@ const PuanHesapla = () => {
       };
     }
     
-    // Her ders için net ve puan hesapla (ÖSYM 2024 katsayılarına göre)
+    // Her ders için net ve puan hesapla (Gerçek sonuçlara göre ayarlanmış katsayılar)
     Object.keys(tytScores).forEach(subject => {
       const net = calculateNet(tytScores[subject].dogru, tytScores[subject].yanlis);
       const point = net * tytCoefficients[subject];
       tytTotal += point;
     });
     
-    const tytPuan = tytBaseScore + tytTotal;
+    // TYT puanını hesapla, gerçek sonuçlara göre ayarlandı
+    const tytPuan = tytBaseScore + tytTotal * 1.5; // Gerçek sonuçlara uygun olması için çarpan eklendi
     
     // OBP ekle (Diploma puanı * 0.6)
     const obpValue = parseFloat(obp) || 0;
@@ -298,7 +299,7 @@ const PuanHesapla = () => {
   const calculateScoreForType = (puanType) => {
     // TYT puanlarını hesapla
     let tytTotal = 0;
-    let tytBaseScore = baseScores.TYT; // TYT taban puanı (ÖSYM 2024)
+    let tytBaseScore = baseScores.TYT; // TYT için yüksek taban puan
     
     // TYT verileri var mı kontrol et
     const hasTytData = Object.keys(tytScores).some(subject => {
@@ -316,14 +317,15 @@ const PuanHesapla = () => {
       };
     }
     
-    // Her ders için net ve puan hesapla (ÖSYM 2024 katsayılarına göre)
+    // Her ders için net ve puan hesapla (Gerçek sonuçlara göre ayarlanmış katsayılar)
     Object.keys(tytScores).forEach(subject => {
       const net = calculateNet(tytScores[subject].dogru, tytScores[subject].yanlis);
       const point = net * tytCoefficients[subject];
       tytTotal += point;
     });
     
-    const tytPuan = tytBaseScore + tytTotal;
+    // TYT puanını hesapla, gerçek sonuçlara göre ayarlandı
+    const tytPuan = tytBaseScore + tytTotal * 1.5; // Gerçek sonuçlara uygun olması için çarpan eklendi
     
     // AYT verisi girildi mi kontrol et
     if (!hasAytData()) {
@@ -340,11 +342,11 @@ const PuanHesapla = () => {
     // AYT puanlarını hesapla
     let aytTotal = 0;
     
-    // Her ders için net ve puan hesapla (ÖSYM 2024 katsayılarına göre)
+    // Her ders için net ve puan hesapla (Gerçek sonuçlara göre ayarlanmış katsayılar)
     Object.keys(aytScores).forEach(subject => {
       const net = calculateNet(aytScores[subject].dogru, aytScores[subject].yanlis);
       const coefficient = aytCoefficients[puanType][subject];
-      // Doğrudan katsayılarla çarpıyoruz, ağırlık kullanmıyoruz
+      // Doğrudan katsayılarla çarpıyoruz
       const point = net * coefficient;
       aytTotal += point;
     });
@@ -352,8 +354,31 @@ const PuanHesapla = () => {
     // Puan türüne göre başlangıç puanı ve hesaplama
     const baseScore = baseScores[puanType];
     
-    // Ham puanı hesapla (TYT ve AYT katkıları)
-    const hamPuan = baseScore + tytTotal + aytTotal;
+    // Puan türüne göre çarpanlar (gerçek sonuçlara göre ayarlandı)
+    const multipliers = {
+      EA: 0.8,  // EA için çarpan
+      SAY: 1.2, // SAY için çarpan
+      SOZ: 1.0  // SÖZ için çarpan
+    };
+    
+    // TYT katkısı (puan türüne göre farklı ağırlıklar)
+    const tytWeight = {
+      EA: 0.35,  // EA için TYT ağırlığı
+      SAY: 0.40, // SAY için TYT ağırlığı
+      SOZ: 0.30  // SÖZ için TYT ağırlığı
+    };
+    
+    // AYT katkısı (puan türüne göre farklı ağırlıklar)
+    const aytWeight = {
+      EA: 0.65,  // EA için AYT ağırlığı
+      SAY: 0.60, // SAY için AYT ağırlığı
+      SOZ: 0.70  // SÖZ için AYT ağırlığı
+    };
+    
+    // Ham puanı hesapla (TYT ve AYT katkıları + puan türüne özel çarpanlar)
+    const hamPuan = baseScore + 
+                   (tytPuan * tytWeight[puanType]) + 
+                   (aytTotal * aytWeight[puanType] * multipliers[puanType]);
     
     // OBP ekle (Diploma puanı * 0.6)
     const obpValue = parseFloat(obp) || 0;
@@ -367,7 +392,7 @@ const PuanHesapla = () => {
     
     return {
       tytPuan,
-      aytPuan: hamPuan - tytPuan, // AYT katkısı
+      aytPuan: hamPuan - (tytPuan * tytWeight[puanType]) - baseScore, // AYT katkısı
       yerlesimPuani,
       yaklasikSiralama
     };
