@@ -250,6 +250,8 @@ const PomodoroTimer = () => {
     // Eğer pomodoro modundaysa ve timer çalışmıyorsa ve hedef belirlenmemişse
     if (mode === 'pomodoro' && !isRunning && !currentGoal) {
       setShowGoalInput(true);
+      // Sayacı başlatma, bu sadece hedef diyaloğunu açar
+      return;
     } else if (showGoalResult) {
       setShowGoalResult(false);
       setCurrentGoal('');
@@ -418,6 +420,53 @@ const PomodoroTimer = () => {
             </Button>
           </Box>
           
+          {/* Gösterişli İlerleme Çubuğu */}
+          <Box 
+            sx={{ 
+              width: '100%', 
+              maxWidth: 400, 
+              mx: 'auto', 
+              mb: 3, 
+              mt: 2,
+              position: 'relative',
+              height: 12,
+              bgcolor: 'rgba(0,0,0,0.05)',
+              borderRadius: 6,
+              overflow: 'hidden',
+              boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.1)',
+              border: '1px solid rgba(0,0,0,0.03)'
+            }}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                height: '100%',
+                width: `${calculateProgress()}%`,
+                background: mode === 'pomodoro' 
+                  ? 'linear-gradient(90deg, #0067b8 0%, #0078d4 100%)' 
+                  : mode === 'shortBreak' 
+                    ? 'linear-gradient(90deg, #34a853 0%, #46c565 100%)' 
+                    : 'linear-gradient(90deg, #ea4335 0%, #ff5c52 100%)',
+                transition: 'width 1s linear',
+                boxShadow: `0 0 10px ${mode === 'pomodoro' ? 'rgba(0,103,184,0.6)' : 
+                          mode === 'shortBreak' ? 'rgba(52,168,83,0.6)' : 'rgba(234,67,53,0.6)'}`,
+                borderRadius: 6,
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(to right, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.1) 100%)',
+                  opacity: 0.8
+                }
+              }}
+            />
+          </Box>
+          
           {/* Main Timer Display - Horizontal Layout */}
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', justifyContent: 'center', mb: 4, width: '100%' }}>
             <Box 
@@ -431,111 +480,6 @@ const PomodoroTimer = () => {
                 mr: { xs: 0, sm: 4, md: 6 }
               }}
             >
-              {/* Yarım daire şeklinde ilerleme çubuğu */}
-              <Box
-                sx={{
-                  position: 'absolute',
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 1
-                }}
-              >
-                <Box
-                  sx={{
-                    position: 'relative',
-                    width: 200,
-                    height: 100,
-                    overflow: 'hidden'
-                  }}
-                >
-                  {/* Başlangıç noktası */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      left: 0,
-                      bottom: 0,
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      bgcolor: mode === 'pomodoro' ? '#0067b8' : 
-                              mode === 'shortBreak' ? '#34a853' : '#ea4335',
-                      zIndex: 3,
-                      boxShadow: '0 0 5px rgba(0,0,0,0.2)'
-                    }}
-                  />
-                  
-                  {/* Bitiş noktası */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      right: 0,
-                      bottom: 0,
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      bgcolor: mode === 'pomodoro' ? '#0067b8' : 
-                              mode === 'shortBreak' ? '#34a853' : '#ea4335',
-                      zIndex: 3,
-                      boxShadow: '0 0 5px rgba(0,0,0,0.2)'
-                    }}
-                  />
-                  
-                  {/* İlerleme arkaplanı */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      width: '100%',
-                      height: 4,
-                      bgcolor: 'rgba(0,0,0,0.1)',
-                      borderRadius: 2,
-                      zIndex: 1
-                    }}
-                  />
-                  
-                  {/* İlerleme çubuğu */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      width: `${calculateProgress()}%`,
-                      height: 4,
-                      bgcolor: mode === 'pomodoro' ? '#0067b8' : 
-                              mode === 'shortBreak' ? '#34a853' : '#ea4335',
-                      borderRadius: 2,
-                      transition: 'width 1s linear',
-                      zIndex: 2,
-                      boxShadow: `0 0 10px ${mode === 'pomodoro' ? 'rgba(0,103,184,0.5)' : 
-                                mode === 'shortBreak' ? 'rgba(52,168,83,0.5)' : 'rgba(234,67,53,0.5)'}`
-                    }}
-                  />
-                  
-                  {/* Yarım daire */}
-                  <Box
-                    sx={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      width: 200,
-                      height: 200,
-                      borderRadius: '50%',
-                      border: `2px solid ${mode === 'pomodoro' ? '#0067b8' : 
-                                        mode === 'shortBreak' ? '#34a853' : '#ea4335'}`,
-                      borderBottom: 'none',
-                      borderLeft: 'none',
-                      borderRight: 'none',
-                      transform: 'rotate(-180deg)',
-                      boxSizing: 'border-box',
-                      opacity: 0.3
-                    }}
-                  />
-                </Box>
-              </Box>
               <Box 
                 sx={{ 
                   position: 'absolute',
@@ -858,6 +802,7 @@ const PomodoroTimer = () => {
               <Button 
                 onClick={() => {
                   setShowGoalInput(false);
+                  // Hedefsiz başlat butonuna tıklandığında sayacı başlat
                   setIsRunning(true);
                 }} 
                 color="inherit"

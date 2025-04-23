@@ -762,11 +762,28 @@ const DersProgrami = () => {
         <Box sx={{ width: '100%', mt: 4 }}>
           <Box sx={{ 
             display: 'flex', 
-            flexWrap: 'wrap', 
-            gap: 3, 
-            justifyContent: 'center',
+            flexDirection: 'row',
+            flexWrap: 'nowrap',
+            gap: 2, 
+            justifyContent: 'space-between',
             width: '100%',
             position: 'relative',
+            overflowX: 'auto',
+            pb: 2, // Scroll çubuğu için biraz padding
+            '&::-webkit-scrollbar': {
+              height: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'rgba(0,0,0,0.05)',
+              borderRadius: '10px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'rgba(63, 81, 181, 0.3)',
+              borderRadius: '10px',
+              '&:hover': {
+                background: 'rgba(63, 81, 181, 0.5)',
+              },
+            },
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -794,11 +811,12 @@ const DersProgrami = () => {
               <Box 
                 key={day}
                 sx={{
-                  width: { xs: '100%', sm: 'calc(50% - 16px)', md: 'calc(33.33% - 16px)', lg: 'calc(14.28% - 16px)' },
-                  minWidth: { xs: '100%', sm: '280px', md: '220px' },
+                  flex: '1 0 auto',
+                  width: { xs: '85%', sm: '250px', md: '200px', lg: '180px' },
+                  minWidth: { xs: '85%', sm: '250px', md: '200px', lg: '180px' },
                   display: 'flex',
                   flexDirection: 'column',
-                  mb: 3,
+                  mb: 1,
                   transition: 'all 0.3s ease',
                   position: 'relative',
                   '&:hover': {

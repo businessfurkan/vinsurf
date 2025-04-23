@@ -19,6 +19,7 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import InsightsIcon from '@mui/icons-material/Insights';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import CalculateIcon from '@mui/icons-material/Calculate';
 
 
 
@@ -101,6 +102,7 @@ const Sidebar = () => {
     { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' }, // Turuncu
     { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#00BCD4' }, // Turkuaz - Shortened for better display
     { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Mor
+    { text: 'Puan Hesapla', icon: <CalculateIcon />, path: '/puan-hesapla', color: '#FF5722' }, // Turuncu
     // Teneffüs sekmesi kaldırıldı.
   ];
 

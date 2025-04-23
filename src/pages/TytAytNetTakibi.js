@@ -1443,8 +1443,6 @@ const TytAytNetTakibi = () => {
                                       axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
                                     />
                                     <RechartsTooltip />
-                                    <Legend />
-                                    <Bar dataKey="net" fill={color} />
                                     <Tooltip 
                                       formatter={(value) => [Math.round(value), 'Net']}
                                       contentStyle={{ 
