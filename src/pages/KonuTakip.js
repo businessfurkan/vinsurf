@@ -250,7 +250,7 @@ const dersler = [
     color: '#4CAF50',
     konular: [
       'Doğa ve İnsan',
-      'Dünya'nın Şekli ve Hareketleri',
+      'Dünyanın Şekli ve Hareketleri',
       'Coğrafi Konum',
       'Harita Bilgisi',
       'Atmosfer ve Sıcaklık',
@@ -262,14 +262,14 @@ const dersler = [
       'Nüfus',
       'Göç',
       'Yerleşme',
-      'Türkiye'nin Yer Şekilleri',
-      'Türkiye'nin İklimi',
-      'Türkiye'nin Bitki Örtüsü',
-      'Türkiye'de Nüfus ve Yerleşme',
+      'Türkiyenin Yer Şekilleri',
+      'Türkiyenin İklimi',
+      'Türkiyenin Bitki Örtüsü',
+      'Türkiyede Nüfus ve Yerleşme',
       'Türkiye Ekonomisi',
       'Bölgesel Kalkınma Projeleri',
       'Uluslararası Ulaşım Hatları',
-      'Türkiye'nin Jeopolitik Konumu',
+      'Türkiyenin Jeopolitik Konumu',
       'Doğal Kaynaklar',
       'Ekonomik Faaliyetler',
       'Bölgeler'
@@ -296,7 +296,7 @@ const KonuTakip = () => {
   const [user] = useAuthState(auth);
   const [selectedDers, setSelectedDers] = useState(null);
   const [konuDurumu, setKonuDurumu] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setLoading] = useState(true);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
@@ -571,7 +571,20 @@ const KonuTakip = () => {
                 boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
               }}
             >
-              {selectedDers ? (
+              {isLoading ? (
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: 400
+                  }}
+                >
+                  <Typography variant="h6" color="text.secondary">
+                    Yükleniyor...
+                  </Typography>
+                </Box>
+              ) : selectedDers ? (
                 <>
                   <Box sx={{ 
                     display: 'flex', 
