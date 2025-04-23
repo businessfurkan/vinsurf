@@ -495,14 +495,16 @@ const PuanHesapla = () => {
       </Typography>
 
       <Paper elevation={0} sx={{ 
-        p: { xs: 2, sm: 3 }, 
-        borderRadius: { xs: 3, md: 4 }, 
-        mb: 4,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+        p: { xs: 3, md: 4 }, 
+        borderRadius: { xs: 2, md: 3 }, 
+        boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+        border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
         transition: 'all 0.3s ease',
+        maxWidth: '1200px',
+        mx: 'auto',
         '&:hover': {
-          boxShadow: '0 6px 25px rgba(0,0,0,0.1)',
+          boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+          transform: 'translateY(-3px)'
         }
       }}>
         <Typography variant="body1" sx={{ mb: 2, fontSize: { xs: '0.95rem', md: '1rem' } }}>
@@ -555,12 +557,16 @@ const PuanHesapla = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
               <Paper elevation={0} sx={{ 
-                p: { xs: 2, md: 3 }, 
-                borderRadius: { xs: 2, md: 3 }, 
-                boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                p: { xs: 3, md: 4 }, 
+                borderRadius: { xs: 3, md: 4 }, 
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
                 transition: 'all 0.3s ease',
+                width: '100%',
+                mx: 'auto',
                 '&:hover': {
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                  boxShadow: '0 8px 22px rgba(0,0,0,0.12)',
+                  transform: 'translateY(-2px)'
                 }
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -722,12 +728,16 @@ const PuanHesapla = () => {
               </Paper>
               
               <Paper elevation={0} sx={{ 
-                p: { xs: 2, md: 3 }, 
-                borderRadius: { xs: 2, md: 3 }, 
-                boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                p: { xs: 3, md: 4 }, 
+                borderRadius: { xs: 3, md: 4 }, 
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
                 transition: 'all 0.3s ease',
+                width: '100%',
+                mx: 'auto',
                 '&:hover': {
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                  boxShadow: '0 8px 22px rgba(0,0,0,0.12)',
+                  transform: 'translateY(-2px)'
                 }
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -783,12 +793,16 @@ const PuanHesapla = () => {
           <Grid container spacing={3}>
             <Grid item xs={12} md={8}>
               <Paper elevation={0} sx={{ 
-                p: { xs: 2, md: 3 }, 
-                borderRadius: { xs: 2, md: 3 }, 
-                boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                p: { xs: 3, md: 4 }, 
+                borderRadius: { xs: 3, md: 4 }, 
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
                 transition: 'all 0.3s ease',
+                width: '100%',
+                mx: 'auto',
                 '&:hover': {
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                  boxShadow: '0 8px 22px rgba(0,0,0,0.12)',
+                  transform: 'translateY(-2px)'
                 }
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -1183,12 +1197,16 @@ const PuanHesapla = () => {
               </Paper>
               
               <Paper elevation={0} sx={{ 
-                p: { xs: 2, md: 3 }, 
-                borderRadius: { xs: 2, md: 3 }, 
-                boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                p: { xs: 3, md: 4 }, 
+                borderRadius: { xs: 3, md: 4 }, 
+                boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
+                border: `1px solid ${alpha(theme.palette.primary.main, 0.08)}`,
                 transition: 'all 0.3s ease',
+                width: '100%',
+                mx: 'auto',
                 '&:hover': {
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+                  boxShadow: '0 8px 22px rgba(0,0,0,0.12)',
+                  transform: 'translateY(-2px)'
                 }
               }}>
                 <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>
@@ -1241,15 +1259,16 @@ const PuanHesapla = () => {
       {activeTab === 2 && results && (
         <Box>
           <Paper elevation={0} sx={{ 
-            p: { xs: 3, md: 4 }, 
-            borderRadius: { xs: 3, md: 4 }, 
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-            maxWidth: puanTuru === 'HEPSI' ? 1000 : 800,
+            p: { xs: 4, md: 5 }, 
+            borderRadius: { xs: 4, md: 5 }, 
+            boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
+            maxWidth: puanTuru === 'HEPSI' ? 1200 : 900,
             mx: 'auto',
             transition: 'all 0.4s ease',
+            background: `linear-gradient(to bottom, ${alpha(theme.palette.background.paper, 0.95)}, ${theme.palette.background.paper})`,
             '&:hover': {
-              boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.2)',
               transform: 'translateY(-5px)'
             }
           }}>
@@ -1274,9 +1293,11 @@ const PuanHesapla = () => {
                   <Typography variant="h3" sx={{ 
                     fontWeight: 800, 
                     color: theme.palette.primary.dark,
-                    fontSize: { xs: '2.5rem', md: '3rem' },
+                    fontSize: { xs: '2.8rem', md: '3.5rem' },
                     textAlign: 'center',
-                    textShadow: '0 2px 10px rgba(0,0,0,0.08)'
+                    textShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                    letterSpacing: '-0.5px',
+                    mb: 2
                   }}>
                     {results.yerlesimPuani.toFixed(2)}
                   </Typography>
@@ -1285,20 +1306,22 @@ const PuanHesapla = () => {
                 <Grid container spacing={4}>
                   <Grid item xs={12} sm={6}>
                     <Card sx={{ 
-                      borderRadius: 3, 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                      borderRadius: 4, 
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
                       height: '100%',
                       transition: 'all 0.3s ease',
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                      background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.95)}, ${theme.palette.background.paper})`,
                       '&:hover': {
-                        boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
-                        transform: 'translateY(-3px)'
+                        boxShadow: '0 12px 25px rgba(0,0,0,0.15)',
+                        transform: 'translateY(-5px)'
                       }
                     }}>
-                      <CardContent sx={{ p: 3 }}>
+                      <CardContent sx={{ p: 4 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           TYT Puanı
                         </Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.tytPuan.toFixed(2)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -1310,20 +1333,22 @@ const PuanHesapla = () => {
                   
                   <Grid item xs={12} sm={6}>
                     <Card sx={{ 
-                      borderRadius: 3, 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                      borderRadius: 4, 
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
                       height: '100%',
                       transition: 'all 0.3s ease',
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                      background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.95)}, ${theme.palette.background.paper})`,
                       '&:hover': {
-                        boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
-                        transform: 'translateY(-3px)'
+                        boxShadow: '0 12px 25px rgba(0,0,0,0.15)',
+                        transform: 'translateY(-5px)'
                       }
                     }}>
-                      <CardContent sx={{ p: 3 }}>
+                      <CardContent sx={{ p: 4 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           AYT Puanı
                         </Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.aytPuan.toFixed(2)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -1345,11 +1370,11 @@ const PuanHesapla = () => {
                         bgcolor: alpha(theme.palette.primary.main, 0.08)
                       }
                     }}>
-                      <CardContent sx={{ p: 3 }}>
+                      <CardContent sx={{ p: 4 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           Yaklaşık Sıralamanız
                         </Typography>
-                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+                        <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.yaklasikSiralama.toLocaleString()}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -1377,21 +1402,22 @@ const PuanHesapla = () => {
                     {/* EA Sonuçları */}
                     <Grid item xs={12} md={4}>
                       <Card sx={{ 
-                        borderRadius: 3, 
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        borderRadius: 4, 
+                        boxShadow: '0 8px 20px rgba(66, 133, 244, 0.15)',
                         height: '100%',
                         transition: 'all 0.3s ease',
                         border: `2px solid ${alpha('#4285F4', 0.7)}`,
+                        background: `linear-gradient(135deg, ${alpha('#4285F4', 0.03)}, ${alpha('#4285F4', 0.01)})`,
                         '&:hover': {
-                          boxShadow: '0 6px 15px rgba(66, 133, 244, 0.2)',
-                          transform: 'translateY(-3px)'
+                          boxShadow: '0 12px 30px rgba(66, 133, 244, 0.25)',
+                          transform: 'translateY(-5px)'
                         }
                       }}>
-                        <CardContent sx={{ p: 3 }}>
+                        <CardContent sx={{ p: 4 }}>
                           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#4285F4' }}>
                             Eşit Ağırlık (EA)
                           </Typography>
-                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#4285F4' }}>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#4285F4', textShadow: '0 2px 5px rgba(66, 133, 244, 0.2)' }}>
                             {allResults.EA.yerlesimPuani.toFixed(2)}
                           </Typography>
                           
@@ -1430,21 +1456,22 @@ const PuanHesapla = () => {
                     {/* SAY Sonuçları */}
                     <Grid item xs={12} md={4}>
                       <Card sx={{ 
-                        borderRadius: 3, 
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        borderRadius: 4, 
+                        boxShadow: '0 8px 20px rgba(52, 168, 83, 0.15)',
                         height: '100%',
                         transition: 'all 0.3s ease',
                         border: `2px solid ${alpha('#34A853', 0.7)}`,
+                        background: `linear-gradient(135deg, ${alpha('#34A853', 0.03)}, ${alpha('#34A853', 0.01)})`,
                         '&:hover': {
-                          boxShadow: '0 6px 15px rgba(52, 168, 83, 0.2)',
-                          transform: 'translateY(-3px)'
+                          boxShadow: '0 12px 30px rgba(52, 168, 83, 0.25)',
+                          transform: 'translateY(-5px)'
                         }
                       }}>
-                        <CardContent sx={{ p: 3 }}>
+                        <CardContent sx={{ p: 4 }}>
                           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#34A853' }}>
                             Sayısal (SAY)
                           </Typography>
-                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#34A853' }}>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#34A853', textShadow: '0 2px 5px rgba(52, 168, 83, 0.2)' }}>
                             {allResults.SAY.yerlesimPuani.toFixed(2)}
                           </Typography>
                           
@@ -1483,21 +1510,22 @@ const PuanHesapla = () => {
                     {/* SÖZ Sonuçları */}
                     <Grid item xs={12} md={4}>
                       <Card sx={{ 
-                        borderRadius: 3, 
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                        borderRadius: 4, 
+                        boxShadow: '0 8px 20px rgba(234, 67, 53, 0.15)',
                         height: '100%',
                         transition: 'all 0.3s ease',
                         border: `2px solid ${alpha('#EA4335', 0.7)}`,
+                        background: `linear-gradient(135deg, ${alpha('#EA4335', 0.03)}, ${alpha('#EA4335', 0.01)})`,
                         '&:hover': {
-                          boxShadow: '0 6px 15px rgba(234, 67, 53, 0.2)',
-                          transform: 'translateY(-3px)'
+                          boxShadow: '0 12px 30px rgba(234, 67, 53, 0.25)',
+                          transform: 'translateY(-5px)'
                         }
                       }}>
-                        <CardContent sx={{ p: 3 }}>
+                        <CardContent sx={{ p: 4 }}>
                           <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#EA4335' }}>
                             Sözel (SÖZ)
                           </Typography>
-                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#EA4335' }}>
+                          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, color: '#EA4335', textShadow: '0 2px 5px rgba(234, 67, 53, 0.2)' }}>
                             {allResults.SOZ.yerlesimPuani.toFixed(2)}
                           </Typography>
                           
