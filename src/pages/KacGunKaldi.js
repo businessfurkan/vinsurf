@@ -169,159 +169,302 @@ const KacGunKaldi = () => {
           </Paper>
         </Box>
         
-        <Grid container spacing={3} sx={{ mt: 3 }}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Card 
-              elevation={4} 
+        {/* Redesigned countdown timer - more horizontal and centered */}
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center',
+            alignItems: 'center',
+            mt: 4,
+            mb: 5,
+            position: 'relative'
+          }}
+        >
+          <Paper
+            elevation={5}
+            sx={{
+              borderRadius: 6,
+              overflow: 'hidden',
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.05)} 0%, ${alpha(theme.palette.secondary.dark, 0.05)} 100%)`,
+              backdropFilter: 'blur(10px)',
+              boxShadow: `0 10px 30px ${alpha(theme.palette.common.black, 0.15)}`,
+              position: 'relative',
+              p: 1,
+              maxWidth: 900,
+              width: '100%',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, transparent 80%)',
+                zIndex: 0
+              }
+            }}
+          >
+            <Box 
               sx={{ 
-                height: '100%', 
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${alpha(colors.days, 0.9)} 0%, ${alpha(colors.days, 0.7)} 100%)`,
-                color: 'white',
-                transform: animate ? 'translateY(-5px)' : 'translateY(0)',
-                transition: 'transform 0.3s ease',
+                display: 'flex', 
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'stretch',
                 position: 'relative',
-                overflow: 'hidden',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                  zIndex: 0
-                }
+                zIndex: 1,
+                p: { xs: 1, sm: 2 }
               }}
             >
-              <CardContent sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: 4 }}>
-                <Typography variant="h2" component="div" sx={{ fontWeight: 800, mb: 1 }}>
-                  {timeLeft.days}
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  GÜN
-                </Typography>
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                  <CalendarTodayIcon fontSize="large" />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          <Grid item xs={12} sm={6} md={3}>
-            <Card 
-              elevation={4} 
-              sx={{ 
-                height: '100%', 
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${alpha(colors.hours, 0.9)} 0%, ${alpha(colors.hours, 0.7)} 100%)`,
-                color: 'white',
-                transform: animate ? 'translateY(-5px)' : 'translateY(0)',
-                transition: 'transform 0.3s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                  zIndex: 0
-                }
-              }}
-            >
-              <CardContent sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: 4 }}>
-                <Typography variant="h2" component="div" sx={{ fontWeight: 800, mb: 1 }}>
-                  {timeLeft.hours}
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  SAAT
-                </Typography>
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                  <AccessTimeIcon fontSize="large" />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          <Grid item xs={12} sm={6} md={3}>
-            <Card 
-              elevation={4} 
-              sx={{ 
-                height: '100%', 
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${alpha(colors.minutes, 0.9)} 0%, ${alpha(colors.minutes, 0.7)} 100%)`,
-                color: 'white',
-                transform: animate ? 'translateY(-5px)' : 'translateY(0)',
-                transition: 'transform 0.3s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                  zIndex: 0
-                }
-              }}
-            >
-              <CardContent sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: 4 }}>
-                <Typography variant="h2" component="div" sx={{ fontWeight: 800, mb: 1 }}>
-                  {timeLeft.minutes}
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  DAKİKA
-                </Typography>
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                  <EmojiEventsIcon fontSize="large" />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          <Grid item xs={12} sm={6} md={3}>
-            <Card 
-              elevation={4} 
-              sx={{ 
-                height: '100%', 
-                borderRadius: 3,
-                background: `linear-gradient(135deg, ${alpha(colors.seconds, 0.9)} 0%, ${alpha(colors.seconds, 0.7)} 100%)`,
-                color: 'white',
-                transform: animate ? 'translateY(-5px)' : 'translateY(0)',
-                transition: 'transform 0.3s ease',
-                position: 'relative',
-                overflow: 'hidden',
-                '&::after': {
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
-                  zIndex: 0
-                }
-              }}
-            >
-              <CardContent sx={{ position: 'relative', zIndex: 1, textAlign: 'center', py: 4 }}>
-                <Typography variant="h2" component="div" sx={{ fontWeight: 800, mb: 1 }}>
-                  {timeLeft.seconds}
-                </Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  SANİYE
-                </Typography>
-                <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                  <CelebrationIcon fontSize="large" />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+              {/* DAYS */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: { xs: 1, sm: 2, md: 3 },
+                  position: 'relative',
+                  flex: 1,
+                  maxWidth: 200
+                }}
+              >
+                <Paper
+                  elevation={3}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    background: `linear-gradient(135deg, ${colors.days} 0%, ${alpha(colors.days, 0.8)} 100%)`,
+                    borderRadius: 4,
+                    p: { xs: 1.5, sm: 2, md: 3 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle at top left, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                      zIndex: 0
+                    }
+                  }}
+                >
+                  <Typography 
+                    variant="h2" 
+                    component="div" 
+                    sx={{ 
+                      fontWeight: 800, 
+                      color: 'white',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      position: 'relative',
+                      zIndex: 1,
+                      fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                    }}
+                  >
+                    {timeLeft.days}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, position: 'relative', zIndex: 1 }}>
+                    <CalendarTodayIcon sx={{ mr: 0.5, color: 'white' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                      GÜN
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
+
+              {/* HOURS */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: { xs: 1, sm: 2, md: 3 },
+                  position: 'relative',
+                  flex: 1,
+                  maxWidth: 200
+                }}
+              >
+                <Paper
+                  elevation={3}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    background: `linear-gradient(135deg, ${colors.hours} 0%, ${alpha(colors.hours, 0.8)} 100%)`,
+                    borderRadius: 4,
+                    p: { xs: 1.5, sm: 2, md: 3 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                      zIndex: 0
+                    }
+                  }}
+                >
+                  <Typography 
+                    variant="h2" 
+                    component="div" 
+                    sx={{ 
+                      fontWeight: 800, 
+                      color: 'white',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      position: 'relative',
+                      zIndex: 1,
+                      fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                    }}
+                  >
+                    {timeLeft.hours}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, position: 'relative', zIndex: 1 }}>
+                    <AccessTimeIcon sx={{ mr: 0.5, color: 'white' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                      SAAT
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
+
+              {/* MINUTES */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: { xs: 1, sm: 2, md: 3 },
+                  position: 'relative',
+                  flex: 1,
+                  maxWidth: 200
+                }}
+              >
+                <Paper
+                  elevation={3}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    background: `linear-gradient(135deg, ${colors.minutes} 0%, ${alpha(colors.minutes, 0.8)} 100%)`,
+                    borderRadius: 4,
+                    p: { xs: 1.5, sm: 2, md: 3 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle at bottom left, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                      zIndex: 0
+                    }
+                  }}
+                >
+                  <Typography 
+                    variant="h2" 
+                    component="div" 
+                    sx={{ 
+                      fontWeight: 800, 
+                      color: 'white',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      position: 'relative',
+                      zIndex: 1,
+                      fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                    }}
+                  >
+                    {timeLeft.minutes}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, position: 'relative', zIndex: 1 }}>
+                    <EmojiEventsIcon sx={{ mr: 0.5, color: 'white' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                      DAKİKA
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
+
+              {/* SECONDS */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: { xs: 1, sm: 2, md: 3 },
+                  position: 'relative',
+                  flex: 1,
+                  maxWidth: 200
+                }}
+              >
+                <Paper
+                  elevation={3}
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    background: `linear-gradient(135deg, ${colors.seconds} 0%, ${alpha(colors.seconds, 0.8)} 100%)`,
+                    borderRadius: 4,
+                    p: { xs: 1.5, sm: 2, md: 3 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
+                      zIndex: 0
+                    }
+                  }}
+                >
+                  <Typography 
+                    variant="h2" 
+                    component="div" 
+                    sx={{ 
+                      fontWeight: 800, 
+                      color: 'white',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                      position: 'relative',
+                      zIndex: 1,
+                      fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem' }
+                    }}
+                  >
+                    {timeLeft.seconds}
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: 1, position: 'relative', zIndex: 1 }}>
+                    <CelebrationIcon sx={{ mr: 0.5, color: 'white' }} />
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                      SANİYE
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
       </Box>
       
       <Box sx={{ mt: 6 }}>
