@@ -3,7 +3,6 @@ import {
   Box, 
   Container, 
   Typography, 
-  Paper, 
   Grid, 
   Button, 
   List, 
@@ -14,13 +13,21 @@ import {
   Divider,
   Chip,
   Alert,
-  Snackbar
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Tab,
+  Tabs,
+  Card,
+  CardContent,
+  CardActionArea
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ScienceIcon from '@mui/icons-material/Science';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { 
@@ -33,10 +40,29 @@ import {
 
 // Ders ve konu verileri
 const dersler = [
+  // TYT Dersleri
   {
-    id: 'matematik',
-    ad: 'Matematik',
+    id: 'turkce',
+    ad: 'Türkçe',
+    color: '#9C27B0',
+    type: 'TYT',
+    konular: [
+      'Ses Bilgisi',
+      'Yazım Kuralları',
+      'Noktalama İşaretleri',
+      'Sözcük Yapısı',
+      'Sözcük Türleri',
+      'Fiilimsiler',
+      'Cümlenin Ögeleri',
+      'Cümle Türleri',
+      'Anlatım Bozuklukları'
+    ]
+  },
+  {
+    id: 'temel-matematik',
+    ad: 'Temel Matematik',
     color: '#4285F4',
+    type: 'TYT',
     konular: [
       'Temel Kavramlar',
       'Sayı Basamakları',
@@ -50,26 +76,14 @@ const dersler = [
       'Çarpanlara Ayırma',
       'Oran-Orantı',
       'Denklem Çözme',
-      'Problemler',
-      'Kümeler',
-      'Kartezyen Çarpım',
-      'Fonksiyonlar',
-      'Polinomlar',
-      'Permütasyon',
-      'Kombinasyon',
-      'Binom',
-      'Olasılık',
-      'İstatistik',
-      'Karmaşık Sayılar',
-      'Logaritma',
-      'Türev',
-      'İntegral'
+      'Problemler'
     ]
   },
   {
-    id: 'geometri',
+    id: 'geometri-tyt',
     ad: 'Geometri',
     color: '#EA4335',
+    type: 'TYT',
     konular: [
       'Doğruda Açılar',
       'Üçgende Açılar',
@@ -86,23 +100,14 @@ const dersler = [
       'Dikdörtgen',
       'Kare',
       'Yamuk',
-      'Deltoid',
-      'Çemberde Açılar',
-      'Çemberde Uzunluk',
-      'Dairede Alan',
-      'Prizmalar',
-      'Piramitler',
-      'Küre',
-      'Silindir',
-      'Koni',
-      'Koordinat Düzlemi',
-      'Analitik Geometri'
+      'Deltoid'
     ]
   },
   {
-    id: 'fizik',
+    id: 'fizik-tyt',
     ad: 'Fizik',
     color: '#FBBC05',
+    type: 'TYT',
     konular: [
       'Fizik Bilimine Giriş',
       'Madde ve Özellikleri',
@@ -113,19 +118,14 @@ const dersler = [
       'Kuvvet',
       'Dinamik',
       'İş, Güç ve Enerji',
-      'Elektrik',
-      'Manyetizma',
-      'Dalgalar',
-      'Optik',
-      'Modern Fizik',
-      'Atom Fiziği',
-      'Nükleer Fizik'
+      'Elektrik'
     ]
   },
   {
-    id: 'kimya',
+    id: 'kimya-tyt',
     ad: 'Kimya',
     color: '#34A853',
+    type: 'TYT',
     konular: [
       'Kimya Bilimi',
       'Atom ve Yapısı',
@@ -134,7 +134,145 @@ const dersler = [
       'Kimyasal Tepkimeler',
       'Kimyasal Hesaplamalar',
       'Karışımlar',
-      'Asit, Baz ve Tuzlar',
+      'Asit, Baz ve Tuzlar'
+    ]
+  },
+  {
+    id: 'biyoloji-tyt',
+    ad: 'Biyoloji',
+    color: '#FF9800',
+    type: 'TYT',
+    konular: [
+      'Biyoloji Bilimi',
+      'Canlıların Ortak Özellikleri',
+      'Canlıların Temel Bileşenleri',
+      'Hücre ve Yapısı',
+      'Hücre Zarından Madde Geçişleri',
+      'Canlıların Sınıflandırılması',
+      'Mitoz ve Eşeysiz Üreme',
+      'Mayoz ve Eşeyli Üreme',
+      'Kalıtım'
+    ]
+  },
+  {
+    id: 'tarih-tyt',
+    ad: 'Tarih',
+    color: '#00BCD4',
+    type: 'TYT',
+    konular: [
+      'Tarih Bilimi',
+      'İlk Uygarlıklar',
+      'İlk Türk Devletleri',
+      'İslamiyet Öncesi Türk Tarihi',
+      'İslamiyet Sonrası Türk Tarihi',
+      'Türkiye Tarihi',
+      'Osmanlı Devleti Kuruluş Dönemi',
+      'Osmanlı Devleti Yükselme Dönemi',
+      'Osmanlı Devleti Duraklama Dönemi',
+      'Osmanlı Devleti Gerileme Dönemi'
+    ]
+  },
+  {
+    id: 'cografya-tyt',
+    ad: 'Coğrafya',
+    color: '#4CAF50',
+    type: 'TYT',
+    konular: [
+      'Doğa ve İnsan',
+      'Dünyanın Şekli ve Hareketleri',
+      'Coğrafi Konum',
+      'Harita Bilgisi',
+      'Atmosfer ve Sıcaklık',
+      'İklimler',
+      'Basınç ve Rüzgarlar',
+      'Nem, Yağış ve Buharlaşma',
+      'İklim Tipleri ve Bitki Örtüsü',
+      'Nüfus',
+      'Göç',
+      'Yerleşme'
+    ]
+  },
+  {
+    id: 'felsefe-tyt',
+    ad: 'Felsefe',
+    color: '#795548',
+    type: 'TYT',
+    konular: [
+      'Felsefenin Konusu',
+      'Bilgi Felsefesi',
+      'Varlık Felsefesi',
+      'Ahlak Felsefesi'
+    ]
+  },
+  // AYT Dersleri
+  {
+    id: 'matematik-ayt',
+    ad: 'Matematik',
+    color: '#4285F4',
+    type: 'AYT',
+    konular: [
+      'Kümeler',
+      'Kartezyen Çarpım',
+      'Fonksiyonlar',
+      'Polinomlar',
+      'Permütasyon',
+      'Kombinasyon',
+      'Binom',
+      'Olasılık',
+      'İstatistik',
+      'Karmaşık Sayılar',
+      'Logaritma',
+      'Türev',
+      'İntegral',
+      'Limit',
+      'Diziler',
+      'Seriler'
+    ]
+  },
+  {
+    id: 'geometri-ayt',
+    ad: 'Geometri',
+    color: '#EA4335',
+    type: 'AYT',
+    konular: [
+      'Çemberde Açılar',
+      'Çemberde Uzunluk',
+      'Dairede Alan',
+      'Prizmalar',
+      'Piramitler',
+      'Küre',
+      'Silindir',
+      'Koni',
+      'Koordinat Düzlemi',
+      'Analitik Geometri',
+      'Vektörler',
+      'Uzay Geometri'
+    ]
+  },
+  {
+    id: 'fizik-ayt',
+    ad: 'Fizik',
+    color: '#FBBC05',
+    type: 'AYT',
+    konular: [
+      'Manyetizma',
+      'Dalgalar',
+      'Optik',
+      'Modern Fizik',
+      'Atom Fiziği',
+      'Nükleer Fizik',
+      'Elektromanyetik İndüksiyon',
+      'Alternatif Akım',
+      'Kuantum Fiziği',
+      'Görelilik'
+    ]
+  },
+  {
+    id: 'kimya-ayt',
+    ad: 'Kimya',
+    color: '#34A853',
+    type: 'AYT',
+    konular: [
       'Maddenin Halleri',
       'Gazlar',
       'Çözeltiler',
@@ -145,23 +283,18 @@ const dersler = [
       'Asit-Baz Dengesi',
       'Kimya ve Elektrik',
       'Karbon Kimyasına Giriş',
-      'Organik Kimya'
+      'Organik Kimya',
+      'Karboksilli Asitler',
+      'Esterler',
+      'Aromatik Bileşikler'
     ]
   },
   {
-    id: 'biyoloji',
+    id: 'biyoloji-ayt',
     ad: 'Biyoloji',
     color: '#FF9800',
+    type: 'AYT',
     konular: [
-      'Biyoloji Bilimi',
-      'Canlıların Ortak Özellikleri',
-      'Canlıların Temel Bileşenleri',
-      'Hücre ve Yapısı',
-      'Hücre Zarından Madde Geçişleri',
-      'Canlıların Sınıflandırılması',
-      'Mitoz ve Eşeysiz Üreme',
-      'Mayoz ve Eşeyli Üreme',
-      'Kalıtım',
       'Ekosistem Ekolojisi',
       'Popülasyon Ekolojisi',
       'Komünite ve Biyom Ekolojisi',
@@ -174,32 +307,16 @@ const dersler = [
       'Solunum Sistemi',
       'Boşaltım Sistemi',
       'Üreme Sistemi ve Embriyonik Gelişim',
-      'Bitki Biyolojisi'
+      'Bitki Biyolojisi',
+      'Genetik Mühendisliği',
+      'Biyoteknoloji'
     ]
   },
   {
-    id: 'turkce',
-    ad: 'Türkçe',
-    color: '#9C27B0',
-    konular: [
-      'Sözcükte Anlam',
-      'Cümlede Anlam',
-      'Paragrafta Anlam',
-      'Ses Bilgisi',
-      'Yazım Kuralları',
-      'Noktalama İşaretleri',
-      'Sözcük Yapısı',
-      'Sözcük Türleri',
-      'Fiilimsiler',
-      'Cümlenin Ögeleri',
-      'Cümle Türleri',
-      'Anlatım Bozuklukları'
-    ]
-  },
-  {
-    id: 'edebiyat',
+    id: 'edebiyat-ayt',
     ad: 'Edebiyat',
     color: '#E91E63',
+    type: 'AYT',
     konular: [
       'Giriş (Edebiyat, Sanat, Metin)',
       'Şiir Bilgisi',
@@ -207,35 +324,25 @@ const dersler = [
       'Tiyatro',
       'Destan-Efsane',
       'Masal-Fabl',
-      'Anı-Gezi-Biyografi-Otobiyografi',
+      'Anı-Gezi Yazısı',
+      'Biyografi-Otobiyografi',
       'Mektup-Günlük',
       'Halk Edebiyatı',
       'Divan Edebiyatı',
       'Tanzimat Edebiyatı',
       'Servet-i Fünun Edebiyatı',
-      'Fecr-i Ati Edebiyatı',
       'Milli Edebiyat',
-      'Cumhuriyet Dönemi Edebiyatı'
+      'Cumhuriyet Dönemi Edebiyatı',
+      'Dünya Edebiyatı'
     ]
   },
   {
-    id: 'tarih',
-    ad: 'Tarih',
+    id: 'tarih-1-ayt',
+    ad: 'Tarih-1',
     color: '#00BCD4',
+    type: 'AYT',
     konular: [
-      'Tarih Bilimi',
-      'İlk Uygarlıklar',
-      'İlk Türk Devletleri',
-      'İslamiyet Öncesi Türk Tarihi',
-      'İslam Tarihi',
-      'Türk-İslam Devletleri',
-      'Türkiye Tarihi (Osmanlı Öncesi)',
-      'Osmanlı Devleti Kuruluş Dönemi',
-      'Osmanlı Devleti Yükselme Dönemi',
-      'Osmanlı Devleti Duraklama Dönemi',
-      'Osmanlı Devleti Gerileme Dönemi',
       'Osmanlı Devleti Dağılma Dönemi',
-      'XX. Yüzyıl Başlarında Osmanlı Devleti',
       'I. Dünya Savaşı',
       'Kurtuluş Savaşı Hazırlık Dönemi',
       'Kurtuluş Savaşı',
@@ -246,49 +353,88 @@ const dersler = [
     ]
   },
   {
-    id: 'cografya',
-    ad: 'Coğrafya',
+    id: 'cografya-1-ayt',
+    ad: 'Coğrafya-1',
     color: '#4CAF50',
+    type: 'AYT',
     konular: [
-      'Doğa ve İnsan',
-      'Dünyanın Şekli ve Hareketleri',
-      'Coğrafi Konum',
-      'Harita Bilgisi',
-      'Atmosfer ve Sıcaklık',
-      'İklimler',
-      'Basınç ve Rüzgârlar',
-      'Nem, Yağış ve Buharlaşma',
-      'İç Kuvvetler / Dış Kuvvetler',
-      'Su-Toprak-Bitki',
-      'Nüfus',
-      'Göç',
-      'Yerleşme',
       'Türkiyenin Yer Şekilleri',
       'Türkiyenin İklimi',
       'Türkiyenin Bitki Örtüsü',
-      'Türkiyede Nüfus ve Yerleşme',
-      'Türkiye Ekonomisi',
+      'Türkiyenin Nüfusu ve Yerleşmesi',
+      'Ekonomik Faaliyetler',
       'Bölgesel Kalkınma Projeleri',
       'Uluslararası Ulaşım Hatları',
-      'Türkiyenin Jeopolitik Konumu',
-      'Doğal Kaynaklar',
-      'Ekonomik Faaliyetler',
-      'Bölgeler'
+      'Türkiyenin Jeopolitik Konumu'
     ]
   },
   {
-    id: 'felsefe',
+    id: 'tarih-2-ayt',
+    ad: 'Tarih-2',
+    color: '#00BCD4',
+    type: 'AYT',
+    konular: [
+      'II. Dünya Savaşı',
+      'Soğuk Savaş Dönemi',
+      'Yumuşama Dönemi',
+      'Küreselleşen Dünya',
+      'Türkiye Cumhuriyeti Tarihi (1938-1980)',
+      'Türkiye Cumhuriyeti Tarihi (1980 Sonrası)'
+    ]
+  },
+  {
+    id: 'cografya-2-ayt',
+    ad: 'Coğrafya-2',
+    color: '#4CAF50',
+    type: 'AYT',
+    konular: [
+      'Doğal Sistemler',
+      'Beşeri Sistemler',
+      'Ekonomik Faaliyetler',
+      'Çevre ve Toplum'
+    ]
+  },
+  {
+    id: 'felsefe-ayt',
     ad: 'Felsefe',
     color: '#795548',
+    type: 'AYT',
     konular: [
-      'Felsefenin Konusu',
-      'Bilgi Felsefesi',
-      'Varlık Felsefesi',
-      'Ahlak Felsefesi',
       'Sanat Felsefesi',
       'Din Felsefesi',
       'Siyaset Felsefesi',
-      'Bilim Felsefesi'
+      'Bilim Felsefesi',
+      'Mantık',
+      'Psikoloji',
+      'Sosyoloji'
+    ]
+  },
+  {
+    id: 'din-kulturu-ayt',
+    ad: 'Din Kültürü',
+    color: '#607D8B',
+    type: 'AYT',
+    konular: [
+      'İslam ve İbadet',
+      'İslam Düşüncesi',
+      'İslam ve Ahlak',
+      'İslam ve Bilim',
+      'Yaşayan Dinler'
+    ]
+  },
+  {
+    id: 'yabanci-dil-ayt',
+    ad: 'Yabancı Dil',
+    color: '#9E9E9E',
+    type: 'AYT',
+    konular: [
+      'Kelime Bilgisi',
+      'Dil Bilgisi',
+      'Cümle Tamamlama',
+      'Paragraf',
+      'Diyalog Tamamlama',
+      'Çeviri',
+      'Okuma Parçası'
     ]
   }
 ];
@@ -297,10 +443,12 @@ const KonuTakip = () => {
   const [user] = useAuthState(auth);
   const [selectedDers, setSelectedDers] = useState(null);
   const [konuDurumu, setKonuDurumu] = useState({});
-  const [isLoading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [examType, setExamType] = useState('TYT');
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // Firestore'dan konu durumlarını yükle
   useEffect(() => {
@@ -353,14 +501,13 @@ const KonuTakip = () => {
     loadKonuDurumu();
   }, [user]);
 
-  // Ders seçimi
-  const handleDersSelect = (ders) => {
-    setSelectedDers(ders);
-  };
+
 
   // Konu durumu değişikliği
   const handleKonuDurumuChange = (konu, durum, value) => {
     setKonuDurumu(prevState => {
+      if (!selectedDers) return prevState;
+      
       const dersId = selectedDers.id;
       const konuKey = `${dersId}_${konu}`;
       
@@ -452,6 +599,21 @@ const KonuTakip = () => {
     return Math.round((tamamlananKonuSayisi / dersKonulari.length) * 100);
   };
 
+  // Handle dialog open/close
+  const handleOpenDialog = (ders) => {
+    setSelectedDers(ders);
+    setDialogOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+  };
+
+  // Handle tab change between TYT and AYT
+  const handleExamTypeChange = (event, newValue) => {
+    setExamType(newValue);
+  };
+
   return (
     <Box 
       sx={{ 
@@ -487,296 +649,292 @@ const KonuTakip = () => {
           Konu Takip Sistemi
         </Typography>
 
-        <Grid container spacing={3}>
-          {/* Dersler Listesi */}
-          <Grid item xs={12} md={4}>
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                height: '100%',
-                backgroundColor: '#FFFFF8',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+        {/* TYT/AYT Tab Selector */}
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs 
+            value={examType} 
+            onChange={handleExamTypeChange} 
+            centered
+            sx={{
+              '& .MuiTabs-indicator': {
+                backgroundColor: examType === 'TYT' ? '#4285F4' : '#E91E63',
+                height: 3
+              }
+            }}
+          >
+            <Tab 
+              label="TYT Dersleri" 
+              value="TYT" 
+              sx={{
+                fontWeight: examType === 'TYT' ? 600 : 400,
+                color: examType === 'TYT' ? '#4285F4' : 'text.secondary',
+                '&.Mui-selected': {
+                  color: examType === 'TYT' ? '#4285F4' : '#E91E63'
+                }
               }}
-            >
-              <Typography 
-                variant="h6" 
-                component="h2" 
-                gutterBottom
-                sx={{ 
-                  fontWeight: 600,
-                  color: '#2e3856',
-                  mb: 2,
-                  borderBottom: '2px solid #f0f0f0',
-                  pb: 1
-                }}
-              >
-                Dersler
-              </Typography>
-              
-              <List sx={{ width: '100%' }}>
-                {dersler.map((ders) => (
-                  <ListItem 
-                    key={ders.id}
-                    disablePadding
-                    sx={{ mb: 1 }}
+            />
+            <Tab 
+              label="AYT Dersleri" 
+              value="AYT" 
+              sx={{
+                fontWeight: examType === 'AYT' ? 600 : 400,
+                color: examType === 'AYT' ? '#E91E63' : 'text.secondary',
+                '&.Mui-selected': {
+                  color: examType === 'AYT' ? '#E91E63' : '#4285F4'
+                }
+              }}
+            />
+          </Tabs>
+        </Box>
+
+        {/* Ders Kartları Grid */}
+        <Grid container spacing={3}>
+          {dersler
+            .filter(ders => ders.type === examType)
+            .map((ders) => (
+              <Grid item xs={12} sm={6} md={4} lg={3} key={ders.id}>
+                <Card 
+                  elevation={3}
+                  sx={{ 
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    borderRadius: 2,
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.12)'
+                    },
+                    border: `2px solid ${ders.color}20`
+                  }}
+                >
+                  <CardActionArea 
+                    onClick={() => handleOpenDialog(ders)}
+                    sx={{ 
+                      flexGrow: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'stretch',
+                      justifyContent: 'flex-start'
+                    }}
                   >
-                    <Button
-                      fullWidth
-                      variant={selectedDers?.id === ders.id ? "contained" : "outlined"}
-                      onClick={() => handleDersSelect(ders)}
-                      sx={{
-                        justifyContent: 'flex-start',
-                        textAlign: 'left',
-                        p: 1.5,
-                        borderRadius: 2,
-                        backgroundColor: selectedDers?.id === ders.id ? ders.color : 'transparent',
-                        color: selectedDers?.id === ders.id ? 'white' : ders.color,
-                        borderColor: ders.color,
-                        '&:hover': {
-                          backgroundColor: selectedDers?.id === ders.id ? ders.color : `${ders.color}22`
-                        }
+                    <Box 
+                      sx={{ 
+                        backgroundColor: ders.color,
+                        color: 'white',
+                        py: 2,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center'
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-                        <Typography variant="body1" sx={{ fontWeight: 500, mr: 2 }}>
-                          {ders.ad}
-                        </Typography>
+                      <Typography variant="h6" component="h2" align="center" sx={{ fontWeight: 600 }}>
+                        {ders.ad}
+                      </Typography>
+                    </Box>
+                    <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" color="text.secondary" align="center" sx={{ mb: 2 }}>
+                        {ders.konular.length} konu
+                      </Typography>
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
                         <Chip 
-                          label={`${calculateProgress(ders.id)}%`} 
+                          label={`${calculateProgress(ders.id)}% Tamamlandı`} 
                           size="small"
                           sx={{ 
-                            backgroundColor: selectedDers?.id === ders.id ? 'rgba(255,255,255,0.2)' : ders.color,
-                            color: selectedDers?.id === ders.id ? 'white' : 'white',
+                            backgroundColor: `${ders.color}20`,
+                            color: ders.color,
                             fontWeight: 'bold',
-                            minWidth: '48px'
+                            borderRadius: '4px'
                           }}
                         />
                       </Box>
-                    </Button>
-                  </ListItem>
-                ))}
-              </List>
-            </Paper>
-          </Grid>
-
-          {/* Konular Listesi */}
-          <Grid item xs={12} md={8}>
-            <Paper 
-              elevation={3} 
-              sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                minHeight: 400,
-                backgroundColor: '#FFFFF8',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
-              }}
-            >
-              {isLoading ? (
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: 400
-                  }}
-                >
-                  <Typography variant="h6" color="text.secondary">
-                    Yükleniyor...
-                  </Typography>
-                </Box>
-              ) : selectedDers ? (
-                <>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mb: 3,
-                    pb: 1,
-                    borderBottom: '2px solid #f0f0f0'
-                  }}>
-                    <Typography 
-                      variant="h6" 
-                      component="h2"
-                      sx={{ 
-                        fontWeight: 600,
-                        color: selectedDers.color
-                      }}
-                    >
-                      {selectedDers.ad} Konuları
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2 }}>
-                      <Button
-                        variant="outlined"
-                        startIcon={<CancelIcon />}
-                        onClick={() => setSelectedDers(null)}
-                        sx={{
-                          borderColor: selectedDers.color,
-                          color: selectedDers.color,
-                          '&:hover': {
-                            borderColor: selectedDers.color,
-                            backgroundColor: `${selectedDers.color}10`,
-                          }
-                        }}
-                      >
-                        İptal
-                      </Button>
-                      <Button
-                        variant="contained"
-                        startIcon={<SaveIcon />}
-                        onClick={saveChanges}
-                        sx={{
-                          backgroundColor: selectedDers.color,
-                          '&:hover': {
-                            backgroundColor: selectedDers.color,
-                            opacity: 0.9
-                          }
-                        }}
-                      >
-                        Kaydet
-                      </Button>
-                    </Box>
-                  </Box>
-
-                  <List>
-                    {selectedDers.konular.map((konu, index) => {
-                      const konuKey = `${selectedDers.id}_${konu}`;
-                      const konuData = konuDurumu[konuKey] || {
-                        ogrendim: false,
-                        testCozdüm: false,
-                        denemedeCozdüm: false
-                      };
-                      
-                      return (
-                        <React.Fragment key={konuKey}>
-                          {index > 0 && <Divider component="li" />}
-                          <ListItem 
-                            sx={{ 
-                              py: 1.5,
-                              backgroundColor: konuData.ogrendim ? `${selectedDers.color}10` : 'transparent',
-                              borderRadius: 1
-                            }}
-                          >
-                            <ListItemText 
-                              primary={konu} 
-                              sx={{ 
-                                '& .MuiTypography-root': { 
-                                  fontWeight: konuData.ogrendim ? 600 : 400,
-                                  color: konuData.ogrendim ? selectedDers.color : 'inherit'
-                                }
-                              }}
-                            />
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                              <FormControlLabel
-                                control={
-                                  <Checkbox 
-                                    checked={konuData.ogrendim} 
-                                    onChange={(e) => handleKonuDurumuChange(konu, 'ogrendim', e.target.checked)}
-                                    icon={<CheckCircleIcon />}
-                                    checkedIcon={<CheckCircleIcon />}
-                                    sx={{ 
-                                      color: '#bdbdbd',
-                                      '&.Mui-checked': {
-                                        color: '#4CAF50'
-                                      },
-                                      '&:hover': {
-                                        backgroundColor: 'rgba(76, 175, 80, 0.08)'
-                                      }
-                                    }}
-                                  />
-                                }
-                                label="Öğrendim"
-                                sx={{ 
-                                  mr: 1,
-                                  '& .MuiFormControlLabel-label': {
-                                    color: konuData.ogrendim ? '#4CAF50' : 'inherit',
-                                    fontWeight: konuData.ogrendim ? 600 : 400
-                                  }
-                                }}
-                              />
-                              <FormControlLabel
-                                control={
-                                  <Checkbox 
-                                    checked={konuData.testCozdüm} 
-                                    onChange={(e) => handleKonuDurumuChange(konu, 'testCozdüm', e.target.checked)}
-                                    icon={<ScienceIcon />}
-                                    checkedIcon={<ScienceIcon />}
-                                    sx={{ 
-                                      color: '#bdbdbd',
-                                      '&.Mui-checked': {
-                                        color: '#2196F3'
-                                      },
-                                      '&:hover': {
-                                        backgroundColor: 'rgba(33, 150, 243, 0.08)'
-                                      }
-                                    }}
-                                  />
-                                }
-                                label="Test Çözdüm"
-                                sx={{ 
-                                  mr: 1,
-                                  '& .MuiFormControlLabel-label': {
-                                    color: konuData.testCozdüm ? '#2196F3' : 'inherit',
-                                    fontWeight: konuData.testCozdüm ? 600 : 400
-                                  }
-                                }}
-                              />
-                              <FormControlLabel
-                                control={
-                                  <Checkbox 
-                                    checked={konuData.denemedeCozdüm} 
-                                    onChange={(e) => handleKonuDurumuChange(konu, 'denemedeCozdüm', e.target.checked)}
-                                    icon={<PsychologyIcon />}
-                                    checkedIcon={<PsychologyIcon />}
-                                    sx={{ 
-                                      color: '#bdbdbd',
-                                      '&.Mui-checked': {
-                                        color: '#FF9800'
-                                      },
-                                      '&:hover': {
-                                        backgroundColor: 'rgba(255, 152, 0, 0.08)'
-                                      }
-                                    }}
-                                  />
-                                }
-                                label="Denemede Çözdüm"
-                                sx={{ 
-                                  '& .MuiFormControlLabel-label': {
-                                    color: konuData.denemedeCozdüm ? '#FF9800' : 'inherit',
-                                    fontWeight: konuData.denemedeCozdüm ? 600 : 400
-                                  }
-                                }}
-                              />
-                            </Box>
-                          </ListItem>
-                        </React.Fragment>
-                      );
-                    })}
-                  </List>
-                </>
-              ) : (
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column',
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    height: 400
-                  }}
-                >
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    Lütfen sol taraftan bir ders seçin
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" align="center" sx={{ maxWidth: 400 }}>
-                    Ders seçtikten sonra konuları görüntüleyebilir ve ilerleme durumunuzu kaydedebilirsiniz.
-                  </Typography>
-                </Box>
-              )}
-            </Paper>
-          </Grid>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            ))}
         </Grid>
       </Container>
+
+      {/* Konu Dialog */}
+      <Dialog 
+        open={dialogOpen} 
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            maxHeight: '80vh'
+          }
+        }}
+      >
+        {selectedDers && (
+          <>
+            <DialogTitle sx={{ 
+              backgroundColor: selectedDers.color,
+              color: 'white',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              py: 2
+            }}>
+              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+                {selectedDers.ad} Konuları
+              </Typography>
+              <Chip 
+                label={`${calculateProgress(selectedDers.id)}% Tamamlandı`} 
+                size="small"
+                sx={{ 
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  fontWeight: 'bold'
+                }}
+              />
+            </DialogTitle>
+            <DialogContent dividers sx={{ p: 0 }}>
+              <List sx={{ width: '100%', bgcolor: 'background.paper', p: 0 }}>
+                {selectedDers.konular.map((konu, index) => {
+                  const konuKey = `${selectedDers.id}_${konu}`;
+                  const konuData = konuDurumu[konuKey] || {
+                    ogrendim: false,
+                    testCozdüm: false,
+                    denemedeCozdüm: false
+                  };
+                  
+                  return (
+                    <React.Fragment key={konuKey}>
+                      {index > 0 && <Divider />}
+                      <ListItem 
+                        sx={{ 
+                          py: 1.5,
+                          backgroundColor: konuData.ogrendim ? `${selectedDers.color}10` : 'transparent'
+                        }}
+                      >
+                        <ListItemText 
+                          primary={konu} 
+                          sx={{ 
+                            '& .MuiTypography-root': { 
+                              fontWeight: konuData.ogrendim ? 600 : 400,
+                              color: konuData.ogrendim ? selectedDers.color : 'inherit'
+                            }
+                          }}
+                        />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                checked={konuData.ogrendim} 
+                                onChange={(e) => handleKonuDurumuChange(konu, 'ogrendim', e.target.checked)}
+                                icon={<CheckCircleIcon />}
+                                checkedIcon={<CheckCircleIcon />}
+                                sx={{ 
+                                  color: '#bdbdbd',
+                                  '&.Mui-checked': {
+                                    color: '#4CAF50'
+                                  },
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(76, 175, 80, 0.08)'
+                                  }
+                                }}
+                              />
+                            }
+                            label="Öğrendim"
+                            sx={{ 
+                              mr: 1,
+                              '& .MuiFormControlLabel-label': {
+                                color: konuData.ogrendim ? '#4CAF50' : 'inherit',
+                                fontWeight: konuData.ogrendim ? 600 : 400
+                              }
+                            }}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                checked={konuData.testCozdüm} 
+                                onChange={(e) => handleKonuDurumuChange(konu, 'testCozdüm', e.target.checked)}
+                                icon={<ScienceIcon />}
+                                checkedIcon={<ScienceIcon />}
+                                sx={{ 
+                                  color: '#bdbdbd',
+                                  '&.Mui-checked': {
+                                    color: '#2196F3'
+                                  },
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(33, 150, 243, 0.08)'
+                                  }
+                                }}
+                              />
+                            }
+                            label="Test Çözdüm"
+                            sx={{ 
+                              mr: 1,
+                              '& .MuiFormControlLabel-label': {
+                                color: konuData.testCozdüm ? '#2196F3' : 'inherit',
+                                fontWeight: konuData.testCozdüm ? 600 : 400
+                              }
+                            }}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox 
+                                checked={konuData.denemedeCozdüm} 
+                                onChange={(e) => handleKonuDurumuChange(konu, 'denemedeCozdüm', e.target.checked)}
+                                icon={<PsychologyIcon />}
+                                checkedIcon={<PsychologyIcon />}
+                                sx={{ 
+                                  color: '#bdbdbd',
+                                  '&.Mui-checked': {
+                                    color: '#FF9800'
+                                  },
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(255, 152, 0, 0.08)'
+                                  }
+                                }}
+                              />
+                            }
+                            label="Denemede Çözdüm"
+                            sx={{ 
+                              '& .MuiFormControlLabel-label': {
+                                color: konuData.denemedeCozdüm ? '#FF9800' : 'inherit',
+                                fontWeight: konuData.denemedeCozdüm ? 600 : 400
+                              }
+                            }}
+                          />
+                        </Box>
+                      </ListItem>
+                    </React.Fragment>
+                  );
+                })}
+              </List>
+            </DialogContent>
+            <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+              <Button 
+                onClick={handleCloseDialog} 
+                color="inherit"
+                sx={{ fontWeight: 500 }}
+              >
+                Kapat
+              </Button>
+              <Button 
+                onClick={saveChanges} 
+                variant="contained" 
+                startIcon={<SaveIcon />}
+                sx={{
+                  backgroundColor: selectedDers.color,
+                  '&:hover': {
+                    backgroundColor: selectedDers.color,
+                    opacity: 0.9
+                  }
+                }}
+              >
+                Kaydet
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
 
       {/* Bildirim Snackbar */}
       <Snackbar 
