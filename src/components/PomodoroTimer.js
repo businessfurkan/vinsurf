@@ -244,7 +244,7 @@ const PomodoroTimer = () => {
     }
     
     return () => clearInterval(timer);
-  }, [isRunning, timeLeft, mode, completedPomodoros, playSound, saveStats, currentGoal]);
+  }, [isRunning, timeLeft, mode, completedPomodoros, playSound, saveStats, currentGoal, settings.pomodoro, settings.shortBreak, settings.longBreak]);
 
   const handleStartPause = () => {
     // Eğer pomodoro modundaysa ve timer çalışmıyorsa ve hedef belirlenmemişse

@@ -17,7 +17,6 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 
 import InsightsIcon from '@mui/icons-material/Insights';
-import AssignmentTurnedInIcon from '@mui/icons-material/AssignmentTurnedIn';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 
