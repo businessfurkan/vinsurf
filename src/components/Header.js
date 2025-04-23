@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNotifications } from '../context/NotificationContext';
 import {
   AppBar,
   Toolbar,
@@ -14,15 +15,19 @@ import {
   Divider,
   ListItemIcon,
   ListItemText,
-  Tooltip
+  Tooltip,
+  alpha
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import DoneAllIcon from '@mui/icons-material/DoneAll';
+import WarningIcon from '@mui/icons-material/Warning';
+import ErrorIcon from '@mui/icons-material/Error';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import InfoIcon from '@mui/icons-material/Info';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -64,6 +69,9 @@ const Header = ({ handleDrawerToggle }) => {
   const [userPhotoURL, setUserPhotoURL] = useState(null);
   const [userName, setUserName] = useState('');
   
+  // Bildirim sistemini kullan
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
@@ -88,6 +96,16 @@ const Header = ({ handleDrawerToggle }) => {
   };
   
   const handleNotificationClose = () => {
+    setNotificationAnchor(null);
+  };
+  
+  const handleReadNotification = (notificationId) => {
+    markAsRead(notificationId);
+    setNotificationAnchor(null);
+  };
+  
+  const handleReadAllNotifications = () => {
+    markAllAsRead();
     setNotificationAnchor(null);
   };
   
@@ -148,14 +166,14 @@ const Header = ({ handleDrawerToggle }) => {
               color="inherit"
               onClick={handleNotificationClick}
               sx={{ 
-                color: 'text.primary',
+                color: unreadCount > 0 ? 'primary.main' : 'text.primary',
                 transition: 'transform 0.2s',
                 '&:hover': {
                   transform: 'scale(1.1)',
                 } 
               }}
             >
-              <StyledBadge badgeContent={3} color="error">
+              <StyledBadge badgeContent={unreadCount} color="error" invisible={unreadCount === 0}>
                 <NotificationsIcon />
               </StyledBadge>
             </IconButton>
@@ -190,28 +208,64 @@ const Header = ({ handleDrawerToggle }) => {
               },
             }}
           >
-            <Box sx={{ p: 2, pb: 1 }}>
+            <Box sx={{ p: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="subtitle1" fontWeight={600}>Bildirimler</Typography>
+              {unreadCount > 0 && (
+                <Tooltip title="Tümünü okundu işaretle">
+                  <IconButton size="small" onClick={handleReadAllNotifications}>
+                    <DoneAllIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              )}
             </Box>
             <Divider />
-            <MenuItem sx={{ py: 1.5 }} onClick={handleNotificationClose}>
-              <ListItemIcon sx={{ color: theme.palette.primary.main }}>
-                <MoreVertIcon />
-              </ListItemIcon>
-              <ListItemText primary="Bugün 3 pomodoro tamamladınız!" />
-            </MenuItem>
-            <MenuItem sx={{ py: 1.5 }} onClick={handleNotificationClose}>
-              <ListItemIcon sx={{ color: theme.palette.secondary.main }}>
-                <MoreVertIcon />
-              </ListItemIcon>
-              <ListItemText primary="Yeni özellikler: Yapay Zeka eklendi" />
-            </MenuItem>
-            <MenuItem sx={{ py: 1.5 }} onClick={handleNotificationClose}>
-              <ListItemIcon sx={{ color: '#FF9800' }}>
-                <MoreVertIcon />
-              </ListItemIcon>
-              <ListItemText primary="Haftalık çalışma hedefinize ulaşmak için 2 saat kaldı" />
-            </MenuItem>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <MenuItem 
+                  key={notification.id} 
+                  sx={{ 
+                    py: 1.5,
+                    bgcolor: notification.read ? 'transparent' : alpha(theme.palette.primary.light, 0.1)
+                  }} 
+                  onClick={() => handleReadNotification(notification.id)}
+                >
+                  <ListItemIcon sx={{ 
+                    color: notification.type === 'warning' ? theme.palette.warning.main :
+                           notification.type === 'error' ? theme.palette.error.main :
+                           notification.type === 'success' ? theme.palette.success.main :
+                           theme.palette.primary.main
+                  }}>
+                    {notification.type === 'warning' ? <WarningIcon /> :
+                     notification.type === 'error' ? <ErrorIcon /> :
+                     notification.type === 'success' ? <CheckCircleIcon /> :
+                     <InfoIcon />}
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={
+                      <Typography variant="body2" sx={{ fontWeight: notification.read ? 400 : 600 }}>
+                        {notification.message}
+                      </Typography>
+                    }
+                    secondary={
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(notification.createdAt).toLocaleString('tr-TR', { 
+                          day: '2-digit', 
+                          month: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </Typography>
+                    }
+                  />
+                </MenuItem>
+              ))
+            ) : (
+              <Box sx={{ py: 4, textAlign: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  Bildirim bulunmuyor
+                </Typography>
+              </Box>
+            )}
           </Menu>
           
           <Tooltip title={userName || "Profil"}>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useNotifications } from '../context/NotificationContext';
 import { keyframes } from '@mui/system';
 import { 
   Box, 
@@ -105,6 +106,9 @@ const TytAytNetTakibi = () => {
   const [selectedGraphSubject, setSelectedGraphSubject] = useState('');
   const [selectedRecordsSubject, setSelectedRecordsSubject] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('');
+  
+  // Bildirim sistemini kullan
+  const { addNotification } = useNotifications();
 
   // Calculate net
   const calculateNet = (correct, incorrect) => {
@@ -127,6 +131,61 @@ const TytAytNetTakibi = () => {
     });
   };
 
+  // Gelişim takibi ve uyarı sistemi
+  const compareWithPreviousRecord = useCallback((newRecord) => {
+    if (!netRecords || netRecords.length === 0) return;
+    
+    // Aynı ders ve sınav türü için önceki kayıtları bul
+    const previousRecords = netRecords.filter(record => 
+      record.examType === newRecord.examType && 
+      record.subject === newRecord.subject
+    );
+    
+    if (previousRecords.length === 0) return;
+    
+    // Tarihe göre sırala (en yeniden en eskiye)
+    const sortedRecords = [...previousRecords].sort((a, b) => 
+      new Date(b.date) - new Date(a.date)
+    );
+    
+    // En son kayıt
+    const lastRecord = sortedRecords[0];
+    
+    // Yeni kayıt ile son kaydı karşılaştır
+    const lastNet = parseFloat(lastRecord.net);
+    const newNet = parseFloat(newRecord.net);
+    
+    // Net değişimi
+    const netDifference = (newNet - lastNet).toFixed(2);
+    
+    // Bildirim oluştur
+    if (netDifference < 0) {
+      // Net düşmüş
+      const message = `${newRecord.subject} dersinde bir önceki denemene göre ${Math.abs(netDifference)} net düşüş var. Daha fazla çalışmalısın!`;
+      addNotification(message, 'warning', {
+        examType: newRecord.examType,
+        subject: newRecord.subject,
+        netDifference
+      });
+    } else if (netDifference > 0) {
+      // Net artmış
+      const message = `${newRecord.subject} dersinde bir önceki denemene göre ${netDifference} net artış var. Harika ilerliyorsun!`;
+      addNotification(message, 'success', {
+        examType: newRecord.examType,
+        subject: newRecord.subject,
+        netDifference
+      });
+    } else {
+      // Net değişmemiş
+      const message = `${newRecord.subject} dersinde bir önceki deneme ile aynı neti yaptın. Biraz daha çalışarak netini artırabilirsin.`;
+      addNotification(message, 'info', {
+        examType: newRecord.examType,
+        subject: newRecord.subject,
+        netDifference
+      });
+    }
+  }, [netRecords, addNotification]);
+  
   // Fetch existing net records
   useEffect(() => {
     const fetchNetRecords = async () => {
@@ -331,6 +390,11 @@ const TytAytNetTakibi = () => {
         console.error('Error saving to localStorage:', localStorageError);
         showNotification('Kayıt yerel depolamaya kaydedilemedi', 'warning');
       }
+      
+      // Gelişim takibi - önceki kayıtlarla karşılaştır
+      compareWithPreviousRecord(recordWithId);
+      
+      showNotification(`${examType} ${subject} kaydı başarıyla eklendi!`);
       
       // Clear form
       setSubject('');

@@ -129,7 +129,7 @@ const KacGunKaldi = () => {
       >
         <Typography variant="h4" component="h1" gutterBottom align="center" sx={{ fontWeight: 700, color: theme.palette.primary.main, position: 'relative', zIndex: 1 }}>
           <CalendarTodayIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-          YKS 2026'ya Kalan Süre
+          YKS 2026&apos;ya Kalan Süre
         </Typography>
         <Typography variant="subtitle1" align="center" gutterBottom sx={{ mb: 3, position: 'relative', zIndex: 1 }}>
           Hedefine ulaşmak için her saniyeyi değerlendir!
@@ -377,7 +377,7 @@ const KacGunKaldi = () => {
                   Zamanını Verimli Kullan
                 </Typography>
                 <Typography variant="body1" paragraph>
-                  YKS'ye kalan süreyi en iyi şekilde değerlendirmek için her gün düzenli çalışma planı yap. 
+                  YKS&apos;ye kalan süreyi en iyi şekilde değerlendirmek için her gün düzenli çalışma planı yap. 
                   Konuları parçalara bölerek öğren ve düzenli tekrarlarla kalıcı hale getir.
                 </Typography>
                 <Typography variant="body1">

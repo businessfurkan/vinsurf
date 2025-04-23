@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { NotificationProvider } from './context/NotificationContext';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -52,6 +53,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <NotificationProvider>
       {user ? (
         <Box sx={{ display: 'flex', bgcolor: '#FFFFF0', minHeight: '100vh' }}>
           <Sidebar />
@@ -89,6 +91,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       )}
+      </NotificationProvider>
     </ThemeProvider>
   );
 };
