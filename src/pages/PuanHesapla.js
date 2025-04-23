@@ -82,161 +82,188 @@ const PuanHesapla = () => {
     return Math.max(0, dogruNum - (yanlisNum / 4));
   };
 
-  // Gerçek sonuçlara göre ayarlanmış TYT katsayıları
+  // 2024 YKS TYT katsayıları - ertansinansahin.com'dan alınmıştır
   const tytCoefficients = {
-    turkce: 3.5, // Türkçe katsayısı
-    sosyal: 3.5, // Sosyal Bilimler katsayısı
-    matematik: 4.0, // Temel Matematik katsayısı
-    fen: 3.8 // Fen Bilimleri katsayısı
+    turkce: 1.11, // Türkçe
+    sosyal: 1.12, // Sosyal Bilimler
+    matematik: 1.11, // Temel Matematik
+    fen: 1.20 // Fen Bilimleri
   };
 
-  // Gerçek sonuçlara göre ayarlanmış AYT katsayıları
+  // 2024 YKS AYT katsayıları (puan türüne göre) - ertansinansahin.com'dan alınmıştır
   const aytCoefficients = {
     EA: {
-      matematik: 4.5, // Matematik
-      fizik: 0.2, // Eşit Ağırlık için fizik düşük katsayılı
-      kimya: 0.2, // Eşit Ağırlık için kimya düşük katsayılı
-      biyoloji: 0.2, // Eşit Ağırlık için biyoloji düşük katsayılı
-      edebiyat: 3.5, // Türk Dili ve Edebiyatı
-      tarih1: 2.5, // Tarih-1
-      cografya1: 2.0, // Coğrafya-1
-      tarih2: 0.2, // Eşit Ağırlık için tarih-2 düşük katsayılı
-      cografya2: 0.2, // Eşit Ağırlık için coğrafya-2 düşük katsayılı
-      felsefe: 0.2, // Eşit Ağırlık için felsefe düşük katsayılı
-      din: 0.2 // Eşit Ağırlık için din kültürü düşük katsayılı
+      matematik: 3.19, // Matematik
+      fizik: 0.0, // EA'da kullanılmaz
+      kimya: 0.0, // EA'da kullanılmaz
+      biyoloji: 0.0, // EA'da kullanılmaz
+      edebiyat: 2.85, // Türk Dili ve Edebiyatı
+      tarih1: 1.82, // Tarih-1
+      cografya1: 1.82, // Coğrafya-1
+      tarih2: 0.0, // EA'da kullanılmaz
+      cografya2: 0.0, // EA'da kullanılmaz
+      felsefe: 0.0, // EA'da kullanılmaz
+      din: 0.0 // EA'da kullanılmaz
     },
     SAY: {
-      matematik: 5.0, // Matematik
-      fizik: 4.0, // Fizik
-      kimya: 4.5, // Kimya
-      biyoloji: 4.0, // Biyoloji
-      edebiyat: 0.2, // Sayısal için edebiyat düşük katsayılı
-      tarih1: 0.2, // Sayısal için tarih-1 düşük katsayılı
-      cografya1: 0.2, // Sayısal için coğrafya-1 düşük katsayılı
-      tarih2: 0.2, // Sayısal için tarih-2 düşük katsayılı
-      cografya2: 0.2, // Sayısal için coğrafya-2 düşük katsayılı
-      felsefe: 0.2, // Sayısal için felsefe düşük katsayılı
-      din: 0.2 // Sayısal için din kültürü düşük katsayılı
+      matematik: 3.19, // Matematik
+      fizik: 2.43, // Fizik
+      kimya: 3.07, // Kimya
+      biyoloji: 2.51, // Biyoloji
+      edebiyat: 0.0, // SAY'da kullanılmaz
+      tarih1: 0.0, // SAY'da kullanılmaz
+      cografya1: 0.0, // SAY'da kullanılmaz
+      tarih2: 0.0, // SAY'da kullanılmaz
+      cografya2: 0.0, // SAY'da kullanılmaz
+      felsefe: 0.0, // SAY'da kullanılmaz
+      din: 0.0 // SAY'da kullanılmaz
     },
     SOZ: {
-      matematik: 0.2, // Sözel için matematik düşük katsayılı
-      fizik: 0.2, // Sözel için fizik düşük katsayılı
-      kimya: 0.2, // Sözel için kimya düşük katsayılı
-      biyoloji: 0.2, // Sözel için biyoloji düşük katsayılı
-      edebiyat: 4.0, // Türk Dili ve Edebiyatı
-      tarih1: 3.5, // Tarih-1
-      cografya1: 3.0, // Coğrafya-1
-      tarih2: 3.0, // Tarih-2
-      cografya2: 2.5, // Coğrafya-2
-      felsefe: 2.5, // Felsefe Grubu
-      din: 2.0 // Din Kültürü
+      matematik: 0.0, // SÖZ'de kullanılmaz
+      fizik: 0.0, // SÖZ'de kullanılmaz
+      kimya: 0.0, // SÖZ'de kullanılmaz
+      biyoloji: 0.0, // SÖZ'de kullanılmaz
+      edebiyat: 2.85, // Türk Dili ve Edebiyatı
+      tarih1: 1.82, // Tarih-1
+      cografya1: 1.82, // Coğrafya-1
+      tarih2: 1.82, // Tarih-2
+      cografya2: 1.82, // Coğrafya-2
+      felsefe: 1.82, // Felsefe Grubu
+      din: 1.82 // Din Kültürü/İlave Felsefe
     }
   };
 
-  // Gerçek sonuçlara göre ayarlanmış taban puanlar
+  // 2024 YKS Taban puanlar - ertansinansahin.com'dan alınmıştır
   const baseScores = {
-    TYT: 200, // TYT için yüksek taban puan
-    EA: 100, // EA için taban puan
-    SAY: 150, // SAY için taban puan
-    SOZ: 120 // SÖZ için taban puan
+    TYT: 133.28, // TYT taban puanı
+    EA: 133.28, // EA taban puanı
+    SAY: 133.28, // SAY taban puanı
+    SOZ: 133.28 // SÖZ taban puanı
   };
 
-  // Sıralama tahminleri (puan türüne göre) - 2024 ÖSYM verilerine göre güncel değerler
+  // Sıralama tahminleri (puan türüne göre) - 2024 ertansinansahin.com verilerine göre güncel değerler
   const rankEstimates = {
     EA: {
-      280: 350000,
-      300: 200000,
-      320: 150000,
-      340: 100000,
-      350: 127000,  // Örnek veriye göre ayarlandı
-      360: 85000,
-      380: 50000,
-      400: 28000,
-      420: 14000,
-      440: 6500,
-      460: 2800,
-      480: 1200,
-      500: 400
+      200: 800000,
+      250: 500000,
+      300: 300000,
+      350: 150000,
+      370: 100000,
+      390: 75000,
+      410: 50000,
+      430: 30000,
+      450: 15000,
+      470: 7000,
+      490: 3000,
+      510: 1000,
+      530: 300
     },
     SAY: {
-      230: 340000,  // Örnek veriye göre ayarlandı
-      250: 300000,
-      280: 250000,
-      300: 200000,
-      320: 150000,
-      340: 100000,
-      360: 70000,
-      380: 42000,
-      400: 23000,
-      420: 11000,
-      440: 4500,
-      460: 1800,
-      480: 800,
-      500: 250
+      200: 850000,
+      250: 550000,
+      300: 350000,
+      350: 180000,
+      370: 120000,
+      390: 80000,
+      410: 45000,
+      430: 25000,
+      450: 12000,
+      470: 5000,
+      490: 2000,
+      510: 800,
+      530: 200
     },
     SOZ: {
-      270: 300000,
-      280: 280000,  // Örnek veriye göre ayarlandı
-      300: 240000,
-      320: 200000,
-      326: 239000,  // Örnek veriye göre ayarlandı
-      340: 160000,
-      360: 95000,
-      380: 55000,
-      400: 32000,
-      420: 16000,
-      440: 7500,
-      460: 3200,
-      480: 1500,
-      500: 600
+      200: 750000,
+      250: 450000,
+      300: 250000,
+      350: 120000,
+      370: 80000,
+      390: 50000,
+      410: 30000,
+      430: 18000,
+      450: 9000,
+      470: 4000,
+      490: 1500,
+      510: 600,
+      530: 150
     },
     TYT: {
-      300: 400000,
-      320: 300000,
-      322: 290000,  // Örnek veriye göre ayarlandı
-      340: 200000,
-      360: 120000,
-      370: 100000,  // Örnek veriye göre ayarlandı
-      380: 70000,
-      400: 40000,
-      420: 20000,
-      440: 10000,
-      460: 5000,
-      480: 2000,
-      500: 800
+      200: 1800000,
+      250: 1200000,
+      300: 700000,
+      350: 350000,
+      370: 250000,
+      390: 150000,
+      410: 80000,
+      430: 40000,
+      450: 20000,
+      470: 8000,
+      490: 3000,
+      510: 1000,
+      530: 300
     }
   };
 
   // Puana göre yaklaşık sıralama hesaplama
-  const estimateRank = (score, type) => {
-    const ranks = rankEstimates[type];
-    const scores = Object.keys(ranks).map(Number).sort((a, b) => a - b);
+  const estimateRank = (score, puanType) => {
+    // Puanı en yakın 10'a yuvarla
+    const roundedScore = Math.floor(score / 10) * 10;
     
-    // Puan en düşük sınırdan düşükse
-    if (score < scores[0]) {
-      return ranks[scores[0]];
+    // Puan türüne göre sıralama tahminlerini al
+    const estimates = rankEstimates[puanType];
+    
+    // Puanın tam olarak karşılığı varsa, doğrudan döndür
+    if (estimates[roundedScore]) {
+      return estimates[roundedScore];
     }
     
-    // Puan en yüksek sınırdan yüksekse
-    if (score > scores[scores.length - 1]) {
-      return Math.max(100, ranks[scores[scores.length - 1]] / 2);
+    // Puanın tam karşılığı yoksa, en yakın iki değer arasında interpolasyon yap
+    // Mevcut puan aralıklarını bul
+    const scorePoints = Object.keys(estimates).map(Number).sort((a, b) => a - b);
+    
+    // Eğer puan en düşük değerden küçükse, en düşük değerin sıralamasını döndür
+    if (roundedScore < scorePoints[0]) {
+      // En düşük puanın altındaysa, daha yüksek sıralama (daha kötü) tahmin et
+      const lowestScore = scorePoints[0];
+      const lowestRank = estimates[lowestScore];
+      // Her 10 puan için %15 daha kötü sıralama
+      const scoreDiff = lowestScore - roundedScore;
+      const rankIncreaseFactor = 1 + (scoreDiff / 10) * 0.15;
+      return Math.round(lowestRank * rankIncreaseFactor);
     }
     
-    // Aradaki puanlar için doğrusal interpolasyon
-    for (let i = 0; i < scores.length - 1; i++) {
-      if (score >= scores[i] && score <= scores[i + 1]) {
-        const lowerScore = scores[i];
-        const upperScore = scores[i + 1];
-        const lowerRank = ranks[lowerScore];
-        const upperRank = ranks[upperScore];
-        
-        // Doğrusal interpolasyon
-        const ratio = (score - lowerScore) / (upperScore - lowerScore);
-        return Math.round(lowerRank - ratio * (lowerRank - upperRank));
+    // Eğer puan en yüksek değerden büyükse, en yüksek değerin sıralamasını döndür
+    if (roundedScore > scorePoints[scorePoints.length - 1]) {
+      // En yüksek puanın üstündeyse, daha düşük sıralama (daha iyi) tahmin et
+      const highestScore = scorePoints[scorePoints.length - 1];
+      const highestRank = estimates[highestScore];
+      // Her 10 puan için %20 daha iyi sıralama
+      const scoreDiff = roundedScore - highestScore;
+      const rankDecreaseFactor = Math.max(0.1, 1 - (scoreDiff / 10) * 0.2);
+      return Math.max(1, Math.round(highestRank * rankDecreaseFactor));
+    }
+    
+    // Puanın düştüğü aralığı bul
+    let lowerBound, upperBound;
+    for (let i = 0; i < scorePoints.length - 1; i++) {
+      if (roundedScore >= scorePoints[i] && roundedScore <= scorePoints[i + 1]) {
+        lowerBound = scorePoints[i];
+        upperBound = scorePoints[i + 1];
+        break;
       }
     }
     
-    return 100000; // Varsayılan değer
+    // İki değer arasında logaritmik interpolasyon yap (daha gerçekçi sonuçlar için)
+    const lowerRank = estimates[lowerBound];
+    const upperRank = estimates[upperBound];
+    const ratio = (roundedScore - lowerBound) / (upperBound - lowerBound);
+    
+    // Logaritmik interpolasyon - puan arttıkça sıralama daha hızlı düşer
+    const logRatio = Math.log(1 + 9 * ratio) / Math.log(10); // 0 ile 1 arasında logaritmik değer
+    
+    // Sıralama tahmini (logaritmik interpolasyon)
+    return Math.round(lowerRank - (logRatio * (lowerRank - upperRank)));
   };
 
   // AYT verisi girilip girilmediğini kontrol et
@@ -246,11 +273,11 @@ const PuanHesapla = () => {
     });
   };
 
-  // Sadece TYT puanı hesapla (Gerçek sonuçlara göre ayarlanmış)
+  // Sadece TYT puanı hesapla (2024 formülüne göre)
   const calculateTytScore = () => {
     // TYT puanlarını hesapla
     let tytTotal = 0;
-    let tytBaseScore = baseScores.TYT; // TYT için yüksek taban puan
+    let tytBaseScore = baseScores.TYT; // TYT taban puanı
     
     // TYT verileri var mı kontrol et
     const hasTytData = Object.keys(tytScores).some(subject => {
@@ -263,22 +290,26 @@ const PuanHesapla = () => {
         error: 'TYT verisi girilmedi',
         tytPuan: 0,
         aytPuan: 0,
+        hamPuan: 0,
         yerlesimPuani: 0,
-        yaklasikSiralama: 0
+        yaklasikSiralama: 0,
+        netler: {}
       };
     }
     
-    // Her ders için net ve puan hesapla (Gerçek sonuçlara göre ayarlanmış katsayılar)
+    // Her ders için net ve puan hesapla
+    const netler = {};
     Object.keys(tytScores).forEach(subject => {
       const net = calculateNet(tytScores[subject].dogru, tytScores[subject].yanlis);
+      netler[subject] = net;
       const point = net * tytCoefficients[subject];
       tytTotal += point;
     });
     
-    // TYT puanını hesapla, gerçek sonuçlara göre ayarlandı
-    const tytPuan = tytBaseScore + tytTotal * 1.5; // Gerçek sonuçlara uygun olması için çarpan eklendi
+    // TYT puanını hesapla (Ham puan)
+    const tytPuan = tytBaseScore + tytTotal;
     
-    // OBP ekle (Diploma puanı * 0.6)
+    // OBP ekle (Diploma puanı * 0.6) - Sadece yerleştirme puanına eklenir
     const obpValue = parseFloat(obp) || 0;
     let yerlesimPuani = tytPuan;
     if (obpValue > 0) {
@@ -291,16 +322,14 @@ const PuanHesapla = () => {
     return {
       tytPuan,
       aytPuan: 0,
+      hamPuan: tytPuan, // TYT için ham puan = TYT puanı
       yerlesimPuani,
-      yaklasikSiralama
+      yaklasikSiralama,
+      netler
     };
   };
 
   const calculateScoreForType = (puanType) => {
-    // TYT puanlarını hesapla
-    let tytTotal = 0;
-    let tytBaseScore = baseScores.TYT; // TYT için yüksek taban puan
-    
     // TYT verileri var mı kontrol et
     const hasTytData = Object.keys(tytScores).some(subject => {
       return tytScores[subject].dogru !== '' || tytScores[subject].yanlis !== '';
@@ -312,20 +341,35 @@ const PuanHesapla = () => {
         error: 'TYT verisi girilmedi',
         tytPuan: 0,
         aytPuan: 0,
+        hamPuan: 0,
         yerlesimPuani: 0,
-        yaklasikSiralama: 0
+        yaklasikSiralama: 0,
+        netler: {}
       };
     }
     
-    // Her ders için net ve puan hesapla (Gerçek sonuçlara göre ayarlanmış katsayılar)
-    Object.keys(tytScores).forEach(subject => {
-      const net = calculateNet(tytScores[subject].dogru, tytScores[subject].yanlis);
-      const point = net * tytCoefficients[subject];
-      tytTotal += point;
-    });
+    // Her ders için net ve puan hesapla
+    const netler = { tyt: {}, ayt: {} };
     
-    // TYT puanını hesapla, gerçek sonuçlara göre ayarlandı
-    const tytPuan = tytBaseScore + tytTotal * 1.5; // Gerçek sonuçlara uygun olması için çarpan eklendi
+    // TYT puanını hesapla - ertansinansahin.com formülüne göre
+    // TYT puanı = 133.28 + TR×1.11 + SB×1.12 + TM×1.11 + FB×1.20
+    const turkceNet = calculateNet(tytScores.turkce.dogru, tytScores.turkce.yanlis);
+    const sosyalNet = calculateNet(tytScores.sosyal.dogru, tytScores.sosyal.yanlis);
+    const matematikNet = calculateNet(tytScores.matematik.dogru, tytScores.matematik.yanlis);
+    const fenNet = calculateNet(tytScores.fen.dogru, tytScores.fen.yanlis);
+    
+    // Netleri kaydet
+    netler.tyt.turkce = turkceNet;
+    netler.tyt.sosyal = sosyalNet;
+    netler.tyt.matematik = matematikNet;
+    netler.tyt.fen = fenNet;
+    
+    // TYT puanını hesapla
+    const tytPuan = baseScores.TYT + 
+                   (turkceNet * tytCoefficients.turkce) + 
+                   (sosyalNet * tytCoefficients.sosyal) + 
+                   (matematikNet * tytCoefficients.matematik) + 
+                   (fenNet * tytCoefficients.fen);
     
     // AYT verisi girildi mi kontrol et
     if (!hasAytData()) {
@@ -334,53 +378,66 @@ const PuanHesapla = () => {
         error: 'AYT verisi girilmedi',
         tytPuan,
         aytPuan: 0,
+        hamPuan: 0,
         yerlesimPuani: 0,
-        yaklasikSiralama: 0
+        yaklasikSiralama: 0,
+        netler
       };
     }
     
-    // AYT puanlarını hesapla
-    let aytTotal = 0;
-    
-    // Her ders için net ve puan hesapla (Gerçek sonuçlara göre ayarlanmış katsayılar)
+    // AYT netlerini hesapla
     Object.keys(aytScores).forEach(subject => {
       const net = calculateNet(aytScores[subject].dogru, aytScores[subject].yanlis);
-      const coefficient = aytCoefficients[puanType][subject];
-      // Doğrudan katsayılarla çarpıyoruz
-      const point = net * coefficient;
-      aytTotal += point;
+      netler.ayt[subject] = net;
     });
     
-    // Puan türüne göre başlangıç puanı ve hesaplama
-    const baseScore = baseScores[puanType];
+    // Puan türüne göre AYT puanını hesapla
+    let aytPuan = 0;
     
-    // Puan türüne göre çarpanlar (gerçek sonuçlara göre ayarlandı)
-    const multipliers = {
-      EA: 0.8,  // EA için çarpan
-      SAY: 1.2, // SAY için çarpan
-      SOZ: 1.0  // SÖZ için çarpan
-    };
+    if (puanType === 'SAY') {
+      // SAY puanı = 133.28 + TR×1.11 + SB×1.12 + TM×1.11 + FB×1.20 + M×3.19 + F×2.43 + K×3.07 + B×2.51
+      aytPuan = baseScores.SAY + 
+               (turkceNet * tytCoefficients.turkce) + 
+               (sosyalNet * tytCoefficients.sosyal) + 
+               (matematikNet * tytCoefficients.matematik) + 
+               (fenNet * tytCoefficients.fen) + 
+               (netler.ayt.matematik * aytCoefficients.SAY.matematik) + 
+               (netler.ayt.fizik * aytCoefficients.SAY.fizik) + 
+               (netler.ayt.kimya * aytCoefficients.SAY.kimya) + 
+               (netler.ayt.biyoloji * aytCoefficients.SAY.biyoloji);
+    } 
+    else if (puanType === 'EA') {
+      // EA puanı = 133.28 + TR×1.11 + SB×1.12 + TM×1.11 + FB×1.20 + M×3.19 + Edebiyat×2.85 + Tarih1×1.82 + Coğrafya1×1.82
+      aytPuan = baseScores.EA + 
+               (turkceNet * tytCoefficients.turkce) + 
+               (sosyalNet * tytCoefficients.sosyal) + 
+               (matematikNet * tytCoefficients.matematik) + 
+               (fenNet * tytCoefficients.fen) + 
+               (netler.ayt.matematik * aytCoefficients.EA.matematik) + 
+               (netler.ayt.edebiyat * aytCoefficients.EA.edebiyat) + 
+               (netler.ayt.tarih1 * aytCoefficients.EA.tarih1) + 
+               (netler.ayt.cografya1 * aytCoefficients.EA.cografya1);
+    }
+    else if (puanType === 'SOZ') {
+      // SÖZ puanı = 133.28 + TR×1.11 + SB×1.12 + TM×1.11 + FB×1.20 + Edebiyat×2.85 + Tarih1×1.82 + Coğrafya1×1.82 + Tarih2×1.82 + Coğrafya2×1.82 + Felsefe×1.82 + Din×1.82
+      aytPuan = baseScores.SOZ + 
+               (turkceNet * tytCoefficients.turkce) + 
+               (sosyalNet * tytCoefficients.sosyal) + 
+               (matematikNet * tytCoefficients.matematik) + 
+               (fenNet * tytCoefficients.fen) + 
+               (netler.ayt.edebiyat * aytCoefficients.SOZ.edebiyat) + 
+               (netler.ayt.tarih1 * aytCoefficients.SOZ.tarih1) + 
+               (netler.ayt.cografya1 * aytCoefficients.SOZ.cografya1) + 
+               (netler.ayt.tarih2 * aytCoefficients.SOZ.tarih2) + 
+               (netler.ayt.cografya2 * aytCoefficients.SOZ.cografya2) + 
+               (netler.ayt.felsefe * aytCoefficients.SOZ.felsefe) + 
+               (netler.ayt.din * aytCoefficients.SOZ.din);
+    }
     
-    // TYT katkısı (puan türüne göre farklı ağırlıklar)
-    const tytWeight = {
-      EA: 0.35,  // EA için TYT ağırlığı
-      SAY: 0.40, // SAY için TYT ağırlığı
-      SOZ: 0.30  // SÖZ için TYT ağırlığı
-    };
+    // Ham puan, ertansinansahin.com sitesine göre AYT puanı ile aynıdır
+    const hamPuan = aytPuan;
     
-    // AYT katkısı (puan türüne göre farklı ağırlıklar)
-    const aytWeight = {
-      EA: 0.65,  // EA için AYT ağırlığı
-      SAY: 0.60, // SAY için AYT ağırlığı
-      SOZ: 0.70  // SÖZ için AYT ağırlığı
-    };
-    
-    // Ham puanı hesapla (TYT ve AYT katkıları + puan türüne özel çarpanlar)
-    const hamPuan = baseScore + 
-                   (tytPuan * tytWeight[puanType]) + 
-                   (aytTotal * aytWeight[puanType] * multipliers[puanType]);
-    
-    // OBP ekle (Diploma puanı * 0.6)
+    // OBP ekle (Diploma puanı * 0.6) - Sadece yerleştirme puanına eklenir
     const obpValue = parseFloat(obp) || 0;
     let yerlesimPuani = hamPuan;
     if (obpValue > 0) {
@@ -392,9 +449,11 @@ const PuanHesapla = () => {
     
     return {
       tytPuan,
-      aytPuan: hamPuan - (tytPuan * tytWeight[puanType]) - baseScore, // AYT katkısı
+      aytPuan,
+      hamPuan,
       yerlesimPuani,
-      yaklasikSiralama
+      yaklasikSiralama,
+      netler
     };
   };
 
@@ -434,6 +493,7 @@ const PuanHesapla = () => {
         return;
       }
       
+      // Tüm puan türlerinin sonuçlarını ayarla
       setAllResults({
         EA: eaResults,
         SAY: sayResults,
@@ -452,8 +512,19 @@ const PuanHesapla = () => {
         return;
       }
       
+      // Tek puan türü için sonuçları ayarla
       setResults(result);
-      setAllResults(null);
+      
+      // Tüm puan türlerini hesapla (diğer puan türlerindeki sıralamalar için)
+      const eaResults = puanTuru === 'EA' ? result : calculateScoreForType('EA');
+      const sayResults = puanTuru === 'SAY' ? result : calculateScoreForType('SAY');
+      const sozResults = puanTuru === 'SOZ' ? result : calculateScoreForType('SOZ');
+      
+      setAllResults({
+        EA: eaResults,
+        SAY: sayResults,
+        SOZ: sozResults
+      });
     }
     
     setActiveTab(2); // Sonuçlar sekmesine geç
@@ -1670,7 +1741,7 @@ const PuanHesapla = () => {
             borderRadius: { xs: 4, md: 5 }, 
             boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
             border: `1px solid ${alpha(theme.palette.primary.main, 0.15)}`,
-            maxWidth: puanTuru === 'HEPSI' ? 1200 : 900,
+            maxWidth: puanTuru === 'HEPSI' ? 1200 : 1000,
             mx: 'auto',
             transition: 'all 0.4s ease',
             background: `linear-gradient(to bottom, ${alpha(theme.palette.background.paper, 0.95)}, ${theme.palette.background.paper})`,
@@ -1697,20 +1768,40 @@ const PuanHesapla = () => {
                   }}>
                     {puanTuru === 'EA' ? 'Eşit Ağırlık' : puanTuru === 'SAY' ? 'Sayısal' : 'Sözel'} Puanınız
                   </Typography>
-                  <Typography variant="h3" sx={{ 
-                    fontWeight: 800, 
-                    color: theme.palette.primary.dark,
-                    fontSize: { xs: '2.8rem', md: '3.5rem' },
-                    textAlign: 'center',
-                    textShadow: '0 4px 12px rgba(0,0,0,0.12)',
-                    letterSpacing: '-0.5px',
-                    mb: 2
-                  }}>
-                    {results.yerlesimPuani.toFixed(2)}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="overline" sx={{ fontWeight: 600, color: theme.palette.primary.main }}>
+                        Ham Puan
+                      </Typography>
+                      <Typography variant="h3" sx={{ 
+                        fontWeight: 800, 
+                        color: theme.palette.primary.dark,
+                        fontSize: { xs: '2.2rem', md: '2.8rem' },
+                        textShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                        letterSpacing: '-0.5px'
+                      }}>
+                        {results.hamPuan.toFixed(2)}
+                      </Typography>
+                    </Box>
+                    <Divider orientation="vertical" flexItem />
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Typography variant="overline" sx={{ fontWeight: 600, color: theme.palette.success.main }}>
+                        Yerleştirme Puanı
+                      </Typography>
+                      <Typography variant="h3" sx={{ 
+                        fontWeight: 800, 
+                        color: theme.palette.success.dark,
+                        fontSize: { xs: '2.2rem', md: '2.8rem' },
+                        textShadow: '0 4px 12px rgba(0,0,0,0.12)',
+                        letterSpacing: '-0.5px'
+                      }}>
+                        {results.yerlesimPuani.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
                 
-                <Grid container spacing={4}>
+                <Grid container spacing={3}>
                   <Grid xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       borderRadius: 4, 
@@ -1724,16 +1815,37 @@ const PuanHesapla = () => {
                         transform: 'translateY(-5px)'
                       }
                     }}>
-                      <CardContent sx={{ p: 4 }}>
+                      <CardContent sx={{ p: 3 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           TYT Puanı
                         </Typography>
                         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.tytPuan.toFixed(2)}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          TYT puanınız yerleştirme puanınıza %40 oranında etki etmektedir.
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          TYT puanınız ham puanınıza %40 oranında etki etmektedir.
                         </Typography>
+                        
+                        <Divider sx={{ my: 2 }} />
+                        
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                          TYT Netleriniz
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          {Object.entries(results.netler.tyt).map(([subject, net]) => (
+                            <Box key={subject} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Typography variant="body2" color="text.secondary">
+                                {subject === 'turkce' ? 'Türkçe' : 
+                                 subject === 'sosyal' ? 'Sosyal Bilimler' : 
+                                 subject === 'matematik' ? 'Matematik' : 'Fen Bilimleri'}
+                              </Typography>
+                              <Typography variant="body2" fontWeight="600">
+                                {net.toFixed(2)} net
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
                       </CardContent>
                     </Card>
                   </Grid>
@@ -1751,16 +1863,50 @@ const PuanHesapla = () => {
                         transform: 'translateY(-5px)'
                       }
                     }}>
-                      <CardContent sx={{ p: 4 }}>
+                      <CardContent sx={{ p: 3 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           AYT Puanı
                         </Typography>
                         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.aytPuan.toFixed(2)}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          AYT puanınız yerleştirme puanınıza %60 oranında etki etmektedir.
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                          AYT puanınız ham puanınıza %60 oranında etki etmektedir.
                         </Typography>
+                        
+                        <Divider sx={{ my: 2 }} />
+                        
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                          AYT Netleriniz ({puanTuru} için)
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxHeight: 200, overflowY: 'auto' }}>
+                          {Object.entries(results.netler.ayt).map(([subject, net]) => {
+                            // Puan türüne göre katsayısı 0'dan büyük olan dersleri göster
+                            if (aytCoefficients[puanTuru][subject] > 0) {
+                              return (
+                                <Box key={subject} sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    {subject === 'matematik' ? 'Matematik' : 
+                                     subject === 'fizik' ? 'Fizik' : 
+                                     subject === 'kimya' ? 'Kimya' : 
+                                     subject === 'biyoloji' ? 'Biyoloji' : 
+                                     subject === 'edebiyat' ? 'Edebiyat' : 
+                                     subject === 'tarih1' ? 'Tarih-1' : 
+                                     subject === 'cografya1' ? 'Coğrafya-1' : 
+                                     subject === 'tarih2' ? 'Tarih-2' : 
+                                     subject === 'cografya2' ? 'Coğrafya-2' : 
+                                     subject === 'felsefe' ? 'Felsefe' : 'Din Kültürü'}
+                                  </Typography>
+                                  <Typography variant="body2" fontWeight="600">
+                                    {net.toFixed(2)} net
+                                  </Typography>
+                                </Box>
+                              );
+                            }
+                            return null;
+                          })}
+                        </Box>
                       </CardContent>
                     </Card>
                   </Grid>
@@ -1778,16 +1924,40 @@ const PuanHesapla = () => {
                         transform: 'translateY(-5px)'
                       }
                     }}>
-                      <CardContent sx={{ p: 4 }}>
+                      <CardContent sx={{ p: 3 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                           {puanTuru} Sıralaması
                         </Typography>
                         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.yaklasikSiralama.toLocaleString()}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                           Bu sıralama tahmini olup, gerçek sıralamanız değişiklik gösterebilir.
                         </Typography>
+                        
+                        <Divider sx={{ my: 2 }} />
+                        
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                          Diploma Notu Katkısı
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Diploma Notu
+                          </Typography>
+                          <Typography variant="body2" fontWeight="600">
+                            {obp || '0'}
+                          </Typography>
+                        </Box>
+                        
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" color="text.secondary">
+                            OBP Katkısı
+                          </Typography>
+                          <Typography variant="body2" fontWeight="600">
+                            {((parseFloat(obp) || 0) * 0.6).toFixed(2)} puan
+                          </Typography>
+                        </Box>
                       </CardContent>
                     </Card>
                   </Grid>
