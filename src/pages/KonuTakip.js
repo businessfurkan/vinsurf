@@ -515,7 +515,7 @@ const KonuTakip = () => {
       const prevKonuDurumu = prevState[konuKey] || {
         ogrendim: false,
         testCozdüm: false,
-        denemedeCozdüm: false,
+        tekrarEttim: false,
         lastUpdated: new Date().toISOString()
       };
       
@@ -843,7 +843,7 @@ const KonuTakip = () => {
                   const konuData = konuDurumu[konuKey] || {
                     ogrendim: false,
                     testCozdüm: false,
-                    denemedeCozdüm: false
+                    tekrarEttim: false
                   };
                   
                   return (
@@ -922,8 +922,8 @@ const KonuTakip = () => {
                           <FormControlLabel
                             control={
                               <Checkbox 
-                                checked={konuData.denemedeCozdüm} 
-                                onChange={(e) => handleKonuDurumuChange(konu, 'denemedeCozdüm', e.target.checked)}
+                                checked={konuData.tekrarEttim} 
+                                onChange={(e) => handleKonuDurumuChange(konu, 'tekrarEttim', e.target.checked)}
                                 icon={<PsychologyIcon />}
                                 checkedIcon={<PsychologyIcon />}
                                 sx={{ 
@@ -937,11 +937,11 @@ const KonuTakip = () => {
                                 }}
                               />
                             }
-                            label="Denemede Çözdüm"
+                            label="Tekrar Ettim"
                             sx={{ 
                               '& .MuiFormControlLabel-label': {
-                                color: konuData.denemedeCozdüm ? '#FF9800' : 'inherit',
-                                fontWeight: konuData.denemedeCozdüm ? 600 : 400
+                                color: konuData.tekrarEttim ? '#FF9800' : 'inherit',
+                                fontWeight: konuData.tekrarEttim ? 600 : 400
                               }
                             }}
                           />
