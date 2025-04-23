@@ -20,6 +20,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ScienceIcon from '@mui/icons-material/Science';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import SaveIcon from '@mui/icons-material/Save';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { 
@@ -538,8 +539,8 @@ const KonuTakip = () => {
                         }
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                        <Typography variant="body1" sx={{ flexGrow: 1, fontWeight: 500 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                        <Typography variant="body1" sx={{ fontWeight: 500, mr: 2 }}>
                           {ders.ad}
                         </Typography>
                         <Chip 
@@ -548,7 +549,8 @@ const KonuTakip = () => {
                           sx={{ 
                             backgroundColor: selectedDers?.id === ders.id ? 'rgba(255,255,255,0.2)' : ders.color,
                             color: selectedDers?.id === ders.id ? 'white' : 'white',
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            minWidth: '48px'
                           }}
                         />
                       </Box>
@@ -604,20 +606,37 @@ const KonuTakip = () => {
                     >
                       {selectedDers.ad} Konuları
                     </Typography>
-                    <Button
-                      variant="contained"
-                      startIcon={<SaveIcon />}
-                      onClick={saveChanges}
-                      sx={{
-                        backgroundColor: selectedDers.color,
-                        '&:hover': {
+                    <Box sx={{ display: 'flex', gap: 2 }}>
+                      <Button
+                        variant="outlined"
+                        startIcon={<CancelIcon />}
+                        onClick={() => setSelectedDers(null)}
+                        sx={{
+                          borderColor: selectedDers.color,
+                          color: selectedDers.color,
+                          '&:hover': {
+                            borderColor: selectedDers.color,
+                            backgroundColor: `${selectedDers.color}10`,
+                          }
+                        }}
+                      >
+                        İptal
+                      </Button>
+                      <Button
+                        variant="contained"
+                        startIcon={<SaveIcon />}
+                        onClick={saveChanges}
+                        sx={{
                           backgroundColor: selectedDers.color,
-                          opacity: 0.9
-                        }
-                      }}
-                    >
-                      Kaydet
-                    </Button>
+                          '&:hover': {
+                            backgroundColor: selectedDers.color,
+                            opacity: 0.9
+                          }
+                        }}
+                      >
+                        Kaydet
+                      </Button>
+                    </Box>
                   </Box>
 
                   <List>
@@ -659,13 +678,22 @@ const KonuTakip = () => {
                                     sx={{ 
                                       color: '#bdbdbd',
                                       '&.Mui-checked': {
-                                        color: selectedDers.color
+                                        color: '#4CAF50'
+                                      },
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(76, 175, 80, 0.08)'
                                       }
                                     }}
                                   />
                                 }
                                 label="Öğrendim"
-                                sx={{ mr: 1 }}
+                                sx={{ 
+                                  mr: 1,
+                                  '& .MuiFormControlLabel-label': {
+                                    color: konuData.ogrendim ? '#4CAF50' : 'inherit',
+                                    fontWeight: konuData.ogrendim ? 600 : 400
+                                  }
+                                }}
                               />
                               <FormControlLabel
                                 control={
@@ -677,13 +705,22 @@ const KonuTakip = () => {
                                     sx={{ 
                                       color: '#bdbdbd',
                                       '&.Mui-checked': {
-                                        color: selectedDers.color
+                                        color: '#2196F3'
+                                      },
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(33, 150, 243, 0.08)'
                                       }
                                     }}
                                   />
                                 }
                                 label="Test Çözdüm"
-                                sx={{ mr: 1 }}
+                                sx={{ 
+                                  mr: 1,
+                                  '& .MuiFormControlLabel-label': {
+                                    color: konuData.testCozdüm ? '#2196F3' : 'inherit',
+                                    fontWeight: konuData.testCozdüm ? 600 : 400
+                                  }
+                                }}
                               />
                               <FormControlLabel
                                 control={
@@ -695,12 +732,21 @@ const KonuTakip = () => {
                                     sx={{ 
                                       color: '#bdbdbd',
                                       '&.Mui-checked': {
-                                        color: selectedDers.color
+                                        color: '#FF9800'
+                                      },
+                                      '&:hover': {
+                                        backgroundColor: 'rgba(255, 152, 0, 0.08)'
                                       }
                                     }}
                                   />
                                 }
                                 label="Denemede Çözdüm"
+                                sx={{ 
+                                  '& .MuiFormControlLabel-label': {
+                                    color: konuData.denemedeCozdüm ? '#FF9800' : 'inherit',
+                                    fontWeight: konuData.denemedeCozdüm ? 600 : 400
+                                  }
+                                }}
                               />
                             </Box>
                           </ListItem>
