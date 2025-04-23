@@ -82,98 +82,63 @@ const PuanHesapla = () => {
     return Math.max(0, dogruNum - (yanlisNum / 4));
   };
 
-  // TYT katsayıları (2024 güncel)
+  // TYT katsayıları (2024 güncel - ÖSYM verilerine göre)
   const tytCoefficients = {
-    turkce: 3.3,
-    sosyal: 3.4,
-    matematik: 3.3,
-    fen: 3.4
+    turkce: 1.11, // Türkçe katsayısı
+    sosyal: 1.12, // Sosyal Bilimler katsayısı
+    matematik: 1.11, // Temel Matematik katsayısı
+    fen: 1.20 // Fen Bilimleri katsayısı
   };
 
-  // AYT katsayıları (puan türüne göre) - 2024 güncel
+  // AYT katsayıları (puan türüne göre) - 2024 ÖSYM verilerine göre güncel
   const aytCoefficients = {
     EA: {
-      matematik: 3.0,
-      fizik: 2.85,
-      kimya: 3.07,
-      biyoloji: 2.51,
-      edebiyat: 3.0,
-      tarih1: 2.8,
-      cografya1: 3.33,
-      tarih2: 2.91,
-      cografya2: 2.91,
-      felsefe: 3.5,
-      din: 3.33
+      matematik: 3.19, // Matematik
+      fizik: 0.1, // Eşit Ağırlık için fizik düşük katsayılı
+      kimya: 0.1, // Eşit Ağırlık için kimya düşük katsayılı
+      biyoloji: 0.1, // Eşit Ağırlık için biyoloji düşük katsayılı
+      edebiyat: 2.80, // Türk Dili ve Edebiyatı
+      tarih1: 1.80, // Tarih-1
+      cografya1: 1.00, // Coğrafya-1
+      tarih2: 0.1, // Eşit Ağırlık için tarih-2 düşük katsayılı
+      cografya2: 0.1, // Eşit Ağırlık için coğrafya-2 düşük katsayılı
+      felsefe: 0.1, // Eşit Ağırlık için felsefe düşük katsayılı
+      din: 0.1 // Eşit Ağırlık için din kültürü düşük katsayılı
     },
     SAY: {
-      matematik: 3.0,
-      fizik: 2.85,
-      kimya: 3.07,
-      biyoloji: 2.51,
-      edebiyat: 3.0,
-      tarih1: 2.8,
-      cografya1: 3.33,
-      tarih2: 2.91,
-      cografya2: 2.91,
-      felsefe: 3.5,
-      din: 3.33
+      matematik: 3.19, // Matematik
+      fizik: 2.43, // Fizik
+      kimya: 3.07, // Kimya
+      biyoloji: 2.51, // Biyoloji
+      edebiyat: 0.1, // Sayısal için edebiyat düşük katsayılı
+      tarih1: 0.1, // Sayısal için tarih-1 düşük katsayılı
+      cografya1: 0.1, // Sayısal için coğrafya-1 düşük katsayılı
+      tarih2: 0.1, // Sayısal için tarih-2 düşük katsayılı
+      cografya2: 0.1, // Sayısal için coğrafya-2 düşük katsayılı
+      felsefe: 0.1, // Sayısal için felsefe düşük katsayılı
+      din: 0.1 // Sayısal için din kültürü düşük katsayılı
     },
     SOZ: {
-      matematik: 3.0,
-      fizik: 2.85,
-      kimya: 3.07,
-      biyoloji: 2.51,
-      edebiyat: 3.0,
-      tarih1: 2.8,
-      cografya1: 3.33,
-      tarih2: 2.91,
-      cografya2: 2.91,
-      felsefe: 3.5,
-      din: 3.33
+      matematik: 0.1, // Sözel için matematik düşük katsayılı
+      fizik: 0.1, // Sözel için fizik düşük katsayılı
+      kimya: 0.1, // Sözel için kimya düşük katsayılı
+      biyoloji: 0.1, // Sözel için biyoloji düşük katsayılı
+      edebiyat: 2.80, // Türk Dili ve Edebiyatı
+      tarih1: 1.80, // Tarih-1
+      cografya1: 1.00, // Coğrafya-1
+      tarih2: 1.80, // Tarih-2
+      cografya2: 1.00, // Coğrafya-2
+      felsefe: 1.00, // Felsefe Grubu
+      din: 1.00 // Din Kültürü
     }
   };
 
-  // Puan türüne göre ağırlıklar
-  const weightsByType = {
-    EA: {
-      matematik: 0.5,
-      fizik: 0.05,
-      kimya: 0.05,
-      biyoloji: 0.05,
-      edebiyat: 0.4,
-      tarih1: 0.3,
-      cografya1: 0.3,
-      tarih2: 0.05,
-      cografya2: 0.05,
-      felsefe: 0.05,
-      din: 0.05
-    },
-    SAY: {
-      matematik: 0.5,
-      fizik: 0.3,
-      kimya: 0.3,
-      biyoloji: 0.3,
-      edebiyat: 0.1,
-      tarih1: 0.05,
-      cografya1: 0.05,
-      tarih2: 0.05,
-      cografya2: 0.05,
-      felsefe: 0.05,
-      din: 0.05
-    },
-    SOZ: {
-      matematik: 0.1,
-      fizik: 0.05,
-      kimya: 0.05,
-      biyoloji: 0.05,
-      edebiyat: 0.5,
-      tarih1: 0.4,
-      cografya1: 0.4,
-      tarih2: 0.3,
-      cografya2: 0.3,
-      felsefe: 0.3,
-      din: 0.2
-    }
+  // 2024 ÖSYM verilerine göre taban puanlar
+  const baseScores = {
+    TYT: 133.28,
+    EA: 133.28,
+    SAY: 133.28,
+    SOZ: 133.28
   };
 
   // Sıralama tahminleri (puan türüne göre) - 2024 ÖSYM verilerine göre güncel değerler
@@ -281,11 +246,11 @@ const PuanHesapla = () => {
     });
   };
 
-  // Sadece TYT puanı hesapla
+  // Sadece TYT puanı hesapla (2024 ÖSYM verilerine göre güncel)
   const calculateTytScore = () => {
     // TYT puanlarını hesapla
     let tytTotal = 0;
-    let tytBaseScore = 100; // TYT taban puanı
+    let tytBaseScore = baseScores.TYT; // TYT taban puanı (ÖSYM 2024)
     
     // TYT verileri var mı kontrol et
     const hasTytData = Object.keys(tytScores).some(subject => {
@@ -303,7 +268,7 @@ const PuanHesapla = () => {
       };
     }
     
-    // Her ders için net ve puan hesapla
+    // Her ders için net ve puan hesapla (ÖSYM 2024 katsayılarına göre)
     Object.keys(tytScores).forEach(subject => {
       const net = calculateNet(tytScores[subject].dogru, tytScores[subject].yanlis);
       const point = net * tytCoefficients[subject];
@@ -333,7 +298,7 @@ const PuanHesapla = () => {
   const calculateScoreForType = (puanType) => {
     // TYT puanlarını hesapla
     let tytTotal = 0;
-    let tytBaseScore = 100; // TYT taban puanı
+    let tytBaseScore = baseScores.TYT; // TYT taban puanı (ÖSYM 2024)
     
     // TYT verileri var mı kontrol et
     const hasTytData = Object.keys(tytScores).some(subject => {
@@ -351,7 +316,7 @@ const PuanHesapla = () => {
       };
     }
     
-    // Her ders için net ve puan hesapla
+    // Her ders için net ve puan hesapla (ÖSYM 2024 katsayılarına göre)
     Object.keys(tytScores).forEach(subject => {
       const net = calculateNet(tytScores[subject].dogru, tytScores[subject].yanlis);
       const point = net * tytCoefficients[subject];
@@ -374,28 +339,25 @@ const PuanHesapla = () => {
     
     // AYT puanlarını hesapla
     let aytTotal = 0;
-    let aytBaseScore = 100; // AYT taban puanı
     
-    // Puan türüne göre ağırlıkları al
-    const weights = weightsByType[puanType];
-    
-    // Her ders için net ve puan hesapla
+    // Her ders için net ve puan hesapla (ÖSYM 2024 katsayılarına göre)
     Object.keys(aytScores).forEach(subject => {
       const net = calculateNet(aytScores[subject].dogru, aytScores[subject].yanlis);
       const coefficient = aytCoefficients[puanType][subject];
-      const weight = weights[subject];
-      const point = net * coefficient * weight;
+      // Doğrudan katsayılarla çarpıyoruz, ağırlık kullanmıyoruz
+      const point = net * coefficient;
       aytTotal += point;
     });
     
-    const aytPuan = aytBaseScore + aytTotal;
+    // Puan türüne göre başlangıç puanı ve hesaplama
+    const baseScore = baseScores[puanType];
     
-    // Yerleştirme puanını hesapla
-    // TYT %40, AYT %60 ağırlıklı
-    let yerlesimPuani = (tytPuan * 0.4) + (aytPuan * 0.6);
+    // Ham puanı hesapla (TYT ve AYT katkıları)
+    const hamPuan = baseScore + tytTotal + aytTotal;
     
     // OBP ekle (Diploma puanı * 0.6)
     const obpValue = parseFloat(obp) || 0;
+    let yerlesimPuani = hamPuan;
     if (obpValue > 0) {
       yerlesimPuani += (obpValue * 0.6);
     }
@@ -405,7 +367,7 @@ const PuanHesapla = () => {
     
     return {
       tytPuan,
-      aytPuan,
+      aytPuan: hamPuan - tytPuan, // AYT katkısı
       yerlesimPuani,
       yaklasikSiralama
     };
@@ -575,127 +537,239 @@ const PuanHesapla = () => {
                 
                 <Grid container spacing={3}>
                   {/* Türkçe */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Türkçe (40 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={tytScores.turkce.dogru}
-                          onChange={(e) => handleTytChange('turkce', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #FF6B6B',
+                      background: 'linear-gradient(to right, rgba(255,107,107,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#FF6B6B' }}>
+                            Türkçe (40 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 40 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.turkce.dogru}
+                                onChange={(e) => handleTytChange('turkce', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 40 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.turkce.yanlis}
+                                onChange={(e) => handleTytChange('turkce', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={tytScores.turkce.yanlis}
-                          onChange={(e) => handleTytChange('turkce', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Sosyal Bilimler */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Sosyal Bilimler (20 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 20 } }}
-                          value={tytScores.sosyal.dogru}
-                          onChange={(e) => handleTytChange('sosyal', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #FFD166',
+                      background: 'linear-gradient(to right, rgba(255,209,102,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#FFD166' }}>
+                            Sosyal Bilimler (20 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 20 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.sosyal.dogru}
+                                onChange={(e) => handleTytChange('sosyal', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 20 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.sosyal.yanlis}
+                                onChange={(e) => handleTytChange('sosyal', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 20 } }}
-                          value={tytScores.sosyal.yanlis}
-                          onChange={(e) => handleTytChange('sosyal', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Matematik */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Matematik (40 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={tytScores.matematik.dogru}
-                          onChange={(e) => handleTytChange('matematik', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #5B8FB9',
+                      background: 'linear-gradient(to right, rgba(91,143,185,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#5B8FB9' }}>
+                            Matematik (40 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 40 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.matematik.dogru}
+                                onChange={(e) => handleTytChange('matematik', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 40 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.matematik.yanlis}
+                                onChange={(e) => handleTytChange('matematik', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={tytScores.matematik.yanlis}
-                          onChange={(e) => handleTytChange('matematik', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Fen Bilimleri */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Fen Bilimleri (20 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 20 } }}
-                          value={tytScores.fen.dogru}
-                          onChange={(e) => handleTytChange('fen', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #06D6A0',
+                      background: 'linear-gradient(to right, rgba(6,214,160,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#06D6A0' }}>
+                            Fen Bilimleri (20 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 20 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.fen.dogru}
+                                onChange={(e) => handleTytChange('fen', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 20 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={tytScores.fen.yanlis}
+                                onChange={(e) => handleTytChange('fen', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 20 } }}
-                          value={tytScores.fen.yanlis}
-                          onChange={(e) => handleTytChange('fen', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                 </Grid>
               </Paper>
@@ -812,359 +886,667 @@ const PuanHesapla = () => {
                 <Grid container spacing={3}>
                   {/* Sayısal Bölüm */}
                   <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: theme.palette.primary.main }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: '#3D6F94' }}>
                       Sayısal Dersler
                     </Typography>
-                    <Divider sx={{ mb: 2 }} />
+                    <Divider sx={{ mb: 2, borderColor: alpha('#3D6F94', 0.3) }} />
                   </Grid>
                   
                   {/* Matematik */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Matematik (40 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={aytScores.matematik.dogru}
-                          onChange={(e) => handleAytChange('matematik', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #5B8FB9',
+                      background: 'linear-gradient(to right, rgba(91,143,185,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#5B8FB9' }}>
+                            Matematik (40 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 40 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.matematik.dogru}
+                                onChange={(e) => handleAytChange('matematik', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 40 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.matematik.yanlis}
+                                onChange={(e) => handleAytChange('matematik', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={aytScores.matematik.yanlis}
-                          onChange={(e) => handleAytChange('matematik', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Fizik */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Fizik (14 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 14 } }}
-                          value={aytScores.fizik.dogru}
-                          onChange={(e) => handleAytChange('fizik', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #7CA6C8',
+                      background: 'linear-gradient(to right, rgba(124,166,200,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#7CA6C8' }}>
+                            Fizik (14 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 14 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.fizik.dogru}
+                                onChange={(e) => handleAytChange('fizik', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 14 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.fizik.yanlis}
+                                onChange={(e) => handleAytChange('fizik', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 14 } }}
-                          value={aytScores.fizik.yanlis}
-                          onChange={(e) => handleAytChange('fizik', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Kimya */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Kimya (13 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 13 } }}
-                          value={aytScores.kimya.dogru}
-                          onChange={(e) => handleAytChange('kimya', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #B8C0FF',
+                      background: 'linear-gradient(to right, rgba(184,192,255,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#B8C0FF' }}>
+                            Kimya (13 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 13 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.kimya.dogru}
+                                onChange={(e) => handleAytChange('kimya', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 13 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.kimya.yanlis}
+                                onChange={(e) => handleAytChange('kimya', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 13 } }}
-                          value={aytScores.kimya.yanlis}
-                          onChange={(e) => handleAytChange('kimya', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Biyoloji */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Biyoloji (13 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 13 } }}
-                          value={aytScores.biyoloji.dogru}
-                          onChange={(e) => handleAytChange('biyoloji', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #06D6A0',
+                      background: 'linear-gradient(to right, rgba(6,214,160,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#06D6A0' }}>
+                            Biyoloji (13 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 13 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.biyoloji.dogru}
+                                onChange={(e) => handleAytChange('biyoloji', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 13 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.biyoloji.yanlis}
+                                onChange={(e) => handleAytChange('biyoloji', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 13 } }}
-                          value={aytScores.biyoloji.yanlis}
-                          onChange={(e) => handleAytChange('biyoloji', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Sözel Bölüm */}
                   <Grid item xs={12}>
-                    <Typography variant="subtitle1" sx={{ mb: 2, mt: 2, fontWeight: 600, color: theme.palette.primary.main }}>
+                    <Typography variant="h6" sx={{ mb: 2, mt: 3, fontWeight: 600, color: '#EA4335' }}>
                       Sözel Dersler
                     </Typography>
-                    <Divider sx={{ mb: 2 }} />
+                    <Divider sx={{ mb: 2, borderColor: alpha('#EA4335', 0.3) }} />
                   </Grid>
                   
                   {/* Edebiyat */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Türk Dili ve Edebiyatı (24 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 24 } }}
-                          value={aytScores.edebiyat.dogru}
-                          onChange={(e) => handleAytChange('edebiyat', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #FF6B6B',
+                      background: 'linear-gradient(to right, rgba(255,107,107,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#FF6B6B' }}>
+                            Türk Dili ve Edebiyatı (24 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 24 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.edebiyat.dogru}
+                                onChange={(e) => handleAytChange('edebiyat', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 24 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.edebiyat.yanlis}
+                                onChange={(e) => handleAytChange('edebiyat', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 24 } }}
-                          value={aytScores.edebiyat.yanlis}
-                          onChange={(e) => handleAytChange('edebiyat', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Tarih-1 */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Tarih-1 (10 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 10 } }}
-                          value={aytScores.tarih1.dogru}
-                          onChange={(e) => handleAytChange('tarih1', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #FFD166',
+                      background: 'linear-gradient(to right, rgba(255,209,102,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#FFD166' }}>
+                            Tarih-1 (10 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 10 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.tarih1.dogru}
+                                onChange={(e) => handleAytChange('tarih1', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 10 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.tarih1.yanlis}
+                                onChange={(e) => handleAytChange('tarih1', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 10 } }}
-                          value={aytScores.tarih1.yanlis}
-                          onChange={(e) => handleAytChange('tarih1', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Coğrafya-1 */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Coğrafya-1 (6 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 6 } }}
-                          value={aytScores.cografya1.dogru}
-                          onChange={(e) => handleAytChange('cografya1', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #F4845F',
+                      background: 'linear-gradient(to right, rgba(244,132,95,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#F4845F' }}>
+                            Coğrafya-1 (6 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 6 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.cografya1.dogru}
+                                onChange={(e) => handleAytChange('cografya1', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 6 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.cografya1.yanlis}
+                                onChange={(e) => handleAytChange('cografya1', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 6 } }}
-                          value={aytScores.cografya1.yanlis}
-                          onChange={(e) => handleAytChange('cografya1', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Tarih-2 */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Tarih-2 (11 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 11 } }}
-                          value={aytScores.tarih2.dogru}
-                          onChange={(e) => handleAytChange('tarih2', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #E07A5F',
+                      background: 'linear-gradient(to right, rgba(224,122,95,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#E07A5F' }}>
+                            Tarih-2 (11 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 11 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.tarih2.dogru}
+                                onChange={(e) => handleAytChange('tarih2', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 11 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.tarih2.yanlis}
+                                onChange={(e) => handleAytChange('tarih2', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 11 } }}
-                          value={aytScores.tarih2.yanlis}
-                          onChange={(e) => handleAytChange('tarih2', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Coğrafya-2 */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Coğrafya-2 (5 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 5 } }}
-                          value={aytScores.cografya2.dogru}
-                          onChange={(e) => handleAytChange('cografya2', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #F9C74F',
+                      background: 'linear-gradient(to right, rgba(249,199,79,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#F9C74F' }}>
+                            Coğrafya-2 (5 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 5 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.cografya2.dogru}
+                                onChange={(e) => handleAytChange('cografya2', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 5 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.cografya2.yanlis}
+                                onChange={(e) => handleAytChange('cografya2', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 5 } }}
-                          value={aytScores.cografya2.yanlis}
-                          onChange={(e) => handleAytChange('cografya2', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Felsefe */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Felsefe (12 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 12 } }}
-                          value={aytScores.felsefe.dogru}
-                          onChange={(e) => handleAytChange('felsefe', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #9A9FD8',
+                      background: 'linear-gradient(to right, rgba(154,159,216,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#9A9FD8' }}>
+                            Felsefe (12 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 12 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.felsefe.dogru}
+                                onChange={(e) => handleAytChange('felsefe', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 12 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.felsefe.yanlis}
+                                onChange={(e) => handleAytChange('felsefe', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 12 } }}
-                          value={aytScores.felsefe.yanlis}
-                          onChange={(e) => handleAytChange('felsefe', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                   
                   {/* Din Kültürü */}
-                  <Grid xs={12} sm={4}>
-                    <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                      Din Kültürü (6 Soru)
-                    </Typography>
-                    <Grid container spacing={2}>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Doğru"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 6 } }}
-                          value={aytScores.din.dogru}
-                          onChange={(e) => handleAytChange('din', 'dogru', e.target.value)}
-                        />
+                  <Grid xs={12}>
+                    <Paper elevation={0} sx={{ 
+                      p: 2, 
+                      mb: 2, 
+                      borderRadius: 2,
+                      borderLeft: '4px solid #D1D6FF',
+                      background: 'linear-gradient(to right, rgba(209,214,255,0.05), rgba(255,255,240,0.5))'
+                    }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid xs={3}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#D1D6FF' }}>
+                            Din Kültürü (6 Soru)
+                          </Typography>
+                        </Grid>
+                        <Grid xs={9}>
+                          <Grid container spacing={2}>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Doğru"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 6 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.success.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.success.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.success.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.din.dogru}
+                                onChange={(e) => handleAytChange('din', 'dogru', e.target.value)}
+                              />
+                            </Grid>
+                            <Grid xs={6}>
+                              <TextField
+                                label="Yanlış"
+                                type="number"
+                                fullWidth
+                                size="small"
+                                InputProps={{ 
+                                  inputProps: { min: 0, max: 6 },
+                                  sx: { 
+                                    bgcolor: alpha(theme.palette.error.main, 0.1),
+                                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.15) },
+                                    '& .MuiOutlinedInput-notchedOutline': { borderColor: alpha(theme.palette.error.main, 0.3) }
+                                  }
+                                }}
+                                value={aytScores.din.yanlis}
+                                onChange={(e) => handleAytChange('din', 'yanlis', e.target.value)}
+                              />
+                            </Grid>
+                          </Grid>
+                        </Grid>
                       </Grid>
-                      <Grid xs={6}>
-                        <TextField
-                          label="Yanlış"
-                          type="number"
-                          fullWidth
-                          size="small"
-                          InputProps={{ inputProps: { min: 0, max: 6 } }}
-                          value={aytScores.din.yanlis}
-                          onChange={(e) => handleAytChange('din', 'yanlis', e.target.value)}
-                        />
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   </Grid>
                 </Grid>
               </Paper>
@@ -1304,7 +1686,7 @@ const PuanHesapla = () => {
                 </Box>
                 
                 <Grid container spacing={4}>
-                  <Grid xs={12} sm={4}>
+                  <Grid xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       borderRadius: 4, 
                       boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
@@ -1331,7 +1713,7 @@ const PuanHesapla = () => {
                     </Card>
                   </Grid>
                   
-                  <Grid xs={12} sm={4}>
+                  <Grid xs={12} sm={6} md={4}>
                     <Card sx={{ 
                       borderRadius: 4, 
                       boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
@@ -1358,21 +1740,22 @@ const PuanHesapla = () => {
                     </Card>
                   </Grid>
                   
-                  <Grid xs={12}>
+                  <Grid xs={12} md={4}>
                     <Card sx={{ 
-                      borderRadius: 3, 
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                      bgcolor: alpha(theme.palette.primary.main, 0.05),
+                      borderRadius: 4, 
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+                      height: '100%',
                       transition: 'all 0.3s ease',
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                      background: `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.95)}, ${theme.palette.background.paper})`,
                       '&:hover': {
-                        boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
-                        transform: 'translateY(-3px)',
-                        bgcolor: alpha(theme.palette.primary.main, 0.08)
+                        boxShadow: '0 12px 25px rgba(0,0,0,0.15)',
+                        transform: 'translateY(-5px)'
                       }
                     }}>
                       <CardContent sx={{ p: 4 }}>
                         <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                          Yaklaşık Sıralamanız
+                          {puanTuru} Sıralaması
                         </Typography>
                         <Typography variant="h4" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 5px rgba(0,0,0,0.08)' }}>
                           {results.yaklasikSiralama.toLocaleString()}
@@ -1382,6 +1765,132 @@ const PuanHesapla = () => {
                         </Typography>
                       </CardContent>
                     </Card>
+                  </Grid>
+                  
+                  {/* Diğer puan türlerindeki sıralamalar */}
+                  <Grid xs={12}>
+                    <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, textAlign: 'center' }}>
+                      Diğer Puan Türlerindeki Sıralamalarınız
+                    </Typography>
+                    
+                    <Grid container spacing={3}>
+                      {puanTuru !== 'EA' && (
+                        <Grid xs={12} sm={puanTuru === 'HEPSI' ? 4 : 6}>
+                          <Card sx={{ 
+                            borderRadius: 4, 
+                            boxShadow: '0 8px 20px rgba(66, 133, 244, 0.15)',
+                            height: '100%',
+                            transition: 'all 0.3s ease',
+                            border: `2px solid ${alpha('#4285F4', 0.7)}`,
+                            background: `linear-gradient(135deg, ${alpha('#4285F4', 0.03)}, ${alpha('#4285F4', 0.01)})`,
+                            '&:hover': {
+                              boxShadow: '0 12px 30px rgba(66, 133, 244, 0.25)',
+                              transform: 'translateY(-5px)'
+                            }
+                          }}>
+                            <CardContent sx={{ p: 3 }}>
+                              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#4285F4' }}>
+                                Eşit Ağırlık (EA)
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Puan:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: '#4285F4' }}>
+                                  {allResults.EA.yerlesimPuani.toFixed(2)}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Sıralama:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: '#4285F4' }}>
+                                  {allResults.EA.yaklasikSiralama.toLocaleString()}
+                                </Typography>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      )}
+                      
+                      {puanTuru !== 'SAY' && (
+                        <Grid xs={12} sm={puanTuru === 'HEPSI' ? 4 : 6}>
+                          <Card sx={{ 
+                            borderRadius: 4, 
+                            boxShadow: '0 8px 20px rgba(52, 168, 83, 0.15)',
+                            height: '100%',
+                            transition: 'all 0.3s ease',
+                            border: `2px solid ${alpha('#34A853', 0.7)}`,
+                            background: `linear-gradient(135deg, ${alpha('#34A853', 0.03)}, ${alpha('#34A853', 0.01)})`,
+                            '&:hover': {
+                              boxShadow: '0 12px 30px rgba(52, 168, 83, 0.25)',
+                              transform: 'translateY(-5px)'
+                            }
+                          }}>
+                            <CardContent sx={{ p: 3 }}>
+                              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#34A853' }}>
+                                Sayısal (SAY)
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Puan:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: '#34A853' }}>
+                                  {allResults.SAY.yerlesimPuani.toFixed(2)}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Sıralama:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: '#34A853' }}>
+                                  {allResults.SAY.yaklasikSiralama.toLocaleString()}
+                                </Typography>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      )}
+                      
+                      {puanTuru !== 'SOZ' && (
+                        <Grid xs={12} sm={puanTuru === 'HEPSI' ? 4 : 6}>
+                          <Card sx={{ 
+                            borderRadius: 4, 
+                            boxShadow: '0 8px 20px rgba(234, 67, 53, 0.15)',
+                            height: '100%',
+                            transition: 'all 0.3s ease',
+                            border: `2px solid ${alpha('#EA4335', 0.7)}`,
+                            background: `linear-gradient(135deg, ${alpha('#EA4335', 0.03)}, ${alpha('#EA4335', 0.01)})`,
+                            '&:hover': {
+                              boxShadow: '0 12px 30px rgba(234, 67, 53, 0.25)',
+                              transform: 'translateY(-5px)'
+                            }
+                          }}>
+                            <CardContent sx={{ p: 3 }}>
+                              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#EA4335' }}>
+                                Sözel (SÖZ)
+                              </Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Puan:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: '#EA4335' }}>
+                                  {allResults.SOZ.yerlesimPuani.toFixed(2)}
+                                </Typography>
+                              </Box>
+                              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mt: 1 }}>
+                                <Typography variant="body2" color="text.secondary">
+                                  Sıralama:
+                                </Typography>
+                                <Typography variant="h6" sx={{ fontWeight: 600, color: '#EA4335' }}>
+                                  {allResults.SOZ.yaklasikSiralama.toLocaleString()}
+                                </Typography>
+                              </Box>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      )}
+                    </Grid>
                   </Grid>
                 </Grid>
               </>
