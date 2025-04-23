@@ -18,7 +18,6 @@ import TytAytNetTakibi from './pages/TytAytNetTakibi';
 import YapayZeka from './pages/YapayZeka';
 import DersProgrami from './pages/DersProgrami';
 import Analiz from './pages/Analiz';
-import BugunCozduklerin from './pages/BugunCozduklerin';
 import NotDefterim from './pages/NotDefterim';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
@@ -69,7 +68,6 @@ const App = () => {
                 <Route path="/yapay-zeka" element={<ProtectedRoute><YapayZeka /></ProtectedRoute>} />
                 <Route path="/performans" element={<ProtectedRoute><DersProgrami /></ProtectedRoute>} />
                 <Route path="/analiz" element={<ProtectedRoute><Analiz /></ProtectedRoute>} />
-                <Route path="/bugun-cozduklerin" element={<ProtectedRoute><BugunCozduklerin /></ProtectedRoute>} />
                 <Route path="/not-defterim" element={<ProtectedRoute><NotDefterim /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />

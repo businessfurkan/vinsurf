@@ -101,7 +101,6 @@ const Sidebar = () => {
     { text: 'Yapay Zeka', icon: <SmartToyIcon />, path: '/yapay-zeka', color: '#34A853' }, // Google Yeşil
     { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' }, // Turuncu
     { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#00BCD4' }, // Turkuaz - Shortened for better display
-    { text: 'Çözdüklerin', icon: <AssignmentTurnedInIcon />, path: '/bugun-cozduklerin', color: '#FF5722' }, // Koyu Turuncu - Shortened for better display
     { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Mor
     // Teneffüs sekmesi kaldırıldı.
   ];
