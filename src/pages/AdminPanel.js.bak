@@ -208,18 +208,19 @@ const AdminPanel = () => {
 
   // Handle deleting a post
   const handleDeletePost = async (postId) => {
-    if (window.confirm('Bu gönderiyi silmek istediğinizden emin misiniz?')) {
-      try {
-        await deleteDoc(doc(db, 'forumPosts', postId));
-        // Remove from posts list
-        setPosts(posts.filter(post => post.id !== postId));
-        // Also remove from userPosts if it exists there
-        if (selectedUser) {
-          setUserPosts(userPosts.filter(post => post.id !== postId));
-        }
-      } catch (error) {
-        console.error('Error deleting post:', error);
-      }
+    if (!window.confirm('Bu gönderiyi silmek istediğinizden emin misiniz?')) {
+      return;
+    }
+    
+    try {
+      // Delete post
+      await deleteDoc(doc(db, 'forumPosts', postId));
+      
+      // Refresh posts
+      fetchPosts();
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Gönderi silinirken bir hata oluştu.');
     }
   };
 
@@ -228,33 +229,26 @@ const AdminPanel = () => {
     try {
       const userRef = doc(db, 'userProfiles', userId);
       await updateDoc(userRef, {
-        isAdmin: !currentStatus
+        role: currentStatus === 'admin' ? 'user' : 'admin'
       });
       
-      // Update local state
-      const updatedUsers = users.map(user => {
-        if (user.id === userId) {
-          return { ...user, isAdmin: !currentStatus };
-        }
-        return user;
-      });
-      
-      setUsers(updatedUsers);
-      setFilteredUsers(updatedUsers);
+      // Refresh users
+      fetchUsers();
     } catch (error) {
-      console.error('Error updating admin status:', error);
+      console.error('Error updating user role:', error);
+      alert('Kullanıcı rolü güncellenirken bir hata oluştu.');
     }
   };
-
-  // Fetch user posts
-  const fetchUserPosts = async (userId) => {
+  
+  // Fetch user's posts
+  const fetchUserPosts = useCallback(async (userId) => {
     try {
-      const userPostsQuery = query(
+      const postsQuery = query(
         collection(db, 'forumPosts'),
         where('userId', '==', userId),
         orderBy('createdAt', 'desc')
       );
-      const querySnapshot = await getDocs(userPostsQuery);
+      const querySnapshot = await getDocs(postsQuery);
       const postsData = [];
       
       querySnapshot.forEach((doc) => {
@@ -265,79 +259,83 @@ const AdminPanel = () => {
     } catch (error) {
       console.error('Error fetching user posts:', error);
     }
-  };
-
+  }, []);
+  
   // Handle user selection
   const handleUserSelect = (user) => {
     setSelectedUser(user);
     fetchUserPosts(user.id);
   };
-
+  
   // Handle post visibility toggle
   const handleTogglePostVisibility = async (postId, currentVisibility) => {
     try {
       const postRef = doc(db, 'forumPosts', postId);
       await updateDoc(postRef, {
-        isVisible: !currentVisibility
+        isHidden: !currentVisibility
       });
       
-      // Update local state
-      const updatedPosts = posts.map(post => {
-        if (post.id === postId) {
-          return { ...post, isVisible: !currentVisibility };
-        }
-        return post;
-      });
-      
-      setPosts(updatedPosts);
+      // Refresh user posts
+      if (selectedUser) {
+        fetchUserPosts(selectedUser.id);
+      }
     } catch (error) {
-      console.error('Error updating post visibility:', error);
+      console.error('Error toggling post visibility:', error);
+      alert('Gönderi görünürlüğü güncellenirken bir hata oluştu.');
     }
   };
-
+  
   // Handle user expansion toggle
   const handleExpandUser = (userId) => {
     setExpandedUser(expandedUser === userId ? null : userId);
   };
 
-  // Loading state
+  // Show loading indicator
   if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress color="primary" size={60} thickness={4} />
+        <CircularProgress />
       </Box>
     );
   }
 
-  // Not admin state
+  // Show unauthorized message if not admin
   if (!isAdmin) {
     return (
-      <Box sx={{ p: 3, maxWidth: 600, mx: 'auto', textAlign: 'center', mt: 8 }}>
-        <Alert 
-          severity="error" 
-          sx={{ 
-            mb: 3, 
-            borderRadius: 2,
-            py: 2,
-            '& .MuiAlert-icon': {
-              fontSize: '2rem'
-            }
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Yetkisiz Erişim</Typography>
-          <Typography variant="body1">Bu sayfaya erişim yetkiniz bulunmamaktadır.</Typography>
+      <Container maxWidth="md" sx={{ mt: 5 }}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          <Typography variant="h6">Yetkisiz Erişim</Typography>
+          <Typography variant="body1">
+            Bu sayfayı görüntülemek için admin yetkilerine sahip olmanız gerekmektedir.
+          </Typography>
         </Alert>
         <Button 
           variant="contained" 
-          onClick={() => navigate('/')} 
-          sx={{ 
-            mt: 2,
-            bgcolor: '#4285F4',
-            '&:hover': {
-              bgcolor: '#3367d6'
-            }
-          }}
+          onClick={() => navigate('/')}
+          sx={{ mt: 2 }}
         >
+          Ana Sayfaya Dön
+        </Button>
+      </Container>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <Box sx={{ p: 3, maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
+          <Typography variant="h6">Yetkisiz Erişim</Typography>
+          <Typography variant="body1">Bu sayfaya erişim yetkiniz bulunmamaktadır.</Typography>
+        </Alert>
+        <Button variant="contained" onClick={() => navigate('/')} sx={{ mt: 2 }}>
           Ana Sayfaya Dön
         </Button>
       </Box>
@@ -588,6 +586,8 @@ const AdminPanel = () => {
                 </Grid>
               </Grid>
             </Box>
+          )
+            </Grid>
           )}
           
           {/* Users */}
@@ -643,201 +643,229 @@ const AdminPanel = () => {
               </Box>
               
               <Grid container spacing={3}>
+                {/* User List */}
                 <Grid item xs={12} md={selectedUser ? 6 : 12}>
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      borderRadius: 2, 
-                      overflow: 'hidden',
-                      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                      border: '1px solid rgba(0,0,0,0.05)'
-                    }}
-                  >
-                    <List sx={{ p: 0 }}>
-                      {filteredUsers.map((user) => (
+                  <Paper sx={{ borderRadius: 2, overflow: 'hidden' }}>
+                    <List sx={{ bgcolor: 'background.paper' }}>
+                      {filteredUsers.length > 0 ? filteredUsers.map((user) => (
                         <React.Fragment key={user.id}>
                           <ListItem
                             button
                             onClick={() => handleUserSelect(user)}
-                            selected={selectedUser && selectedUser.id === user.id}
-                            sx={{
-                              transition: 'all 0.2s',
-                              '&.Mui-selected': {
-                                backgroundColor: alpha('#4285F4', 0.1),
-                              },
-                              '&:hover': {
-                                backgroundColor: alpha('#4285F4', 0.05),
-                              }
-                            }}
+                            selected={selectedUser?.id === user.id}
+                            secondaryAction={
+                              <Box sx={{ display: 'flex', gap: 1 }}>
+                                <IconButton
+                                  edge="end"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleExpandUser(user.id);
+                                  }}
+                                >
+                                  {expandedUser === user.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                                </IconButton>
+                                <Button
+                                  variant="outlined"
+                                  color={user.role === 'admin' ? 'error' : 'primary'}
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleAdminStatus(user.id, user.role);
+                                  }}
+                                  startIcon={user.role === 'admin' ? <BlockIcon /> : <CheckCircleIcon />}
+                                >
+                                  {user.role === 'admin' ? 'Admin Yetkisini Kaldır' : 'Admin Yap'}
+                                </Button>
+                              </Box>
+                            }
                           >
                             <ListItemAvatar>
-                              <Avatar 
-                                src={user.photoURL} 
-                                alt={user.displayName || 'Kullanıcı'}
-                                sx={{ 
-                                  width: 50, 
-                                  height: 50,
-                                  border: '2px solid #f0f0f0',
-                                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                                }}
-                              >
-                                {!user.photoURL && (user.displayName ? user.displayName[0].toUpperCase() : 'U')}
+                              <Avatar src={user.photoURL} alt={user.displayName}>
+                                {user.displayName?.charAt(0) || 'U'}
                               </Avatar>
                             </ListItemAvatar>
                             <ListItemText
                               primary={
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                    {user.displayName || 'İsimsiz Kullanıcı'}
-                                  </Typography>
-                                  {user.isAdmin && (
-                                    <Chip 
-                                      size="small" 
-                                      label="Admin" 
-                                      color="primary" 
-                                      sx={{ ml: 1, fontWeight: 600, fontSize: '0.7rem' }} 
-                                    />
+                                  {user.displayName || 'İsimsiz Kullanıcı'}
+                                  {user.role === 'admin' && (
+                                    <Typography 
+                                      variant="caption" 
+                                      sx={{ 
+                                        ml: 1, 
+                                        bgcolor: 'error.main', 
+                                        color: 'white', 
+                                        px: 1, 
+                                        py: 0.5, 
+                                        borderRadius: 1,
+                                        fontWeight: 'bold'
+                                      }}
+                                    >
+                                      ADMIN
+                                    </Typography>
                                   )}
                                 </Box>
                               }
                               secondary={
                                 <React.Fragment>
-                                  <Typography variant="body2" component="span" color="text.secondary">
+                                  <Typography component="span" variant="body2" color="text.primary">
                                     {user.email}
                                   </Typography>
-                                  <Typography variant="body2" component="div" color="text.secondary" sx={{ mt: 0.5 }}>
-                                    Kayıt: {user.createdAt && new Date(user.createdAt.seconds * 1000).toLocaleDateString()}
-                                  </Typography>
+                                  {user.lastLogin && (
+                                    <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                      Son giriş: {new Date(user.lastLogin.seconds * 1000).toLocaleDateString()}
+                                    </Typography>
+                                  )}
                                 </React.Fragment>
                               }
-                              sx={{ ml: 1 }}
                             />
-                            <IconButton edge="end" onClick={(e) => {
-                              e.stopPropagation();
-                              handleExpandUser(user.id);
-                            }}>
-                              {expandedUser === user.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                            </IconButton>
                           </ListItem>
                           
                           <Collapse in={expandedUser === user.id} timeout="auto" unmountOnExit>
                             <Box sx={{ p: 2, bgcolor: alpha('#f5f5f5', 0.5) }}>
-                              <Button
-                                variant="outlined"
-                                color={user.isAdmin ? "error" : "primary"}
-                                startIcon={user.isAdmin ? <BlockIcon /> : <CheckCircleIcon />}
-                                onClick={() => handleToggleAdminStatus(user.id, user.isAdmin)}
-                                size="small"
-                                sx={{ mr: 1, borderRadius: 2 }}
-                              >
-                                {user.isAdmin ? "Admin Yetkisini Kaldır" : "Admin Yap"}
-                              </Button>
+                              <Typography variant="subtitle2" gutterBottom>
+                                Kullanıcı Detayları
+                              </Typography>
+                              <Grid container spacing={2}>
+                                <Grid item xs={6}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Kayıt Tarihi: {user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : 'Bilinmiyor'}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={6}>
+                                  <Typography variant="body2" color="text.secondary">
+                                    Hedef Sıralama: {user.targetRank || 'Belirtilmemiş'}
+                                  </Typography>
+                                </Grid>
+                                <Grid item xs={12}>
+                                  <Button 
+                                    variant="contained" 
+                                    size="small" 
+                                    onClick={() => handleUserSelect(user)}
+                                    startIcon={<VisibilityIcon />}
+                                  >
+                                    Kullanıcı İçeriğini Görüntüle
+                                  </Button>
+                                </Grid>
+                              </Grid>
                             </Box>
                           </Collapse>
                           
                           <Divider component="li" />
                         </React.Fragment>
-                      ))}
+                      )) : (
+                        <Box sx={{ p: 4, textAlign: 'center' }}>
+                          <Typography variant="body1" color="text.secondary">
+                            Arama kriterlerine uygun kullanıcı bulunamadı.
+                          </Typography>
+                        </Box>
+                      )}
                     </List>
                   </Paper>
                 </Grid>
                 
+                {/* User Content */}
                 {selectedUser && (
                   <Grid item xs={12} md={6}>
-                    <Paper 
-                      elevation={0}
-                      sx={{ 
-                        p: 3, 
-                        borderRadius: 2,
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                        border: '1px solid rgba(0,0,0,0.05)',
-                        height: '100%'
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                        <Avatar 
-                          src={selectedUser.photoURL} 
-                          alt={selectedUser.displayName || 'Kullanıcı'}
-                          sx={{ 
-                            width: 60, 
-                            height: 60,
-                            mr: 2,
-                            border: '2px solid #f0f0f0',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
-                          }}
+                    <Paper sx={{ p: 3, borderRadius: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                        <Typography variant="h6">
+                          {selectedUser.displayName || 'Kullanıcı'} İçeriği
+                        </Typography>
+                        <Button 
+                          variant="outlined" 
+                          size="small"
+                          onClick={() => setSelectedUser(null)}
                         >
-                          {!selectedUser.photoURL && (selectedUser.displayName ? selectedUser.displayName[0].toUpperCase() : 'U')}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {selectedUser.displayName || 'İsimsiz Kullanıcı'}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            {selectedUser.email}
-                          </Typography>
-                        </Box>
+                          Kapat
+                        </Button>
                       </Box>
                       
-                      <Divider sx={{ my: 2 }} />
-                      
-                      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center' }}>
-                        <ForumIcon sx={{ mr: 1, fontSize: 20, color: '#EA4335' }} /> Kullanıcının Gönderileri
-                      </Typography>
-                      
                       {userPosts.length > 0 ? (
-                        <List sx={{ p: 0 }}>
-                          {userPosts.map((post) => (
-                            <React.Fragment key={post.id}>
-                              <ListItem
-                                sx={{
-                                  borderRadius: 2,
-                                  mb: 1,
-                                  bgcolor: alpha('#f5f5f5', 0.5),
-                                  '&:hover': {
-                                    bgcolor: alpha('#f5f5f5', 0.8),
-                                  }
-                                }}
-                                secondaryAction={
-                                  <Box>
-                                    <IconButton edge="end" onClick={() => handleTogglePostVisibility(post.id, post.isVisible)}>
-                                      {post.isVisible ? <VisibilityIcon color="primary" /> : <VisibilityOffIcon color="error" />}
-                                    </IconButton>
-                                    <IconButton edge="end" onClick={() => handleDeletePost(post.id)}>
-                                      <DeleteIcon color="error" />
-                                    </IconButton>
+                        <Stack spacing={2}>
+                          {userPosts.map(post => (
+                            <Card key={post.id} sx={{ borderRadius: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+                              <CardContent>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                  <Typography variant="h6" gutterBottom>
+                                    {post.title}
+                                    {post.isHidden && (
+                                      <Chip 
+                                        label="Gizlenmiş" 
+                                        size="small" 
+                                        color="error" 
+                                        sx={{ ml: 1 }} 
+                                      />
+                                    )}
+                                  </Typography>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {post.createdAt && new Date(post.createdAt.seconds * 1000).toLocaleString()}
+                                  </Typography>
+                                </Box>
+                                
+                                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                                  {post.content}
+                                </Typography>
+                                
+                                {post.tags && post.tags.length > 0 && (
+                                  <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                    {post.tags.map((tag, index) => (
+                                      <Chip key={index} label={tag} size="small" variant="outlined" />
+                                    ))}
                                   </Box>
-                                }
-                              >
-                                <ListItemText
-                                  primary={
-                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                      {post.title}
-                                    </Typography>
-                                  }
-                                  secondary={
-                                    <React.Fragment>
-                                      <Typography variant="body2" color="text.secondary">
-                                        {post.createdAt && new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
-                                      </Typography>
-                                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                                        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                                          <ChatIcon sx={{ fontSize: 16, mr: 0.5 }} /> {post.commentCount || 0}
-                                        </Typography>
-                                        <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                          <ThumbUpIcon sx={{ fontSize: 16, mr: 0.5 }} /> {post.likeCount || 0}
-                                        </Typography>
-                                      </Box>
-                                    </React.Fragment>
-                                  }
-                                />
-                              </ListItem>
-                            </React.Fragment>
+                                )}
+                                
+                                {post.imageUrl && (
+                                  <Box sx={{ mb: 2 }}>
+                                    <CardMedia
+                                      component="img"
+                                      image={post.imageUrl}
+                                      alt="Post image"
+                                      sx={{ 
+                                        height: 200, 
+                                        objectFit: 'contain',
+                                        borderRadius: 1,
+                                        border: '1px solid #eee'
+                                      }}
+                                    />
+                                  </Box>
+                                )}
+                                
+                                <Box sx={{ display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+                                  <Tooltip title={post.isHidden ? "Gönderiyi Göster" : "Gönderiyi Gizle"}>
+                                    <Button
+                                      variant="outlined"
+                                      size="small"
+                                      color={post.isHidden ? "primary" : "warning"}
+                                      startIcon={post.isHidden ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                      onClick={() => handleTogglePostVisibility(post.id, post.isHidden)}
+                                    >
+                                      {post.isHidden ? "Göster" : "Gizle"}
+                                    </Button>
+                                  </Tooltip>
+                                  <Tooltip title="Gönderiyi Sil">
+                                    <Button
+                                      variant="outlined"
+                                      size="small"
+                                      color="error"
+                                      startIcon={<DeleteIcon />}
+                                      onClick={() => handleDeletePost(post.id)}
+                                    >
+                                      Sil
+                                    </Button>
+                                  </Tooltip>
+                                </Box>
+                              </CardContent>
+                            </Card>
                           ))}
-                        </List>
+                        </Stack>
                       ) : (
-                        <Alert severity="info" sx={{ borderRadius: 2 }}>
-                          Bu kullanıcının henüz gönderisi bulunmamaktadır.
-                        </Alert>
+                        <Box sx={{ p: 4, textAlign: 'center', bgcolor: alpha('#f5f5f5', 0.5), borderRadius: 2 }}>
+                          <ImageIcon sx={{ fontSize: 48, color: 'text.secondary', opacity: 0.5, mb: 2 }} />
+                          <Typography variant="body1" color="text.secondary">
+                            Bu kullanıcı henüz forum gönderisi oluşturmamış.
+                          </Typography>
+                        </Box>
                       )}
                     </Paper>
                   </Grid>
@@ -870,93 +898,43 @@ const AdminPanel = () => {
               >
                 <ForumIcon sx={{ mr: 1 }} /> Forum Gönderileri
               </Typography>
-              
-              <Paper 
-                elevation={0}
-                sx={{ 
-                  borderRadius: 2, 
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  border: '1px solid rgba(0,0,0,0.05)'
-                }}
-              >
-                <List sx={{ p: 0 }}>
-                  {posts.map((post) => (
-                    <React.Fragment key={post.id}>
-                      <ListItem
-                        sx={{
-                          transition: 'all 0.2s',
-                          '&:hover': {
-                            bgcolor: alpha('#f5f5f5', 0.5),
-                          },
-                          pl: 3,
-                          pr: 2,
-                          py: 2
-                        }}
-                        secondaryAction={
-                          <Box>
-                            <Tooltip title={post.isVisible ? "Gönderimi Gizle" : "Gönderimi Göster"}>
-                              <IconButton edge="end" onClick={() => handleTogglePostVisibility(post.id, post.isVisible)}>
-                                {post.isVisible ? <VisibilityIcon color="primary" /> : <VisibilityOffIcon color="error" />}
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Gönderiyi Sil">
-                              <IconButton edge="end" onClick={() => handleDeletePost(post.id)}>
-                                <DeleteIcon color="error" />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
+              <List sx={{ 
+                bgcolor: 'background.paper',
+                borderRadius: 2,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                overflow: 'hidden',
+                border: '1px solid rgba(0,0,0,0.05)'
+              }}>
+                {posts.map((post) => (
+                  <React.Fragment key={post.id}>
+                    <ListItem
+                      secondaryAction={
+                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeletePost(post.id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                    >
+                      <ListItemText
+                        primary={post.title}
+                        secondary={
+                          <React.Fragment>
+                            <Typography component="span" variant="body2" color="text.secondary">
+                              Yazar: {post.userName || 'İsimsiz Kullanıcı'} • 
+                            </Typography>
+                            <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                              {post.createdAt && new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
+                            </Typography>
+                            <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                              • {post.commentCount || 0} yorum • {post.likeCount || 0} beğeni
+                            </Typography>
+                          </React.Fragment>
                         }
-                      >
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                                {post.title}
-                              </Typography>
-                              {!post.isVisible && (
-                                <Chip 
-                                  size="small" 
-                                  label="Gizli" 
-                                  color="error" 
-                                  sx={{ ml: 1, fontWeight: 600, fontSize: '0.7rem' }} 
-                                />
-                              )}
-                            </Box>
-                          }
-                          secondary={
-                            <React.Fragment>
-                              <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                                <Avatar 
-                                  src={post.userPhotoURL} 
-                                  alt={post.userName || 'Kullanıcı'}
-                                  sx={{ width: 24, height: 24, mr: 1 }}
-                                >
-                                  {!post.userPhotoURL && (post.userName ? post.userName[0].toUpperCase() : 'U')}
-                                </Avatar>
-                                {post.userName || 'İsimsiz Kullanıcı'} • 
-                                <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 0.5 }}>
-                                  {post.createdAt && new Date(post.createdAt.seconds * 1000).toLocaleDateString()}
-                                </Typography>
-                              </Typography>
-                              
-                              <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                                  <ChatIcon sx={{ fontSize: 16, mr: 0.5 }} /> {post.commentCount || 0} yorum
-                                </Typography>
-                                <Typography variant="body2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <ThumbUpIcon sx={{ fontSize: 16, mr: 0.5 }} /> {post.likeCount || 0} beğeni
-                                </Typography>
-                              </Box>
-                            </React.Fragment>
-                          }
-                        />
-                      </ListItem>
-                      <Divider component="li" />
-                    </React.Fragment>
-                  ))}
-                </List>
-              </Paper>
+                      />
+                    </ListItem>
+                    <Divider component="li" />
+                  </React.Fragment>
+                ))}
+              </List>
             </Box>
           )}
           
@@ -984,7 +962,6 @@ const AdminPanel = () => {
               >
                 <SettingsIcon sx={{ mr: 1 }} /> Sistem Ayarları
               </Typography>
-              
               <Alert 
                 severity="info" 
                 sx={{ 
