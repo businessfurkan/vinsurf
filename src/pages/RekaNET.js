@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -17,12 +17,20 @@ import {
   CircularProgress,
   FormControl,
   InputLabel,
-  Select
+  Select,
+  Paper,
+  useTheme,
+  alpha
 } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LanguageIcon from '@mui/icons-material/Language';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import SchoolIcon from '@mui/icons-material/School';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import ReactConfetti from 'react-confetti';
 import { db } from '../firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
@@ -153,6 +161,33 @@ const RekaNET = () => {
   const [comparisonResult, setComparisonResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+  
+  // Tema renkleri için
+  const theme = useTheme();
+  
+  // Pencere boyutunu takip et
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Konfeti efektini başlat
+  const startConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 5000); // 5 saniye sonra konfeti efektini kapat
+  };
 
   // Adımlar
   const steps = [
@@ -850,89 +885,345 @@ const RekaNET = () => {
                   </Box>
                 </Card>
                 
+                {/* Konfeti efekti */}
+                {showConfetti && (
+                  <ReactConfetti
+                    width={windowSize.width}
+                    height={windowSize.height}
+                    recycle={false}
+                    numberOfPieces={500}
+                    gravity={0.1}
+                    colors={[
+                      '#3F51B5', '#4CAF50', '#FFC107', '#F44336', '#9C27B0', 
+                      '#2196F3', '#FF9800', '#00BCD4', '#E91E63', '#FFEB3B'
+                    ]}
+                  />
+                )}
+                
                 {/* Karşılaştırma sonucu */}
                 {comparisonResult && (
-                  <Card elevation={3} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
-                    <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Typography variant="h6">
-                        RekaNET Sıralamanız
-                      </Typography>
+                  <Card 
+                    elevation={4} 
+                    sx={{ 
+                      mb: 4, 
+                      borderRadius: 3, 
+                      overflow: 'hidden',
+                      boxShadow: '0 8px 24px rgba(63, 81, 181, 0.15)',
+                      position: 'relative',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 12px 28px rgba(63, 81, 181, 0.25)'
+                      }
+                    }}
+                  >
+                    {/* Başlık */}
+                    <Box 
+                      sx={{ 
+                        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                        p: 2.5, 
+                        color: 'white', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between'
+                      }}
+                    >
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <LanguageIcon sx={{ mr: 1, fontSize: 20 }} />
-                        <Typography variant="body2">
+                        <SchoolIcon sx={{ mr: 1.5, fontSize: 24 }} />
+                        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                          RekaNET Sıralamanız
+                        </Typography>
+                      </Box>
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center',
+                          bgcolor: 'rgba(255,255,255,0.15)',
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 4
+                        }}
+                      >
+                        <LanguageIcon sx={{ mr: 1, fontSize: 18 }} />
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
                           {comparisonResult.province}
                         </Typography>
                       </Box>
                     </Box>
-                    <Box sx={{ p: 3 }}>
-                      <Grid container spacing={3} alignItems="center">
+                    
+                    {/* İçerik */}
+                    <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                      <Grid container spacing={4} alignItems="stretch">
+                        {/* Sol Kısım - Sıralama */}
                         <Grid item xs={12} md={7}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                            <EmojiEventsIcon sx={{ fontSize: 48, color: '#FFD700', mr: 2 }} />
-                            <Box>
-                              <Typography variant="h5" sx={{ color: '#3F51B5', fontWeight: 700 }}>
-                                {comparisonResult.rank}. Sırada
-                              </Typography>
-                              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
-                                Toplam {comparisonResult.totalUsers + 1} katılımcı arasında
+                          <Paper 
+                            elevation={0} 
+                            sx={{ 
+                              p: 3, 
+                              height: '100%',
+                              borderRadius: 3,
+                              background: `linear-gradient(135deg, ${alpha(theme.palette.success.light, 0.1)} 0%, ${alpha(theme.palette.primary.light, 0.1)} 100%)`,
+                              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}
+                          >
+                            {/* Sıralama Bilgisi */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                              <Box 
+                                sx={{ 
+                                  bgcolor: '#FFD700', 
+                                  p: 1.5, 
+                                  borderRadius: '50%',
+                                  display: 'flex',
+                                  mr: 2,
+                                  boxShadow: '0 4px 12px rgba(255, 215, 0, 0.3)'
+                                }}
+                              >
+                                <EmojiEventsIcon sx={{ fontSize: 40, color: 'white' }} />
+                              </Box>
+                              <Box>
+                                <Typography 
+                                  variant="h4" 
+                                  sx={{ 
+                                    color: theme.palette.primary.main, 
+                                    fontWeight: 800,
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                  }}
+                                >
+                                  {comparisonResult.rank}. Sırada
+                                </Typography>
+                                <Typography 
+                                  variant="subtitle1" 
+                                  sx={{ 
+                                    color: theme.palette.text.secondary, 
+                                    mt: 0.5,
+                                    display: 'flex',
+                                    alignItems: 'center'
+                                  }}
+                                >
+                                  <BarChartIcon sx={{ mr: 1, fontSize: 18 }} />
+                                  Toplam {comparisonResult.totalUsers + 1} katılımcı arasında
+                                </Typography>
+                              </Box>
+                            </Box>
+                            
+                            {/* Açıklama */}
+                            <Box 
+                              sx={{ 
+                                bgcolor: 'white', 
+                                p: 2.5, 
+                                borderRadius: 2, 
+                                mb: 2,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                flex: 1
+                              }}
+                            >
+                              <Typography variant="body1" sx={{ lineHeight: 1.6 }}>
+                                <strong style={{ color: theme.palette.primary.main }}>YKSTRACKER</strong> sistemimizi kullanan ve <strong>{comparisonResult.province}</strong> ilinde yaşayan diğer <strong>{comparisonResult.totalUsers}</strong> kullanıcımız arasından {comparisonResult.comparisonType === "TYT" ? "TYT" : "TYT+AYT"} netlerinizle bu sıralamayı elde ettiniz.
                               </Typography>
                             </Box>
-                          </Box>
-                          
-                          <Box sx={{ bgcolor: 'rgba(63, 81, 181, 0.08)', p: 2, borderRadius: 2, mb: 2 }}>
-                            <Typography variant="body1">
-                              YKSTRACKER sistemimizi kullanan ve <strong>{comparisonResult.province}</strong> ilinde yaşayan diğer <strong>{comparisonResult.totalUsers}</strong> kullanıcımız arasından {comparisonResult.comparisonType === "TYT" ? "TYT" : "TYT+AYT"} netlerinizle bu sıralamayı elde ettiniz.
-                            </Typography>
-                          </Box>
+                            
+                            {/* Kutla Butonu */}
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              size="large"
+                              startIcon={<CelebrationIcon />}
+                              onClick={startConfetti}
+                              sx={{
+                                py: 1.5,
+                                borderRadius: 2,
+                                fontWeight: 700,
+                                textTransform: 'none',
+                                fontSize: '1rem',
+                                boxShadow: '0 4px 12px rgba(156, 39, 176, 0.3)',
+                                background: `linear-gradient(135deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
+                                '&:hover': {
+                                  boxShadow: '0 6px 16px rgba(156, 39, 176, 0.4)',
+                                  background: `linear-gradient(135deg, ${theme.palette.secondary.dark} 0%, ${theme.palette.secondary.main} 100%)`
+                                }
+                              }}
+                            >
+                              Başarını Kutla!
+                            </Button>
+                          </Paper>
                         </Grid>
                         
+                        {/* Sağ Kısım - Net Bilgileri */}
                         <Grid item xs={12} md={5}>
-                          <Card elevation={2} sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F5F5', height: '100%' }}>
-                            <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
-                              Net Bilgileriniz
-                            </Typography>
+                          <Paper 
+                            elevation={0} 
+                            sx={{ 
+                              height: '100%',
+                              borderRadius: 3,
+                              overflow: 'hidden',
+                              border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
+                            }}
+                          >
+                            {/* Net Bilgileri Başlık */}
+                            <Box 
+                              sx={{ 
+                                bgcolor: alpha(theme.palette.primary.main, 0.9),
+                                p: 2,
+                                color: 'white'
+                              }}
+                            >
+                              <Typography 
+                                variant="h6" 
+                                sx={{ 
+                                  fontWeight: 600,
+                                  display: 'flex',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <TrendingUpIcon sx={{ mr: 1 }} />
+                                Net Bilgileriniz
+                              </Typography>
+                            </Box>
                             
-                            <Grid container spacing={2}>
-                              <Grid item xs={6}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                    TYT Netiniz:
-                                  </Typography>
-                                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#3F51B5' }}>
-                                    {comparisonResult.tytNet}
-                                  </Typography>
-                                </Box>
+                            {/* Net Detayları */}
+                            <Box sx={{ p: 3, bgcolor: 'white' }}>
+                              <Grid container spacing={3}>
+                                {/* TYT Net */}
+                                <Grid item xs={6}>
+                                  <Box 
+                                    sx={{ 
+                                      p: 2,
+                                      borderRadius: 2,
+                                      bgcolor: alpha(theme.palette.primary.main, 0.05),
+                                      height: '100%'
+                                    }}
+                                  >
+                                    <Typography 
+                                      variant="body2" 
+                                      sx={{ 
+                                        color: theme.palette.text.secondary,
+                                        mb: 1,
+                                        fontWeight: 500
+                                      }}
+                                    >
+                                      TYT Netiniz:
+                                    </Typography>
+                                    <Typography 
+                                      variant="h5" 
+                                      sx={{ 
+                                        fontWeight: 700, 
+                                        color: theme.palette.primary.main,
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                      }}
+                                    >
+                                      {comparisonResult.tytNet}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
+                                
+                                {/* AYT Net */}
+                                <Grid item xs={6}>
+                                  <Box 
+                                    sx={{ 
+                                      p: 2,
+                                      borderRadius: 2,
+                                      bgcolor: comparisonResult.comparisonType === "TYT" ? 
+                                        alpha(theme.palette.grey[300], 0.5) : 
+                                        alpha(theme.palette.primary.main, 0.05),
+                                      height: '100%'
+                                    }}
+                                  >
+                                    <Typography 
+                                      variant="body2" 
+                                      sx={{ 
+                                        color: theme.palette.text.secondary,
+                                        mb: 1,
+                                        fontWeight: 500 
+                                      }}
+                                    >
+                                      AYT Netiniz:
+                                    </Typography>
+                                    <Typography 
+                                      variant="h5" 
+                                      sx={{ 
+                                        fontWeight: 700, 
+                                        color: comparisonResult.comparisonType === "TYT" ? 
+                                          theme.palette.text.disabled : 
+                                          theme.palette.primary.main
+                                      }}
+                                    >
+                                      {comparisonResult.aytNet}
+                                    </Typography>
+                                  </Box>
+                                </Grid>
                               </Grid>
                               
-                              <Grid item xs={6}>
-                                <Box sx={{ mb: 2 }}>
-                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                    AYT Netiniz:
-                                  </Typography>
-                                  <Typography variant="h6" sx={{ fontWeight: 600, color: comparisonResult.comparisonType === "TYT" ? 'text.disabled' : '#3F51B5' }}>
-                                    {comparisonResult.aytNet}
-                                  </Typography>
-                                </Box>
-                              </Grid>
-                            </Grid>
-                            
-                            <Divider sx={{ my: 2 }} />
-                            
-                            <Box>
-                              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                Toplam Netiniz:
-                              </Typography>
-                              <Typography variant="h4" sx={{ fontWeight: 700, color: '#3F51B5' }}>
-                                {comparisonResult.userNet}
-                              </Typography>
+                              <Divider sx={{ my: 3 }} />
+                              
+                              {/* Toplam Net */}
+                              <Box 
+                                sx={{ 
+                                  p: 2.5, 
+                                  borderRadius: 2, 
+                                  bgcolor: alpha(theme.palette.success.main, 0.1),
+                                  border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`,
+                                  mb: 3
+                                }}
+                              >
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    color: theme.palette.success.dark,
+                                    mb: 0.5,
+                                    fontWeight: 500 
+                                  }}
+                                >
+                                  Toplam Netiniz:
+                                </Typography>
+                                <Typography 
+                                  variant="h3" 
+                                  sx={{ 
+                                    fontWeight: 800, 
+                                    color: theme.palette.success.dark,
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                                  }}
+                                >
+                                  {comparisonResult.userNet}
+                                </Typography>
+                              </Box>
+                              
+                              {/* En Yüksek Net */}
+                              <Box 
+                                sx={{ 
+                                  p: 2, 
+                                  borderRadius: 2, 
+                                  bgcolor: alpha(theme.palette.warning.main, 0.05),
+                                  border: `1px dashed ${alpha(theme.palette.warning.main, 0.3)}`,
+                                  display: 'flex',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center'
+                                }}
+                              >
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    color: theme.palette.warning.dark,
+                                    fontWeight: 500 
+                                  }}
+                                >
+                                  Sıralamadaki en yüksek net:
+                                </Typography>
+                                <Typography 
+                                  variant="h6" 
+                                  sx={{ 
+                                    fontWeight: 700, 
+                                    color: theme.palette.warning.dark,
+                                    ml: 1
+                                  }}
+                                >
+                                  {comparisonResult.highestNet}
+                                </Typography>
+                              </Box>
                             </Box>
-                            
-                            <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed #E0E0E0' }}>
-                              <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
-                                <span>Sıralamadaki en yüksek net:</span> <strong>{comparisonResult.highestNet}</strong>
-                              </Typography>
-                            </Box>
-                          </Card>
+                          </Paper>
                         </Grid>
                       </Grid>
                     </Box>
