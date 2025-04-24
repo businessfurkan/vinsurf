@@ -90,7 +90,7 @@ const Sidebar = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   
   // Admin panel secret access variables
-  const [clickCount, setClickCount] = useState(0);
+  const [, setClickCount] = useState(0); // Sadece setter'ı kullanıyoruz
   const clickTimerRef = useRef(null);
   const ADMIN_URL = '/admin-x1f9wz'; // Secret admin URL
 
