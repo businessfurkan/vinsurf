@@ -111,13 +111,21 @@ const RekaNET = () => {
   
   // TYT net hesaplama
   const calculateTYTNet = (subject) => {
-    const { correct, wrong } = formData.tytScores[subject];
+    // Undefined kontrolü ekliyoruz
+    if (!formData.tytScores[subject]) return "0.00";
+    
+    const correct = Number(formData.tytScores[subject].correct || 0);
+    const wrong = Number(formData.tytScores[subject].wrong || 0);
     return Math.max(0, correct - (wrong * 0.25)).toFixed(2);
   };
   
   // AYT net hesaplama
   const calculateAYTNet = (subject) => {
-    const { correct, wrong } = formData.aytScores[subject];
+    // Undefined kontrolü ekliyoruz
+    if (!formData.aytScores[subject]) return "0.00";
+    
+    const correct = Number(formData.aytScores[subject].correct || 0);
+    const wrong = Number(formData.aytScores[subject].wrong || 0);
     return Math.max(0, correct - (wrong * 0.25)).toFixed(2);
   };
   
@@ -845,35 +853,83 @@ const RekaNET = () => {
                 {/* Karşılaştırma sonucu */}
                 {comparisonResult && (
                   <Card elevation={3} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
-                    <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white' }}>
+                    <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <Typography variant="h6">
                         RekaNET Sıralamanız
                       </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <LanguageIcon sx={{ mr: 1, fontSize: 20 }} />
+                        <Typography variant="body2">
+                          {comparisonResult.province}
+                        </Typography>
+                      </Box>
                     </Box>
                     <Box sx={{ p: 3 }}>
-                      <Grid container spacing={2} alignItems="center">
-                        <Grid item xs={12} md={8}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <EmojiEventsIcon sx={{ fontSize: 40, color: '#FFD700', mr: 2 }} />
-                            <Typography variant="h6" sx={{ color: '#3F51B5', fontWeight: 600 }}>
-                              {comparisonResult.rank}. sıradasınız!
+                      <Grid container spacing={3} alignItems="center">
+                        <Grid item xs={12} md={7}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                            <EmojiEventsIcon sx={{ fontSize: 48, color: '#FFD700', mr: 2 }} />
+                            <Box>
+                              <Typography variant="h5" sx={{ color: '#3F51B5', fontWeight: 700 }}>
+                                {comparisonResult.rank}. Sırada
+                              </Typography>
+                              <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                                Toplam {comparisonResult.totalUsers + 1} katılımcı arasında
+                              </Typography>
+                            </Box>
+                          </Box>
+                          
+                          <Box sx={{ bgcolor: 'rgba(63, 81, 181, 0.08)', p: 2, borderRadius: 2, mb: 2 }}>
+                            <Typography variant="body1">
+                              YKSTRACKER sistemimizi kullanan ve <strong>{comparisonResult.province}</strong> ilinde yaşayan diğer <strong>{comparisonResult.totalUsers}</strong> kullanıcımız arasından {comparisonResult.comparisonType === "TYT" ? "TYT" : "TYT+AYT"} netlerinizle bu sıralamayı elde ettiniz.
                             </Typography>
                           </Box>
-                          <Typography variant="body1">
-                            YKSTRACKER sistemimizi kullanan ve <strong>{comparisonResult.province}</strong> ilinde yaşayan diğer <strong>{comparisonResult.totalUsers}</strong> kullanıcımız arasından {comparisonResult.comparisonType === "TYT" ? "TYT" : "TYT+AYT"} netlerinizle bu sıralamayı elde ettiniz.
-                          </Typography>
                         </Grid>
-                        <Grid item xs={12} md={4}>
-                          <Card elevation={1} sx={{ p: 2, bgcolor: '#F5F5F5', borderRadius: 2 }}>
-                            <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
-                              Toplam Netiniz:
+                        
+                        <Grid item xs={12} md={5}>
+                          <Card elevation={2} sx={{ p: 2, borderRadius: 2, bgcolor: '#F5F5F5', height: '100%' }}>
+                            <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                              Net Bilgileriniz
                             </Typography>
-                            <Typography variant="h4" sx={{ fontWeight: 700, color: '#3F51B5' }}>
-                              {comparisonResult.userNet}
-                            </Typography>
-                            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #E0E0E0' }}>
+                            
+                            <Grid container spacing={2}>
+                              <Grid item xs={6}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                    TYT Netiniz:
+                                  </Typography>
+                                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#3F51B5' }}>
+                                    {comparisonResult.tytNet}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={6}>
+                                <Box sx={{ mb: 2 }}>
+                                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                    AYT Netiniz:
+                                  </Typography>
+                                  <Typography variant="h6" sx={{ fontWeight: 600, color: comparisonResult.comparisonType === "TYT" ? 'text.disabled' : '#3F51B5' }}>
+                                    {comparisonResult.aytNet}
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                            </Grid>
+                            
+                            <Divider sx={{ my: 2 }} />
+                            
+                            <Box>
                               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                Sıralamadaki en yüksek net: <strong>{comparisonResult.highestNet}</strong>
+                                Toplam Netiniz:
+                              </Typography>
+                              <Typography variant="h4" sx={{ fontWeight: 700, color: '#3F51B5' }}>
+                                {comparisonResult.userNet}
+                              </Typography>
+                            </Box>
+                            
+                            <Box sx={{ mt: 2, pt: 2, borderTop: '1px dashed #E0E0E0' }}>
+                              <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Sıralamadaki en yüksek net:</span> <strong>{comparisonResult.highestNet}</strong>
                               </Typography>
                             </Box>
                           </Card>
@@ -950,63 +1006,105 @@ const RekaNET = () => {
                         setComparisonResult(null);
                         
                         try {
-                          // Seçilen ildeki diğer kullanıcıların verilerini çek
-                          const q = query(collection(db, "rekanet_scores"), where("province", "==", formData.province));
-                          const querySnapshot = await getDocs(q);
-                          
-                          if (querySnapshot.empty) {
-                            setError(`${formData.province} ilinde henüz net bilgisi girilmemiş.`);
+                          // İl seçilip seçilmediğini kontrol et
+                          if (!formData.province) {
+                            setError("Lütfen önce bir il seçiniz.");
                             setLoading(false);
                             return;
                           }
                           
-                          // Kullanıcının AYT netleri girip girmediğini kontrol et
-                          const hasAYTScores = Object.values(formData.aytScores).some(score => 
-                            parseInt(score.correct) > 0 || parseInt(score.wrong) > 0
-                          );
-                          
-                          // Kullanıcı netleri
-                          const userTYTNet = parseFloat(calculateTotalTYTNet());
-                          const userAYTNet = hasAYTScores ? parseFloat(calculateTotalAYTNet()) : 0;
-                          
-                          // Karşılaştırma türünü belirle
-                          const comparisonType = hasAYTScores ? "TYT+AYT" : "TYT";
-                          
-                          // Tüm kullanıcıların netlerini topla
-                          const allScores = [];
-                          querySnapshot.forEach((doc) => {
-                            const data = doc.data();
-                            let totalNet;
+                          // Seçilen ildeki diğer kullanıcıların verilerini çek
+                          try {
+                            const q = query(collection(db, "rekanet_scores"), where("province", "==", formData.province));
+                            const querySnapshot = await getDocs(q);
                             
-                            if (comparisonType === "TYT") {
-                              // Sadece TYT karşılaştırması yapılıyorsa
-                              totalNet = parseFloat(data.totalTYTNet);
-                            } else {
-                              // TYT+AYT karşılaştırması yapılıyorsa
-                              totalNet = parseFloat(data.totalTYTNet) + 
-                                       (data.totalAYTNet ? parseFloat(data.totalAYTNet) : 0);
+                            // Veri yoksa uyarı göster
+                            if (querySnapshot.empty) {
+                              setError(`${formData.province} ilinde henüz net bilgisi girilmemiş. İlk kaydeden siz olabilirsiniz!`);
+                              setLoading(false);
+                              return;
                             }
                             
-                            allScores.push(totalNet);
-                          });
-                          
-                          // Kullanıcının toplam neti
-                          const userTotalNet = comparisonType === "TYT" ? userTYTNet : (userTYTNet + userAYTNet);
-                          
-                          // Kullanıcının sıralamasını bul
-                          allScores.push(userTotalNet);
-                          allScores.sort((a, b) => b - a); // Büyükten küçüğe sırala
-                          const userRank = allScores.indexOf(userTotalNet) + 1;
-                          
-                          // Sonucu göster - Daha detaylı bir obje olarak gönderelim
-                          setComparisonResult({
-                            province: formData.province,
-                            totalUsers: allScores.length - 1,
-                            rank: userRank,
-                            userNet: userTotalNet.toFixed(2),
-                            highestNet: allScores[0].toFixed(2),
-                            comparisonType: comparisonType
-                          });
+                            // Kullanıcının AYT netleri girip girmediğini kontrol et
+                            const hasAYTScores = Object.values(formData.aytScores).some(score => 
+                              parseInt(score.correct) > 0 || parseInt(score.wrong) > 0
+                            );
+                            
+                            // Kullanıcı netleri
+                            const userTYTNet = parseFloat(calculateTotalTYTNet());
+                            const userAYTNet = hasAYTScores ? parseFloat(calculateTotalAYTNet()) : 0;
+                            
+                            // Karşılaştırma türünü belirle
+                            const comparisonType = hasAYTScores ? "TYT+AYT" : "TYT";
+                            
+                            // Tüm kullanıcıların netlerini topla
+                            const allScores = [];
+                            const allUserData = [];
+                            
+                            querySnapshot.forEach((doc) => {
+                              const data = doc.data();
+                              
+                              // Veri doğrulama
+                              if (!data.totalTYTNet) {
+                                return; // Geçersiz veriyi atla
+                              }
+                              
+                              let totalNet;
+                              
+                              if (comparisonType === "TYT") {
+                                // Sadece TYT karşılaştırması yapılıyorsa
+                                totalNet = parseFloat(data.totalTYTNet || 0);
+                              } else {
+                                // TYT+AYT karşılaştırması yapılıyorsa
+                                totalNet = parseFloat(data.totalTYTNet || 0) + 
+                                         (data.totalAYTNet ? parseFloat(data.totalAYTNet) : 0);
+                              }
+                              
+                              // Geçerli bir sayı mı kontrol et
+                              if (!isNaN(totalNet)) {
+                                allScores.push(totalNet);
+                                allUserData.push({
+                                  id: doc.id,
+                                  totalNet: totalNet,
+                                  tytNet: parseFloat(data.totalTYTNet || 0),
+                                  aytNet: data.totalAYTNet ? parseFloat(data.totalAYTNet) : 0,
+                                  timestamp: data.timestamp ? data.timestamp.toDate() : new Date()
+                                });
+                              }
+                            });
+                            
+                            // Veri yoksa uyarı göster
+                            if (allScores.length === 0) {
+                              setError(`${formData.province} ilinde geçerli net bilgisi bulunamadı.`);
+                              setLoading(false);
+                              return;
+                            }
+                            
+                            // Kullanıcının toplam neti
+                            const userTotalNet = comparisonType === "TYT" ? userTYTNet : (userTYTNet + userAYTNet);
+                            
+                            // Kullanıcının sıralamasını bul
+                            allScores.push(userTotalNet);
+                            const sortedScores = [...allScores].sort((a, b) => b - a); // Büyükten küçüğe sırala
+                            const userRank = sortedScores.indexOf(userTotalNet) + 1;
+                            
+                            // Sonucu göster
+                            setComparisonResult({
+                              province: formData.province,
+                              totalUsers: allScores.length - 1,
+                              rank: userRank,
+                              userNet: userTotalNet.toFixed(2),
+                              highestNet: sortedScores[0].toFixed(2),
+                              comparisonType: comparisonType,
+                              tytNet: userTYTNet.toFixed(2),
+                              aytNet: hasAYTScores ? userAYTNet.toFixed(2) : "0.00"
+                            });
+                          } catch (firestoreError) {
+                            console.error("Firestore error: ", firestoreError);
+                            setError(`Veritabanı sorgusu sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.`);
+                            setLoading(false);
+                            return;
+                          }
                         } catch (error) {
                           console.error("Error comparing scores: ", error);
                           setError("Karşılaştırma yapılırken bir hata oluştu.");
