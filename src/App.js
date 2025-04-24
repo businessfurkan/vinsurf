@@ -24,6 +24,7 @@ import KacGunKaldi from './pages/KacGunKaldi';
 import KonuTakip from './pages/KonuTakip';
 import SoruForum from './pages/SoruForum';
 import SoruForumDetail from './pages/SoruForumDetail';
+import BenimleCalis from './pages/BenimleCalis';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
@@ -140,6 +141,7 @@ const App = () => {
                 <Route path="/konu-takip" element={<ProtectedRoute><KonuTakip /></ProtectedRoute>} />
                 <Route path="/soru-forum" element={<ProtectedRoute><SoruForum /></ProtectedRoute>} />
                 <Route path="/soru-forum/:postId" element={<ProtectedRoute><SoruForumDetail /></ProtectedRoute>} />
+                <Route path="/benimle-calis" element={<ProtectedRoute><BenimleCalis /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/admin-panel" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                 <Route path="/check-admin" element={<ProtectedRoute><CheckAdminStatus /></ProtectedRoute>} />

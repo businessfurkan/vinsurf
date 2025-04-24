@@ -42,7 +42,7 @@ import {
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
-import { collection, query, orderBy, getDocs, doc, where, deleteDoc, updateDoc, limit } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, doc, where, deleteDoc, updateDoc, limit, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const AdminPanel = () => {
@@ -63,6 +63,8 @@ const AdminPanel = () => {
     totalComments: 0,
     activeUsers: 0
   });
+  const [liveStreamLink, setLiveStreamLink] = useState('');
+  const [isLiveStreamLinkUpdating, setIsLiveStreamLinkUpdating] = useState(false);
   const navigate = useNavigate();
 
   // Check if user is admin
@@ -92,6 +94,7 @@ const AdminPanel = () => {
     if (isAdmin) {
       if (tabValue === 0) {
         fetchDashboardStats();
+        fetchLiveStreamLink();
       } else if (tabValue === 1) {
         fetchUsers();
       } else if (tabValue === 2) {
@@ -99,6 +102,42 @@ const AdminPanel = () => {
       }
     }
   }, [tabValue, isAdmin]);
+  
+  // Fetch live stream link
+  const fetchLiveStreamLink = async () => {
+    try {
+      const docRef = doc(db, 'appSettings', 'liveStream');
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        setLiveStreamLink(docSnap.data().youtubeLink || '');
+      }
+    } catch (error) {
+      console.error('Error fetching live stream link:', error);
+    }
+  };
+  
+  // Update live stream link
+  const updateLiveStreamLink = async () => {
+    if (!liveStreamLink.trim()) return;
+    
+    setIsLiveStreamLinkUpdating(true);
+    
+    try {
+      const docRef = doc(db, 'appSettings', 'liveStream');
+      await setDoc(docRef, { 
+        youtubeLink: liveStreamLink,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      alert('Canlı yayın linki başarıyla güncellendi!');
+    } catch (error) {
+      console.error('Error updating live stream link:', error);
+      alert('Canlı yayın linki güncellenirken bir hata oluştu!');
+    } finally {
+      setIsLiveStreamLinkUpdating(false);
+    }
+  };
 
   // Fetch dashboard stats
   const fetchDashboardStats = async () => {
@@ -1426,6 +1465,39 @@ const AdminPanel = () => {
                         >
                           Aktif
                         </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+                        <ListItemText 
+                          primary="Canlı Yayın Linki"
+                          secondary="Benimle Çalış sayfasında gösterilecek YouTube canlı yayın linki"
+                          sx={{ mb: 2 }}
+                        />
+                        <Box sx={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          <TextField
+                            fullWidth
+                            variant="outlined"
+                            placeholder="YouTube canlı yayın linkini girin"
+                            value={liveStreamLink}
+                            onChange={(e) => setLiveStreamLink(e.target.value)}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2
+                              }
+                            }}
+                          />
+                          <Button 
+                            variant="contained" 
+                            color="primary"
+                            sx={{ borderRadius: 2, alignSelf: 'flex-end' }}
+                            onClick={updateLiveStreamLink}
+                            disabled={isLiveStreamLinkUpdating || !liveStreamLink.trim()}
+                          >
+                            {isLiveStreamLinkUpdating ? 'Güncelleniyor...' : 'Güncelle'}
+                          </Button>
+                        </Box>
                       </ListItem>
                     </List>
                   </Paper>
