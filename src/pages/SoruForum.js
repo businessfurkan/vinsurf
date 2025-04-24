@@ -5,14 +5,9 @@ import {
   Paper,
   Button,
   TextField,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActions,
   Avatar,
   Chip,
   IconButton,
-  Divider,
   CircularProgress,
   LinearProgress,
   Dialog,
@@ -51,14 +46,9 @@ import {
   getDocs, 
   doc, 
   getDoc, 
-  updateDoc, 
   query, 
   orderBy, 
   serverTimestamp,
-
-  increment,
-  arrayUnion,
-  arrayRemove,
   limit
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -67,18 +57,7 @@ import { useNavigate } from 'react-router-dom';
 import { formatDistance } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
-// Styled components
-const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: '12px',
-  overflow: 'hidden',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 10px 20px rgba(0,0,0,0.1)',
-  },
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-  background: '#FFFFFF',
-}));
+
 
 const StyledChip = styled(Chip)(({ theme }) => ({
   borderRadius: '20px',
@@ -377,61 +356,7 @@ const SoruForum = () => {
     navigate(`/soru-forum/${postId}`);
   };
 
-  // Handle liking a post
-  const handleLikePost = async (postId) => {
-    if (!user) {
-      showNotification('Beğenmek için giriş yapmalısınız', 'warning');
-      return;
-    }
-    
-    try {
-      const postRef = doc(db, 'forumPosts', postId);
-      const postDoc = await getDoc(postRef);
-      
-      if (!postDoc.exists()) {
-        showNotification('Gönderi bulunamadı', 'error');
-        return;
-      }
-      
-      const postData = postDoc.data();
-      const isLiked = postData.likedBy && postData.likedBy.includes(user.uid);
-      
-      if (isLiked) {
-        // Unlike
-        await updateDoc(postRef, {
-          likeCount: increment(-1),
-          likedBy: arrayRemove(user.uid)
-        });
-      } else {
-        // Like
-        await updateDoc(postRef, {
-          likeCount: increment(1),
-          likedBy: arrayUnion(user.uid)
-        });
-      }
-      
-      // Update local state
-      setPosts(prevPosts => 
-        prevPosts.map(post => {
-          if (post.id === postId) {
-            const newLikedBy = isLiked
-              ? post.likedBy.filter(id => id !== user.uid)
-              : [...(post.likedBy || []), user.uid];
-            
-            return {
-              ...post,
-              likeCount: isLiked ? (post.likeCount - 1) : (post.likeCount + 1),
-              likedBy: newLikedBy
-            };
-          }
-          return post;
-        })
-      );
-    } catch (error) {
-      console.error('Error liking post:', error);
-      showNotification('İşlem sırasında bir hata oluştu', 'error');
-    }
-  };
+
 
   // Format date for display
   const formatDate = (date) => {
@@ -628,7 +553,7 @@ const SoruForum = () => {
                       fontSize="small" 
                       sx={{ 
                         mr: 0.5, 
-                        color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
+                        color: 'text.secondary',
                         opacity: 0.7,
                         fontSize: '0.9rem'
                       }} 

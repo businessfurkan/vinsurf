@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import {
   AppBar,
@@ -31,7 +31,8 @@ import InfoIcon from '@mui/icons-material/Info';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: '#FFFFF0',
@@ -69,19 +70,68 @@ const Header = ({ handleDrawerToggle }) => {
   const [userPhotoURL, setUserPhotoURL] = useState(null);
   const [userName, setUserName] = useState('');
   
+  // Admin panel secret access variables
+  const [, setClickCount] = useState(0); // Only need the setter
+  const [isAdmin, setIsAdmin] = useState(false);
+  const clickTimerRef = useRef(null);
+  const ADMIN_URL = '/admin-x1f9wz'; // Secret admin URL
+  
   // Bildirim sistemini kullan
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUserPhotoURL(user.photoURL);
         setUserName(user.displayName || user.email?.split('@')[0] || 'Kullanıcı');
+        
+        // Check if user is admin
+        try {
+          const userDoc = await getDoc(doc(db, 'userProfiles', user.uid));
+          if (userDoc.exists() && userDoc.data().role === 'admin') {
+            setIsAdmin(true);
+          } else {
+            setIsAdmin(false);
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+          setIsAdmin(false);
+        }
       }
     });
     
     return () => unsubscribe();
   }, []);
+  
+  // Handle secret admin access with 7 clicks in 3 seconds
+  const handleSecretAdminAccess = () => {
+    // Increment click count
+    setClickCount(prevCount => {
+      const newCount = prevCount + 1;
+      
+      // Clear existing timer
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+      
+      // Set timer to reset click count after 3 seconds
+      clickTimerRef.current = setTimeout(() => {
+        setClickCount(0);
+      }, 3000);
+      
+      // Check if we've reached 7 clicks and user is admin
+      if (newCount >= 7 && isAdmin) {
+        // Navigate to admin panel
+        navigate(ADMIN_URL);
+        return 0; // Reset count after successful navigation
+      }
+      
+      // For debugging
+      console.log(`Click count: ${newCount}`);
+      
+      return newCount;
+    });
+  };
   
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -271,7 +321,10 @@ const Header = ({ handleDrawerToggle }) => {
           <Tooltip title={userName || "Profil"}>
             <Box sx={{ ml: 1.5 }}>
               <ProfileAvatar 
-                onClick={handleMenuClick} 
+                onClick={(e) => {
+                  handleSecretAdminAccess();
+                  handleMenuClick(e);
+                }} 
                 src={userPhotoURL}
                 sx={{ bgcolor: userPhotoURL ? 'transparent' : theme.palette.primary.main }}
               >

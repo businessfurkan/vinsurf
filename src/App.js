@@ -27,6 +27,7 @@ import SoruForum from './pages/SoruForum';
 import SoruForumDetail from './pages/SoruForumDetail';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
+import AdminPanel from './pages/AdminPanel';
 
 // Theme
 import theme from './theme';
@@ -141,6 +142,7 @@ const App = () => {
                 <Route path="/soru-forum" element={<ProtectedRoute><SoruForum /></ProtectedRoute>} />
                 <Route path="/soru-forum/:postId" element={<ProtectedRoute><SoruForumDetail /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/admin-x1f9wz" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Box>
