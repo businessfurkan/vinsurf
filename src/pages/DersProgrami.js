@@ -903,28 +903,6 @@ const DersProgrami = () => {
                                 <SchoolIcon sx={{ mr: 1, fontSize: '1.1rem' }} />
                                 {classItem.subject || 'Belirtilmemiş'}
                               </Typography>
-                              <Box>
-                                <IconButton 
-                                  size="small" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleStartEdit(day, classItem);
-                                  }}
-                                  sx={{ mr: 0.5 }}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                                <IconButton 
-                                  size="small" 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteClass(day, classItem.id);
-                                  }}
-                                  color="error"
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </Box>
                             </Box>
                             {classItem.time && (
                               <Typography 
