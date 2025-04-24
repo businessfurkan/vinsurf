@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,10 +16,6 @@ import {
   CircularProgress,
   Menu,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Alert,
   Snackbar,
   styled,
@@ -27,7 +23,7 @@ import {
   Breadcrumbs
 } from '@mui/material';
 import {
-  AddPhotoAlternate as AddPhotoIcon,
+
   Send as SendIcon,
   ThumbUp as ThumbUpIcon,
   Comment as CommentIcon,
@@ -35,12 +31,11 @@ import {
   Reply as ReplyIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  Close as CloseIcon,
   ArrowBack as ArrowBackIcon,
   LocalOffer as TagIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, firestore } from '../firebase';
+import { auth, db } from '../firebase';
 import { 
   collection, 
   addDoc, 
@@ -53,15 +48,15 @@ import {
   where, 
   orderBy, 
   serverTimestamp,
-  Timestamp,
+
   increment,
   arrayUnion,
   arrayRemove
 } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../firebase';
+
+
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { format, formatDistance } from 'date-fns';
+import { formatDistance } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 // Styled components
@@ -144,18 +139,10 @@ const SoruForumDetail = () => {
     severity: 'success'
   });
   
-  // Load post and comments on component mount
-  useEffect(() => {
-    if (postId) {
-      fetchPost();
-      fetchComments();
-    }
-  }, [postId]);
-
   // Fetch post from Firestore
   const fetchPost = async () => {
     try {
-      const postDoc = await getDoc(doc(firestore, 'forumPosts', postId));
+      const postDoc = await getDoc(doc(db, 'forumPosts', postId));
       
       if (!postDoc.exists()) {
         showNotification('Gönderi bulunamadı', 'error');
@@ -172,7 +159,7 @@ const SoruForumDetail = () => {
       
       // Get user info
       if (postData.userId) {
-        const userDoc = await getDoc(doc(firestore, 'users', postData.userId));
+        const userDoc = await getDoc(doc(db, 'users', postData.userId));
         if (userDoc.exists()) {
           postData.userInfo = userDoc.data();
         }
@@ -191,7 +178,7 @@ const SoruForumDetail = () => {
   const fetchComments = async () => {
     try {
       const commentsQuery = query(
-        collection(firestore, 'forumComments'),
+        collection(db, 'forumComments'),
         where('postId', '==', postId),
         orderBy('createdAt', 'asc')
       );
@@ -209,7 +196,7 @@ const SoruForumDetail = () => {
         
         // Get user info
         if (commentData.userId) {
-          const userDoc = await getDoc(doc(firestore, 'users', commentData.userId));
+          const userDoc = await getDoc(doc(db, 'users', commentData.userId));
           if (userDoc.exists()) {
             commentData.userInfo = userDoc.data();
           }
@@ -259,6 +246,14 @@ const SoruForumDetail = () => {
     return rootComments;
   };
 
+  // Load post and comments on component mount
+  useEffect(() => {
+    if (postId) {
+      fetchPost();
+      fetchComments();
+    }
+  }, [postId]);
+
   // Handle adding a new comment
   const handleAddComment = async () => {
     if (!user) {
@@ -285,10 +280,10 @@ const SoruForumDetail = () => {
         likedBy: []
       };
       
-      await addDoc(collection(firestore, 'forumComments'), commentData);
+      await addDoc(collection(db, 'forumComments'), commentData);
       
       // Update post comment count
-      const postRef = doc(firestore, 'forumPosts', postId);
+      const postRef = doc(db, 'forumPosts', postId);
       await updateDoc(postRef, {
         commentCount: increment(1)
       });
@@ -330,10 +325,10 @@ const SoruForumDetail = () => {
         likedBy: []
       };
       
-      await addDoc(collection(firestore, 'forumComments'), replyData);
+      await addDoc(collection(db, 'forumComments'), replyData);
       
       // Update post comment count
-      const postRef = doc(firestore, 'forumPosts', postId);
+      const postRef = doc(db, 'forumPosts', postId);
       await updateDoc(postRef, {
         commentCount: increment(1)
       });
@@ -361,7 +356,7 @@ const SoruForumDetail = () => {
     }
     
     try {
-      const commentRef = doc(firestore, 'forumComments', editingComment.id);
+      const commentRef = doc(db, 'forumComments', editingComment.id);
       
       await updateDoc(commentRef, {
         content: editText.trim(),
@@ -386,10 +381,10 @@ const SoruForumDetail = () => {
     }
     
     try {
-      await deleteDoc(doc(firestore, 'forumComments', commentId));
+      await deleteDoc(doc(db, 'forumComments', commentId));
       
       // Update post comment count
-      const postRef = doc(firestore, 'forumPosts', postId);
+      const postRef = doc(db, 'forumPosts', postId);
       await updateDoc(postRef, {
         commentCount: increment(-1)
       });
@@ -411,7 +406,7 @@ const SoruForumDetail = () => {
     }
     
     try {
-      const commentRef = doc(firestore, 'forumComments', commentId);
+      const commentRef = doc(db, 'forumComments', commentId);
       const commentDoc = await getDoc(commentRef);
       
       if (!commentDoc.exists()) {
@@ -451,7 +446,7 @@ const SoruForumDetail = () => {
     }
     
     try {
-      const postRef = doc(firestore, 'forumPosts', postId);
+      const postRef = doc(db, 'forumPosts', postId);
       const isLiked = post.likedBy && post.likedBy.includes(user.uid);
       
       if (isLiked) {

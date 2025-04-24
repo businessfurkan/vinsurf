@@ -14,8 +14,7 @@ import {
   IconButton,
   Divider,
   CircularProgress,
-  Menu,
-  MenuItem,
+  LinearProgress,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -23,7 +22,6 @@ import {
   InputAdornment,
   Tabs,
   Tab,
-  Badge,
   Alert,
   Snackbar,
   styled,
@@ -34,19 +32,19 @@ import {
   Send as SendIcon,
   ThumbUp as ThumbUpIcon,
   Comment as CommentIcon,
-  MoreVert as MoreVertIcon,
+
   Search as SearchIcon,
-  Sort as SortIcon,
+
   LocalOffer as TagIcon,
-  ArrowUpward as ArrowUpwardIcon,
+
   ArrowDownward as ArrowDownwardIcon,
-  Reply as ReplyIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
+
+
+
   Close as CloseIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, firestore } from '../firebase';
+import { auth, db } from '../firebase';
 import { 
   collection, 
   addDoc, 
@@ -54,12 +52,10 @@ import {
   doc, 
   getDoc, 
   updateDoc, 
-  deleteDoc, 
   query, 
-  where, 
   orderBy, 
   serverTimestamp,
-  Timestamp,
+
   increment,
   arrayUnion,
   arrayRemove,
@@ -67,8 +63,8 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { format, formatDistance } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import { formatDistance } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 // Styled components
@@ -153,11 +149,6 @@ const SoruForum = () => {
   // Refs
   const fileInputRef = useRef(null);
 
-  // Load posts on component mount
-  useEffect(() => {
-    fetchPosts();
-  }, [tabValue]);
-
   // Fetch posts from Firestore
   const fetchPosts = async () => {
     setLoading(true);
@@ -166,13 +157,13 @@ const SoruForum = () => {
       
       if (tabValue === 0) { // En yeni
         postsQuery = query(
-          collection(firestore, 'forumPosts'),
+          collection(db, 'forumPosts'),
           orderBy('createdAt', 'desc'),
           limit(20)
         );
       } else { // En popüler
         postsQuery = query(
-          collection(firestore, 'forumPosts'),
+          collection(db, 'forumPosts'),
           orderBy('likeCount', 'desc'),
           limit(20)
         );
@@ -186,7 +177,7 @@ const SoruForum = () => {
         
         // Get user info
         if (postData.userId) {
-          const userDoc = await getDoc(doc(firestore, 'users', postData.userId));
+          const userDoc = await getDoc(doc(db, 'users', postData.userId));
           if (userDoc.exists()) {
             postData.userInfo = userDoc.data();
           }
@@ -208,6 +199,11 @@ const SoruForum = () => {
       setLoading(false);
     }
   };
+
+  // Load posts on component mount
+  useEffect(() => {
+    fetchPosts();
+  }, [tabValue]);
 
   // Handle tab change
   const handleTabChange = (event, newValue) => {
@@ -344,7 +340,7 @@ const SoruForum = () => {
         likedBy: []
       };
       
-      await addDoc(collection(firestore, 'forumPosts'), postData);
+      await addDoc(collection(db, 'forumPosts'), postData);
       
       showNotification('Gönderi başarıyla oluşturuldu', 'success');
       handleClosePostDialog();
@@ -387,7 +383,7 @@ const SoruForum = () => {
     }
     
     try {
-      const postRef = doc(firestore, 'forumPosts', postId);
+      const postRef = doc(db, 'forumPosts', postId);
       const postDoc = await getDoc(postRef);
       
       if (!postDoc.exists()) {
@@ -561,7 +557,7 @@ const SoruForum = () => {
             Henüz gönderi bulunmuyor
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-            İlk gönderiyi oluşturmak için "Yeni Soru Sor" butonuna tıklayın
+            İlk gönderiyi oluşturmak için &quot;Yeni Soru Sor&quot; butonuna tıklayın
           </Typography>
           <StyledButton
             variant="contained"
