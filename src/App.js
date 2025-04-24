@@ -23,6 +23,8 @@ import Analiz from './pages/Analiz';
 import NotDefterim from './pages/NotDefterim';
 import KacGunKaldi from './pages/KacGunKaldi';
 import KonuTakip from './pages/KonuTakip';
+import SoruForum from './pages/SoruForum';
+import SoruForumDetail from './pages/SoruForumDetail';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 
@@ -136,6 +138,8 @@ const App = () => {
                 <Route path="/not-defterim" element={<ProtectedRoute><NotDefterim /></ProtectedRoute>} />
                 <Route path="/kac-gun-kaldi" element={<ProtectedRoute><KacGunKaldi /></ProtectedRoute>} />
                 <Route path="/konu-takip" element={<ProtectedRoute><KonuTakip /></ProtectedRoute>} />
+                <Route path="/soru-forum" element={<ProtectedRoute><SoruForum /></ProtectedRoute>} />
+                <Route path="/soru-forum/:postId" element={<ProtectedRoute><SoruForumDetail /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

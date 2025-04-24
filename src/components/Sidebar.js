@@ -102,6 +102,7 @@ const Sidebar = () => {
     { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Mor
     { text: 'Kaç Gün Kaldı', icon: <HourglassEmptyIcon />, path: '/kac-gun-kaldi', color: '#E91E63' }, // Pembe
     { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#4CAF50' }, // Yeşil
+    { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#FF5722' }, // Turuncu-Kırmızı
     // Teneffüs sekmesi kaldırıldı.
   ];
 
