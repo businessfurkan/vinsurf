@@ -10,7 +10,10 @@ import {
   Tooltip,
   Zoom,
   Fade,
-  Slide
+  Slide,
+  TextField,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import HandshakeIcon from '@mui/icons-material/Handshake';
@@ -29,6 +32,8 @@ const BenimleCalis = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [studyPlan, setStudyPlan] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   // Fetch live stream link from Firestore
   useEffect(() => {
@@ -95,7 +100,7 @@ const BenimleCalis = () => {
 
   return (
     <Box sx={{ 
-      p: { xs: 2, md: 4 }, 
+      p: { xs: 2, sm: 3, md: 4 }, 
       maxWidth: 1200, 
       mx: 'auto',
       minHeight: '90vh',
@@ -103,6 +108,22 @@ const BenimleCalis = () => {
       overflow: 'hidden',
       backgroundImage: 'radial-gradient(circle at 10% 20%, rgba(142, 36, 170, 0.05) 0%, rgba(142, 36, 170, 0.02) 90%)'
     }}>
+      {/* Snackbar notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbarOpen(false)} 
+          severity="success" 
+          sx={{ width: '100%', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}
+        >
+          Çalışma planınız kaydedildi!
+        </Alert>
+      </Snackbar>
+
       {/* Animated background elements */}
       <Box sx={{ 
         position: 'absolute', 
@@ -327,6 +348,57 @@ const BenimleCalis = () => {
             <Typography variant="body1" sx={{ mb: 3, color: '#424242' }}>
               Canlı yayınlarımızda birlikte çalışarak verimli ders çalışma alışkanlıkları kazanabilirsiniz. Aşağıdaki özelliklerden yararlanabilirsiniz:
             </Typography>
+
+            {/* Ders çalışma planı giriş alanı */}
+            <Box sx={{ 
+              mb: 3, 
+              p: 2, 
+              borderRadius: 2, 
+              backgroundColor: 'rgba(142, 36, 170, 0.05)',
+              border: '1px solid rgba(142, 36, 170, 0.1)'
+            }}>
+              <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600, color: '#2e3856' }}>
+                Bugün hangi derslere çalışacaksınız?
+              </Typography>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                variant="outlined"
+                placeholder="Örn: Matematik (2 saat), Fizik (1 saat), TYT Denemesi..."
+                value={studyPlan}
+                onChange={(e) => setStudyPlan(e.target.value)}
+                sx={{
+                  mb: 2,
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: 'rgba(142, 36, 170, 0.2)',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'rgba(142, 36, 170, 0.5)',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#8E24AA',
+                    },
+                  },
+                }}
+              />
+              <Button
+                variant="contained"
+                size="small"
+                sx={{
+                  backgroundColor: '#8E24AA',
+                  '&:hover': {
+                    backgroundColor: '#6A1B9A',
+                  },
+                  textTransform: 'none',
+                }}
+                onClick={() => setSnackbarOpen(true)}
+                disabled={!studyPlan.trim()}
+              >
+                Kaydet
+              </Button>
+            </Box>
             
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
