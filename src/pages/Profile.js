@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Box, 
   Typography, 
@@ -11,12 +12,18 @@ import {
   Alert, 
   Snackbar,
   useTheme,
-  CircularProgress
+  CircularProgress,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+import LockIcon from '@mui/icons-material/Lock';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { auth, db, storage } from '../firebase';
 import { updateProfile } from 'firebase/auth';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
@@ -68,6 +75,10 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
 const Profile = () => {
   const [user, loading] = useAuthState(auth);
   const theme = useTheme();
+  const navigate = useNavigate();
+  const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
   const [profileData, setProfileData] = useState({
     displayName: '',
     email: '',
@@ -218,6 +229,30 @@ const Profile = () => {
       return;
     }
     setOpenSnackbar(false);
+  };
+
+  // Admin giriş işlemleri
+  const handleAdminLogin = () => {
+    setShowAdminDialog(true);
+    setAdminPassword('');
+    setAdminError('');
+  };
+
+  // Admin şifre kontrolü
+  const handleAdminPasswordSubmit = () => {
+    if (adminPassword === 'Arzu280521!@!') {
+      setShowAdminDialog(false);
+      navigate('/admin-panel');
+    } else {
+      setAdminError('Hatalı şifre!');
+    }
+  };
+
+  // Admin dialog kapatma
+  const handleAdminDialogClose = () => {
+    setShowAdminDialog(false);
+    setAdminPassword('');
+    setAdminError('');
   };
 
   if (loading) {
@@ -392,6 +427,66 @@ const Profile = () => {
         </Grid>
       </Grid>
       
+      {/* Admin Giriş Butonu - Sadece businessfrkn@gmail.com için göster */}
+      {user && user.email === 'businessfrkn@gmail.com' && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3, mb: 5 }}>
+          <Button
+            variant="contained"
+            color="error"
+            size="large"
+            startIcon={<AdminPanelSettingsIcon />}
+            onClick={handleAdminLogin}
+            sx={{
+              py: 1.5,
+              px: 4,
+              borderRadius: 2,
+              fontWeight: 'bold',
+              boxShadow: '0 4px 10px rgba(211, 47, 47, 0.3)',
+              '&:hover': {
+                boxShadow: '0 6px 15px rgba(211, 47, 47, 0.4)',
+              }
+            }}
+          >
+            ADMİN PANELİNE GİRİŞ
+          </Button>
+        </Box>
+      )}
+
+      {/* Admin Giriş Dialog */}
+      <Dialog open={showAdminDialog} onClose={handleAdminDialogClose}>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <LockIcon sx={{ mr: 1, color: 'error.main' }} />
+            Admin Girişi
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Admin Şifresi"
+            type="password"
+            fullWidth
+            variant="outlined"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            error={!!adminError}
+            helperText={adminError}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAdminPasswordSubmit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAdminDialogClose}>İptal</Button>
+          <Button onClick={handleAdminPasswordSubmit} variant="contained" color="primary">
+            Giriş
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar 
         open={openSnackbar} 
         autoHideDuration={6000} 
