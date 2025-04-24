@@ -40,7 +40,7 @@ import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { scheduleService } from '../services/scheduleService';
 
-const handleViewClass = () => {};
+// Bu fonksiyon bileşen dışında tanımlandığı için kullanılmıyor
 
 // Renk paleti - ders konularına göre
 const subjectColors = {
@@ -257,6 +257,13 @@ const DersProgrami = () => {
       message,
       severity
     });
+  };
+
+  // Ders detaylarını görüntüleme fonksiyonu
+  const handleViewClass = (day, classItem) => {
+    setViewingDay(day);
+    setViewingClass(classItem);
+    setViewClassDialog(true);
   };
 
   useEffect(() => {
@@ -873,10 +880,7 @@ const DersProgrami = () => {
                           <ClassCard 
                             key={classItem.id}
                             color={getSubjectColor(classItem.subject)}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewClass(day, classItem);
-                            }}
+                            onClick={() => handleViewClass(day, classItem)}
                             sx={{ 
                               cursor: 'pointer',
                               position: 'relative',
