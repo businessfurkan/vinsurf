@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
   Paper, 
-  Container,
   Alert,
   CircularProgress,
   Tabs,
@@ -17,15 +16,11 @@ import {
   Button,
   TextField,
   IconButton,
-  Card,
-  CardContent,
   Grid,
   InputAdornment,
   Collapse,
-  CardMedia,
   Tooltip,
-  Chip,
-  Stack
+  Chip
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import { 
@@ -41,11 +36,9 @@ import {
   ExpandLess as ExpandLessIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
-  Image as ImageIcon,
   Chat as ChatIcon,
   ThumbUp as ThumbUpIcon,
-  TrendingUp as TrendingUpIcon,
-  Insights as InsightsIcon
+  TrendingUp as TrendingUpIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
