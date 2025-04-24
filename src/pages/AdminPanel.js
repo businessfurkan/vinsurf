@@ -45,19 +45,8 @@ import {
   Image as ImageIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db } from '../firebase';
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-  getDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  where, 
-  orderBy, 
-  limit 
-} from 'firebase/firestore';
+import { db, auth } from '../firebase';
+import { collection, query, orderBy, getDocs, doc, where, deleteDoc, updateDoc, limit } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
 
 const AdminPanel = () => {
@@ -84,23 +73,19 @@ const AdminPanel = () => {
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
+        setIsAdmin(false);
         setIsLoading(false);
         return;
       }
 
-      try {
-        const userDoc = await getDoc(doc(db, 'userProfiles', user.uid));
-        if (userDoc.exists() && userDoc.data().role === 'admin') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
+      // Sadece belirli email adresine admin yetkisi ver
+      if (user.email === 'businessfrkn@gmail.com') {
+        setIsAdmin(true);
+      } else {
         setIsAdmin(false);
-      } finally {
-        setIsLoading(false);
       }
+      
+      setIsLoading(false);
     };
 
     checkAdminStatus();

@@ -143,7 +143,7 @@ const App = () => {
                 <Route path="/soru-forum" element={<ProtectedRoute><SoruForum /></ProtectedRoute>} />
                 <Route path="/soru-forum/:postId" element={<ProtectedRoute><SoruForumDetail /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-                <Route path="/admin-x1f9wz" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+                <Route path="/admin-panel" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                 <Route path="/check-admin" element={<ProtectedRoute><CheckAdminStatus /></ProtectedRoute>} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

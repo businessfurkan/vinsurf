@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Drawer, 
@@ -10,10 +10,7 @@ import {
   useTheme, useMediaQuery
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { useAuthState } from 'react-firebase-hooks/auth';
+import { Link, useLocation } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import TimerIcon from '@mui/icons-material/Timer';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -83,78 +80,23 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'ope
 const Sidebar = () => {
   const theme = useTheme();
   const location = useLocation();
-  const navigate = useNavigate();
+  // navigate artık kullanılmıyor
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(!isMobile);
-  const [user] = useAuthState(auth);
-  const [isAdmin, setIsAdmin] = useState(false);
   
-  // Admin panel secret access variables
-  const [, setClickCount] = useState(0); // Sadece setter'ı kullanıyoruz
-  const clickTimerRef = useRef(null);
-  const ADMIN_URL = '/admin-x1f9wz'; // Secret admin URL
+  // Admin erişimi artık sadece profil menüsünden şifre ile yapılacak
 
   useEffect(() => {
     setOpen(!isMobile);
   }, [isMobile]);
   
-  // Check if user is admin
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        return;
-      }
-
-      try {
-        const userDoc = await getDoc(doc(db, 'userProfiles', user.uid));
-        if (userDoc.exists() && userDoc.data().role === 'admin') {
-          setIsAdmin(true);
-        } else {
-          setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminStatus();
-  }, [user]);
+  // Admin erişimi artık sadece Header.js içinde kontrol ediliyor
 
   const handleDrawerToggle = () => {
     setOpen(!open);
   };
   
-  // Handle secret admin access with 7 clicks in 4 seconds
-  const handleSecretAdminAccess = () => {
-    // Increment click count
-    setClickCount(prevCount => {
-      const newCount = prevCount + 1;
-      
-      // Clear existing timer
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current);
-      }
-      
-      // Set timer to reset click count after 4 seconds
-      clickTimerRef.current = setTimeout(() => {
-        setClickCount(0);
-      }, 4000);
-      
-      // Check if we've reached 7 clicks and user is admin
-      if (newCount >= 7 && isAdmin) {
-        // Navigate to admin panel
-        navigate(ADMIN_URL);
-        return 0; // Reset count after successful navigation
-      }
-      
-      // For debugging
-      console.log(`Click count: ${newCount}`);
-      
-      return newCount;
-    });
-  };
+  // Admin erişimi artık sadece profil menüsünden şifre ile yapılacak
 
   // Menü öğeleri
   const menuItems = [
@@ -291,64 +233,27 @@ const Sidebar = () => {
       
       <Box sx={{ flexGrow: 1 }} />
       
-      {isAdmin ? (
-        <Box 
-          component="button"
-          onClick={handleSecretAdminAccess}
-          sx={{
-            px: open ? 3 : 1,
-            py: 2,
-            textAlign: 'center',
-            fontSize: '0.8rem',
-            color: '#2e3856aa',
-            fontFamily: 'Montserrat, sans-serif',
-            fontWeight: 500,
-            opacity: 0.9,
-            userSelect: 'none',
-            mx: 2,
-            mb: 2,
-            borderRadius: 2,
-            background: '#FFFFF0',
-            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.03)',
-            border: '1px solid rgba(0,0,0,0.05)',
-            cursor: 'pointer',
-            width: '100%',
-            outline: 'none',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              opacity: 1,
-              boxShadow: 'inset 0 0 12px rgba(0,0,0,0.05)',
-            },
-            '&:active': {
-              transform: 'scale(0.98)',
-            }
-          }}
-        >
-          {open ? 'YKS ÇALIŞMA © 2025' : 'YKS'}
-        </Box>
-      ) : (
-        <Box 
-          sx={{
-            px: open ? 3 : 1,
-            py: 2,
-            textAlign: 'center',
-            fontSize: '0.8rem',
-            color: '#2e3856aa',
-            fontFamily: 'Montserrat, sans-serif',
-            fontWeight: 500,
-            opacity: 0.9,
-            userSelect: 'none',
-            mx: 2,
-            mb: 2,
-            borderRadius: 2,
-            background: '#FFFFF0',
-            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.03)',
-            border: '1px solid rgba(0,0,0,0.05)',
-          }}
-        >
-          {open ? 'YKS ÇALIŞMA © 2025' : 'YKS'}
-        </Box>
-      )}
+      <Box 
+        sx={{
+          px: open ? 3 : 1,
+          py: 2,
+          textAlign: 'center',
+          fontSize: '0.8rem',
+          color: '#2e3856aa',
+          fontFamily: 'Montserrat, sans-serif',
+          fontWeight: 500,
+          opacity: 0.9,
+          userSelect: 'none',
+          mx: 2,
+          mb: 2,
+          borderRadius: 2,
+          background: '#FFFFF0',
+          boxShadow: 'inset 0 0 10px rgba(0,0,0,0.03)',
+          border: '1px solid rgba(0,0,0,0.05)',
+        }}
+      >
+        {open ? 'YKS ÇALIŞMA © 2025' : 'YKS'}
+      </Box>
     </StyledDrawer>
   );
 };

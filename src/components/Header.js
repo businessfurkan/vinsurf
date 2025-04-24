@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNotifications } from '../context/NotificationContext';
 import {
   AppBar,
@@ -16,9 +16,16 @@ import {
   ListItemIcon,
   ListItemText,
   Tooltip,
-  alpha
+  alpha,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import LockIcon from '@mui/icons-material/Lock';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PersonIcon from '@mui/icons-material/Person';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -31,8 +38,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../firebase';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
   backgroundColor: '#FFFFF0',
@@ -70,67 +76,59 @@ const Header = ({ handleDrawerToggle }) => {
   const [userPhotoURL, setUserPhotoURL] = useState(null);
   const [userName, setUserName] = useState('');
   
-  // Admin panel secret access variables
-  const [, setClickCount] = useState(0); // Only need the setter
+  // Admin panel variables
   const [isAdmin, setIsAdmin] = useState(false);
-  const clickTimerRef = useRef(null);
-  const ADMIN_URL = '/admin-x1f9wz'; // Secret admin URL
+  const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState('');
   
   // Bildirim sistemini kullan
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        setUserPhotoURL(user.photoURL);
-        setUserName(user.displayName || user.email?.split('@')[0] || 'Kullanıcı');
-        
-        // Check if user is admin
-        try {
-          const userDoc = await getDoc(doc(db, 'userProfiles', user.uid));
-          if (userDoc.exists() && userDoc.data().role === 'admin') {
+    const checkAdminStatus = async () => {
+      const unsubscribe = auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          setUserPhotoURL(user.photoURL);
+          setUserName(user.displayName || user.email?.split('@')[0] || 'Kullanıcı');
+          
+          // Sadece belirli email adresine admin yetkisi ver
+          if (user.email === 'businessfrkn@gmail.com') {
             setIsAdmin(true);
           } else {
             setIsAdmin(false);
           }
-        } catch (error) {
-          console.error('Error checking admin status:', error);
-          setIsAdmin(false);
         }
-      }
-    });
-    
-    return () => unsubscribe();
+      });
+      
+      return () => unsubscribe();
+    };
+
+    checkAdminStatus();
   }, []);
   
-  // Handle secret admin access with 7 clicks in 3 seconds
-  const handleSecretAdminAccess = () => {
-    // Increment click count
-    setClickCount(prevCount => {
-      const newCount = prevCount + 1;
-      
-      // Clear existing timer
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current);
-      }
-      
-      // Set timer to reset click count after 3 seconds
-      clickTimerRef.current = setTimeout(() => {
-        setClickCount(0);
-      }, 3000);
-      
-      // Check if we've reached 7 clicks and user is admin
-      if (newCount >= 7 && isAdmin) {
-        // Navigate to admin panel
-        navigate(ADMIN_URL);
-        return 0; // Reset count after successful navigation
-      }
-      
-      // For debugging
-      console.log(`Click count: ${newCount}`);
-      
-      return newCount;
-    });
+  // Handle admin login
+  const handleAdminLogin = () => {
+    setShowAdminDialog(true);
+    setAdminPassword('');
+    setAdminError('');
+  };
+
+  // Handle admin password submit
+  const handleAdminPasswordSubmit = () => {
+    if (adminPassword === 'Arzu280521!@!') {
+      setShowAdminDialog(false);
+      navigate('/admin-panel');
+    } else {
+      setAdminError('Hatalı şifre!');
+    }
+  };
+
+  // Handle admin dialog close
+  const handleAdminDialogClose = () => {
+    setShowAdminDialog(false);
+    setAdminPassword('');
+    setAdminError('');
   };
   
   const handleMenuClick = (event) => {
@@ -321,10 +319,7 @@ const Header = ({ handleDrawerToggle }) => {
           <Tooltip title={userName || "Profil"}>
             <Box sx={{ ml: 1.5 }}>
               <ProfileAvatar 
-                onClick={(e) => {
-                  handleSecretAdminAccess();
-                  handleMenuClick(e);
-                }} 
+                onClick={handleMenuClick} 
                 src={userPhotoURL}
                 sx={{ bgcolor: userPhotoURL ? 'transparent' : theme.palette.primary.main }}
               >
@@ -383,6 +378,17 @@ const Header = ({ handleDrawerToggle }) => {
               </ListItemIcon>
               <ListItemText primary="Ayarlar" />
             </MenuItem>
+            {isAdmin && (
+              <MenuItem onClick={() => {
+                handleAdminLogin();
+                handleClose();
+              }} sx={{ py: 1.5 }}>
+                <ListItemIcon>
+                  <LockIcon fontSize="small" color="error" />
+                </ListItemIcon>
+                <ListItemText primary="Admin Girişi" sx={{ color: 'error.main' }} />
+              </MenuItem>
+            )}
             <Divider />
             <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
               <ListItemIcon>
@@ -391,8 +397,38 @@ const Header = ({ handleDrawerToggle }) => {
               <ListItemText primary="Çıkış Yap" sx={{ color: 'error.main' }} />
             </MenuItem>
           </Menu>
-        </Box>
-      </Toolbar>
+
+      {/* Admin Giriş Dialog */}
+      <Dialog open={showAdminDialog} onClose={handleAdminDialogClose}>
+        <DialogTitle>Admin Girişi</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Admin Şifresi"
+            type="password"
+            fullWidth
+            variant="outlined"
+            value={adminPassword}
+            onChange={(e) => setAdminPassword(e.target.value)}
+            error={!!adminError}
+            helperText={adminError}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleAdminPasswordSubmit();
+              }
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAdminDialogClose}>İptal</Button>
+          <Button onClick={handleAdminPasswordSubmit} variant="contained" color="primary">
+            Giriş
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+    </Toolbar>
     </StyledAppBar>
   );
 };

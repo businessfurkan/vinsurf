@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Container, Box, Typography, Paper, Grid, 
   Card, CardContent, useTheme, alpha 
 } from '@mui/material';
+import { db } from '../firebase';
+import { collection, query, orderBy, getDocs, limit } from 'firebase/firestore';
 import { 
   AccessTime as AccessTimeIcon,
   EmojiEvents as EmojiEventsIcon,
@@ -41,7 +44,7 @@ const KacGunKaldi = () => {
     }, 1000);
     
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]); // targetDate bağımlılığını ekledim
   
   // Motivasyon mesajları
   const motivationalMessages = [
@@ -71,7 +74,7 @@ const KacGunKaldi = () => {
     }, 10000);
     
     return () => clearInterval(messageInterval);
-  }, []);
+  }, [motivationalMessages]); // motivationalMessages bağımlılığını ekledim
   
   // Renk paleti
   const colors = {
@@ -91,6 +94,38 @@ const KacGunKaldi = () => {
     
     return () => clearInterval(animationInterval);
   }, []);
+  
+  // Yorum ve motivasyon mesajları
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [name, setName] = useState('');
+  const [showComments, setShowComments] = useState(false);
+  
+  // Yorumları Firestore'dan çek - useCallback ile sarmalıyorum
+  const fetchComments = useCallback(async () => {
+    try {
+      const commentsQuery = query(
+        collection(db, 'motivationComments'),
+        orderBy('createdAt', 'desc'),
+        limit(10)
+      );
+      const commentSnapshot = await getDocs(commentsQuery);
+      const commentsList = commentSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setComments(commentsList);
+    } catch (error) {
+      console.error('Yorumlar yüklenirken hata oluştu:', error);
+    }
+  }, []);
+  
+  // Sayfa yüklendiğinde yorumları çek
+  useEffect(() => {
+    if (showComments) {
+      fetchComments();
+    }
+  }, [showComments, fetchComments]);
   
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
