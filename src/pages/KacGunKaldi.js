@@ -23,6 +23,7 @@ const KacGunKaldi = () => {
   });
   
   // YKS 2026 tarihi - Haziran 2026'nın ilk cumartesi ve pazar günleri (varsayılan olarak 6-7 Haziran 2026)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const targetDate = new Date('2026-06-06T10:00:00');
   
   useEffect(() => {
@@ -47,6 +48,7 @@ const KacGunKaldi = () => {
   }, [targetDate]); // targetDate bağımlılığını ekledim
   
   // Motivasyon mesajları
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const motivationalMessages = [
     "Her gün bir adım daha yakınsın!",
     "Bugünün çalışması, yarının başarısı!",
@@ -102,6 +104,7 @@ const KacGunKaldi = () => {
   const [showComments, setShowComments] = useState(false);
   
   // Yorumları Firestore'dan çek - useCallback ile sarmalıyorum
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchComments = useCallback(async () => {
     try {
       const commentsQuery = query(

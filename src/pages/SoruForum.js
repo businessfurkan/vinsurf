@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -127,9 +127,19 @@ const SoruForum = () => {
   
   // Refs
   const fileInputRef = useRef(null);
+  
+  // Show notification
+  const showNotification = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity
+    });
+  };
 
   // Fetch posts from Firestore
-  const fetchPosts = async () => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       let postsQuery;
@@ -177,12 +187,13 @@ const SoruForum = () => {
     } finally {
       setLoading(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabValue]);
 
   // Load posts on component mount
   useEffect(() => {
     fetchPosts();
-  }, [tabValue]);
+  }, [fetchPosts]);
 
   // Handle tab change
   const handleTabChange = (event, newValue) => {
@@ -334,14 +345,7 @@ const SoruForum = () => {
     }
   };
 
-  // Show notification
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
-  };
+  // Handle closing snackbar
 
   // Handle closing snackbar
   const handleCloseSnackbar = () => {

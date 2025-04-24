@@ -316,6 +316,7 @@ const SoruForumDetail = () => {
   };
 
   // Load post and comments on component mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (postId) {
       fetchPost();
