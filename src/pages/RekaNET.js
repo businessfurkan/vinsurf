@@ -1,0 +1,1006 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  TextField,
+  MenuItem,
+  Button,
+  Stepper,
+  Step,
+  StepLabel,
+  Grid,
+  Fade,
+  Divider,
+  Alert,
+  CircularProgress
+} from '@mui/material';
+import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import { db } from '../firebase';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+
+// Türkiye'deki 81 il listesi
+const turkeyProvinces = [
+  'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya', 'Artvin', 'Aydın', 'Balıkesir',
+  'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa', 'Çanakkale', 'Çankırı', 'Çorum', 'Denizli',
+  'Diyarbakır', 'Edirne', 'Elazığ', 'Erzincan', 'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari',
+  'Hatay', 'Isparta', 'Mersin', 'İstanbul', 'İzmir', 'Kars', 'Kastamonu', 'Kayseri', 'Kırklareli', 'Kırşehir',
+  'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Kahramanmaraş', 'Mardin', 'Muğla', 'Muş', 'Nevşehir',
+  'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop', 'Sivas', 'Tekirdağ', 'Tokat',
+  'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat', 'Zonguldak', 'Aksaray', 'Bayburt', 'Karaman',
+  'Kırıkkale', 'Batman', 'Şırnak', 'Bartın', 'Ardahan', 'Iğdır', 'Yalova', 'Karabük', 'Kilis', 'Osmaniye',
+  'Düzce'
+];
+
+const RekaNET = () => {
+  // State tanımlamaları
+  const [activeStep, setActiveStep] = useState(0);
+  const [selectedProvince, setSelectedProvince] = useState('');
+  const [formData, setFormData] = useState({
+    province: '',
+    tytScores: {
+      turkish: { correct: 0, wrong: 0, empty: 0 },
+      social: { correct: 0, wrong: 0, empty: 0 },
+      math: { correct: 0, wrong: 0, empty: 0 },
+      science: { correct: 0, wrong: 0, empty: 0 }
+    },
+    aytScores: {
+      mathAYT: { correct: 0, wrong: 0, empty: 0 },
+      physics: { correct: 0, wrong: 0, empty: 0 },
+      chemistry: { correct: 0, wrong: 0, empty: 0 },
+      biology: { correct: 0, wrong: 0, empty: 0 },
+      literature: { correct: 0, wrong: 0, empty: 0 },
+      history: { correct: 0, wrong: 0, empty: 0 },
+      geography: { correct: 0, wrong: 0, empty: 0 },
+      philosophy: { correct: 0, wrong: 0, empty: 0 }
+    }
+  });
+
+  // İl seçimi değiştiğinde çalışacak fonksiyon
+  const handleProvinceChange = (event) => {
+    setSelectedProvince(event.target.value);
+    setFormData({
+      ...formData,
+      province: event.target.value
+    });
+  };
+
+  // İlerle butonuna tıklandığında çalışacak fonksiyon
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  // Geri butonuna tıklandığında çalışacak fonksiyon
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+  
+  // TYT net hesaplama
+  const calculateTYTNet = (subject) => {
+    const { correct, wrong } = formData.tytScores[subject];
+    return Math.max(0, correct - (wrong * 0.25)).toFixed(2);
+  };
+  
+  // AYT net hesaplama
+  const calculateAYTNet = (subject) => {
+    const { correct, wrong } = formData.aytScores[subject];
+    return Math.max(0, correct - (wrong * 0.25)).toFixed(2);
+  };
+  
+  // Toplam TYT neti hesaplama
+  const calculateTotalTYTNet = () => {
+    return (
+      parseFloat(calculateTYTNet('turkish')) +
+      parseFloat(calculateTYTNet('social')) +
+      parseFloat(calculateTYTNet('mathTYT')) +
+      parseFloat(calculateTYTNet('science'))
+    ).toFixed(2);
+  };
+  
+  // Toplam AYT neti hesaplama
+  const calculateTotalAYTNet = () => {
+    return (
+      parseFloat(calculateAYTNet('mathAYT')) +
+      parseFloat(calculateAYTNet('physics')) +
+      parseFloat(calculateAYTNet('chemistry')) +
+      parseFloat(calculateAYTNet('biology'))
+    ).toFixed(2);
+  };
+  
+  // RekaNET karşılaştırma durumu
+  const [comparisonResult, setComparisonResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Adımlar
+  const steps = [
+    'İl Seçimi',
+    'TYT Netleri',
+    'AYT Netleri',
+    'Sonuçlar'
+  ];
+
+  return (
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, maxWidth: 1200, mx: 'auto' }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+        <LanguageIcon 
+          sx={{ 
+            fontSize: 60, 
+            color: '#3F51B5',
+            mr: 2,
+            filter: 'drop-shadow(0 4px 6px rgba(63, 81, 181, 0.3))'
+          }} 
+        />
+        <Box>
+          <Typography 
+            variant="h3" 
+            component="h1" 
+            sx={{ 
+              fontWeight: 800,
+              color: '#3F51B5',
+              textShadow: '2px 2px 4px rgba(63, 81, 181, 0.2)',
+              lineHeight: 1.2
+            }}
+          >
+            RekaNET
+          </Typography>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: 'rgba(63, 81, 181, 0.8)',
+              fontWeight: 500
+            }}
+          >
+            Yapay Zeka Destekli Soru Çözüm Platformu
+          </Typography>
+        </Box>
+      </Box>
+      
+      {/* Stepper */}
+      <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+        {steps.map((label) => {
+          return (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          );
+        })}
+      </Stepper>
+      
+      {/* Content */}
+      <Card 
+        elevation={3}
+        sx={{ 
+          borderRadius: 3,
+          overflow: 'hidden',
+          mb: 4,
+          boxShadow: '0 10px 30px rgba(63, 81, 181, 0.1)'
+        }}
+      >
+        <CardContent sx={{ p: 4 }}>
+          {/* İl Seçimi Adımı */}
+          {activeStep === 0 && (
+            <Fade in={activeStep === 0} timeout={500}>
+              <Box>
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#3F51B5' }}>
+                  Hangi ilde yaşıyorsunuz?
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary' }}>
+                  Size en doğru önerileri sunabilmemiz için lütfen yaşadığınız ili seçin.
+                </Typography>
+                
+                <FormControl fullWidth sx={{ mb: 4 }}>
+                  <InputLabel id="province-select-label">İl Seçiniz</InputLabel>
+                  <Select
+                    labelId="province-select-label"
+                    id="province-select"
+                    value={selectedProvince}
+                    label="İl Seçiniz"
+                    onChange={handleProvinceChange}
+                  >
+                    {turkeyProvinces.map((province) => (
+                      <MenuItem key={province} value={province}>
+                        {province}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="contained"
+                    endIcon={<NavigateNextIcon />}
+                    onClick={handleNext}
+                    disabled={!selectedProvince}
+                    sx={{
+                      bgcolor: '#3F51B5',
+                      '&:hover': {
+                        bgcolor: '#303F9F'
+                      },
+                      '&.Mui-disabled': {
+                        bgcolor: 'rgba(63, 81, 181, 0.3)'
+                      }
+                    }}
+                  >
+                    İlerle
+                  </Button>
+                </Box>
+              </Box>
+            </Fade>
+          )}
+          
+          {/* TYT Netleri Adımı */}
+          {activeStep === 1 && (
+            <Fade in={activeStep === 1} timeout={500}>
+              <Box>
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#3F51B5' }}>
+                  TYT Sonuçlarınız
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary' }}>
+                  Son girdiğiniz TYT denemesindeki doğru, yanlış ve boş sayılarınızı giriniz.
+                </Typography>
+                
+                <Grid container spacing={4}>
+                  {/* Türkçe */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Türkçe (40 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.tytScores.turkish.correct}
+                            onChange={(e) => handleScoreChange('tyt', 'turkish', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.tytScores.turkish.wrong}
+                            onChange={(e) => handleScoreChange('tyt', 'turkish', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.tytScores.turkish.empty}
+                            onChange={(e) => handleScoreChange('tyt', 'turkish', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateTYTNet('turkish')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  
+                  {/* Sosyal Bilimler */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Sosyal Bilimler (20 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 20 } }}
+                            value={formData.tytScores.social.correct}
+                            onChange={(e) => handleScoreChange('tyt', 'social', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 20 } }}
+                            value={formData.tytScores.social.wrong}
+                            onChange={(e) => handleScoreChange('tyt', 'social', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 20 } }}
+                            value={formData.tytScores.social.empty}
+                            onChange={(e) => handleScoreChange('tyt', 'social', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateTYTNet('social')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  
+                  {/* Matematik */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Matematik (40 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.tytScores.math.correct}
+                            onChange={(e) => handleScoreChange('tyt', 'math', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.tytScores.math.wrong}
+                            onChange={(e) => handleScoreChange('tyt', 'math', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.tytScores.math.empty}
+                            onChange={(e) => handleScoreChange('tyt', 'math', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateTYTNet('math')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  
+                  {/* Fen Bilimleri */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Fen Bilimleri (20 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 20 } }}
+                            value={formData.tytScores.science.correct}
+                            onChange={(e) => handleScoreChange('tyt', 'science', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 20 } }}
+                            value={formData.tytScores.science.wrong}
+                            onChange={(e) => handleScoreChange('tyt', 'science', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 20 } }}
+                            value={formData.tytScores.science.empty}
+                            onChange={(e) => handleScoreChange('tyt', 'science', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateTYTNet('science')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                </Grid>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={handleBack}
+                    sx={{
+                      borderColor: '#3F51B5',
+                      color: '#3F51B5',
+                      '&:hover': {
+                        borderColor: '#303F9F',
+                        bgcolor: 'rgba(63, 81, 181, 0.05)'
+                      }
+                    }}
+                  >
+                    Geri
+                  </Button>
+                  <Button
+                    variant="contained"
+                    endIcon={<NavigateNextIcon />}
+                    onClick={handleNext}
+                    sx={{
+                      bgcolor: '#3F51B5',
+                      '&:hover': {
+                        bgcolor: '#303F9F'
+                      }
+                    }}
+                  >
+                    İlerle
+                  </Button>
+                </Box>
+              </Box>
+            </Fade>
+          )}
+          
+          {/* AYT Netleri Adımı */}
+          {activeStep === 2 && (
+            <Fade in={activeStep === 2} timeout={500}>
+              <Box>
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#3F51B5' }}>
+                  AYT Sonuçlarınız
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary' }}>
+                  Son girdiğiniz AYT denemesindeki doğru, yanlış ve boş sayılarınızı giriniz.
+                </Typography>
+                
+                <Grid container spacing={4}>
+                  {/* Matematik */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Matematik (40 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.aytScores.mathAYT.correct}
+                            onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.aytScores.mathAYT.wrong}
+                            onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 40 } }}
+                            value={formData.aytScores.mathAYT.empty}
+                            onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateAYTNet('mathAYT')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  
+                  {/* Fizik */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Fizik (14 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 14 } }}
+                            value={formData.aytScores.physics.correct}
+                            onChange={(e) => handleScoreChange('ayt', 'physics', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 14 } }}
+                            value={formData.aytScores.physics.wrong}
+                            onChange={(e) => handleScoreChange('ayt', 'physics', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 14 } }}
+                            value={formData.aytScores.physics.empty}
+                            onChange={(e) => handleScoreChange('ayt', 'physics', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateAYTNet('physics')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  
+                  {/* Kimya */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Kimya (13 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 13 } }}
+                            value={formData.aytScores.chemistry.correct}
+                            onChange={(e) => handleScoreChange('ayt', 'chemistry', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 13 } }}
+                            value={formData.aytScores.chemistry.wrong}
+                            onChange={(e) => handleScoreChange('ayt', 'chemistry', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 13 } }}
+                            value={formData.aytScores.chemistry.empty}
+                            onChange={(e) => handleScoreChange('ayt', 'chemistry', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateAYTNet('chemistry')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                  
+                  {/* Biyoloji */}
+                  <Grid item xs={12} md={6}>
+                    <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
+                      <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
+                        Biyoloji (13 Soru)
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Doğru"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 13 } }}
+                            value={formData.aytScores.biology.correct}
+                            onChange={(e) => handleScoreChange('ayt', 'biology', 'correct', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Yanlış"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 13 } }}
+                            value={formData.aytScores.biology.wrong}
+                            onChange={(e) => handleScoreChange('ayt', 'biology', 'wrong', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                        <Grid item xs={4}>
+                          <TextField
+                            label="Boş"
+                            type="number"
+                            InputProps={{ inputProps: { min: 0, max: 13 } }}
+                            value={formData.aytScores.biology.empty}
+                            onChange={(e) => handleScoreChange('ayt', 'biology', 'empty', e.target.value)}
+                            fullWidth
+                            size="small"
+                          />
+                        </Grid>
+                      </Grid>
+                      <Box sx={{ mt: 2, p: 1, bgcolor: 'rgba(63, 81, 181, 0.1)', borderRadius: 1 }}>
+                        <Typography variant="body2">
+                          Net: <strong>{calculateAYTNet('biology')}</strong>
+                        </Typography>
+                      </Box>
+                    </Card>
+                  </Grid>
+                </Grid>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={handleBack}
+                    sx={{
+                      borderColor: '#3F51B5',
+                      color: '#3F51B5',
+                      '&:hover': {
+                        borderColor: '#303F9F',
+                        bgcolor: 'rgba(63, 81, 181, 0.05)'
+                      }
+                    }}
+                  >
+                    Geri
+                  </Button>
+                  <Button
+                    variant="contained"
+                    endIcon={<NavigateNextIcon />}
+                    onClick={handleNext}
+                    sx={{
+                      bgcolor: '#3F51B5',
+                      '&:hover': {
+                        bgcolor: '#303F9F'
+                      }
+                    }}
+                  >
+                    İlerle
+                  </Button>
+                </Box>
+              </Box>
+            </Fade>
+          )}
+          
+          {/* Sonuçlar Adımı */}
+          {activeStep === 3 && (
+            <Fade in={activeStep === 3} timeout={500}>
+              <Box>
+                <Typography variant="h5" sx={{ mb: 3, fontWeight: 600, color: '#3F51B5' }}>
+                  Sonuçlarınız
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 4, color: 'text.secondary' }}>
+                  Girdiğiniz bilgilere göre sonuçlarınız aşağıda görüntülenmektedir.
+                </Typography>
+                
+                <Card elevation={2} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+                  <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white' }}>
+                    <Typography variant="h6">
+                      Kişisel Bilgiler
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 3 }}>
+                    <Typography variant="body1" sx={{ mb: 1 }}>
+                      <strong>Bulunduğunuz İl:</strong> {formData.province}
+                    </Typography>
+                  </Box>
+                </Card>
+                
+                <Card elevation={2} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+                  <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white' }}>
+                    <Typography variant="h6">
+                      TYT Sonuçlarınız
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 3 }}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Türkçe:</strong> {calculateTYTNet('turkish')} net
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Sosyal Bilimler:</strong> {calculateTYTNet('social')} net
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Matematik:</strong> {calculateTYTNet('mathTYT')} net
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Fen Bilimleri:</strong> {calculateTYTNet('science')} net
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#3F51B5' }}>
+                      Toplam TYT Neti: {calculateTotalTYTNet()}
+                    </Typography>
+                  </Box>
+                </Card>
+                
+                <Card elevation={2} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+                  <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white' }}>
+                    <Typography variant="h6">
+                      AYT Sonuçlarınız
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 3 }}>
+                    <Grid container spacing={3}>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Matematik:</strong> {calculateAYTNet('mathAYT')} net
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Fizik:</strong> {calculateAYTNet('physics')} net
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Kimya:</strong> {calculateAYTNet('chemistry')} net
+                        </Typography>
+                        <Typography variant="body1" sx={{ mb: 1 }}>
+                          <strong>Biyoloji:</strong> {calculateAYTNet('biology')} net
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    
+                    <Divider sx={{ my: 2 }} />
+                    
+                    <Typography variant="body1" sx={{ fontWeight: 600, color: '#3F51B5' }}>
+                      Toplam Sayısal AYT Neti: {calculateTotalAYTNet()}
+                    </Typography>
+                  </Box>
+                </Card>
+                
+                {/* Karşılaştırma sonucu */}
+                {comparisonResult && (
+                  <Card elevation={3} sx={{ mb: 4, borderRadius: 2, overflow: 'hidden' }}>
+                    <Box sx={{ bgcolor: '#3F51B5', p: 2, color: 'white' }}>
+                      <Typography variant="h6">
+                        RekaNET Sıralamanız
+                      </Typography>
+                    </Box>
+                    <Box sx={{ p: 3 }}>
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={12} md={8}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                            <EmojiEventsIcon sx={{ fontSize: 40, color: '#FFD700', mr: 2 }} />
+                            <Typography variant="h6" sx={{ color: '#3F51B5', fontWeight: 600 }}>
+                              {comparisonResult.rank}. sıradasınız!
+                            </Typography>
+                          </Box>
+                          <Typography variant="body1">
+                            YKSTRACKER sistemimizi kullanan ve <strong>{comparisonResult.province}</strong> ilinde yaşayan diğer <strong>{comparisonResult.totalUsers}</strong> kullanıcımız arasından {comparisonResult.comparisonType === "TYT" ? "TYT" : "TYT+AYT"} netlerinizle bu sıralamayı elde ettiniz.
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                          <Card elevation={1} sx={{ p: 2, bgcolor: '#F5F5F5', borderRadius: 2 }}>
+                            <Typography variant="body2" sx={{ mb: 1, color: 'text.secondary' }}>
+                              Toplam Netiniz:
+                            </Typography>
+                            <Typography variant="h4" sx={{ fontWeight: 700, color: '#3F51B5' }}>
+                              {comparisonResult.userNet}
+                            </Typography>
+                            <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #E0E0E0' }}>
+                              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                Sıralamadaki en yüksek net: <strong>{comparisonResult.highestNet}</strong>
+                              </Typography>
+                            </Box>
+                          </Card>
+                        </Grid>
+                      </Grid>
+                    </Box>
+                  </Card>
+                )}
+                
+                {/* Hata mesajı */}
+                {error && (
+                  <Alert severity="warning" sx={{ mb: 4 }}>
+                    {error}
+                  </Alert>
+                )}
+                
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={handleBack}
+                    sx={{
+                      borderColor: '#3F51B5',
+                      color: '#3F51B5',
+                      '&:hover': {
+                        borderColor: '#303F9F',
+                        bgcolor: 'rgba(63, 81, 181, 0.05)'
+                      }
+                    }}
+                  >
+                    Geri
+                  </Button>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button
+                      variant="contained"
+                      onClick={async () => {
+                        try {
+                          // Verileri Firestore'a kaydet
+                          // Kullanıcının AYT netleri girip girmediğini kontrol et
+                          const hasAYTScores = Object.values(formData.aytScores).some(score => 
+                            parseInt(score.correct) > 0 || parseInt(score.wrong) > 0
+                          );
+                          
+                          await addDoc(collection(db, "rekanet_scores"), {
+                            province: formData.province,
+                            tytScores: formData.tytScores,
+                            aytScores: formData.aytScores,
+                            totalTYTNet: calculateTotalTYTNet(),
+                            totalAYTNet: hasAYTScores ? calculateTotalAYTNet() : "0",
+                            hasAYTScores: hasAYTScores,
+                            timestamp: new Date()
+                          });
+                          alert('Bilgileriniz başarıyla kaydedildi!');
+                        } catch (error) {
+                          console.error("Error adding document: ", error);
+                          alert('Bilgileriniz kaydedilirken bir hata oluştu!');
+                        }
+                      }}
+                      sx={{
+                        bgcolor: '#4CAF50',
+                        '&:hover': {
+                          bgcolor: '#388E3C'
+                        }
+                      }}
+                    >
+                      Kaydet
+                    </Button>
+                    <Button
+                      variant="contained"
+                      disabled={loading}
+                      onClick={async () => {
+                        setLoading(true);
+                        setError(null);
+                        setComparisonResult(null);
+                        
+                        try {
+                          // Seçilen ildeki diğer kullanıcıların verilerini çek
+                          const q = query(collection(db, "rekanet_scores"), where("province", "==", formData.province));
+                          const querySnapshot = await getDocs(q);
+                          
+                          if (querySnapshot.empty) {
+                            setError(`${formData.province} ilinde henüz net bilgisi girilmemiş.`);
+                            setLoading(false);
+                            return;
+                          }
+                          
+                          // Kullanıcının AYT netleri girip girmediğini kontrol et
+                          const hasAYTScores = Object.values(formData.aytScores).some(score => 
+                            parseInt(score.correct) > 0 || parseInt(score.wrong) > 0
+                          );
+                          
+                          // Kullanıcı netleri
+                          const userTYTNet = parseFloat(calculateTotalTYTNet());
+                          const userAYTNet = hasAYTScores ? parseFloat(calculateTotalAYTNet()) : 0;
+                          
+                          // Karşılaştırma türünü belirle
+                          const comparisonType = hasAYTScores ? "TYT+AYT" : "TYT";
+                          
+                          // Tüm kullanıcıların netlerini topla
+                          const allScores = [];
+                          querySnapshot.forEach((doc) => {
+                            const data = doc.data();
+                            let totalNet;
+                            
+                            if (comparisonType === "TYT") {
+                              // Sadece TYT karşılaştırması yapılıyorsa
+                              totalNet = parseFloat(data.totalTYTNet);
+                            } else {
+                              // TYT+AYT karşılaştırması yapılıyorsa
+                              totalNet = parseFloat(data.totalTYTNet) + 
+                                       (data.totalAYTNet ? parseFloat(data.totalAYTNet) : 0);
+                            }
+                            
+                            allScores.push(totalNet);
+                          });
+                          
+                          // Kullanıcının toplam neti
+                          const userTotalNet = comparisonType === "TYT" ? userTYTNet : (userTYTNet + userAYTNet);
+                          
+                          // Kullanıcının sıralamasını bul
+                          allScores.push(userTotalNet);
+                          allScores.sort((a, b) => b - a); // Büyükten küçüğe sırala
+                          const userRank = allScores.indexOf(userTotalNet) + 1;
+                          
+                          // Sonucu göster - Daha detaylı bir obje olarak gönderelim
+                          setComparisonResult({
+                            province: formData.province,
+                            totalUsers: allScores.length - 1,
+                            rank: userRank,
+                            userNet: userTotalNet.toFixed(2),
+                            highestNet: allScores[0].toFixed(2),
+                            comparisonType: comparisonType
+                          });
+                        } catch (error) {
+                          console.error("Error comparing scores: ", error);
+                          setError("Karşılaştırma yapılırken bir hata oluştu.");
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                      sx={{
+                        bgcolor: '#3F51B5',
+                        '&:hover': {
+                          bgcolor: '#303F9F'
+                        }
+                      }}
+                    >
+                      {loading ? <CircularProgress size={24} color="inherit" /> : 'RekaNET Hesapla'}
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+            </Fade>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
+  );
+};
+
+export default RekaNET;

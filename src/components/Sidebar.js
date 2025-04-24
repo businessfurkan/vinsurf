@@ -22,6 +22,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HandshakeIcon from '@mui/icons-material/Handshake';
+import LanguageIcon from '@mui/icons-material/Language';
 
 
 const drawerWidth = 290;
@@ -111,6 +112,7 @@ const Sidebar = () => {
     { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#4CAF50' }, // Yeşil
     { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#FF5722' }, // Turuncu-Kırmızı
     { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#8E24AA' }, // Mor
+    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#3F51B5' }, // Indigo
     // Teneffüs sekmesi kaldırıldı.
   ];
 
