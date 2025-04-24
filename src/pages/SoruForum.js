@@ -294,6 +294,8 @@ const SoruForum = () => {
       let imageUrl = null;
       
       // Upload image if selected
+      // NOTE: All forum data (posts, comments, and images) are permanently stored in Firestore/Storage
+      // and should NOT be automatically deleted. This data should persist indefinitely.
       if (newPost.image) {
         const storageRef = ref(storage, `forum_images/${Date.now()}_${newPost.image.name}`);
         const uploadTask = uploadBytesResumable(storageRef, newPost.image);
@@ -569,125 +571,103 @@ const SoruForum = () => {
           </StyledButton>
         </Paper>
       ) : (
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-          gap: 3 
-        }}>
+        <Box sx={{ width: '100%' }}>
           {filteredPosts.map(post => (
-            <StyledCard key={post.id}>
-              {post.imageUrl && (
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={post.imageUrl}
-                  alt={post.title}
-                  sx={{ objectFit: 'cover' }}
-                />
-              )}
-              <CardContent sx={{ pb: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Paper
+              key={post.id}
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 2,
+                borderRadius: 2,
+                border: '1px solid rgba(0,0,0,0.08)',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer',
+                '&:hover': {
+                  backgroundColor: alpha('#4285F4', 0.03),
+                  borderColor: alpha('#4285F4', 0.2),
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+                },
+              }}
+              onClick={() => handleViewPost(post.id)}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                   <Avatar 
                     src={post.userInfo?.photoURL || post.userPhotoURL} 
                     alt={post.userInfo?.displayName || post.userName}
-                    sx={{ width: 36, height: 36, mr: 1.5 }}
+                    sx={{ width: 32, height: 32, mr: 1.5 }}
                   />
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2e3856' }}>
-                      {post.userInfo?.displayName || post.userName || 'İsimsiz Kullanıcı'}
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2e3856', mr: 1 }}>
+                        {post.userInfo?.displayName || post.userName || 'İsimsiz Kullanıcı'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatDate(post.createdAt)}
+                      </Typography>
+                    </Box>
+                    
+                    <Typography 
+                      variant="body1" 
+                      component="h2" 
+                      sx={{ 
+                        fontWeight: 600, 
+                        color: '#2e3856',
+                      }}
+                    >
+                      {post.title}
                     </Typography>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+                    <ThumbUpIcon 
+                      fontSize="small" 
+                      sx={{ 
+                        mr: 0.5, 
+                        color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
+                        opacity: 0.7,
+                        fontSize: '0.9rem'
+                      }} 
+                    />
                     <Typography variant="caption" color="text.secondary">
-                      {formatDate(post.createdAt)}
+                      {post.likeCount || 0}
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CommentIcon 
+                      fontSize="small" 
+                      sx={{ 
+                        mr: 0.5, 
+                        color: 'text.secondary',
+                        opacity: 0.7,
+                        fontSize: '0.9rem'
+                      }} 
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {post.commentCount || 0}
                     </Typography>
                   </Box>
                 </Box>
-                
-                <Typography 
-                  variant="h6" 
-                  component="h2" 
-                  sx={{ 
-                    fontWeight: 600, 
-                    mb: 1,
-                    color: '#2e3856',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                  }}
-                >
-                  {post.title}
-                </Typography>
-                
-                <Typography 
-                  variant="body2" 
-                  color="text.secondary"
-                  sx={{
-                    mb: 2,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                  }}
-                >
-                  {post.content}
-                </Typography>
-                
-                {post.tags && post.tags.length > 0 && (
-                  <Box sx={{ mb: 1.5, display: 'flex', flexWrap: 'wrap' }}>
-                    {post.tags.map(tag => (
-                      <StyledChip 
-                        key={tag} 
-                        label={tag} 
-                        size="small"
-                        icon={<TagIcon fontSize="small" />}
-                      />
-                    ))}
-                  </Box>
-                )}
-              </CardContent>
+              </Box>
               
-              <Divider sx={{ mx: 2 }} />
-              
-              <CardActions sx={{ px: 2, py: 1, justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button 
-                    size="small" 
-                    startIcon={
-                      <ThumbUpIcon 
-                        color={post.likedBy?.includes(user?.uid) ? 'primary' : 'action'} 
-                        fontSize="small" 
-                      />
-                    }
-                    onClick={() => handleLikePost(post.id)}
-                    sx={{ 
-                      color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
-                      fontWeight: 500
-                    }}
-                  >
-                    {post.likeCount || 0}
-                  </Button>
-                  
-                  <Button 
-                    size="small" 
-                    startIcon={<CommentIcon fontSize="small" />}
-                    sx={{ color: 'text.secondary', fontWeight: 500 }}
-                  >
-                    {post.commentCount || 0}
-                  </Button>
+              {post.tags && post.tags.length > 0 && (
+                <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap' }}>
+                  {post.tags.map(tag => (
+                    <StyledChip 
+                      key={tag} 
+                      label={tag} 
+                      size="small"
+                      icon={<TagIcon fontSize="small" />}
+                    />
+                  ))}
                 </Box>
-                
-                <Button 
-                  size="small" 
-                  color="primary"
-                  onClick={() => handleViewPost(post.id)}
-                  sx={{ fontWeight: 600 }}
-                >
-                  Detaylar
-                </Button>
-              </CardActions>
-            </StyledCard>
+              )}
+            </Paper>
           ))}
         </Box>
       )}

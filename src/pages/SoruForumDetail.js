@@ -20,7 +20,11 @@ import {
   Snackbar,
   styled,
   alpha,
-  Breadcrumbs
+  Breadcrumbs,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import {
 
@@ -32,7 +36,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
-  LocalOffer as TagIcon
+  LocalOffer as TagIcon,
+  Close as CloseIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
@@ -48,7 +53,7 @@ import {
   where, 
   orderBy, 
   serverTimestamp,
-
+  writeBatch,
   increment,
   arrayUnion,
   arrayRemove
@@ -138,6 +143,13 @@ const SoruForumDetail = () => {
     message: '',
     severity: 'success'
   });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editPostData, setEditPostData] = useState({
+    title: '',
+    content: '',
+    tags: ''
+  });
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   
   // Fetch post from Firestore
   const fetchPost = async () => {
@@ -435,6 +447,120 @@ const SoruForumDetail = () => {
     } catch (error) {
       console.error('Error liking comment:', error);
       showNotification('İşlem sırasında bir hata oluştu', 'error');
+    }
+  };
+
+  // Check if post can be edited (within 2 hours of creation)
+  const canEditPost = () => {
+    if (!post || !user || user.uid !== post.userId) return false;
+    
+    const now = new Date();
+    const postTime = post.createdAt;
+    const timeDiff = now - postTime; // time difference in milliseconds
+    const hoursDiff = timeDiff / (1000 * 60 * 60); // convert to hours
+    
+    return hoursDiff <= 2; // can edit if less than 2 hours old
+  };
+
+  // Handle opening edit dialog
+  const handleOpenEditDialog = () => {
+    if (!canEditPost()) {
+      showNotification('Gönderi düzenleme süresi dolmuştur (2 saat)', 'warning');
+      return;
+    }
+    
+    setEditPostData({
+      title: post.title,
+      content: post.content,
+      tags: post.tags ? post.tags.join(', ') : ''
+    });
+    setEditDialogOpen(true);
+  };
+
+  // Handle closing edit dialog
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+  };
+
+  // Handle edit input change
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditPostData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle saving edited post
+  const handleSaveEditedPost = async () => {
+    if (!user || !post) return;
+    
+    if (!editPostData.title.trim()) {
+      showNotification('Lütfen bir başlık girin', 'error');
+      return;
+    }
+    
+    if (!editPostData.content.trim()) {
+      showNotification('Lütfen bir açıklama girin', 'error');
+      return;
+    }
+    
+    try {
+      // Process tags
+      const tagsArray = editPostData.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag.length > 0);
+      
+      const postRef = doc(db, 'forumPosts', postId);
+      await updateDoc(postRef, {
+        title: editPostData.title.trim(),
+        content: editPostData.content.trim(),
+        tags: tagsArray,
+        updatedAt: serverTimestamp(),
+        isEdited: true
+      });
+      
+      showNotification('Gönderi başarıyla güncellendi', 'success');
+      setEditDialogOpen(false);
+      fetchPost(); // Refresh post data
+    } catch (error) {
+      console.error('Error updating post:', error);
+      showNotification('Gönderi güncellenirken bir hata oluştu', 'error');
+    }
+  };
+
+  // Handle deleting post
+  const handleDeletePost = async () => {
+    if (!user || !post || user.uid !== post.userId) {
+      showNotification('Bu gönderiyi silme yetkiniz yok', 'error');
+      return;
+    }
+    
+    try {
+      // Delete the post document
+      await deleteDoc(doc(db, 'forumPosts', postId));
+      
+      // Delete all comments associated with this post
+      const commentsQuery = query(
+        collection(db, 'forumComments'),
+        where('postId', '==', postId)
+      );
+      
+      const querySnapshot = await getDocs(commentsQuery);
+      const batch = writeBatch(db);
+      
+      querySnapshot.forEach(docSnapshot => {
+        batch.delete(docSnapshot.ref);
+      });
+      
+      await batch.commit();
+      
+      showNotification('Gönderi başarıyla silindi', 'success');
+      navigate('/soru-forum');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      showNotification('Gönderi silinirken bir hata oluştu', 'error');
     }
   };
 
@@ -755,28 +881,57 @@ const SoruForumDetail = () => {
         
         <Divider />
         
-        <CardActions sx={{ px: 2, py: 1.5 }}>
-          <Button 
-            startIcon={
-              <ThumbUpIcon 
-                color={post.likedBy?.includes(user?.uid) ? 'primary' : 'action'} 
-              />
-            }
-            onClick={handleLikePost}
-            sx={{ 
-              color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
-              fontWeight: 500
-            }}
-          >
-            {post.likeCount || 0} Beğeni
-          </Button>
-          
-          <Button 
-            startIcon={<CommentIcon />}
-            sx={{ color: 'text.secondary', fontWeight: 500 }}
-          >
-            {post.commentCount || 0} Yorum
-          </Button>
+        <CardActions sx={{ px: 2, py: 1.5, display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex' }}>
+            <Button 
+              startIcon={
+                <ThumbUpIcon 
+                  color={post.likedBy?.includes(user?.uid) ? 'primary' : 'action'} 
+                />
+              }
+              onClick={handleLikePost}
+              sx={{ 
+                color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
+                fontWeight: 500
+              }}
+            >
+              {post.likeCount || 0} Beğeni
+            </Button>
+            
+            <Button 
+              startIcon={<CommentIcon />}
+              sx={{ color: 'text.secondary', fontWeight: 500 }}
+            >
+              {post.commentCount || 0} Yorum
+            </Button>
+          </Box>
+
+          {user && user.uid === post.userId && (
+            <Box>
+              <Button 
+                startIcon={<EditIcon />}
+                onClick={handleOpenEditDialog}
+                sx={{ 
+                  color: canEditPost() ? 'primary.main' : 'text.disabled',
+                  fontWeight: 500
+                }}
+                disabled={!canEditPost()}
+              >
+                Düzenle
+              </Button>
+              
+              <Button 
+                startIcon={<DeleteIcon />}
+                onClick={() => setDeleteConfirmOpen(true)}
+                sx={{ 
+                  color: 'error.main',
+                  fontWeight: 500
+                }}
+              >
+                Sil
+              </Button>
+            </Box>
+          )}
         </CardActions>
       </StyledCard>
       
@@ -879,6 +1034,152 @@ const SoruForumDetail = () => {
         )}
       </Menu>
       
+      {/* Edit Post Dialog */}
+      <Dialog
+        open={editDialogOpen}
+        onClose={handleCloseEditDialog}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          pb: 1, 
+          pt: 3,
+          px: 3,
+          fontWeight: 700,
+          color: '#2e3856',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <Typography variant="h5" component="div">Gönderi Düzenle</Typography>
+          <IconButton onClick={handleCloseEditDialog} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        
+        <DialogContent sx={{ px: 3, py: 2 }}>
+          <StyledTextField
+            autoFocus
+            margin="dense"
+            name="title"
+            label="Başlık"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={editPostData.title}
+            onChange={handleEditInputChange}
+            sx={{ mb: 2 }}
+          />
+          
+          <StyledTextField
+            margin="dense"
+            name="content"
+            label="Açıklama"
+            multiline
+            rows={4}
+            fullWidth
+            variant="outlined"
+            value={editPostData.content}
+            onChange={handleEditInputChange}
+            sx={{ mb: 2 }}
+          />
+          
+          <StyledTextField
+            margin="dense"
+            name="tags"
+            label="Etiketler (virgülle ayırın)"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={editPostData.tags}
+            onChange={handleEditInputChange}
+            placeholder="matematik, geometri, fizik"
+            sx={{ mb: 1 }}
+          />
+
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+            * Gönderiler sadece oluşturulduktan sonraki 2 saat içinde düzenlenebilir.
+          </Typography>
+        </DialogContent>
+        
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={handleCloseEditDialog}
+            sx={{ 
+              borderRadius: '30px',
+              px: 3,
+              textTransform: 'none',
+              fontWeight: 600
+            }}
+          >
+            İptal
+          </Button>
+          <StyledButton
+            onClick={handleSaveEditedPost}
+            variant="contained"
+            color="primary"
+            disabled={!editPostData.title.trim() || !editPostData.content.trim()}
+          >
+            Kaydet
+          </StyledButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          pt: 3,
+          px: 3,
+          fontWeight: 700,
+          color: '#2e3856',
+        }}>
+          Gönderiyi Sil
+        </DialogTitle>
+        
+        <DialogContent sx={{ px: 3, py: 2 }}>
+          <Typography variant="body1">
+            Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz ve tüm yorumlar da silinecektir.
+          </Typography>
+        </DialogContent>
+        
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setDeleteConfirmOpen(false)}
+            sx={{ 
+              borderRadius: '30px',
+              px: 3,
+              textTransform: 'none',
+              fontWeight: 600
+            }}
+          >
+            İptal
+          </Button>
+          <StyledButton
+            onClick={handleDeletePost}
+            variant="contained"
+            color="error"
+          >
+            Sil
+          </StyledButton>
+        </DialogActions>
+      </Dialog>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
