@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -14,10 +14,14 @@ import {
   Fade,
   Divider,
   Alert,
-  CircularProgress
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  Select
 } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import LanguageIcon from '@mui/icons-material/Language';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { db } from '../firebase';
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
@@ -76,6 +80,33 @@ const RekaNET = () => {
   // Geri butonuna tıklandığında çalışacak fonksiyon
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+  
+  // Skor değişikliklerini işleyen fonksiyon
+  const handleScoreChange = (examType, subject, field, value) => {
+    if (examType === 'tyt') {
+      setFormData({
+        ...formData,
+        tytScores: {
+          ...formData.tytScores,
+          [subject]: {
+            ...formData.tytScores[subject],
+            [field]: value
+          }
+        }
+      });
+    } else if (examType === 'ayt') {
+      setFormData({
+        ...formData,
+        aytScores: {
+          ...formData.aytScores,
+          [subject]: {
+            ...formData.aytScores[subject],
+            [field]: value
+          }
+        }
+      });
+    }
   };
   
   // TYT net hesaplama
