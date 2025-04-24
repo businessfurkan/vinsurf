@@ -66,28 +66,61 @@ import { tr } from 'date-fns/locale';
 
 // Styled components
 const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: '12px',
+  borderRadius: '16px',
   overflow: 'hidden',
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+  border: 'none',
   background: '#FFFFFF',
+  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+  },
 }));
 
-const StyledChip = styled(Chip)(({ theme }) => ({
-  borderRadius: '20px',
-  fontWeight: 500,
-  fontSize: '0.75rem',
-  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-  color: theme.palette.primary.main,
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.2),
-  },
-  margin: theme.spacing(0.5),
-}));
+const StyledChip = styled(Chip)(({ theme, colorIndex, label }) => {
+  // Renkli etiketler için renk paleti
+  const colors = [
+    { bg: '#E3F2FD', color: '#1976D2' }, // Mavi
+    { bg: '#E8F5E9', color: '#2E7D32' }, // Yeşil
+    { bg: '#FFF8E1', color: '#F57F17' }, // Sarı
+    { bg: '#F3E5F5', color: '#7B1FA2' }, // Mor
+    { bg: '#FFEBEE', color: '#C62828' }, // Kırmızı
+    { bg: '#E0F7FA', color: '#00838F' }, // Turkuaz
+  ];
+  
+  // Hash fonksiyonu ile tag'e göre renk seçimi
+  const getColorIndex = (tag) => {
+    let hash = 0;
+    for (let i = 0; i < tag.length; i++) {
+      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % colors.length;
+  };
+  
+  // Eğer colorIndex belirtilmemişse ve label varsa, label'a göre renk seç
+  const index = colorIndex !== undefined ? colorIndex : (label ? getColorIndex(label) : 0);
+  const colorObj = colors[index];
+  
+  return {
+    borderRadius: '20px',
+    fontWeight: 600,
+    fontSize: '0.75rem',
+    backgroundColor: colorObj.bg,
+    color: colorObj.color,
+    border: `1px solid ${alpha(colorObj.color, 0.2)}`,
+    '&:hover': {
+      backgroundColor: alpha(colorObj.color, 0.15)
+    },
+    margin: theme.spacing(0.5),
+    transition: 'all 0.2s ease',
+    padding: '4px 10px'
+  };
+});
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: '30px',
-  padding: '8px 20px',
+  padding: '8px 24px',
   fontWeight: 600,
   textTransform: 'none',
   boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
@@ -95,6 +128,9 @@ const StyledButton = styled(Button)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-2px)',
     boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+  },
+  '&.MuiButton-containedPrimary': {
+    background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)',
   },
 }));
 
@@ -111,16 +147,37 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
       borderColor: theme.palette.primary.main,
     },
   },
+  '& .MuiInputBase-input': {
+    fontSize: '0.95rem',
+  },
+  '& .MuiInputLabel-root': {
+    fontSize: '0.95rem',
+  },
 }));
 
 const CommentCard = styled(Paper)(({ theme, isReply }) => ({
-  padding: theme.spacing(2),
-  marginBottom: theme.spacing(2),
-  marginLeft: isReply ? theme.spacing(5) : 0,
-  borderRadius: '12px',
+  padding: theme.spacing(2.5),
+  marginBottom: theme.spacing(2.5),
+  marginLeft: isReply ? theme.spacing(6) : 0,
+  borderRadius: '16px',
   border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-  backgroundColor: isReply ? alpha(theme.palette.background.paper, 0.5) : theme.palette.background.paper,
+  backgroundColor: isReply ? '#F8FAFF' : '#FFFFFF',
   position: 'relative',
+  boxShadow: isReply ? 'none' : '0 4px 15px rgba(0,0,0,0.05)',
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    boxShadow: isReply ? 'none' : '0 6px 20px rgba(0,0,0,0.08)',
+    borderColor: alpha(theme.palette.primary.main, 0.2)
+  },
+  '&::before': isReply ? {
+    content: '""',
+    position: 'absolute',
+    left: '-20px',
+    top: '20px',
+    width: '20px',
+    height: '2px',
+    backgroundColor: alpha(theme.palette.primary.main, 0.2)
+  } : {}
 }));
 
 // Main SoruForumDetail component
@@ -635,18 +692,49 @@ const SoruForumDetail = () => {
   const renderComment = (comment, isReply = false) => (
     <Box key={comment.id}>
       <CommentCard isReply={isReply} elevation={0}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Avatar 
               src={comment.userInfo?.photoURL || comment.userPhotoURL} 
               alt={comment.userInfo?.displayName || comment.userName}
-              sx={{ width: 32, height: 32, mr: 1.5 }}
+              sx={{ 
+                width: 36, 
+                height: 36, 
+                mr: 1.5,
+                border: isReply ? '1px solid #4285F4' : '2px solid #4285F4',
+                boxShadow: isReply ? 'none' : '0 2px 6px rgba(66, 133, 244, 0.15)'
+              }}
             />
             <Box>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2e3856' }}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: '#2e3856',
+                  fontSize: '0.9rem'
+                }}
+              >
                 {comment.userInfo?.displayName || comment.userName || 'İsimsiz Kullanıcı'}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'text.secondary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5
+                }}
+              >
+                <Box 
+                  component="span" 
+                  sx={{ 
+                    width: 6, 
+                    height: 6, 
+                    borderRadius: '50%', 
+                    backgroundColor: comment.isEdited ? '#FFA000' : '#4CAF50',
+                    display: 'inline-block'
+                  }} 
+                />
                 {formatDate(comment.createdAt)}
                 {comment.isEdited && ' (düzenlendi)'}
               </Typography>
@@ -657,6 +745,13 @@ const SoruForumDetail = () => {
             <IconButton 
               size="small"
               onClick={(e) => handleOpenMenu(e, comment)}
+              sx={{
+                color: '#9e9e9e',
+                '&:hover': {
+                  backgroundColor: alpha('#000', 0.04),
+                  color: '#616161'
+                }
+              }}
             >
               <MoreVertIcon fontSize="small" />
             </IconButton>
@@ -672,7 +767,12 @@ const SoruForumDetail = () => {
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               variant="outlined"
-              sx={{ mb: 1 }}
+              sx={{ 
+                mb: 1.5,
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#FFFFFF'
+                }
+              }}
             />
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
               <Button 
@@ -680,6 +780,12 @@ const SoruForumDetail = () => {
                 onClick={() => {
                   setEditingComment(null);
                   setEditText('');
+                }}
+                sx={{
+                  borderRadius: '20px',
+                  px: 2,
+                  fontWeight: 600,
+                  textTransform: 'none'
                 }}
               >
                 İptal
@@ -689,18 +795,35 @@ const SoruForumDetail = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleEditComment}
+                sx={{
+                  borderRadius: '20px',
+                  px: 2,
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)'
+                }}
               >
                 Kaydet
               </Button>
             </Box>
           </Box>
         ) : (
-          <Typography variant="body2" sx={{ mt: 1, mb: 2, whiteSpace: 'pre-wrap' }}>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              mt: 1.5, 
+              mb: 2.5, 
+              whiteSpace: 'pre-wrap',
+              lineHeight: 1.6,
+              color: '#424242',
+              fontSize: '0.95rem'
+            }}
+          >
             {comment.content}
           </Typography>
         )}
         
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Button 
             size="small" 
             startIcon={
@@ -712,7 +835,13 @@ const SoruForumDetail = () => {
             onClick={() => handleLikeComment(comment.id)}
             sx={{ 
               color: comment.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
-              fontWeight: 500
+              fontWeight: 600,
+              borderRadius: '20px',
+              px: 1.5,
+              backgroundColor: comment.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.08) : 'transparent',
+              '&:hover': {
+                backgroundColor: comment.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.12) : alpha('#000', 0.04)
+              }
             }}
           >
             {comment.likeCount || 0}
@@ -723,7 +852,15 @@ const SoruForumDetail = () => {
               size="small" 
               startIcon={<ReplyIcon fontSize="small" />}
               onClick={() => setReplyingTo(comment)}
-              sx={{ color: 'text.secondary', fontWeight: 500 }}
+              sx={{ 
+                color: 'text.secondary', 
+                fontWeight: 600,
+                borderRadius: '20px',
+                px: 1.5,
+                '&:hover': {
+                  backgroundColor: alpha('#000', 0.04)
+                }
+              }}
             >
               Yanıtla
             </Button>
@@ -733,7 +870,32 @@ const SoruForumDetail = () => {
       
       {/* Reply form */}
       {replyingTo && replyingTo.id === comment.id && (
-        <Box sx={{ ml: 5, mb: 3 }}>
+        <Box 
+          sx={{ 
+            ml: 6, 
+            mb: 3, 
+            mt: 1,
+            p: 2,
+            borderRadius: '12px',
+            border: '1px solid rgba(66, 133, 244, 0.15)',
+            backgroundColor: alpha('#F8FAFF', 0.7)
+          }}
+        >
+          <Typography 
+            variant="subtitle2" 
+            sx={{ 
+              mb: 1.5, 
+              color: '#2e3856',
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5
+            }}
+          >
+            <ReplyIcon fontSize="small" sx={{ color: '#4285F4' }} />
+            Yanıt yazıyorsunuz
+          </Typography>
+          
           <StyledTextField
             fullWidth
             multiline
@@ -742,7 +904,12 @@ const SoruForumDetail = () => {
             value={replyText}
             onChange={(e) => setReplyText(e.target.value)}
             variant="outlined"
-            sx={{ mb: 1 }}
+            sx={{ 
+              mb: 1.5,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: '#FFFFFF'
+              }
+            }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
             <Button 
@@ -750,6 +917,12 @@ const SoruForumDetail = () => {
               onClick={() => {
                 setReplyingTo(null);
                 setReplyText('');
+              }}
+              sx={{
+                borderRadius: '20px',
+                px: 2,
+                fontWeight: 600,
+                textTransform: 'none'
               }}
             >
               İptal
@@ -760,6 +933,12 @@ const SoruForumDetail = () => {
               color="primary"
               onClick={handleAddReply}
               disabled={!replyText.trim()}
+              sx={{
+                borderRadius: '20px',
+                px: 2,
+                fontWeight: 600,
+                textTransform: 'none'
+              }}
             >
               Yanıtla
             </StyledButton>
@@ -816,28 +995,84 @@ const SoruForumDetail = () => {
       </Breadcrumbs>
       
       {/* Post card */}
-      <StyledCard sx={{ mb: 4 }}>
+      <StyledCard sx={{ mb: 4, position: 'relative', overflow: 'visible' }}>
+        {/* Renkli üst şerit */}
+        <Box 
+          sx={{ 
+            position: 'absolute', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            height: '8px', 
+            background: 'linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335)',
+            borderTopLeftRadius: '16px',
+            borderTopRightRadius: '16px',
+            zIndex: 1
+          }}
+        />
+        
         {post.imageUrl && (
           <CardMedia
             component="img"
-            height="300"
+            height="350"
             image={post.imageUrl}
             alt={post.title}
-            sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5' }}
+            sx={{ 
+              objectFit: 'contain', 
+              backgroundColor: '#f8f9fa',
+              borderBottom: '1px solid rgba(0,0,0,0.06)'
+            }}
           />
         )}
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <CardContent sx={{ pt: 3, px: { xs: 2, sm: 3 } }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            mb: 3,
+            pb: 2,
+            borderBottom: '1px dashed rgba(0,0,0,0.08)'
+          }}>
             <Avatar 
               src={post.userInfo?.photoURL || post.userPhotoURL} 
               alt={post.userInfo?.displayName || post.userName}
-              sx={{ width: 40, height: 40, mr: 1.5 }}
+              sx={{ 
+                width: 48, 
+                height: 48, 
+                mr: 2,
+                border: '2px solid #4285F4',
+                boxShadow: '0 2px 8px rgba(66, 133, 244, 0.2)'
+              }}
             />
             <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#2e3856' }}>
+              <Typography 
+                variant="subtitle1" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: '#2e3856',
+                  fontSize: '1.1rem'
+                }}
+              >
                 {post.userInfo?.displayName || post.userName || 'İsimsiz Kullanıcı'}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'text.secondary',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5
+                }}
+              >
+                <Box 
+                  component="span" 
+                  sx={{ 
+                    width: 8, 
+                    height: 8, 
+                    borderRadius: '50%', 
+                    backgroundColor: '#4CAF50',
+                    display: 'inline-block'
+                  }} 
+                />
                 {formatDate(post.createdAt)}
               </Typography>
             </Box>
@@ -847,9 +1082,11 @@ const SoruForumDetail = () => {
             variant="h5" 
             component="h1" 
             sx={{ 
-              fontWeight: 700, 
-              mb: 2,
-              color: '#2e3856'
+              fontWeight: 800, 
+              mb: 2.5,
+              color: '#2e3856',
+              lineHeight: 1.3,
+              fontSize: { xs: '1.5rem', sm: '1.8rem' }
             }}
           >
             {post.title}
@@ -858,16 +1095,20 @@ const SoruForumDetail = () => {
           <Typography 
             variant="body1" 
             sx={{
-              mb: 3,
-              whiteSpace: 'pre-wrap'
+              mb: 3.5,
+              whiteSpace: 'pre-wrap',
+              lineHeight: 1.7,
+              color: '#424242',
+              fontSize: '1rem',
+              letterSpacing: '0.01em'
             }}
           >
             {post.content}
           </Typography>
           
           {post.tags && post.tags.length > 0 && (
-            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap' }}>
-              {post.tags.map(tag => (
+            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {post.tags.map((tag, index) => (
                 <StyledChip 
                   key={tag} 
                   label={tag} 
@@ -879,41 +1120,62 @@ const SoruForumDetail = () => {
           )}
         </CardContent>
         
-        <Divider />
+        <Divider sx={{ opacity: 0.6 }} />
         
-        <CardActions sx={{ px: 2, py: 1.5, display: 'flex', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex' }}>
+        <CardActions sx={{ px: { xs: 2, sm: 3 }, py: 2, display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <Button 
               startIcon={
                 <ThumbUpIcon 
                   color={post.likedBy?.includes(user?.uid) ? 'primary' : 'action'} 
+                  fontSize="small"
                 />
               }
               onClick={handleLikePost}
               sx={{ 
                 color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
-                fontWeight: 500
+                fontWeight: 600,
+                borderRadius: '20px',
+                px: 2,
+                backgroundColor: post.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.1) : 'transparent',
+                '&:hover': {
+                  backgroundColor: post.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.15) : alpha('#000', 0.04)
+                }
               }}
             >
               {post.likeCount || 0} Beğeni
             </Button>
             
             <Button 
-              startIcon={<CommentIcon />}
-              sx={{ color: 'text.secondary', fontWeight: 500 }}
+              startIcon={<CommentIcon fontSize="small" />}
+              sx={{ 
+                color: 'text.secondary', 
+                fontWeight: 600,
+                borderRadius: '20px',
+                px: 2,
+                '&:hover': {
+                  backgroundColor: alpha('#000', 0.04)
+                }
+              }}
             >
               {post.commentCount || 0} Yorum
             </Button>
           </Box>
 
           {user && user.uid === post.userId && (
-            <Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
               <Button 
-                startIcon={<EditIcon />}
+                startIcon={<EditIcon fontSize="small" />}
                 onClick={handleOpenEditDialog}
                 sx={{ 
                   color: canEditPost() ? 'primary.main' : 'text.disabled',
-                  fontWeight: 500
+                  fontWeight: 600,
+                  borderRadius: '20px',
+                  px: 2,
+                  backgroundColor: canEditPost() ? alpha('#4285F4', 0.1) : 'transparent',
+                  '&:hover': {
+                    backgroundColor: canEditPost() ? alpha('#4285F4', 0.15) : 'transparent'
+                  }
                 }}
                 disabled={!canEditPost()}
               >
@@ -921,11 +1183,17 @@ const SoruForumDetail = () => {
               </Button>
               
               <Button 
-                startIcon={<DeleteIcon />}
+                startIcon={<DeleteIcon fontSize="small" />}
                 onClick={() => setDeleteConfirmOpen(true)}
                 sx={{ 
                   color: 'error.main',
-                  fontWeight: 500
+                  fontWeight: 600,
+                  borderRadius: '20px',
+                  px: 2,
+                  backgroundColor: alpha('#f44336', 0.1),
+                  '&:hover': {
+                    backgroundColor: alpha('#f44336', 0.15)
+                  }
                 }}
               >
                 Sil
@@ -936,29 +1204,87 @@ const SoruForumDetail = () => {
       </StyledCard>
       
       {/* Comments section */}
-      <Typography 
-        variant="h6" 
+      <Box 
         sx={{ 
-          mb: 3, 
-          fontWeight: 600,
-          color: '#2e3856'
+          display: 'flex',
+          alignItems: 'center',
+          mb: 3,
+          mt: 4,
+          position: 'relative',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -8,
+            left: 0,
+            width: '60px',
+            height: '3px',
+            backgroundColor: '#4285F4',
+            borderRadius: '10px'
+          }
         }}
       >
-        Yorumlar ({post.commentCount || 0})
-      </Typography>
+        <CommentIcon 
+          sx={{ 
+            color: '#4285F4', 
+            mr: 1.5,
+            fontSize: '1.8rem'
+          }} 
+        />
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            fontWeight: 700,
+            color: '#2e3856',
+            fontSize: '1.5rem'
+          }}
+        >
+          Yorumlar ({post.commentCount || 0})
+        </Typography>
+      </Box>
       
       {/* Comment form */}
       {user ? (
-        <Box sx={{ mb: 4 }}>
+        <Box 
+          sx={{ 
+            mb: 4,
+            mt: 3,
+            p: 3,
+            borderRadius: '16px',
+            border: '1px solid rgba(66, 133, 244, 0.2)',
+            backgroundColor: '#F8FAFF',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Avatar 
+              src={user?.photoURL} 
+              alt={user?.displayName}
+              sx={{ 
+                width: 36, 
+                height: 36, 
+                mr: 1.5,
+                border: '2px solid #4285F4'
+              }}
+            />
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2e3856' }}>
+              {user?.displayName || user?.email?.split('@')[0] || 'Kullanıcı'}
+            </Typography>
+          </Box>
+          
           <StyledTextField
             fullWidth
             multiline
             rows={3}
-            placeholder="Yorumunuzu yazın..."
+            placeholder="Düşüncelerinizi paylaşın..."
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ 
+              mb: 2,
+              '& .MuiOutlinedInput-root': {
+                backgroundColor: '#FFFFFF'
+              }
+            }}
           />
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <StyledButton 
@@ -986,19 +1312,33 @@ const SoruForumDetail = () => {
         <Paper 
           elevation={0} 
           sx={{ 
-            p: 3, 
+            p: 4, 
             textAlign: 'center',
-            borderRadius: 3,
+            borderRadius: 4,
             backgroundColor: alpha('#4285F4', 0.05),
-            border: `1px dashed ${alpha('#4285F4', 0.3)}`
+            border: `1px dashed ${alpha('#4285F4', 0.3)}`,
+            mt: 2
           }}
         >
-          <Typography variant="body1" sx={{ color: 'text.secondary' }}>
-            Henüz yorum yapılmamış. İlk yorumu siz yapın!
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <CommentIcon sx={{ fontSize: 40, color: alpha('#4285F4', 0.4) }} />
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                color: '#2e3856', 
+                fontWeight: 600,
+                mb: 1
+              }}
+            >
+              Henüz yorum yapılmamış
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', maxWidth: '80%' }}>
+              Bu gönderiye ilk yorumu siz yapın ve tartışmayı başlatın!
+            </Typography>
+          </Box>
         </Paper>
       ) : (
-        <Box>
+        <Box sx={{ mt: 2 }}>
           {comments.map(comment => renderComment(comment))}
         </Box>
       )}
@@ -1008,6 +1348,18 @@ const SoruForumDetail = () => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleCloseMenu}
+        PaperProps={{
+          elevation: 3,
+          sx: {
+            borderRadius: 2,
+            minWidth: 180,
+            boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+            mt: 0.5,
+            '& .MuiList-root': {
+              py: 1
+            }
+          }
+        }}
       >
         {selectedComment && user && user.uid === selectedComment.userId && (
           <MenuItem 
@@ -1016,9 +1368,18 @@ const SoruForumDetail = () => {
               setEditText(selectedComment.content);
               handleCloseMenu();
             }}
+            sx={{ 
+              py: 1.2,
+              px: 2,
+              mx: 0.5,
+              borderRadius: 1,
+              '&:hover': {
+                backgroundColor: alpha('#4285F4', 0.08)
+              }
+            }}
           >
-            <EditIcon fontSize="small" sx={{ mr: 1 }} />
-            Düzenle
+            <EditIcon fontSize="small" sx={{ mr: 1.5, color: '#4285F4' }} />
+            <Typography sx={{ fontWeight: 500 }}>Düzenle</Typography>
           </MenuItem>
         )}
         {selectedComment && user && (user.uid === selectedComment.userId || user.uid === post.userId) && (
@@ -1027,9 +1388,18 @@ const SoruForumDetail = () => {
               handleDeleteComment(selectedComment.id);
               handleCloseMenu();
             }}
+            sx={{ 
+              py: 1.2,
+              px: 2,
+              mx: 0.5,
+              borderRadius: 1,
+              '&:hover': {
+                backgroundColor: alpha('#f44336', 0.08)
+              }
+            }}
           >
-            <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
-            Sil
+            <DeleteIcon fontSize="small" sx={{ mr: 1.5, color: '#f44336' }} />
+            <Typography sx={{ fontWeight: 500 }}>Sil</Typography>
           </MenuItem>
         )}
       </Menu>
