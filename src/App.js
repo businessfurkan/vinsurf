@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { NotificationProvider } from './context/NotificationContext';
@@ -7,6 +7,12 @@ import Box from '@mui/material/Box';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+
+// Theme
+import theme from './theme';
+
+// Styles
+import './styles/global.css';
 
 // Components
 import Sidebar from './components/Sidebar';
@@ -30,11 +36,8 @@ import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import CheckAdminStatus from './pages/CheckAdminStatus';
 
-// Theme
-import theme from './theme';
-
-// Styles
-import './styles/global.css';
+// Sidebar genişliği
+const drawerWidth = 290;
 
 const App = () => {
   const [user, loading] = useAuthState(auth);
@@ -110,24 +113,44 @@ const App = () => {
     return children;
   };
 
+  // Sidebar açık/kapalı durumunu yönetmek için state
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Sidebar'ı açıp kapatmak için fonksiyon
+  const handleDrawerToggle = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <NotificationProvider>
       {user ? (
         <Box sx={{ display: 'flex', bgcolor: '#FFFFF0', minHeight: '100vh' }}>
-          <Sidebar />
+          <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
             sx={{
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
-              width: { sm: `calc(100% - ${240}px)` },
+              width: '100%',
               overflow: 'auto',
               bgcolor: '#FFFFF0',
+              transition: theme => theme.transitions.create(['margin', 'width'], {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+              }),
+              ...(sidebarOpen && {
+                width: { sm: `calc(100% - ${drawerWidth}px)` },
+                marginLeft: { sm: `${drawerWidth}px` },
+                transition: theme => theme.transitions.create(['margin', 'width'], {
+                  easing: theme.transitions.easing.easeOut,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
+              }),
             }}
           >
-            <Header />
+            <Header handleDrawerToggle={handleDrawerToggle} sidebarOpen={sidebarOpen} />
             <Box sx={{ mt: 2 }}>
               <Routes>
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />

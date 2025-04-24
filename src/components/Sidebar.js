@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { 
   Box, 
   Drawer, 
@@ -78,24 +78,18 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'ope
   }),
 );
 
-const Sidebar = () => {
+const Sidebar = ({ open, handleDrawerToggle }) => {
   const theme = useTheme();
   const location = useLocation();
-  const navigate = useNavigate(); // useNavigate hook'unu ekliyoruz
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const [open, setOpen] = useState(!isMobile);
   
-  // Admin erişimi artık sadece profil menüsünden şifre ile yapılacak
-
+  // Mobile cihazlarda sidebar varsayılan olarak kapalı olsun
   useEffect(() => {
-    setOpen(!isMobile);
-  }, [isMobile]);
-  
-  // Admin erişimi artık sadece Header.js içinde kontrol ediliyor
-
-  const handleDrawerToggle = () => {
-    setOpen(!open);
-  };
+    if (isMobile && open) {
+      handleDrawerToggle();
+    }
+  }, [isMobile, open, handleDrawerToggle]);
   
   // Admin erişimi artık sadece profil menüsünden şifre ile yapılacak
 

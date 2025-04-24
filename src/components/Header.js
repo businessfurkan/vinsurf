@@ -10,7 +10,6 @@ import {
   Box,
   Badge,
   Avatar,
-  useMediaQuery,
   useTheme,
   Divider,
   ListItemIcon,
@@ -67,9 +66,8 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
   },
 }));
 
-const Header = ({ handleDrawerToggle }) => {
+const Header = ({ handleDrawerToggle, sidebarOpen }) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [notificationAnchor, setNotificationAnchor] = React.useState(null);
@@ -179,33 +177,38 @@ const Header = ({ handleDrawerToggle }) => {
 
   return (
     <StyledAppBar position="fixed">
-      <Toolbar>
-        {isMobile && (
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="aç/kapat menü"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, color: 'text.primary' }}
+            sx={{
+              mr: 2,
+              color: '#4285F4',
+              '&:hover': {
+                backgroundColor: 'rgba(66, 133, 244, 0.08)'
+              }
+            }}
           >
             <MenuIcon />
           </IconButton>
-        )}
-        
-        <Typography
-          variant="h6"
-          noWrap
-          component="div"
-          sx={{
-            flexGrow: 1,
-            color: 'text.primary',
-            fontWeight: 700,
-            display: { xs: isMobile ? 'none' : 'block', sm: 'block' },
-          }}
-        >
-          YKS Çalışma Asistanı
-        </Typography>
-        
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div" 
+            sx={{ 
+              fontWeight: 700, 
+              color: '#4285F4', 
+              display: { xs: 'none', sm: 'block' },
+              fontFamily: 'Montserrat, sans-serif',
+              letterSpacing: '-0.5px'
+            }}
+          >
+            YKS Çalışma Asistanı
+          </Typography>
+        </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title="Bildirimler">
             <IconButton
