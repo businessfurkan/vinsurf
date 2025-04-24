@@ -20,7 +20,6 @@ import TytAytNetTakibi from './pages/TytAytNetTakibi';
 import DersProgrami from './pages/DersProgrami';
 import Analiz from './pages/Analiz';
 import NotDefterim from './pages/NotDefterim';
-import KacGunKaldi from './pages/KacGunKaldi';
 import KonuTakip from './pages/KonuTakip';
 import SoruForum from './pages/SoruForum';
 import SoruForumDetail from './pages/SoruForumDetail';
@@ -138,7 +137,6 @@ const App = () => {
                 <Route path="/performans" element={<ProtectedRoute><DersProgrami /></ProtectedRoute>} />
                 <Route path="/analiz" element={<ProtectedRoute><Analiz /></ProtectedRoute>} />
                 <Route path="/not-defterim" element={<ProtectedRoute><NotDefterim /></ProtectedRoute>} />
-                <Route path="/kac-gun-kaldi" element={<ProtectedRoute><KacGunKaldi /></ProtectedRoute>} />
                 <Route path="/konu-takip" element={<ProtectedRoute><KonuTakip /></ProtectedRoute>} />
                 <Route path="/soru-forum" element={<ProtectedRoute><SoruForum /></ProtectedRoute>} />
                 <Route path="/soru-forum/:postId" element={<ProtectedRoute><SoruForumDetail /></ProtectedRoute>} />

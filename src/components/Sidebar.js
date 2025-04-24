@@ -19,7 +19,6 @@ import SmartToyIcon from '@mui/icons-material/SmartToy';
 import InsightsIcon from '@mui/icons-material/Insights';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -108,7 +107,6 @@ const Sidebar = () => {
     { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' }, // Turuncu
     { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#00BCD4' }, // Turkuaz - Shortened for better display
     { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Mor
-    { text: 'Kaç Gün Kaldı', icon: <HourglassEmptyIcon />, path: '/kac-gun-kaldi', color: '#E91E63' }, // Pembe
     { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#4CAF50' }, // Yeşil
     { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#FF5722' }, // Turuncu-Kırmızı
     { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#8E24AA' }, // Mor
