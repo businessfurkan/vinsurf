@@ -15,7 +15,7 @@ import {
   Snackbar,
   Alert
 } from '@mui/material';
-import { alpha } from '@mui/material/styles';
+// alpha fonksiyonu artık kullanılmadığı için import kaldırıldı
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import LiveTvIcon from '@mui/icons-material/LiveTv';
 import YouTubeIcon from '@mui/icons-material/YouTube';
