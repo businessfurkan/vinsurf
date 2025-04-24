@@ -26,6 +26,10 @@ const KacGunKaldi = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const targetDate = new Date('2026-06-06T10:00:00');
   
+  // Performans optimizasyonu için useRef kullanıyoruz
+  // Bu sayede gereksiz render'ları önlemiş olacağız
+  const timerRef = React.useRef(null);
+  
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date();
@@ -46,9 +50,19 @@ const KacGunKaldi = () => {
     // İlk hesaplamayı hemen yap
     calculateTimeLeft();
     
-    const timer = setInterval(calculateTimeLeft, 1000);
+    // Mevcut bir timer varsa temizle
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
     
-    return () => clearInterval(timer);
+    // Yeni timer'i ayarla ve referansı sakla
+    timerRef.current = setInterval(calculateTimeLeft, 1000);
+    
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, [targetDate]); // targetDate bağımlılığını ekledim
   
   // Motivasyon mesajları
@@ -68,19 +82,31 @@ const KacGunKaldi = () => {
   
   // Rastgele motivasyon mesajı seç
   const [motivationalMessage, setMotivationalMessage] = useState('');
+  const messageIntervalRef = React.useRef(null);
   
   useEffect(() => {
+    // Sayfa yüklenirken rastgele bir motivasyon mesajı seç
     const randomIndex = Math.floor(Math.random() * motivationalMessages.length);
     setMotivationalMessage(motivationalMessages[randomIndex]);
     
-    // Her 10 saniyede bir mesajı değiştir
-    const messageInterval = setInterval(() => {
+    // Mevcut bir interval varsa temizle
+    if (messageIntervalRef.current) {
+      clearInterval(messageIntervalRef.current);
+    }
+    
+    // Mesaj değişim süresini 60 saniyeye çıkarıyoruz (1 dakika)
+    // Bu sayede sayfanın donmasını önlemiş olacağız
+    messageIntervalRef.current = setInterval(() => {
       const newIndex = Math.floor(Math.random() * motivationalMessages.length);
       setMotivationalMessage(motivationalMessages[newIndex]);
-    }, 10000);
+    }, 60000);
     
-    return () => clearInterval(messageInterval);
-  }, [motivationalMessages]); // motivationalMessages bağımlılığını ekledim
+    return () => {
+      if (messageIntervalRef.current) {
+        clearInterval(messageIntervalRef.current);
+      }
+    };
+  }, []); // Bağımlılık dizisini boş bırakıyoruz, sadece mount/unmount'ta çalışsın
   
   // Renk paleti
   const colors = {
@@ -90,16 +116,9 @@ const KacGunKaldi = () => {
     seconds: theme.palette.warning.main
   };
   
-  // Animasyon efekti için
-  const [animate, setAnimate] = useState(false);
-  
-  useEffect(() => {
-    const animationInterval = setInterval(() => {
-      setAnimate(prev => !prev);
-    }, 500);
-    
-    return () => clearInterval(animationInterval);
-  }, []);
+  // Animasyon efektini tamamen kaldırıyoruz
+  // Sabit bir değer kullanarak gereksiz render'ları önlüyoruz
+  const animate = false; // Sabit bir değer olarak tanımlıyoruz, state değil
   
   // Yorum ve motivasyon mesajları
   const [comments, setComments] = useState([]);
@@ -539,11 +558,7 @@ const KacGunKaldi = () => {
               color: theme.palette.primary.dark,
               position: 'relative',
               zIndex: 1,
-              animation: 'fadeIn 2s infinite alternate',
-              '@keyframes fadeIn': {
-                '0%': { opacity: 0.7 },
-                '100%': { opacity: 1 }
-              }
+              opacity: 1 // Sabit opacity değeri kullanıyoruz
             }}
           >
             {motivationalMessage}
