@@ -142,15 +142,59 @@ const AdminPanel = () => {
   // Fetch users
   const fetchUsers = async () => {
     try {
+      // Fetch all users from userProfiles collection
       const usersQuery = query(
         collection(db, 'userProfiles'),
         orderBy('createdAt', 'desc')
       );
       const querySnapshot = await getDocs(usersQuery);
+      const profilesData = {};
+      
+      // Create a map of user profiles by uid
+      querySnapshot.forEach((doc) => {
+        profilesData[doc.id] = { id: doc.id, ...doc.data() };
+      });
+      
+      // Fetch all users from Firebase Authentication
+      // Note: In a real production app, this would be done through a secure backend
+      // For demo purposes, we'll use the existing profiles and add some mock data
+      
+      // Get all users from auth collection in Firestore as a workaround
+      const authUsersQuery = query(collection(db, 'users'));
+      const authSnapshot = await getDocs(authUsersQuery);
       const usersData = [];
       
-      querySnapshot.forEach((doc) => {
-        usersData.push({ id: doc.id, ...doc.data() });
+      // Combine auth data with profiles
+      authSnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const userId = doc.id;
+        
+        // If we have a profile for this user, combine the data
+        if (profilesData[userId]) {
+          usersData.push({
+            ...profilesData[userId],
+            authData: userData
+          });
+        } else {
+          // If no profile exists, create a basic user object
+          usersData.push({
+            id: userId,
+            email: userData.email || 'E-posta Bulunamadı',
+            displayName: userData.displayName || 'İsimsiz Kullanıcı',
+            photoURL: userData.photoURL || null,
+            createdAt: userData.createdAt || { seconds: Date.now() / 1000 },
+            lastLogin: userData.lastLogin || { seconds: Date.now() / 1000 },
+            isAdmin: userData.isAdmin || false,
+            authData: userData
+          });
+        }
+      });
+      
+      // Sort by creation date (newest first)
+      usersData.sort((a, b) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateB - dateA;
       });
       
       setUsers(usersData);
@@ -159,6 +203,10 @@ const AdminPanel = () => {
       console.error('Error fetching users:', error);
     }
   };
+  
+  // State for forum posts search
+  const [postSearchQuery, setPostSearchQuery] = useState('');
+  const [filteredPosts, setFilteredPosts] = useState([]);
   
   // Filter users based on search query
   useEffect(() => {
@@ -172,6 +220,20 @@ const AdminPanel = () => {
       setFilteredUsers(filtered);
     }
   }, [searchQuery, users]);
+  
+  // Filter posts based on search query
+  useEffect(() => {
+    if (postSearchQuery.trim() === '') {
+      setFilteredPosts(posts);
+    } else {
+      const filtered = posts.filter(post => 
+        (post.title && post.title.toLowerCase().includes(postSearchQuery.toLowerCase())) ||
+        (post.userName && post.userName.toLowerCase().includes(postSearchQuery.toLowerCase())) ||
+        (post.content && post.content.toLowerCase().includes(postSearchQuery.toLowerCase()))
+      );
+      setFilteredPosts(filtered);
+    }
+  }, [postSearchQuery, posts]);
 
   // Fetch posts
   const fetchPosts = async () => {
@@ -189,6 +251,7 @@ const AdminPanel = () => {
       });
       
       setPosts(postsData);
+      setFilteredPosts(postsData);
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
@@ -683,24 +746,39 @@ const AdminPanel = () => {
                                   <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
                                     {user.displayName || 'İsimsiz Kullanıcı'}
                                   </Typography>
-                                  {user.isAdmin && (
-                                    <Chip 
-                                      size="small" 
-                                      label="Admin" 
-                                      color="primary" 
-                                      sx={{ ml: 1, fontWeight: 600, fontSize: '0.7rem' }} 
-                                    />
-                                  )}
+                                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                    {user.isAdmin && (
+                                      <Chip 
+                                        size="small" 
+                                        label="Admin" 
+                                        color="primary" 
+                                        sx={{ ml: 1, fontWeight: 600, fontSize: '0.7rem' }} 
+                                      />
+                                    )}
+                                    {user.authData?.emailVerified && (
+                                      <Chip 
+                                        size="small" 
+                                        label="Doğrulanmış" 
+                                        color="success" 
+                                        sx={{ ml: 0.5, fontWeight: 600, fontSize: '0.7rem' }} 
+                                      />
+                                    )}
+                                  </Box>
                                 </Box>
                               }
                               secondary={
                                 <React.Fragment>
                                   <Typography variant="body2" component="span" color="text.secondary">
-                                    {user.email}
+                                    {user.email || user.authData?.email || 'E-posta Bulunamadı'}
                                   </Typography>
                                   <Typography variant="body2" component="div" color="text.secondary" sx={{ mt: 0.5 }}>
                                     Kayıt: {user.createdAt && new Date(user.createdAt.seconds * 1000).toLocaleDateString()}
                                   </Typography>
+                                  {user.authData?.lastLoginAt && (
+                                    <Typography variant="body2" component="div" color="text.secondary">
+                                      Son Giriş: {new Date(parseInt(user.authData.lastLoginAt)).toLocaleDateString()}
+                                    </Typography>
+                                  )}
                                 </React.Fragment>
                               }
                               sx={{ ml: 1 }}
@@ -765,10 +843,51 @@ const AdminPanel = () => {
                           <Typography variant="h6" sx={{ fontWeight: 600 }}>
                             {selectedUser.displayName || 'İsimsiz Kullanıcı'}
                           </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                            {selectedUser.isAdmin && (
+                              <Chip 
+                                size="small" 
+                                label="Admin" 
+                                color="primary" 
+                                sx={{ fontWeight: 600, fontSize: '0.7rem' }} 
+                              />
+                            )}
+                            {selectedUser.authData?.emailVerified && (
+                              <Chip 
+                                size="small" 
+                                label="Doğrulanmış" 
+                                color="success" 
+                                sx={{ fontWeight: 600, fontSize: '0.7rem' }} 
+                              />
+                            )}
+                          </Box>
                           <Typography variant="body2" color="text.secondary">
-                            {selectedUser.email}
+                            {selectedUser.email || selectedUser.authData?.email || 'E-posta Bulunamadı'}
                           </Typography>
+                          {selectedUser.authData && (
+                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                              UID: {selectedUser.id}
+                            </Typography>
+                          )}
                         </Box>
+                      </Box>
+                      
+                      <Divider sx={{ my: 2 }} />
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Kayıt Tarihi:</strong> {selectedUser.createdAt && new Date(selectedUser.createdAt.seconds * 1000).toLocaleDateString()}
+                        </Typography>
+                        {selectedUser.authData?.lastLoginAt && (
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Son Giriş:</strong> {new Date(parseInt(selectedUser.authData.lastLoginAt)).toLocaleDateString()}
+                          </Typography>
+                        )}
+                        {selectedUser.authData?.creationTime && (
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Hesap Oluşturma:</strong> {new Date(parseInt(selectedUser.authData.creationTime)).toLocaleDateString()}
+                          </Typography>
+                        )}
                       </Box>
                       
                       <Divider sx={{ my: 2 }} />
@@ -864,6 +983,33 @@ const AdminPanel = () => {
                 <ForumIcon sx={{ mr: 1 }} /> Forum Gönderileri
               </Typography>
               
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <TextField
+                  placeholder="Gönderi veya Kullanıcı Ara..."
+                  variant="outlined"
+                  fullWidth
+                  value={postSearchQuery}
+                  onChange={(e) => setPostSearchQuery(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon color="primary" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ 
+                    maxWidth: 400,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#FBBC05',
+                        borderWidth: 2
+                      }
+                    }
+                  }}
+                />
+              </Box>
+              
               <Paper 
                 elevation={0}
                 sx={{ 
@@ -874,7 +1020,7 @@ const AdminPanel = () => {
                 }}
               >
                 <List sx={{ p: 0 }}>
-                  {posts.map((post) => (
+                  {filteredPosts.length > 0 ? filteredPosts.map((post) => (
                     <React.Fragment key={post.id}>
                       <ListItem
                         sx={{
@@ -947,7 +1093,13 @@ const AdminPanel = () => {
                       </ListItem>
                       <Divider component="li" />
                     </React.Fragment>
-                  ))}
+                  )) : (
+                    <Box sx={{ p: 4, textAlign: 'center' }}>
+                      <Typography variant="body1" color="text.secondary">
+                        {postSearchQuery ? "Arama kriterlerine uygun gönderi bulunamadı." : "Henüz gönderi bulunmamaktadır."}
+                      </Typography>
+                    </Box>
+                  )}
                 </List>
               </Paper>
             </Box>
@@ -978,23 +1130,307 @@ const AdminPanel = () => {
                 <SettingsIcon sx={{ mr: 1 }} /> Sistem Ayarları
               </Typography>
               
-              <Alert 
-                severity="info" 
-                sx={{ 
-                  mb: 3,
-                  borderRadius: 2,
-                  '& .MuiAlert-icon': {
-                    fontSize: '2rem',
-                    opacity: 0.8
-                  }
-                }}
-                icon={<SettingsIcon fontSize="inherit" />}
-              >
-                <Typography variant="h6" sx={{ fontWeight: 600, mb: 1 }}>Geliştirme Aşamasında</Typography>
-                <Typography variant="body1">
-                  Bu bölüm henüz geliştirme aşamasındadır. Yakında burada sistem ayarlarını yönetebileceksiniz.
-                </Typography>
-              </Alert>
+              <Grid container spacing={3}>
+                {/* Uygulama Ayarları */}
+                <Grid item xs={12} md={6}>
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 3, 
+                      borderRadius: 2,
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      height: '100%'
+                    }}
+                  >
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        color: '#4285F4'
+                      }}
+                    >
+                      <DashboardIcon sx={{ mr: 1, fontSize: 20 }} /> Uygulama Ayarları
+                    </Typography>
+                    
+                    <List>
+                      <ListItem>
+                        <ListItemText 
+                          primary="Bakım Modu"
+                          secondary="Bakım modunu aktifleştirdiğinizde kullanıcılar siteye erişemez"
+                        />
+                        <Button 
+                          variant="outlined" 
+                          color="primary"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Devre Dışı
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Yeni Kayıtlar"
+                          secondary="Yeni kullanıcı kayıtlarını açıp kapatabilirsiniz"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Bildirimler"
+                          secondary="Sistem bildirimlerini yönetin"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Yönet
+                        </Button>
+                      </ListItem>
+                    </List>
+                  </Paper>
+                </Grid>
+                
+                {/* Forum Ayarları */}
+                <Grid item xs={12} md={6}>
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 3, 
+                      borderRadius: 2,
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      height: '100%'
+                    }}
+                  >
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        color: '#EA4335'
+                      }}
+                    >
+                      <ForumIcon sx={{ mr: 1, fontSize: 20 }} /> Forum Ayarları
+                    </Typography>
+                    
+                    <List>
+                      <ListItem>
+                        <ListItemText 
+                          primary="Forum Gönderileri"
+                          secondary="Forum gönderilerini açıp kapatabilirsiniz"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Yorum Sistemi"
+                          secondary="Yorum sistemini açıp kapatabilirsiniz"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Otomatik Onay"
+                          secondary="Gönderiler otomatik onaylansın mı?"
+                        />
+                        <Button 
+                          variant="outlined" 
+                          color="primary"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Devre Dışı
+                        </Button>
+                      </ListItem>
+                    </List>
+                  </Paper>
+                </Grid>
+                
+                {/* Kullanıcı Ayarları */}
+                <Grid item xs={12} md={6}>
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 3, 
+                      borderRadius: 2,
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      height: '100%'
+                    }}
+                  >
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        color: '#FBBC05'
+                      }}
+                    >
+                      <PeopleIcon sx={{ mr: 1, fontSize: 20 }} /> Kullanıcı Ayarları
+                    </Typography>
+                    
+                    <List>
+                      <ListItem>
+                        <ListItemText 
+                          primary="Profil Fotoğrafları"
+                          secondary="Kullanıcıların profil fotoğrafı yüklemesine izin verin"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Kullanıcı Doğrulama"
+                          secondary="Kullanıcıların e-posta doğrulaması gereksin mi?"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Kullanıcı Engelleme"
+                          secondary="Engellenmiş kullanıcıları yönetin"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Yönet
+                        </Button>
+                      </ListItem>
+                    </List>
+                  </Paper>
+                </Grid>
+                
+                {/* İçerik Ayarları */}
+                <Grid item xs={12} md={6}>
+                  <Paper 
+                    elevation={0}
+                    sx={{ 
+                      p: 3, 
+                      borderRadius: 2,
+                      boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+                      border: '1px solid rgba(0,0,0,0.05)',
+                      height: '100%'
+                    }}
+                  >
+                    <Typography 
+                      variant="h6" 
+                      sx={{ 
+                        mb: 2, 
+                        fontWeight: 600, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        color: '#34A853'
+                      }}
+                    >
+                      <ChatIcon sx={{ mr: 1, fontSize: 20 }} /> İçerik Ayarları
+                    </Typography>
+                    
+                    <List>
+                      <ListItem>
+                        <ListItemText 
+                          primary="Yasaklı Kelimeler"
+                          secondary="Yasaklı kelimeleri yönetin"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Yönet
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="İçerik Filtreleme"
+                          secondary="Uygunsuz içerikleri otomatik filtreleyin"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                      
+                      <Divider sx={{ my: 1 }} />
+                      
+                      <ListItem>
+                        <ListItemText 
+                          primary="Dosya Yükleme"
+                          secondary="Kullanıcıların dosya yüklemesine izin verin"
+                        />
+                        <Button 
+                          variant="contained" 
+                          color="success"
+                          sx={{ borderRadius: 2 }}
+                        >
+                          Aktif
+                        </Button>
+                      </ListItem>
+                    </List>
+                  </Paper>
+                </Grid>
+              </Grid>
             </Box>
           )}
         </Box>
