@@ -17,7 +17,6 @@ import Home from './pages/Home';
 import Analytics from './pages/Analytics';
 import PomodoroPage from './pages/PomodoroPage';
 import TytAytNetTakibi from './pages/TytAytNetTakibi';
-import YapayZeka from './pages/YapayZeka';
 import DersProgrami from './pages/DersProgrami';
 import Analiz from './pages/Analiz';
 import NotDefterim from './pages/NotDefterim';
@@ -134,7 +133,6 @@ const App = () => {
                 <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
                 <Route path="/pomodoro" element={<ProtectedRoute><PomodoroPage /></ProtectedRoute>} />
                 <Route path="/tyt-ayt-net-takibi" element={<ProtectedRoute><TytAytNetTakibi /></ProtectedRoute>} />
-                <Route path="/yapay-zeka" element={<ProtectedRoute><YapayZeka /></ProtectedRoute>} />
                 <Route path="/performans" element={<ProtectedRoute><DersProgrami /></ProtectedRoute>} />
                 <Route path="/analiz" element={<ProtectedRoute><Analiz /></ProtectedRoute>} />
                 <Route path="/not-defterim" element={<ProtectedRoute><NotDefterim /></ProtectedRoute>} />
