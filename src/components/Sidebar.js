@@ -10,7 +10,7 @@ import {
   useTheme, useMediaQuery
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
 import TimerIcon from '@mui/icons-material/Timer';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -82,7 +82,7 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'ope
 const Sidebar = () => {
   const theme = useTheme();
   const location = useLocation();
-  // navigate artık kullanılmıyor
+  const navigate = useNavigate(); // useNavigate hook'unu ekliyoruz
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(!isMobile);
   
@@ -178,8 +178,7 @@ const Sidebar = () => {
                 }}
               >
                 <ListItemButton
-                  component={Link}
-                  to={item.path}
+                  onClick={() => navigate(item.path)}
                   sx={{
                     minHeight: 50,
                     justifyContent: open ? 'initial' : 'center',
