@@ -430,13 +430,13 @@ const Login = () => {
           zIndex: 2
         }}
       >
-        <RainbowBorder sx={{ width: '100%', height: { xs: 'auto', md: '85vh' } }}>
-          <ContentBox>
-            <Grid 
-              container 
-              spacing={3}
-              sx={{ height: '100%' }}
-            >
+        <RainbowBorder sx={{ width: '100%', height: { xs: 'auto', md: '85vh' }, overflow: 'visible' }}>
+          <ContentBox sx={{ overflow: 'visible' }}>
+              <Grid 
+                container 
+                spacing={3}
+                sx={{ height: '100%', overflow: 'visible', position: 'relative' }}
+              >
               {/* Left side - Login form */}
               <Grid 
                 item 
@@ -604,7 +604,10 @@ const Login = () => {
                   height: { xs: 'auto', md: '100%' },
                   display: 'flex',
                   flexDirection: 'column',
-                  justifyContent: 'center'
+                  justifyContent: 'flex-start',
+                  pt: { xs: 2, md: 4 },
+                  zIndex: 10,
+                  position: 'relative'
                 }}
               >
                 <Fade in={true} timeout={1200}>
@@ -612,7 +615,9 @@ const Login = () => {
                     sx={{ 
                       mb: { xs: 2, md: 2 }, 
                       textAlign: { xs: 'center', md: 'left' },
-                      px: { xs: 2, md: 0 }
+                      px: { xs: 2, md: 0 },
+                      position: 'relative',
+                      zIndex: 10
                     }}
                   >
                     <AnimatedText 
@@ -646,7 +651,7 @@ const Login = () => {
                 
                 {/* Info Cards Section */}
                 <Fade in={true} timeout={1500}>
-                  <Box sx={{ mb: 2 }}>
+                  <Box sx={{ mb: 2, position: 'relative', zIndex: 20 }}>
                     <Grid 
                       container 
                       spacing={2}
@@ -697,7 +702,8 @@ const Login = () => {
                                     boxShadow: `0 6px 15px ${card.color}40`,
                                     flexShrink: 0,
                                     animation: `${float} 4s ease-in-out infinite`,
-                                    animationDelay: `${index * 0.2}s`
+                                    animationDelay: `${index * 0.2}s`,
+                                    zIndex: 5
                                   }}
                                 >
                                   {card.icon}
@@ -737,7 +743,7 @@ const Login = () => {
                 
                 {/* Features Section */}
                 <Fade in={true} timeout={1800}>
-                  <Box sx={{ mt: 1 }}>
+                  <Box sx={{ mt: 1, display: 'none' }}>
                     <Grid 
                       container 
                       spacing={2}
