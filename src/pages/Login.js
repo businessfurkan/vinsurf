@@ -727,6 +727,89 @@ const Login = () => {
                 </Fade>
                 
                 {/* Features Section */}
+                {/* Info Cards Section - Bilgi Kartları */}
+                <Fade in={true} timeout={1500}>
+                  <Box sx={{ mb: 2 }}>
+                    <Grid 
+                      container 
+                      spacing={2}
+                    >
+                      {infoCards.map((card, index) => (
+                        <Grid 
+                          item 
+                          xs={12} 
+                          sm={6} 
+                          md={4}
+                          key={card.title}
+                        >
+                          <Grow in={true} timeout={1200 + (index * 150)}>
+                            <FeatureCard 
+                              elevation={2} 
+                              sx={{ 
+                                height: '100%', 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                '&::after': {
+                                  background: `linear-gradient(90deg, ${card.color}, ${card.color}99)`,
+                                }
+                              }}
+                            >
+                              <CardContent 
+                                sx={{ 
+                                  p: 2, 
+                                  textAlign: 'left', 
+                                  flex: 1, 
+                                  display: 'flex', 
+                                  flexDirection: 'row', 
+                                  alignItems: 'center',
+                                  gap: 1.5
+                                }}
+                              >
+                                <Avatar
+                                  sx={{
+                                    bgcolor: card.color,
+                                    width: 40,
+                                    height: 40,
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  {card.icon}
+                                </Avatar>
+                                <Box>
+                                  <Typography 
+                                    variant="subtitle1" 
+                                    sx={{ 
+                                      fontWeight: 700, 
+                                      fontSize: '0.9rem',
+                                      mb: 0.5,
+                                      color: theme.palette.text.primary
+                                    }}
+                                  >
+                                    {card.title}
+                                  </Typography>
+                                  <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                      fontSize: '0.75rem',
+                                      color: theme.palette.text.secondary,
+                                      fontWeight: 400,
+                                      lineHeight: 1.3
+                                    }}
+                                  >
+                                    {card.description}
+                                  </Typography>
+                                </Box>
+                              </CardContent>
+                            </FeatureCard>
+                          </Grow>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                </Fade>
+                
+                {/* Features Section */}
                 <Fade in={true} timeout={1800}>
                   <Box sx={{ mt: 1 }}>
                     <Grid 
