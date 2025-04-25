@@ -387,10 +387,6 @@ const Login = () => {
               fontSize: { xs: '1.1rem', md: '1.3rem' },
               textAlign: 'center',
               padding: '15px 25px',
-              background: 'rgba(255,255,255,0.6)',
-              borderRadius: '15px',
-              backdropFilter: 'blur(5px)',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
             }}
           >
             <Box component="span" sx={{ color: '#FF6B6B', fontWeight: 700, fontSize: '1.15em' }}>Pomodoro tekniği</Box> ve 
