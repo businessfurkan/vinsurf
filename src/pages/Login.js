@@ -47,7 +47,7 @@ const LoginContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   overflow: 'hidden',
   position: 'relative',
-  background: '#FFFFFF',
+  background: '#FFF8E1',
 }));
 
 const Header = styled(Box)(({ theme }) => ({
@@ -72,41 +72,29 @@ const Logo = styled(Box)(({ theme }) => ({
 
 const HeroSection = styled(Box)(({ theme }) => ({
   display: 'flex',
-  flexDirection: { xs: 'column', md: 'row' },
+  flexDirection: { xs: 'column', md: 'column' },
   alignItems: 'center',
-  justifyContent: 'space-between',
-  padding: { xs: '20px', md: '40px 80px' },
+  justifyContent: 'center',
+  padding: { xs: '20px', md: '40px 20px' },
   position: 'relative',
   overflow: 'visible',
   flex: 1,
+  minHeight: '60vh',
 }));
 
-const HeroContent = styled(Box)(({ theme }) => ({
-  maxWidth: '500px',
-  zIndex: 2,
-  position: 'relative',
-}));
 
-const HeroTitle = styled(Typography)(({ theme }) => ({
-  fontSize: { xs: '32px', md: '42px' },
-  fontWeight: 'bold',
-  marginBottom: '16px',
-  color: '#333',
-  lineHeight: 1.2,
-}));
-
-const HeroSubtitle = styled(Typography)(({ theme }) => ({
-  fontSize: { xs: '16px', md: '18px' },
-  color: '#666',
-  marginBottom: '32px',
-}));
 
 const HeroImageContainer = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  zIndex: 1,
+  position: 'absolute',
+  top: '50%',
+  right: '0',
+  transform: 'translateY(-50%)',
+  zIndex: 0,
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
+  opacity: 0.7,
+  pointerEvents: 'none',
 }));
 
 const BigLetterA = styled(Box)(({ theme }) => ({
@@ -299,30 +287,87 @@ const Login = () => {
       </Header>
       
       <HeroSection>
-        <HeroContent>
-          <HeroTitle>
-            The App<br />
-            That Makes<br />
-            Studying Fun!
-          </HeroTitle>
-          <HeroSubtitle>
-            Pomodoro tekniği ve analitik çalışma takibi ile sınav başarınızı artırın. 
-            Düzenli çalışma ve detaylı istatistiklerle performansınızı maksimum seviyeye çıkarın.
-          </HeroSubtitle>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          maxWidth: '800px',
+          margin: '0 auto',
+          padding: '40px 20px',
+          position: 'relative',
+          zIndex: 5
+        }}>
+          <Typography 
+            variant="h4" 
+            component="h1"
+            sx={{ 
+              fontWeight: 700, 
+              color: '#333',
+              mb: 3,
+              textAlign: 'center',
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: '-10px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '80px',
+                height: '4px',
+                background: 'linear-gradient(90deg, #FF6B6B, #FF9F1C)',
+                borderRadius: '2px'
+              }
+            }}
+          >
+            YKS Çalışma Takip
+          </Typography>
           
-          {loading ? (
-            <CircularProgress size={36} sx={{ color: '#FF6B6B' }} />
-          ) : (
-            <LoginButton
-              variant="contained"
-              startIcon={<GoogleIcon />}
-              onClick={handleGoogleLogin}
-              size="large"
-            >
-              Google ile Giriş Yap
-            </LoginButton>
-          )}
-        </HeroContent>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 500,
+              color: '#555',
+              mb: 5,
+              maxWidth: '600px',
+              lineHeight: 1.6,
+              fontSize: { xs: '1rem', md: '1.25rem' },
+              textAlign: 'center'
+            }}
+          >
+            <Box component="span" sx={{ color: '#FF6B6B', fontWeight: 700 }}>Pomodoro tekniği</Box> ve 
+            <Box component="span" sx={{ color: '#4ECDC4', fontWeight: 700 }}>analitik çalışma takibi</Box> ile 
+            sınav başarınızı artırın. Düzenli çalışma ve detaylı istatistiklerle 
+            performansınızı maksimum seviyeye çıkarın.
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            width: '100%',
+            mb: 4
+          }}>
+            {loading ? (
+              <CircularProgress size={36} sx={{ color: '#FF6B6B' }} />
+            ) : (
+              <LoginButton
+                variant="contained"
+                startIcon={<GoogleIcon />}
+                onClick={handleGoogleLogin}
+                size="large"
+                sx={{ 
+                  py: 1.5, 
+                  px: 4,
+                  fontSize: '1.1rem',
+                  boxShadow: '0 8px 20px rgba(255, 107, 107, 0.3)'
+                }}
+              >
+                Google ile Giriş Yap
+              </LoginButton>
+            )}
+          </Box>
+        </Box>
         
         <HeroImageContainer>
           <GreenBlob />
