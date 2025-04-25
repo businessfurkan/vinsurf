@@ -133,27 +133,27 @@ const GreenBlob = styled(Box)(({ theme }) => ({
 
 
 const LoginButton = styled(Button)(({ theme }) => ({
-  background: '#FF6B6B',
-  border: 0,
-  borderRadius: 30,
-  boxShadow: '0 4px 10px rgba(255, 107, 107, 0.3)',
-  color: 'white',
+  background: 'linear-gradient(45deg, #4776E6, #8E54E9)',
+  color: '#fff',
+  fontWeight: 'bold',
   padding: '12px 30px',
-  fontWeight: 600,
-  transition: 'all 0.3s ease',
-  fontSize: '16px',
+  borderRadius: '30px',
   textTransform: 'none',
+  fontSize: '16px',
+  boxShadow: '0 8px 20px rgba(142, 84, 233, 0.3)',
+  transition: 'all 0.3s ease',
+  border: '2px solid transparent',
   '&:hover': {
-    background: '#FF5252',
+    background: 'linear-gradient(45deg, #3A66D6, #7B46D9)',
+    boxShadow: '0 10px 25px rgba(142, 84, 233, 0.4)',
     transform: 'translateY(-3px)',
-    boxShadow: '0 6px 15px rgba(255, 107, 107, 0.4)',
   },
 }));
 
 
 
 const FeatureCard = styled(Paper)(({ theme, color, index }) => ({
-  borderRadius: '16px',
+  borderRadius: '20px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -167,52 +167,85 @@ const FeatureCard = styled(Paper)(({ theme, color, index }) => ({
   position: 'relative',
   cursor: 'pointer',
   margin: '0 auto',
-  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+  border: `3px solid ${color}15`,
+  boxShadow: `0 10px 25px ${color}25`,
   '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 12px 20px rgba(0, 0, 0, 0.1)',
+    transform: 'translateY(-8px) scale(1.03)',
+    boxShadow: `0 15px 30px ${color}40`,
+    background: `linear-gradient(135deg, white, ${color}10)`,
   },
 }));
 
 const FeatureIcon = styled(Box)(({ color }) => ({
-  width: '60px',
-  height: '60px',
+  width: '70px',
+  height: '70px',
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: color,
+  background: `linear-gradient(135deg, ${color}, ${color}CC)`,
   color: '#fff',
   marginBottom: '16px',
+  boxShadow: `0 8px 20px ${color}50`,
+  border: '4px solid white',
+  transition: 'all 0.3s ease',
   '& .MuiSvgIcon-root': {
-    fontSize: '30px',
+    fontSize: '32px',
+    filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))',
   },
+  '.feature-card:hover &': {
+    transform: 'scale(1.1) rotate(5deg)',
+  }
 }));
 
-const FeatureTitle = styled(Typography)(({ theme }) => ({
+const FeatureTitle = styled(Typography)(({ theme, color }) => ({
   fontSize: '18px',
-  fontWeight: 'bold',
+  fontWeight: '800',
   color: '#333',
+  marginTop: '10px',
+  position: 'relative',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    bottom: '-8px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: '40px',
+    height: '3px',
+    background: color || '#333',
+    borderRadius: '2px',
+  }
 }));
 
 const FeatureDescription = styled(Typography)(({ theme }) => ({
   fontSize: '14px',
-  color: '#666',
+  color: '#fff',
   lineHeight: 1.5,
   position: 'absolute',
-  top: '100%',
+  bottom: '100%',
   left: '50%',
   transform: 'translateX(-50%)',
-  width: '200px',
-  background: 'rgba(255, 255, 255, 0.95)',
-  padding: '12px',
-  borderRadius: '8px',
-  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+  width: '220px',
+  background: 'linear-gradient(135deg, rgba(66, 99, 235, 0.95), rgba(87, 66, 235, 0.95))',
+  padding: '14px',
+  borderRadius: '12px',
+  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
   zIndex: 10,
   opacity: 0,
   visibility: 'hidden',
   transition: 'all 0.3s ease',
   pointerEvents: 'none',
+  fontWeight: '500',
+  textAlign: 'center',
+  '&::after': {
+    content: '""',
+    position: 'absolute',
+    top: '100%',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    border: '8px solid transparent',
+    borderTopColor: 'rgba(87, 66, 235, 0.95)',
+  }
 }));
 
 const TooltipContainer = styled(Box)(({ isOpen }) => ({
@@ -220,15 +253,15 @@ const TooltipContainer = styled(Box)(({ isOpen }) => ({
   '&:hover .feature-description, &.active .feature-description': {
     opacity: 1,
     visibility: 'visible',
-    top: 'calc(100% + 10px)',
+    bottom: 'calc(100% + 15px)',
   },
 }));
 
 const FeatureCardsContainer = styled(Box)(({ theme }) => ({
   background: '#FFF8E1',
-  padding: '40px 0',
+  padding: '40px 0 60px',
   borderRadius: '40px 40px 0 0',
-  marginTop: '40px',
+  marginTop: '-20px',
   position: 'relative',
   zIndex: 1,
 }));
@@ -314,24 +347,29 @@ const Login = () => {
           zIndex: 5
         }}>
           <Typography 
-            variant="h4" 
+            variant="h3" 
             component="h1"
             sx={{ 
-              fontWeight: 700, 
+              fontWeight: 800, 
               color: '#333',
               mb: 3,
               textAlign: 'center',
               position: 'relative',
+              background: 'linear-gradient(90deg, #FF6B6B, #4ECDC4)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              textShadow: '0 2px 10px rgba(0,0,0,0.05)',
               '&::after': {
                 content: '""',
                 position: 'absolute',
-                bottom: '-10px',
+                bottom: '-15px',
                 left: '50%',
                 transform: 'translateX(-50%)',
-                width: '80px',
-                height: '4px',
-                background: 'linear-gradient(90deg, #FF6B6B, #FF9F1C)',
-                borderRadius: '2px'
+                width: '100px',
+                height: '6px',
+                background: 'linear-gradient(90deg, #FF6B6B, #4ECDC4)',
+                borderRadius: '3px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
               }
             }}
           >
@@ -342,16 +380,21 @@ const Login = () => {
             variant="h6" 
             sx={{ 
               fontWeight: 500,
-              color: '#555',
+              color: '#444',
               mb: 5,
-              maxWidth: '600px',
-              lineHeight: 1.6,
-              fontSize: { xs: '1rem', md: '1.25rem' },
-              textAlign: 'center'
+              maxWidth: '650px',
+              lineHeight: 1.7,
+              fontSize: { xs: '1.1rem', md: '1.3rem' },
+              textAlign: 'center',
+              padding: '15px 25px',
+              background: 'rgba(255,255,255,0.6)',
+              borderRadius: '15px',
+              backdropFilter: 'blur(5px)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
             }}
           >
-            <Box component="span" sx={{ color: '#FF6B6B', fontWeight: 700 }}>Pomodoro tekniği</Box> ve 
-            <Box component="span" sx={{ color: '#4ECDC4', fontWeight: 700 }}>analitik çalışma takibi</Box> ile 
+            <Box component="span" sx={{ color: '#FF6B6B', fontWeight: 700, fontSize: '1.15em' }}>Pomodoro tekniği</Box> ve 
+            <Box component="span" sx={{ color: '#4ECDC4', fontWeight: 700, fontSize: '1.15em' }}>analitik çalışma takibi</Box> ile 
             sınav başarınızı artırın. Düzenli çalışma ve detaylı istatistiklerle 
             performansınızı maksimum seviyeye çıkarın.
           </Typography>
@@ -419,11 +462,12 @@ const Login = () => {
                       card.classList.toggle('active');
                     }}
                     id={`feature-card-${index}`}
+                    className="feature-card"
                   >
                     <FeatureIcon color={feature.color}>
                       {feature.icon}
                     </FeatureIcon>
-                    <FeatureTitle>{feature.title}</FeatureTitle>
+                    <FeatureTitle color={feature.color}>{feature.title}</FeatureTitle>
                   </FeatureCard>
                   <FeatureDescription className="feature-description">{feature.description}</FeatureDescription>
                 </TooltipContainer>
