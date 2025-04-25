@@ -90,21 +90,22 @@ const getSubjectColor = (subject) => {
 // Artık kullanılmayan bileşen
 
 const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
-  padding: '16px',
-  borderRadius: '12px',
-  backgroundColor: alpha('#FFFFFF', 0.95),
+  padding: '18px',
+  borderRadius: '16px',
+  backgroundColor: alpha('#FFFFFF', 0.98),
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
-  transition: 'all 0.3s ease',
-  border: '1px solid rgba(255,255,255,0.5)',
-  margin: '8px 0',
+  boxShadow: '0 10px 30px rgba(0,0,0,0.04), 0 6px 10px rgba(0,0,0,0.02)',
+  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+  border: '1px solid rgba(0,0,0,0.03)',
+  margin: '10px 0',
+  backdropFilter: 'blur(8px)',
   '&:hover': {
-    boxShadow: '0 12px 28px rgba(0,0,0,0.1)',
-    transform: 'translateY(-3px) scale(1.02)',
-    backgroundColor: alpha('#FFFFFF', 0.99),
+    boxShadow: '0 15px 35px rgba(0,0,0,0.06), 0 8px 12px rgba(0,0,0,0.03)',
+    transform: 'translateY(-5px)',
+    backgroundColor: alpha('#FFFFFF', 1),
   },
   '&::before': {
     content: '""',
@@ -112,33 +113,33 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
     top: 0,
     left: 0,
     width: '100%',
-    height: '5px',
+    height: '6px',
     background: `linear-gradient(90deg, ${color}, ${alpha(color, 0.7)})`,
-    boxShadow: `0 2px 8px ${alpha(color, 0.4)}`,
+    boxShadow: `0 3px 10px ${alpha(color, 0.3)}`,
   },
   '&::after': {
     content: '""',
     position: 'absolute',
     top: '5px',
     right: '10px',
-    width: '40px',
-    height: '40px',
+    width: '50px',
+    height: '50px',
     borderRadius: '50%',
-    background: `radial-gradient(circle, ${alpha(color, 0.1)} 0%, transparent 70%)`,
+    background: `radial-gradient(circle, ${alpha(color, 0.08)} 0%, transparent 70%)`,
     pointerEvents: 'none',
   }
 }));
 
 const FilterButton = styled(Button)(({ theme }) => ({
-  backgroundColor: alpha('#3f51b5', 0.1),
+  backgroundColor: alpha('#3f51b5', 0.08),
   color: '#3f51b5',
-  border: `1px solid ${alpha('#3f51b5', 0.2)}`,
+  border: `1px solid ${alpha('#3f51b5', 0.15)}`,
   borderRadius: '30px',
-  padding: '8px 16px',
+  padding: '10px 20px',
   textTransform: 'none',
   fontWeight: 600,
-  boxShadow: '0 4px 10px rgba(63, 81, 181, 0.1)',
-  transition: 'all 0.3s ease',
+  boxShadow: '0 6px 12px rgba(63, 81, 181, 0.08)',
+  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
   '&:hover': {
     backgroundColor: alpha('#3f51b5', 0.15),
     boxShadow: '0 6px 12px rgba(63, 81, 181, 0.15)',
@@ -528,33 +529,18 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: 'linear-gradient(135deg, #FFF8E1 0%, #FFECB3 100%)',
+        background: '#FFFFF0',
         position: 'relative',
         overflow: 'hidden',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundImage: `
-            linear-gradient(rgba(255, 154, 139, 0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 154, 139, 0.05) 1px, transparent 1px)
-          `,
-          backgroundSize: '20px 20px',
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
         '&::after': {
           content: '""',
           position: 'absolute',
-          top: '10%',
+          top: '5%',
           right: '5%',
           width: '300px',
           height: '300px',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,154,139,0.1) 0%, rgba(255,154,139,0) 70%)',
+          background: 'radial-gradient(circle, rgba(63, 81, 181, 0.03) 0%, rgba(63, 81, 181, 0) 70%)',
           pointerEvents: 'none',
           zIndex: 0,
         },
@@ -595,13 +581,14 @@ const DersProgrami = () => {
           mb: 3,
           flexWrap: 'wrap',
           gap: 2,
-          backgroundColor: alpha('#FFFFF0', 0.8),
-          padding: '16px 20px',
-          borderRadius: '20px',
-          boxShadow: '0 8px 20px rgba(0,0,0,0.05)',
-          border: '1px solid rgba(63, 81, 181, 0.1)',
+          backgroundColor: alpha('#FFFFFF', 0.9),
+          padding: '20px 24px',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.04), 0 6px 10px rgba(0,0,0,0.02)',
+          border: '1px solid rgba(0,0,0,0.03)',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          backdropFilter: 'blur(10px)',
         }}>
           <Box sx={{
             position: 'absolute',
@@ -1555,19 +1542,23 @@ const DersProgrami = () => {
         >
           <Button 
             onClick={handleCloseViewDialog}
+            variant="contained"
+            color="primary"
+            startIcon={<AddCircleOutlineIcon />}
             sx={{ 
               borderRadius: '30px',
               px: 3,
-              py: 1,
-              color: 'rgba(0,0,0,0.6)',
+              py: 1.2,
               fontWeight: 600,
               textTransform: 'none',
-              backgroundColor: 'rgba(0,0,0,0.03)',
+              background: 'linear-gradient(45deg, #3f51b5 0%, #5c6bc0 100%)',
+              boxShadow: '0 8px 16px rgba(63, 81, 181, 0.25)',
               '&:hover': {
-                backgroundColor: 'rgba(0,0,0,0.06)',
-                transform: 'translateY(-2px)'
+                background: 'linear-gradient(45deg, #3949ab 0%, #5c6bc0 100%)',
+                boxShadow: '0 10px 20px rgba(63, 81, 181, 0.35)',
+                transform: 'translateY(-3px)'
               },
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
             }}
           >
             Kapat
@@ -1585,15 +1576,17 @@ const DersProgrami = () => {
                 sx={{ 
                   borderRadius: '30px',
                   px: 3,
-                  py: 1,
+                  py: 1.2,
                   fontWeight: 600,
                   textTransform: 'none',
-                  backgroundColor: '#1976d2',
+                  background: 'linear-gradient(45deg, #1976d2 0%, #2196f3 100%)',
+                  boxShadow: '0 8px 16px rgba(25, 118, 210, 0.25)',
                   '&:hover': {
-                    backgroundColor: '#1565c0',
-                    transform: 'translateY(-2px)'
+                    background: 'linear-gradient(45deg, #1565c0 0%, #2196f3 100%)',
+                    boxShadow: '0 10px 20px rgba(25, 118, 210, 0.35)',
+                    transform: 'translateY(-3px)'
                   },
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
                 }}
               >
                 Videoyu Aç
@@ -1609,17 +1602,20 @@ const DersProgrami = () => {
               sx={{ 
                 borderRadius: '30px',
                 px: 3,
-                py: 1,
+                py: 1.2,
                 fontWeight: 600,
                 textTransform: 'none',
-                borderColor: alpha('#3f51b5', 0.5),
+                borderWidth: '1.5px',
+                borderColor: alpha('#3f51b5', 0.4),
                 color: '#3f51b5',
+                boxShadow: '0 4px 10px rgba(63, 81, 181, 0.1)',
                 '&:hover': {
                   borderColor: '#3f51b5',
                   backgroundColor: alpha('#3f51b5', 0.05),
-                  transform: 'translateY(-2px)'
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 6px 14px rgba(63, 81, 181, 0.15)'
                 },
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
               }}
             >
               Düzenle
@@ -1634,15 +1630,17 @@ const DersProgrami = () => {
               sx={{ 
                 borderRadius: '30px',
                 px: 3,
-                py: 1,
+                py: 1.2,
                 fontWeight: 600,
                 textTransform: 'none',
                 bgcolor: '#f44336',
+                boxShadow: '0 6px 12px rgba(244, 67, 54, 0.2)',
                 '&:hover': {
                   bgcolor: '#d32f2f',
-                  transform: 'translateY(-2px)'
+                  transform: 'translateY(-3px)',
+                  boxShadow: '0 8px 15px rgba(244, 67, 54, 0.3)'
                 },
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
               }}
             >
               Sil
@@ -1661,7 +1659,13 @@ const DersProgrami = () => {
           onClose={handleCloseSnackbar} 
           severity={snackbar.severity}
           variant="filled"
-          sx={{ borderRadius: 2 }}
+          sx={{ 
+            borderRadius: 3,
+            boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
+            '& .MuiAlert-icon': {
+              fontSize: '1.2rem'
+            }
+          }}
         >
           {snackbar.message}
         </Alert>

@@ -158,31 +158,28 @@ const App = () => {
                 <Route path="/benimle-calis" element={
                   <ProtectedRoute>
                     <Box sx={{
-                      position: 'fixed',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      zIndex: -1,
+                      position: 'relative',
+                      width: '100%',
+                      height: '100%',
                       '&::before': {
                         content: '""',
-                        position: 'absolute',
+                        position: 'fixed',
                         top: 0,
                         left: 0,
                         width: '60px', // Sidebar genişliği
                         height: '100%',
                         backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.6) 0%, rgba(97, 97, 255, 0.5) 100%)',
-                        zIndex: -1,
+                        zIndex: 0,
                       },
                       '&::after': {
                         content: '""',
-                        position: 'absolute',
+                        position: 'fixed',
                         top: 0,
                         right: 0,
                         width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
                         height: '100%',
                         backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.6) 0%, rgba(97, 97, 255, 0.5) 100%)',
-                        zIndex: -1,
+                        zIndex: 0,
                         '@media (max-width: 1200px)': {
                           width: '0px',
                         },
