@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { 
   Box, 
   Drawer, 
@@ -123,6 +124,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
               onMouseLeave={() => setHoveredItem(null)}
             >
               <ListItemButton
+                id={`sidebar-item-${item.text}`}
                 onClick={() => navigate(item.path)}
                 sx={{
                   height: 46,
@@ -158,24 +160,28 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 </ListItemIcon>
               </ListItemButton>
               
-              {hoveredItem === item.text && (
+              {hoveredItem === item.text && ReactDOM.createPortal(
                 <Box
                   sx={{
-                    position: 'absolute',
-                    left: 'calc(100% + 8px)',
-                    top: '50%',
+                    position: 'fixed',
+                    left: `${drawerWidth + 8}px`,
+                    top: (event) => {
+                      const rect = document.getElementById(`sidebar-item-${item.text}`).getBoundingClientRect();
+                      return rect.top + rect.height/2 - 15;
+                    },
                     transform: 'translateY(-50%)',
                     background: 'white',
                     boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
                     borderRadius: '8px',
                     padding: '8px 16px',
-                    zIndex: 1500,
+                    zIndex: 9999,
                     whiteSpace: 'nowrap',
                     fontWeight: 500,
                     color: '#2e3856',
                     fontFamily: 'Montserrat, sans-serif',
                     fontSize: '0.9rem',
                     border: `1px solid ${item.color}30`,
+                    pointerEvents: 'none',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -216,7 +222,8 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                   }}
                 >
                   {item.text}
-                </Box>
+                </Box>,
+                document.body
               )}
             </ListItem>
           );
