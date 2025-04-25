@@ -170,58 +170,75 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                       return rect.top + rect.height/2 - 15;
                     },
                     transform: 'translateY(-50%)',
-                    background: 'white',
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
-                    borderRadius: '8px',
-                    padding: '8px 16px',
+                    background: `linear-gradient(135deg, ${item.color}10, ${item.color}30)`,
+                    boxShadow: `0 8px 16px rgba(0,0,0,0.1), 0 2px 4px ${item.color}20`,
+                    borderRadius: '12px',
+                    padding: '10px 18px',
                     zIndex: 9999,
                     whiteSpace: 'nowrap',
-                    fontWeight: 500,
+                    fontWeight: 600,
                     color: '#2e3856',
                     fontFamily: 'Montserrat, sans-serif',
                     fontSize: '0.9rem',
-                    border: `1px solid ${item.color}30`,
+                    letterSpacing: '0.3px',
+                    backdropFilter: 'blur(8px)',
+                    border: `1px solid ${item.color}40`,
                     pointerEvents: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    minWidth: '120px',
+                    justifyContent: 'center',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
-                      left: '-6px',
+                      left: '-8px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       width: 0,
                       height: 0,
-                      borderTop: '6px solid transparent',
-                      borderBottom: '6px solid transparent',
-                      borderRight: '6px solid white',
+                      borderTop: '8px solid transparent',
+                      borderBottom: '8px solid transparent',
+                      borderRight: `8px solid ${item.color}40`,
                       zIndex: 2
                     },
-                    '&::after': {
-                      content: '""',
-                      position: 'absolute',
-                      left: '-7px',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      width: 0,
-                      height: 0,
-                      borderTop: '7px solid transparent',
-                      borderBottom: '7px solid transparent',
-                      borderRight: `7px solid ${item.color}30`,
-                      zIndex: 1
-                    },
-                    animation: 'fadeIn 0.2s ease-in-out',
-                    '@keyframes fadeIn': {
+                    animation: 'tooltipFadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                    '@keyframes tooltipFadeIn': {
                       '0%': {
                         opacity: 0,
-                        transform: 'translateY(-50%) translateX(-10px)'
+                        transform: 'translateY(-50%) translateX(-15px) scale(0.95)'
                       },
                       '100%': {
                         opacity: 1,
-                        transform: 'translateY(-50%) translateX(0)'
+                        transform: 'translateY(-50%) translateX(0) scale(1)'
                       }
                     }
                   }}
                 >
-                  {item.text}
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'inline-block',
+                      position: 'relative',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        width: '100%',
+                        height: '2px',
+                        bottom: '-2px',
+                        left: 0,
+                        background: item.color,
+                        transform: 'scaleX(0)',
+                        transformOrigin: 'bottom right',
+                        transition: 'transform 0.3s ease-out',
+                      },
+                      '&:hover::after': {
+                        transform: 'scaleX(1)',
+                        transformOrigin: 'bottom left',
+                      },
+                    }}
+                  >
+                    {item.text}
+                  </Box>
                 </Box>,
                 document.body
               )}

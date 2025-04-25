@@ -106,9 +106,9 @@ const BenimleCalis = () => {
       minHeight: '90vh',
       position: 'relative',
       overflow: 'hidden',
-      backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.08) 0%, rgba(97, 97, 255, 0.08) 100%)',
+      backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.6) 0%, rgba(97, 97, 255, 0.5) 100%)',
       borderRadius: 4,
-      boxShadow: '0 10px 40px rgba(0,0,0,0.05)',
+      boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
     }}>
       {/* Snackbar notification */}
       <Snackbar
