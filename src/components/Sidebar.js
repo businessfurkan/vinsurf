@@ -125,9 +125,9 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
               <ListItemButton
                 onClick={() => navigate(item.path)}
                 sx={{
-                  height: 40,
-                  width: 40,
-                  minWidth: 40,
+                  height: 46,
+                  width: 46,
+                  minWidth: 46,
                   borderRadius: '50%',
                   display: 'flex',
                   justifyContent: 'center',
@@ -148,9 +148,9 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                     minWidth: 0,
                     color: isActive ? item.color : `${item.color}99`,
                     transition: 'all 0.2s ease',
-                    fontSize: 20,
+                    fontSize: 24,
                     '& .MuiSvgIcon-root': {
-                      fontSize: 20,
+                      fontSize: 24,
                     }
                   }}
                 >

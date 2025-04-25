@@ -23,7 +23,7 @@ import {
   TextField,
   Button
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+
 import LockIcon from '@mui/icons-material/Lock';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import PersonIcon from '@mui/icons-material/Person';
@@ -179,21 +179,6 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
     <StyledAppBar position="fixed">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton
-            color="inherit"
-            aria-label="aç/kapat menü"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{
-              mr: 2,
-              color: '#4285F4',
-              '&:hover': {
-                backgroundColor: 'rgba(66, 133, 244, 0.08)'
-              }
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
           <Typography 
             variant="h6" 
             noWrap 

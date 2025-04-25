@@ -36,8 +36,7 @@ import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
 import CheckAdminStatus from './pages/CheckAdminStatus';
 
-// Sidebar genişliği
-const drawerWidth = 290;
+
 
 const App = () => {
   const [user, loading] = useAuthState(auth);
@@ -126,28 +125,21 @@ const App = () => {
       <CssBaseline />
       <NotificationProvider>
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: '#FFFFF0', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', bgcolor: '#FFFFF0', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
             sx={{
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
-              width: '100%',
               overflow: 'auto',
               bgcolor: '#FFFFF0',
               transition: theme => theme.transitions.create(['margin', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
               }),
-              ...(sidebarOpen && {
-                width: { sm: `calc(100% - ${drawerWidth}px)` },
-                marginLeft: { sm: `${drawerWidth}px` },
-                transition: theme => theme.transitions.create(['margin', 'width'], {
-                  easing: theme.transitions.easing.easeOut,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
-              }),
+              marginLeft: '60px',
+              width: 'calc(100% - 60px)',
             }}
           >
             <Header handleDrawerToggle={handleDrawerToggle} sidebarOpen={sidebarOpen} />
