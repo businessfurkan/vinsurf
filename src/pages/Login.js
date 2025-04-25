@@ -34,7 +34,7 @@ import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 import { useTheme } from '@mui/material/styles';
 
-// Animations
+// Animations - Updated
 const float = keyframes`
   0% { transform: translateY(0px); }
   50% { transform: translateY(-10px); }
