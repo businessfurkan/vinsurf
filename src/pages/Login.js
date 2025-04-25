@@ -25,6 +25,10 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import ForumIcon from '@mui/icons-material/Forum';
+import GroupsIcon from '@mui/icons-material/Groups';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import PieChartIcon from '@mui/icons-material/PieChart';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
@@ -370,6 +374,40 @@ const Login = () => {
       color: "#FFD166"
     }
   ];
+  
+  // Info cards data
+  const infoCards = [
+    {
+      title: "RekaNET Sıralama",
+      description: "RekaNET ile şehrinde hangi sıralamadasın öğren",
+      icon: <TimelineIcon />,
+      color: "#FF6B6B"
+    },
+    {
+      title: "Benimle Çalış",
+      description: "Benimle Çalış sistemi ile her gün canlı yayında beraber çalışıyoruz",
+      icon: <GroupsIcon />,
+      color: "#4ECDC4"
+    },
+    {
+      title: "SoruForum",
+      description: "Takıldığın soru mu oldu? SoruForum sayesinde soru sorabilirsin",
+      icon: <ForumIcon />,
+      color: "#FF9F1C"
+    },
+    {
+      title: "Deneme Takibi",
+      description: "Deneme netlerini grafiklerle kontrol edebilirsin",
+      icon: <BarChartIcon />,
+      color: "#845EC2"
+    },
+    {
+      title: "Konu Analizi",
+      description: "Hangi konuya ne kadar çalıştığını görebilirsin",
+      icon: <PieChartIcon />,
+      color: "#00B8A9"
+    }
+  ];
 
   return (
     <LoginContainer>
@@ -572,7 +610,7 @@ const Login = () => {
                 <Fade in={true} timeout={1200}>
                   <Box 
                     sx={{ 
-                      mb: { xs: 2, md: 3 }, 
+                      mb: { xs: 2, md: 2 }, 
                       textAlign: { xs: 'center', md: 'left' },
                       px: { xs: 2, md: 0 }
                     }}
@@ -580,7 +618,7 @@ const Login = () => {
                     <AnimatedText 
                       variant="h4" 
                       sx={{ 
-                        mb: { xs: 1, md: 2 },
+                        mb: { xs: 1, md: 1 },
                         fontWeight: 700,
                         color: theme.palette.primary.main,
                         fontSize: { xs: '1.5rem', sm: '1.75rem', md: '1.75rem' }
@@ -606,64 +644,91 @@ const Login = () => {
                   </Box>
                 </Fade>
                 
-                <Grid 
-                  container 
-                  spacing={2}
-                  sx={{ 
-                    display: { xs: 'none', md: 'flex' }
-                  }}
-                >
-                  {stats.map((stat, index) => (
-                    <Grid item xs={4} key={`mobile-${stat.label}`}>
-                      <Grow in={true} timeout={1000 + (index * 300)}>
-                        <Tooltip title={stat.tooltip} arrow placement="top">
-                          <StatsBox 
-                            elevation={2}
-                            color={`linear-gradient(45deg, ${stat.color} 0%, ${stat.color}99 100%)`}
-                          >
-                            <Avatar
-                              sx={{
-                                bgcolor: stat.color,
-                                width: 40,
-                                height: 40,
-                                mx: 'auto',
-                                mb: 1,
-                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                                '& .MuiSvgIcon-root': { fontSize: 24 }
-                              }}
-                            >
-                              {stat.icon}
-                            </Avatar>
-                            <Typography 
-                              variant="h4" 
+                {/* Info Cards Section */}
+                <Fade in={true} timeout={1500}>
+                  <Box sx={{ mb: 2 }}>
+                    <Grid 
+                      container 
+                      spacing={2}
+                    >
+                      {infoCards.map((card, index) => (
+                        <Grid 
+                          item 
+                          xs={12} 
+                          sm={6} 
+                          md={4}
+                          key={card.title}
+                        >
+                          <Grow in={true} timeout={1200 + (index * 150)}>
+                            <FeatureCard 
+                              elevation={2} 
                               sx={{ 
-                                fontWeight: 800, 
-                                fontSize: '1.5rem', 
-                                color: theme.palette.text.primary,
-                                mb: 0.5
+                                height: '100%', 
+                                display: 'flex', 
+                                flexDirection: 'column',
+                                '&::after': {
+                                  background: `linear-gradient(90deg, ${card.color}, ${card.color}99)`,
+                                }
                               }}
                             >
-                              {stat.value}
-                            </Typography>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                fontSize: '0.75rem', 
-                                color: theme.palette.text.secondary, 
-                                fontWeight: 500
-                              }}
-                            >
-                              {stat.label}
-                            </Typography>
-                          </StatsBox>
-                        </Tooltip>
-                      </Grow>
+                              <CardContent 
+                                sx={{ 
+                                  p: 2, 
+                                  textAlign: 'left', 
+                                  flex: 1, 
+                                  display: 'flex', 
+                                  flexDirection: 'row', 
+                                  alignItems: 'center',
+                                  gap: 1.5
+                                }}
+                              >
+                                <Avatar
+                                  sx={{
+                                    bgcolor: card.color,
+                                    width: 40,
+                                    height: 40,
+                                    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                                    flexShrink: 0
+                                  }}
+                                >
+                                  {card.icon}
+                                </Avatar>
+                                <Box>
+                                  <Typography 
+                                    variant="subtitle1" 
+                                    sx={{ 
+                                      fontWeight: 700, 
+                                      fontSize: '0.9rem',
+                                      mb: 0.5,
+                                      color: theme.palette.text.primary
+                                    }}
+                                  >
+                                    {card.title}
+                                  </Typography>
+                                  <Typography 
+                                    variant="body2" 
+                                    sx={{ 
+                                      fontSize: '0.75rem',
+                                      color: theme.palette.text.secondary,
+                                      fontWeight: 400,
+                                      lineHeight: 1.3
+                                    }}
+                                  >
+                                    {card.description}
+                                  </Typography>
+                                </Box>
+                              </CardContent>
+                            </FeatureCard>
+                          </Grow>
+                        </Grid>
+                      ))}
                     </Grid>
-                  ))}
-                </Grid>
-              
+                  </Box>
+                </Fade>
+                
+                {/* Features Section */}
                 <Fade in={true} timeout={1800}>
-                  <Box sx={{ mt: 2 }}>
+                  <Box sx={{ mt: 1 }}>
                     <Grid 
                       container 
                       spacing={2}
