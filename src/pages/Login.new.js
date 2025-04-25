@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -11,7 +11,9 @@ import {
   Card,
   CardContent,
   Avatar,
+  IconButton,
   Paper,
+  Divider,
   useMediaQuery
 } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
@@ -20,10 +22,14 @@ import SchoolIcon from '@mui/icons-material/School';
 import TimerIcon from '@mui/icons-material/Timer';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
@@ -47,6 +53,10 @@ const shimmer = keyframes`
   100% { background-position: 200% 0; }
 `;
 
+const rotate = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
 
 const fadeIn = keyframes`
   0% { opacity: 0; transform: translateY(20px); }
@@ -62,7 +72,6 @@ const bounce = keyframes`
 // Styled components
 const LoginContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
-  width: '100%',
   display: 'flex',
   overflow: 'hidden',
   position: 'relative',
@@ -106,13 +115,13 @@ const FeatureCard = styled(Card)(({ theme }) => ({
 
 const FeatureIcon = styled(Avatar)(({ theme, color }) => ({
   backgroundColor: color || theme.palette.primary.main,
-  width: ({ size }) => size || 56,
-  height: ({ size }) => size || 56,
+  width: 56,
+  height: 56,
   boxShadow: '0 8px 16px rgba(91, 143, 185, 0.2)',
   margin: '0 auto 16px',
   animation: `${float} 6s ease-in-out infinite`,
   '& .MuiSvgIcon-root': {
-    fontSize: ({ size }) => (size ? size/2 : 28),
+    fontSize: 28,
     color: '#FFFFFF'
   }
 }));
@@ -132,9 +141,6 @@ const FloatingShape = styled(Box)(({ theme, delay, size, top, left, right, botto
   zIndex: 0,
   opacity: 0.8,
   backdropFilter: 'blur(5px)',
-  [theme.breakpoints.down('sm')]: {
-    display: 'none', // Hide on small screens to prevent clutter
-  },
 }));
 
 const StatsBox = styled(Paper)(({ theme }) => ({
@@ -199,11 +205,7 @@ const GradientButton = styled(Button)(({ theme }) => ({
   },
   '&:hover::after': {
     opacity: 1,
-  },
-  [theme.breakpoints.down('sm')]: {
-    padding: '10px 24px',
-    fontSize: '0.875rem',
-  },
+  }
 }));
 
 const GlowingCircle = styled(Box)(({ theme }) => ({
@@ -214,16 +216,18 @@ const GlowingCircle = styled(Box)(({ theme }) => ({
   animation: `${pulse} 3s infinite`,
   position: 'absolute',
   zIndex: 0,
-  [theme.breakpoints.down('md')]: {
-    width: '180px',
-    height: '180px',
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: '150px',
-    height: '150px',
-  },
 }));
 
+const HeroSection = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  overflow: 'hidden',
+  padding: theme.spacing(4),
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  minHeight: '100%',
+  zIndex: 1,
+}));
 
 const LogoContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -242,21 +246,7 @@ const LogoIcon = styled(Avatar)(({ theme }) => ({
   '& .MuiSvgIcon-root': {
     fontSize: 45,
     color: '#FFFFFF'
-  },
-  [theme.breakpoints.down('md')]: {
-    width: 70,
-    height: 70,
-    '& .MuiSvgIcon-root': {
-      fontSize: 40,
-    }
-  },
-  [theme.breakpoints.down('sm')]: {
-    width: 60,
-    height: 60,
-    '& .MuiSvgIcon-root': {
-      fontSize: 35,
-    }
-  },
+  }
 }));
 
 const AnimatedText = styled(Typography)(({ theme, delay }) => ({
@@ -276,13 +266,16 @@ const GradientText = styled(Typography)(({ theme }) => ({
   fontWeight: 800,
 }));
 
+const FeatureGrid = styled(Grid)(({ theme }) => ({
+  maxWidth: 1200,
+  margin: '0 auto',
+}));
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleGoogleLogin = async () => {
     try {
@@ -347,66 +340,32 @@ const Login = () => {
 
   return (
     <LoginContainer>
-      {/* Decorative floating shapes - only visible on larger screens */}
+      {/* Decorative floating shapes */}
       <FloatingShape size="120px" top="10%" left="5%" delay="0s" color="linear-gradient(135deg, rgba(91, 143, 185, 0.2), rgba(91, 143, 185, 0.1))" />
       <FloatingShape size="80px" top="20%" right="10%" delay="1s" color="linear-gradient(135deg, rgba(184, 192, 255, 0.2), rgba(184, 192, 255, 0.1))" />
       <FloatingShape size="150px" bottom="10%" left="15%" delay="2s" color="linear-gradient(135deg, rgba(6, 214, 160, 0.1), rgba(6, 214, 160, 0.05))" />
       <FloatingShape size="100px" bottom="20%" right="5%" delay="3s" color="linear-gradient(135deg, rgba(255, 209, 102, 0.1), rgba(255, 209, 102, 0.05))" />
 
-      <Container 
-        maxWidth="lg" 
-        sx={{ 
-          py: { xs: 2, sm: 3, md: 4 }, 
-          px: { xs: 2, sm: 3, md: 4 },
-          position: 'relative', 
-          zIndex: 2,
-          overflow: 'hidden'
-        }}
-      >
-        <Grid 
-          container 
-          spacing={{ xs: 2, sm: 3, md: 4 }} 
-          alignItems="center" 
-          justifyContent="center" 
-          sx={{ 
-            minHeight: { xs: 'auto', md: '90vh' },
-            py: { xs: 4, md: 0 }
-          }}
-        >
+      <Container maxWidth="lg" sx={{ py: 4, position: 'relative', zIndex: 2 }}>
+        <Grid container spacing={4} alignItems="center" justifyContent="center" sx={{ minHeight: '90vh' }}>
           {/* Left side - Login form */}
-          <Grid 
-            item 
-            xs={12} 
-            md={5} 
-            sx={{ 
-              display: 'flex', 
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              textAlign: 'center',
-              position: 'relative',
-              zIndex: 2,
-              order: { xs: 2, md: 1 },
-              mb: { xs: 4, md: 0 },
-              mt: { xs: 2, md: 0 }
-            }}
-          >
+          <Grid item xs={12} md={5} sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            position: 'relative',
+            zIndex: 2,
+            order: { xs: 2, md: 1 }
+          }}>
             <Fade in={true} timeout={1000}>
-              <Box 
-                sx={{ 
-                  position: 'relative', 
-                  mb: { xs: 4, md: 6 },
-                  width: '100%',
-                  maxWidth: { xs: '100%', sm: 450 }
-                }}
-              >
-                <GlowingCircle 
-                  sx={{ 
-                    top: '50%', 
-                    left: '50%', 
-                    transform: 'translate(-50%, -50%)'
-                  }} 
-                />
+              <Box sx={{ position: 'relative', mb: 6 }}>
+                <GlowingCircle sx={{ 
+                  top: '50%', 
+                  left: '50%', 
+                  transform: 'translate(-50%, -50%)'
+                }} />
                 
                 <LogoContainer>
                   <LogoIcon>
@@ -414,28 +373,18 @@ const Login = () => {
                   </LogoIcon>
                 </LogoContainer>
                 
-                <GradientText 
-                  variant="h3" 
-                  component="h1" 
-                  sx={{ 
-                    mb: 1, 
-                    fontSize: { xs: '1.75rem', sm: '2rem', md: '2.5rem' },
-                    px: { xs: 2, sm: 0 }
-                  }}
-                >
+                <GradientText variant="h3" component="h1" sx={{ mb: 1, fontSize: { xs: '2rem', md: '2.5rem' } }}>
                   YKS Çalışma Takip
                 </GradientText>
                 
                 <AnimatedText 
                   variant="h6" 
                   sx={{ 
-                    mb: { xs: 2, md: 4 },
+                    mb: 4,
                     fontWeight: 400,
                     color: theme.palette.text.secondary,
                     maxWidth: 450,
-                    mx: 'auto',
-                    fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
-                    px: { xs: 2, sm: 0 }
+                    mx: 'auto'
                   }}
                   delay="0.3s"
                 >
@@ -445,13 +394,11 @@ const Login = () => {
                 <AnimatedText 
                   variant="body1" 
                   sx={{ 
-                    mb: { xs: 3, md: 4 },
+                    mb: 4,
                     color: theme.palette.text.secondary,
                     maxWidth: 450,
                     mx: 'auto',
-                    lineHeight: 1.8,
-                    fontSize: { xs: '0.875rem', sm: '0.9rem', md: '1rem' },
-                    px: { xs: 2, sm: 0 }
+                    lineHeight: 1.8
                   }}
                   delay="0.5s"
                 >
@@ -469,12 +416,8 @@ const Login = () => {
                         variant="contained"
                         startIcon={<GoogleIcon />}
                         onClick={handleGoogleLogin}
-                        size={isMobile ? "medium" : "large"}
-                        sx={{ 
-                          px: { xs: 3, md: 4 }, 
-                          py: { xs: 1, md: 1.5 },
-                          fontSize: { xs: '0.875rem', sm: '0.9rem', md: '1rem' }
-                        }}
+                        size="large"
+                        sx={{ px: 4, py: 1.5 }}
                       >
                         Google ile Giriş Yap
                       </GradientButton>
@@ -486,30 +429,18 @@ const Login = () => {
           </Grid>
           
           {/* Right side - Features */}
-          <Grid 
-            item 
-            xs={12} 
-            md={7} 
-            sx={{ 
-              order: { xs: 1, md: 2 },
-              mb: { xs: 2, md: 0 }
-            }}
-          >
+          <Grid item xs={12} md={7} sx={{ 
+            order: { xs: 1, md: 2 },
+            mb: { xs: 4, md: 0 }
+          }}>
             <Fade in={true} timeout={1200}>
-              <Box 
-                sx={{ 
-                  mb: { xs: 3, md: 4 }, 
-                  textAlign: { xs: 'center', md: 'left' },
-                  px: { xs: 2, sm: 0 }
-                }}
-              >
+              <Box sx={{ mb: 4, textAlign: { xs: 'center', md: 'left' } }}>
                 <AnimatedText 
                   variant="h4" 
                   sx={{ 
-                    mb: { xs: 1, md: 2 },
+                    mb: 2,
                     fontWeight: 700,
-                    color: theme.palette.primary.main,
-                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+                    color: theme.palette.primary.main
                   }}
                   delay="0.7s"
                 >
@@ -520,9 +451,7 @@ const Login = () => {
                   variant="body1" 
                   sx={{ 
                     color: theme.palette.text.secondary,
-                    maxWidth: 600,
-                    fontSize: { xs: '0.875rem', sm: '0.9rem', md: '1rem' },
-                    mx: { xs: 'auto', md: 0 }
+                    maxWidth: 600
                   }}
                   delay="0.9s"
                 >
@@ -532,14 +461,7 @@ const Login = () => {
               </Box>
             </Fade>
             
-            <Grid 
-              container 
-              spacing={{ xs: 1, sm: 2, md: 3 }} 
-              sx={{ 
-                mb: { xs: 3, md: 4 },
-                px: { xs: 1, sm: 0 }
-              }}
-            >
+            <Grid container spacing={3} sx={{ mb: 4 }}>
               {stats.map((stat, index) => (
                 <Grid item xs={4} key={stat.label}>
                   <Grow in={true} timeout={1000 + (index * 300)}>
@@ -548,14 +470,12 @@ const Login = () => {
                         <Avatar
                           sx={{
                             bgcolor: stat.color,
-                            width: { xs: 40, sm: 44, md: 48 },
-                            height: { xs: 40, sm: 44, md: 48 },
+                            width: 48,
+                            height: 48,
                             mx: 'auto',
-                            mb: { xs: 1, md: 2 },
+                            mb: 2,
                             boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                            '& .MuiSvgIcon-root': { 
-                              fontSize: { xs: 22, sm: 24, md: 28 } 
-                            }
+                            '& .MuiSvgIcon-root': { fontSize: 28 }
                           }}
                         >
                           {stat.icon}
@@ -565,7 +485,7 @@ const Login = () => {
                         variant="h3" 
                         sx={{ 
                           fontWeight: 800, 
-                          fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }, 
+                          fontSize: '2rem', 
                           color: theme.palette.text.primary,
                           mb: 0.5,
                           textShadow: '0 2px 10px rgba(0,0,0,0.05)'
@@ -576,7 +496,7 @@ const Login = () => {
                       <Typography 
                         variant="body2" 
                         sx={{ 
-                          fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' }, 
+                          fontSize: '0.9rem', 
                           color: theme.palette.text.secondary, 
                           fontWeight: 500
                         }}
@@ -590,70 +510,30 @@ const Login = () => {
             </Grid>
           
             <Fade in={true} timeout={1800}>
-              <Box 
-                sx={{ 
-                  width: '100%', 
-                  overflow: 'visible',
-                  px: { xs: 1, sm: 0 }
-                }}
-              >
-                <Grid 
-                  container 
-                  spacing={{ xs: 2, sm: 2, md: 3 }}
-                >
+              <Box sx={{ width: '100%', overflow: 'visible' }}>
+                <Grid container spacing={3}>
                   {features.map((feature, index) => (
-                    <Grid 
-                      item 
-                      xs={12} 
-                      sm={6} 
-                      key={feature.title} 
-                      sx={{ height: '100%' }}
-                    >
+                    <Grid item xs={12} sm={6} key={feature.title} sx={{ height: '100%' }}>
                       <Grow in={true} timeout={1500 + (index * 200)}>
-                        <FeatureCard 
-                          elevation={4} 
-                          sx={{ 
-                            height: '100%', 
-                            display: 'flex', 
-                            flexDirection: 'column' 
-                          }}
-                        >
-                          <CardContent 
-                            sx={{ 
-                              p: { xs: 2, sm: 2.5, md: 3 }, 
-                              textAlign: 'center', 
-                              flex: 1, 
-                              display: 'flex', 
-                              flexDirection: 'column', 
-                              justifyContent: 'center' 
-                            }}
-                          >
-                            <FeatureIcon 
-                              color={feature.color}
-                              size={isMobile ? 48 : isTablet ? 52 : 56}
-                            >
+                        <FeatureCard elevation={4} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                          <CardContent sx={{ p: 3, textAlign: 'center', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <FeatureIcon color={feature.color}>
                               {feature.icon}
                             </FeatureIcon>
-                            <Typography 
-                              variant="h6" 
-                              sx={{ 
-                                fontWeight: 700, 
-                                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' }, 
-                                mb: { xs: 1, md: 1.5 },
-                                color: theme.palette.text.primary
-                              }}
-                            >
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 700, 
+                              fontSize: '1.1rem', 
+                              mb: 1.5,
+                              color: theme.palette.text.primary
+                            }}>
                               {feature.title}
                             </Typography>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                fontSize: { xs: '0.75rem', sm: '0.8rem', md: '0.9rem' },
-                                color: theme.palette.text.secondary,
-                                fontWeight: 400,
-                                lineHeight: 1.6
-                              }}
-                            >
+                            <Typography variant="body2" sx={{ 
+                              fontSize: '0.9rem',
+                              color: theme.palette.text.secondary,
+                              fontWeight: 400,
+                              lineHeight: 1.6
+                            }}>
                               {feature.description}
                             </Typography>
                           </CardContent>
