@@ -106,7 +106,7 @@ const BenimleCalis = () => {
       minHeight: '90vh',
       position: 'relative',
       overflow: 'hidden',
-      backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.6) 0%, rgba(97, 97, 255, 0.5) 100%)',
+      backgroundColor: '#FFFFF0',
       borderRadius: 4,
       boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
     }}>
@@ -406,24 +406,24 @@ const BenimleCalis = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderRadius: '50%',
-                  background: 'linear-gradient(135deg, rgba(142, 36, 170, 0.1) 0%, rgba(97, 97, 255, 0.1) 100%)',
+                  background: '#FFFFF0',
                   mb: 2,
                   animation: 'pulse 2s infinite ease-in-out'
                 }}>
-                  <LiveTvIcon sx={{ fontSize: 50, color: '#8E24AA' }} />
+                  <LiveTvIcon sx={{ fontSize: 50, color: '#333' }} />
                 </Box>
                 <Typography variant="h5" sx={{ 
                   fontWeight: 700, 
-                  color: '#2e3856', 
+                  color: '#333', 
                   mb: 1,
-                  background: 'linear-gradient(135deg, #2e3856 0%, #424242 100%)',
+                  background: '#FFFFF0',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                 }}>
                   Şu anda aktif bir canlı yayın bulunmuyor
                 </Typography>
                 <Typography variant="body1" sx={{ 
-                  color: '#555', 
+                  color: '#333', 
                   maxWidth: 500,
                   lineHeight: 1.6
                 }}>
@@ -437,25 +437,25 @@ const BenimleCalis = () => {
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between',
-                  background: 'linear-gradient(to right, rgba(142, 36, 170, 0.15), rgba(97, 97, 255, 0.15))',
-                  borderBottom: '1px solid rgba(142, 36, 170, 0.2)'
+                  background: '#FFFFF0',
+                  borderBottom: '1px solid rgba(0,0,0,0.05)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box sx={{ 
                       width: 36, 
                       height: 36, 
                       borderRadius: '50%', 
-                      backgroundColor: '#f44336',
+                      backgroundColor: '#333',
                       display: 'flex',
                       justifyContent: 'center',
                       alignItems: 'center',
                       mr: 2,
-                      boxShadow: '0 4px 8px rgba(244, 67, 54, 0.3)'
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
                     }}>
                       <LiveTvIcon sx={{ color: '#fff', fontSize: 20 }} />
                     </Box>
                     <Box>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#2e3856', lineHeight: 1.2 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#333', lineHeight: 1.2 }}>
                         Canlı Yayın
                       </Typography>
                       <Typography variant="caption" sx={{ color: '#666' }}>
@@ -471,9 +471,9 @@ const BenimleCalis = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       sx={{ 
-                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        backgroundColor: '#FFFFF0',
                         '&:hover': {
-                          backgroundColor: 'rgba(255,255,255,1)',
+                          backgroundColor: '#FFFFF0',
                         }
                       }}
                     >
@@ -509,11 +509,11 @@ const BenimleCalis = () => {
               p: 3, 
               borderRadius: 4,
               boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
-              border: '1px solid rgba(142, 36, 170, 0.2)',
+              border: '1px solid rgba(0,0,0,0.05)',
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              background: 'linear-gradient(to bottom, rgba(255,255,255,0.9), rgba(255,255,255,1))',
+              background: '#FFFFF0',
               backdropFilter: 'blur(10px)',
               transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               '&:hover': {
@@ -527,25 +527,25 @@ const BenimleCalis = () => {
               alignItems: 'center', 
               mb: 3,
               pb: 2,
-              borderBottom: '1px solid rgba(142, 36, 170, 0.1)'
+              borderBottom: '1px solid rgba(0,0,0,0.05)'
             }}>
               <Box sx={{ 
                 width: 40, 
                 height: 40, 
                 borderRadius: '50%', 
-                background: 'linear-gradient(135deg, #8E24AA 0%, #6A1B9A 100%)',
+                background: '#333',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 mr: 2,
-                boxShadow: '0 4px 10px rgba(142, 36, 170, 0.3)'
+                boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
               }}>
                 <EmojiPeopleIcon sx={{ color: '#fff', fontSize: 24 }} />
               </Box>
               <Typography variant="h6" sx={{ 
                 fontWeight: 700, 
-                color: '#2e3856',
-                background: 'linear-gradient(135deg, #2e3856 0%, #424242 100%)',
+                color: '#333',
+                background: '#FFFFF0',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
               }}>
@@ -553,7 +553,7 @@ const BenimleCalis = () => {
               </Typography>
             </Box>
             
-            <Typography variant="body1" sx={{ mb: 3, color: '#424242' }}>
+            <Typography variant="body1" sx={{ mb: 3, color: '#333' }}>
               Canlı yayınlarımızda birlikte çalışarak verimli ders çalışma alışkanlıkları kazanabilirsiniz. Aşağıdaki özelliklerden yararlanabilirsiniz:
             </Typography>
 
@@ -562,9 +562,9 @@ const BenimleCalis = () => {
               mb: 3, 
               p: 3, 
               borderRadius: 3, 
-              background: 'linear-gradient(135deg, rgba(142, 36, 170, 0.08) 0%, rgba(97, 97, 255, 0.08) 100%)',
-              border: '1px solid rgba(142, 36, 170, 0.15)',
-              boxShadow: '0 5px 15px rgba(142, 36, 170, 0.05)',
+              background: '#FFFFF0',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
               position: 'relative',
               overflow: 'hidden'
             }}>
@@ -576,7 +576,7 @@ const BenimleCalis = () => {
                   width: 100, 
                   height: 100, 
                   borderRadius: '50%', 
-                  background: 'radial-gradient(circle, rgba(142, 36, 170, 0.1) 0%, rgba(142, 36, 170, 0) 70%)',
+                  background: 'radial-gradient(circle, rgba(0,0,0,0.01) 0%, transparent 70%)',
                   zIndex: 0
                 }} 
               />
@@ -588,7 +588,7 @@ const BenimleCalis = () => {
                       width: 8, 
                       height: 24, 
                       borderRadius: 1, 
-                      background: 'linear-gradient(to bottom, #8E24AA, #6A1B9A)', 
+                      background: '#333', 
                       mr: 2 
                     }} 
                   />
@@ -596,6 +596,8 @@ const BenimleCalis = () => {
                     variant="subtitle1" 
                     sx={{ 
                       fontWeight: 700, 
+                      color: '#333',
+                      background: '#FFFFF0',
                       color: '#2e3856',
                       background: 'linear-gradient(135deg, #2e3856 0%, #424242 100%)',
                       WebkitBackgroundClip: 'text',
@@ -680,7 +682,7 @@ const BenimleCalis = () => {
                     width: 8, 
                     height: 8, 
                     borderRadius: '50%', 
-                    bgcolor: '#8E24AA', 
+                    bgcolor: '#333', 
                     mr: 2 
                   }} 
                 />
@@ -694,7 +696,7 @@ const BenimleCalis = () => {
                     width: 8, 
                     height: 8, 
                     borderRadius: '50%', 
-                    bgcolor: '#8E24AA', 
+                    bgcolor: '#333', 
                     mr: 2 
                   }} 
                 />
@@ -708,7 +710,7 @@ const BenimleCalis = () => {
                     width: 8, 
                     height: 8, 
                     borderRadius: '50%', 
-                    bgcolor: '#8E24AA', 
+                    bgcolor: '#333', 
                     mr: 2 
                   }} 
                 />
@@ -722,7 +724,7 @@ const BenimleCalis = () => {
                     width: 8, 
                     height: 8, 
                     borderRadius: '50%', 
-                    bgcolor: '#8E24AA', 
+                    bgcolor: '#333', 
                     mr: 2 
                   }} 
                 />
@@ -739,11 +741,13 @@ const BenimleCalis = () => {
                 sx={{
                   borderRadius: 3,
                   py: 2,
-                  background: 'linear-gradient(45deg, #8E24AA 0%, #6A1B9A 100%)',
-                  boxShadow: '0 8px 20px rgba(142, 36, 170, 0.3)',
+                  background: '#FFFFF0',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+                  color: '#333',
+                  border: '1px solid rgba(0,0,0,0.1)',
                   '&:hover': {
-                    background: 'linear-gradient(45deg, #6A1B9A 0%, #4A148C 100%)',
-                    boxShadow: '0 10px 25px rgba(142, 36, 170, 0.4)',
+                    background: '#FFFFF0',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
                   },
                   textTransform: 'none',
                   fontWeight: 700,
@@ -785,13 +789,13 @@ const BenimleCalis = () => {
                   borderRadius: 3,
                   py: 1.5,
                   borderWidth: 2,
-                  borderColor: 'rgba(142, 36, 170, 0.5)',
-                  color: '#8E24AA',
-                  backgroundColor: 'rgba(255,255,255,0.7)',
+                  borderColor: 'rgba(0,0,0,0.2)',
+                  color: '#333',
+                  backgroundColor: '#FFFFF0',
                   backdropFilter: 'blur(5px)',
                   '&:hover': {
-                    borderColor: '#8E24AA',
-                    backgroundColor: 'rgba(142, 36, 170, 0.08)',
+                    borderColor: 'rgba(0,0,0,0.3)',
+                    backgroundColor: '#FFFFF0',
                     transform: 'translateY(-2px)',
                   },
                   textTransform: 'none',

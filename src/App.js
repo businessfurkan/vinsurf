@@ -168,7 +168,7 @@ const App = () => {
                         left: 0,
                         width: '60px', // Sidebar genişliği
                         height: '100%',
-                        backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.6) 0%, rgba(97, 97, 255, 0.5) 100%)',
+                        backgroundColor: '#FFFFF0',
                         zIndex: 0,
                       },
                       '&::after': {
@@ -178,7 +178,7 @@ const App = () => {
                         right: 0,
                         width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
                         height: '100%',
-                        backgroundImage: 'linear-gradient(135deg, rgba(142, 36, 170, 0.6) 0%, rgba(97, 97, 255, 0.5) 100%)',
+                        backgroundColor: '#FFFFF0',
                         zIndex: 0,
                         '@media (max-width: 1200px)': {
                           width: '0px',
