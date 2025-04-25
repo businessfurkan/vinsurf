@@ -28,15 +28,8 @@ import { auth, googleProvider } from '../firebase';
 // Animations
 const float = keyframes`
   0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-20px); }
   100% { transform: translateY(0px); }
-`;
-
-
-
-const fadeIn = keyframes`
-  0% { opacity: 0; transform: translateY(20px); }
-  100% { opacity: 1; transform: translateY(0); }
 `;
 
 // Styled components
@@ -161,53 +154,74 @@ const LoginButton = styled(Button)(({ theme }) => ({
 
 const FeatureCard = styled(Paper)(({ theme, color, index }) => ({
   borderRadius: '16px',
-  overflow: 'hidden',
-  position: 'relative',
-  transition: 'all 0.3s ease',
-  height: '100%',
-  background: '#FFF5F7',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-  padding: '20px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'center',
+  width: '180px',
+  height: '180px',
+  transition: 'all 0.3s ease',
+  background: 'rgba(255, 255, 255, 0.9)',
+  backdropFilter: 'blur(10px)',
+  position: 'relative',
   cursor: 'pointer',
-  animation: `${fadeIn} 0.5s ease forwards`,
-  animationDelay: `${index * 0.1}s`,
+  margin: '0 auto',
+  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
   '&:hover': {
     transform: 'translateY(-5px)',
-    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.1)',
+    boxShadow: '0 12px 20px rgba(0, 0, 0, 0.1)',
   },
 }));
 
-const FeatureIcon = styled(Box)(({ theme, color }) => ({
+const FeatureIcon = styled(Box)(({ color }) => ({
   width: '60px',
   height: '60px',
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  background: color || '#FF6B6B',
+  background: color,
+  color: '#fff',
   marginBottom: '16px',
-  '& svg': {
-    fontSize: '28px',
-    color: '#FFF',
-  }
+  '& .MuiSvgIcon-root': {
+    fontSize: '30px',
+  },
 }));
 
 const FeatureTitle = styled(Typography)(({ theme }) => ({
-  fontSize: '16px',
+  fontSize: '18px',
   fontWeight: 'bold',
   color: '#333',
-  marginBottom: '8px',
 }));
 
 const FeatureDescription = styled(Typography)(({ theme }) => ({
   fontSize: '14px',
   color: '#666',
-  lineHeight: 1.4,
+  lineHeight: 1.5,
+  position: 'absolute',
+  top: '100%',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: '200px',
+  background: 'rgba(255, 255, 255, 0.95)',
+  padding: '12px',
+  borderRadius: '8px',
+  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)',
+  zIndex: 10,
+  opacity: 0,
+  visibility: 'hidden',
+  transition: 'all 0.3s ease',
+  pointerEvents: 'none',
+}));
+
+const TooltipContainer = styled(Box)(({ isOpen }) => ({
+  position: 'relative',
+  '&:hover .feature-description, &.active .feature-description': {
+    opacity: 1,
+    visibility: 'visible',
+    top: 'calc(100% + 10px)',
+  },
 }));
 
 const FeatureCardsContainer = styled(Box)(({ theme }) => ({
@@ -391,16 +405,28 @@ const Login = () => {
       
       <FeatureCardsContainer>
         <Container maxWidth="lg">
-          <Grid container spacing={3} justifyContent="center">
+          <Grid container spacing={4} justifyContent="center">
             {features.map((feature, index) => (
               <Grid item xs={12} sm={6} md={2.4} key={feature.title}>
-                <FeatureCard elevation={0} color={feature.color} index={index}>
-                  <FeatureIcon color={feature.color}>
-                    {feature.icon}
-                  </FeatureIcon>
-                  <FeatureTitle>{feature.title}</FeatureTitle>
-                  <FeatureDescription>{feature.description}</FeatureDescription>
-                </FeatureCard>
+                <TooltipContainer>
+                  <FeatureCard 
+                    elevation={0} 
+                    color={feature.color} 
+                    index={index}
+                    onClick={() => {
+                      // Tıklama işlevi burada eklenebilir
+                      const card = document.getElementById(`feature-card-${index}`);
+                      card.classList.toggle('active');
+                    }}
+                    id={`feature-card-${index}`}
+                  >
+                    <FeatureIcon color={feature.color}>
+                      {feature.icon}
+                    </FeatureIcon>
+                    <FeatureTitle>{feature.title}</FeatureTitle>
+                  </FeatureCard>
+                  <FeatureDescription className="feature-description">{feature.description}</FeatureDescription>
+                </TooltipContainer>
               </Grid>
             ))}
           </Grid>
