@@ -81,7 +81,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
 const StyledChip = styled(Chip)(({ theme, colorIndex, label }) => {
   // Renkli etiketler için renk paleti
   const colors = [
-    { bg: '#E3F2FD', color: '#1976D2' }, // Mavi
+    { bg: '#E3F2FD', color: '#55b3d9' }, // Mavi
     { bg: '#E8F5E9', color: '#2E7D32' }, // Yeşil
     { bg: '#FFF8E1', color: '#F57F17' }, // Sarı
     { bg: '#F3E5F5', color: '#7B1FA2' }, // Mor

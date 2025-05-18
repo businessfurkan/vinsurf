@@ -34,7 +34,7 @@ const closedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   width: `${drawerWidth}px`,
-  background: '#FFFFF0',
+  background: '#abe7ff',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
   position: 'relative',
@@ -65,18 +65,18 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState(null);
   
-  // Menü öğeleri
+  // Menü öğeleri - Canlı ve modern renkler
   const menuItems = [
-    { text: 'Anasayfa', icon: <HomeIcon />, path: '/', color: '#4285F4' },
-    { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro', color: '#EA4335' },
-    { text: 'TYT/AYT Net', icon: <AssessmentIcon />, path: '/tyt-ayt-net-takibi', color: '#FBBC05' },
-    { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' },
-    { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#00BCD4' },
-    { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' },
-    { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#4CAF50' },
-    { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#FF5722' },
-    { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#8E24AA' },
-    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#3F51B5' },
+    { text: 'Anasayfa', icon: <HomeIcon />, path: '/', color: '#2196F3' }, // Canlı Mavi
+    { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro', color: '#E91E63' }, // Canlı Pembe
+    { text: 'TYT/AYT Net', icon: <AssessmentIcon />, path: '/tyt-ayt-net-takibi', color: '#FFC107' }, // Canlı Sarı
+    { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' }, // Canlı Turuncu
+    { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#4CAF50' }, // Canlı Yeşil
+    { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Canlı Mor
+    { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#8BC34A' }, // Canlı Açık Yeşil
+    { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#F44336' }, // Canlı Kırmızı
+    { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#673AB7' }, // Canlı Mor
+    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#03A9F4' }, // Canlı Açık Mavi
   ];
 
   return (
@@ -88,15 +88,15 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         py: 2,
         display: 'flex', 
         justifyContent: 'center',
-        background: '#FFFFF0',
+        background: '#abe7ff',
         mb: 1,
       }}>
         <Box sx={{ 
           fontWeight: 800, 
           fontSize: '1.2rem', 
-          color: '#4285F4',
+          color: '#2a5956',
           textAlign: 'center',
-          fontFamily: 'Montserrat, sans-serif',
+          fontFamily: 'Poppins, Montserrat, sans-serif',
         }}>
           YKS
         </Box>
@@ -119,6 +119,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 display: 'block',
                 padding: 0,
                 position: 'relative',
+                mb: 0.5,
               }}
               onMouseEnter={() => setHoveredItem(item.text)}
               onMouseLeave={() => setHoveredItem(null)}
@@ -127,32 +128,28 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 id={`sidebar-item-${item.text}`}
                 onClick={() => navigate(item.path)}
                 sx={{
-                  height: 46,
-                  width: 46,
-                  minWidth: 46,
-                  borderRadius: '50%',
-                  display: 'flex',
+                  minHeight: 42,
                   justifyContent: 'center',
-                  alignItems: 'center',
-                  p: 0,
-                  mx: 'auto',
+                  px: 2.5,
+                  borderRadius: '10px',
+                  transition: 'all 0.3s ease',
                   background: isActive ? `${item.color}15` : 'transparent',
-                  border: isActive ? `2px solid ${item.color}` : '2px solid transparent',
-                  transition: 'all 0.2s ease',
                   '&:hover': {
-                    background: `${item.color}20`,
-                    transform: 'scale(1.1)',
+                    background: `${item.color}10`,
+                    transform: 'translateY(-2px)',
                   },
                 }}
               >
                 <ListItemIcon
                   sx={{
                     minWidth: 0,
-                    color: isActive ? item.color : `${item.color}99`,
-                    transition: 'all 0.2s ease',
-                    fontSize: 24,
+                    color: isActive ? item.color : `${item.color}`,
+                    transition: 'all 0.3s ease',
+                    fontSize: 22,
+                    opacity: isActive ? 1 : 0.9,
+                    filter: isActive ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.15))' : 'none',
                     '& .MuiSvgIcon-root': {
-                      fontSize: 24,
+                      fontSize: 22,
                     }
                   }}
                 >
@@ -170,19 +167,19 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                       return rect.top + rect.height/2 - 15;
                     },
                     transform: 'translateY(-50%)',
-                    background: `linear-gradient(135deg, ${item.color}10, ${item.color}30)`,
-                    boxShadow: `0 8px 16px rgba(0,0,0,0.1), 0 2px 4px ${item.color}20`,
+                    background: `linear-gradient(135deg, ${item.color}15, ${item.color}25)`,
+                    boxShadow: `0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.12)`,
+                    border: `1px solid ${item.color}40`,
+                    backdropFilter: 'blur(8px)',
                     borderRadius: '12px',
                     padding: '10px 18px',
                     zIndex: 9999,
                     whiteSpace: 'nowrap',
                     fontWeight: 600,
-                    color: '#2e3856',
-                    fontFamily: 'Montserrat, sans-serif',
+                    color: '#2a5956',
+                    fontFamily: 'Poppins, Montserrat, sans-serif',
                     fontSize: '0.9rem',
                     letterSpacing: '0.3px',
-                    backdropFilter: 'blur(8px)',
-                    border: `1px solid ${item.color}40`,
                     pointerEvents: 'none',
                     display: 'flex',
                     alignItems: 'center',

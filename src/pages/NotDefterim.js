@@ -126,7 +126,7 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   alignItems: 'center',
   borderRadius: 16,
   marginBottom: theme.spacing(3),
-  backgroundColor: alpha(theme.palette.background.paper, 0.97),
+  backgroundColor: '#aee1f5',
   boxShadow: '0 8px 25px rgba(0,0,0,0.1), 0 2px 5px rgba(0,0,0,0.07)',
   border: '1px solid rgba(0,0,0,0.04)',
   transition: 'all 0.3s ease',
@@ -143,7 +143,7 @@ const NoteListItem = styled(ListItem)(({ theme, categorycolor }) => ({
   overflow: 'hidden',
   transition: 'all 0.25s ease',
   boxShadow: '0 4px 15px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05)',
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: '#aee1f5',
   border: '1px solid rgba(0,0,0,0.03)',
   position: 'relative',
   '&::before': {
@@ -627,7 +627,7 @@ const NotDefterim = () => {
         </HeaderRow>
       </PageHeader>
       
-      <SearchBar elevation={3}>
+      <SearchBar elevation={3} sx={{ backgroundColor: '#aee1f5 !important' }}>
         <SearchIcon sx={{ mr: 1, color: 'primary.main' }} />
         <TextField
           fullWidth
@@ -790,7 +790,7 @@ const NotDefterim = () => {
       ) : (
         <List sx={{ padding: 0 }}>
           {getFilteredNotes().map((note) => (
-            <NoteListItem key={note.id} categorycolor={getCategoryColor(note.category)}>
+            <NoteListItem key={note.id} categorycolor={getCategoryColor(note.category)} style={{backgroundColor: '#aee1f5'}}>
               <NoteListItemContent onClick={() => handleOpenViewDialog(note)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -950,7 +950,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: 'white',
+                        backgroundColor: '#abe7ff',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#536DFE',
                           borderWidth: 2
@@ -984,7 +984,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: 'white',
+                        backgroundColor: '#abe7ff',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#536DFE',
                           borderWidth: 2
@@ -1020,7 +1020,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: 'white',
+                        backgroundColor: '#abe7ff',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#536DFE',
                           borderWidth: 2
@@ -1086,7 +1086,7 @@ const NotDefterim = () => {
         <form onSubmit={handleUpdateNote}>
           <Box sx={{
             p: 2.5,
-            background: `linear-gradient(45deg, ${alpha('#FF9800', 0.9)} 0%, ${alpha('#FF5722', 0.7)} 100%)`,
+            background: '#5db6d9',
             color: 'white',
             position: 'relative',
             overflow: 'hidden'
@@ -1158,7 +1158,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: 'white',
+                        backgroundColor: '#abe7ff',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#FF9800',
                           borderWidth: 2
@@ -1192,7 +1192,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: 'white',
+                        backgroundColor: '#abe7ff',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#FF9800',
                           borderWidth: 2
@@ -1228,7 +1228,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: 'white',
+                        backgroundColor: '#abe7ff',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#FF9800',
                           borderWidth: 2

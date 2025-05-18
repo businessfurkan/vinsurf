@@ -40,7 +40,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#FFFFF0',
+  backgroundColor: '#abe7ff',
   boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
   zIndex: theme.zIndex.drawer + 1,
 }));
@@ -185,9 +185,9 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
             component="div" 
             sx={{ 
               fontWeight: 700, 
-              color: '#4285F4', 
+              color: '#2a5956',
               display: { xs: 'none', sm: 'block' },
-              fontFamily: 'Montserrat, sans-serif',
+              fontFamily: 'Poppins, Montserrat, sans-serif',
               letterSpacing: '-0.5px'
             }}
           >

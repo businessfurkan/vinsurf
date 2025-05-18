@@ -529,7 +529,7 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: '#FFFFF0',
+        background: '#abe7ff',
         position: 'relative',
         overflow: 'hidden',
         '&::after': {
@@ -554,7 +554,8 @@ const DersProgrami = () => {
             mb: 4, 
             mt: 2, 
             fontWeight: 'bold', 
-            color: 'primary.main',
+            color: '#2a5956',
+            fontFamily: 'Poppins, Montserrat, sans-serif',
             display: 'flex',
             alignItems: 'center',
             position: 'relative',

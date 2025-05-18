@@ -453,7 +453,7 @@ const PomodoroTimer = () => {
             mb: 4, 
             width: '100%',
             p: 3,
-            backgroundColor: '#FFFFF0',
+            backgroundColor: '#5db6d9',
             borderRadius: 4,
             boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
             border: '1px solid rgba(0, 0, 0, 0.06)'

@@ -69,7 +69,7 @@ const Home = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        backgroundColor: '#FFFFF0',
+        backgroundColor: '#abe7ff',
       }}
     >
       <Container 
@@ -88,7 +88,7 @@ const Home = () => {
             borderRadius: '16px', 
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
-            background: '#FFFFF0',
+            background: '#abe7ff',
             boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,
@@ -144,7 +144,7 @@ const Home = () => {
             <Typography 
               variant="body1"
               sx={{ 
-                color: '#4b5c6b', 
+                color: '#2a5956', 
                 fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' }, 
                 mb: 3, 
                 fontWeight: 500, 
@@ -166,7 +166,7 @@ const Home = () => {
             borderRadius: '16px', 
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
-            background: '#FFFFF0',
+            background: '#abe7ff',
             boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,
@@ -225,8 +225,8 @@ const Home = () => {
               className="body-font"
               paragraph
               sx={{ 
-                fontFamily: 'Glacial Indifference, Montserrat, sans-serif',
-                color: '#5F6477',
+                fontFamily: 'Poppins, Montserrat, sans-serif',
+                color: '#2a5956',
                 mb: 4,
                 fontSize: { xs: '1rem', sm: '1.1rem', md: '1.2rem' },
                 maxWidth: '800px',

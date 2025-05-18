@@ -517,7 +517,7 @@ const TytAytNetTakibi = () => {
   };
 
   return (
-    <Box sx={{ p: 3, pt: 5, pb: 4, background: '#FFFFF0', minHeight: '100vh' }}>
+    <Box sx={{ p: 3, pt: 5, pb: 4, background: '#abe7ff', minHeight: '100vh' }}>
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)' }} />
       <Typography 
         variant="h5" 

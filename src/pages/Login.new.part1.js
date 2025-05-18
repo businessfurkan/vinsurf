@@ -106,7 +106,7 @@ const FeatureCard = styled(Card)(({ theme }) => ({
     left: 0,
     width: '100%',
     height: '5px',
-    background: 'linear-gradient(90deg, #5B8FB9, #7CA6C8)',
+    background: 'linear-gradient(90deg, #55b3d9, #7CA6C8)',
   }
 }));
 
@@ -173,7 +173,7 @@ const StatsBox = styled(Paper)(({ theme, color }) => ({
 }));
 
 const GradientButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(45deg, #5B8FB9 30%, #7CA6C8 90%)',
+  background: 'linear-gradient(45deg, #55b3d9 30%, #7CA6C8 90%)',
   borderRadius: 50,
   border: 0,
   color: '#FFFFFF',
@@ -185,7 +185,7 @@ const GradientButton = styled(Button)(({ theme }) => ({
   '&:hover': {
     transform: 'translateY(-3px)',
     boxShadow: '0 15px 30px rgba(91, 143, 185, 0.4)',
-    background: 'linear-gradient(45deg, #3D6F94 30%, #5B8FB9 90%)',
+    background: 'linear-gradient(45deg, #3D6F94 30%, #55b3d9 90%)',
   },
   '&:active': {
     transform: 'translateY(1px)',
@@ -270,7 +270,7 @@ const AnimatedText = styled(Typography)(({ theme, delay }) => ({
 }));
 
 const GradientText = styled(Typography)(({ theme }) => ({
-  background: 'linear-gradient(45deg, #5B8FB9 30%, #B8C0FF 90%)',
+  background: 'linear-gradient(45deg, #55b3d9 30%, #B8C0FF 90%)',
   backgroundSize: '200% 100%',
   color: 'transparent',
   WebkitBackgroundClip: 'text',
@@ -284,7 +284,7 @@ const RainbowBorder = styled(Box)(({ theme }) => ({
   position: 'relative',
   borderRadius: 20,
   padding: 3,
-  background: 'linear-gradient(90deg, #5B8FB9, #B8C0FF, #06D6A0, #FFD166, #5B8FB9)',
+  background: 'linear-gradient(90deg, #55b3d9, #B8C0FF, #06D6A0, #FFD166, #55b3d9)',
   backgroundSize: '400% 400%',
   animation: `${colorChange} 10s ease infinite`,
   boxShadow: '0 10px 30px rgba(91, 143, 185, 0.15)',

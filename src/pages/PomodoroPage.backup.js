@@ -21,11 +21,8 @@ import {
 } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-// PlayArrowIcon ve PauseIcon butonlarda kullanılıyor
-/* eslint-disable no-unused-vars */
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
-/* eslint-enable no-unused-vars */
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
@@ -63,11 +60,9 @@ const PomodoroPage = () => {
     return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  /* eslint-disable no-unused-vars */
   const handleStartPause = () => {
     setIsRunning(!isRunning);
   };
-  /* eslint-enable no-unused-vars */
 
   const handleReset = () => {
     setIsRunning(false);
@@ -394,16 +389,11 @@ const PomodoroPage = () => {
                   mt: 2,
                   justifyContent: 'center'
                 }}>
-                  <Tooltip title="Sıfırla">
-                    <IconButton 
-                      onClick={handleReset} 
                       sx={{ 
-                        bgcolor: '#9c27b0',
-                        color: 'white',
+                        bgcolor: 'rgba(0, 0, 0, 0.04)',
                         '&:hover': {
-                          bgcolor: '#7b1fa2',
-                        },
-                        boxShadow: '0 2px 6px rgba(156, 39, 176, 0.3)'
+                          bgcolor: 'rgba(0, 0, 0, 0.08)',
+                        }
                       }}
                     >
                       <RestartAltIcon />
@@ -577,12 +567,12 @@ const PomodoroPage = () => {
                 sx={{ 
                   borderRadius: 2,
                   fontWeight: mode === 'pomodoro' ? 700 : 500,
-                  backgroundColor: mode === 'pomodoro' ? '#ff5252' : 'transparent',
-                  color: mode === 'pomodoro' ? 'white' : '#ff5252',
-                  borderColor: '#ff5252',
+                  backgroundColor: mode === 'pomodoro' ? '#333' : 'transparent',
+                  color: mode === 'pomodoro' ? 'white' : '#333',
+                  borderColor: 'rgba(0, 0, 0, 0.2)',
                   '&:hover': {
-                    backgroundColor: mode === 'pomodoro' ? '#e53935' : 'rgba(255, 82, 82, 0.1)',
-                    borderColor: '#e53935',
+                    backgroundColor: mode === 'pomodoro' ? '#222' : 'rgba(0, 0, 0, 0.05)',
+                    borderColor: 'rgba(0, 0, 0, 0.3)',
                   }
                 }}
               >
@@ -596,12 +586,12 @@ const PomodoroPage = () => {
                 sx={{ 
                   borderRadius: 2,
                   fontWeight: mode === 'shortBreak' ? 700 : 500,
-                  backgroundColor: mode === 'shortBreak' ? '#4caf50' : 'transparent',
-                  color: mode === 'shortBreak' ? 'white' : '#4caf50',
-                  borderColor: '#4caf50',
+                  backgroundColor: mode === 'shortBreak' ? '#333' : 'transparent',
+                  color: mode === 'shortBreak' ? 'white' : '#333',
+                  borderColor: 'rgba(0, 0, 0, 0.2)',
                   '&:hover': {
-                    backgroundColor: mode === 'shortBreak' ? '#43a047' : 'rgba(76, 175, 80, 0.1)',
-                    borderColor: '#43a047',
+                    backgroundColor: mode === 'shortBreak' ? '#222' : 'rgba(0, 0, 0, 0.05)',
+                    borderColor: 'rgba(0, 0, 0, 0.3)',
                   }
                 }}
               >
@@ -615,12 +605,12 @@ const PomodoroPage = () => {
                 sx={{ 
                   borderRadius: 2,
                   fontWeight: mode === 'longBreak' ? 700 : 500,
-                  backgroundColor: mode === 'longBreak' ? '#2196f3' : 'transparent',
-                  color: mode === 'longBreak' ? 'white' : '#2196f3',
-                  borderColor: '#2196f3',
+                  backgroundColor: mode === 'longBreak' ? '#333' : 'transparent',
+                  color: mode === 'longBreak' ? 'white' : '#333',
+                  borderColor: 'rgba(0, 0, 0, 0.2)',
                   '&:hover': {
-                    backgroundColor: mode === 'longBreak' ? '#1e88e5' : 'rgba(33, 150, 243, 0.1)',
-                    borderColor: '#1e88e5',
+                    backgroundColor: mode === 'longBreak' ? '#222' : 'rgba(0, 0, 0, 0.05)',
+                    borderColor: 'rgba(0, 0, 0, 0.3)',
                   }
                 }}
               >
@@ -786,75 +776,16 @@ const PomodoroPage = () => {
             </Grid>
           </Grid>
           
-          <Box sx={{ 
-            mt: 5, 
-            p: 4, 
-            borderRadius: 8, 
-            background: 'linear-gradient(135deg, #e0f7fa 0%, #bbdefb 100%)',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-            overflow: 'hidden',
-            position: 'relative'
-          }}>
-            <Box sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '5px',
-              background: 'linear-gradient(90deg, #00b09b, #96c93d, #3f51b5, #9c27b0)',
-              backgroundSize: '400% 400%',
-              animation: 'gradient 15s ease infinite',
-              '@keyframes gradient': {
-                '0%': { backgroundPosition: '0% 50%' },
-                '50%': { backgroundPosition: '100% 50%' },
-                '100%': { backgroundPosition: '0% 50%' },
-              },
-            }} />
-            
-            <Typography variant="h5" sx={{ 
-              mb: 4, 
-              fontWeight: 800, 
-              color: '#1a237e', 
-              textAlign: 'center',
-              textTransform: 'uppercase',
-              letterSpacing: '1px',
-              position: 'relative',
-              '&:after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-10px',
-                left: '50%',
-                width: '80px',
-                height: '3px',
-                background: 'linear-gradient(90deg, #00b09b, #96c93d)',
-                transform: 'translateX(-50%)'
-              }
-            }}>
+          <Box sx={{ mt: 5, p: 3, borderRadius: 4, bgcolor: 'rgba(0,0,0,0.02)', border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#333' }}>
               Pomodoro Tekniğinin Faydaları
             </Typography>
-            
-            <Grid container spacing={4}>
-              {/* İlk satır: 1 ve 2 yan yana */}
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  textAlign: 'center',
-                  p: 3,
-                  height: '100%',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-                  transition: 'transform 0.3s, box-shadow 0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 12px 25px rgba(0,0,0,0.12)'
-                  }
-                }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                   <Box sx={{ 
-                    width: 70, 
-                    height: 70, 
+                    width: 60, 
+                    height: 60, 
                     borderRadius: '50%', 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -862,191 +793,93 @@ const PomodoroPage = () => {
                     background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
                     color: 'white',
                     fontWeight: 'bold',
-                    mb: 3,
-                    boxShadow: '0 8px 15px rgba(246, 211, 101, 0.4)',
-                    position: 'relative',
-                    '&:before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: '-5px',
-                      left: '-5px',
-                      right: '-5px',
-                      bottom: '-5px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
-                      opacity: 0.4,
-                      zIndex: -1
-                    }
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(246, 211, 101, 0.3)'
                   }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>1</Typography>
+                    <Typography variant="h6">1</Typography>
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#ff7043' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                     Odaklanmayı Artırır
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#546e7a', lineHeight: 1.6 }}>
+                  <Typography variant="body2" color="text.secondary">
                     Kısa çalışma aralıkları daha yoğun odaklanmayı sağlar.
                   </Typography>
                 </Box>
               </Grid>
               
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  textAlign: 'center',
-                  p: 3,
-                  height: '100%',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-                  transition: 'transform 0.3s, box-shadow 0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 12px 25px rgba(0,0,0,0.12)'
-                  }
-                }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                   <Box sx={{ 
-                    width: 70, 
-                    height: 70, 
+                    width: 60, 
+                    height: 60, 
                     borderRadius: '50%', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    background: 'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
                     color: 'white',
                     fontWeight: 'bold',
-                    mb: 3,
-                    boxShadow: '0 8px 15px rgba(67, 233, 123, 0.4)',
-                    position: 'relative',
-                    '&:before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: '-5px',
-                      left: '-5px',
-                      right: '-5px',
-                      bottom: '-5px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-                      opacity: 0.4,
-                      zIndex: -1
-                    }
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(94, 231, 223, 0.3)'
                   }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>2</Typography>
+                    <Typography variant="h6">2</Typography>
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#00bfa5' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                     Verimliliği Yükseltir
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#546e7a', lineHeight: 1.6 }}>
+                  <Typography variant="body2" color="text.secondary">
                     Düzenli molalar zihinsel yorgunluğu azaltır ve verimliliği artırır.
                   </Typography>
                 </Box>
               </Grid>
               
-              {/* İkinci satır: 3 ve 4 yan yana */}
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  textAlign: 'center',
-                  p: 3,
-                  height: '100%',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-                  transition: 'transform 0.3s, box-shadow 0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 12px 25px rgba(0,0,0,0.12)'
-                  }
-                }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                   <Box sx={{ 
-                    width: 70, 
-                    height: 70, 
+                    width: 60, 
+                    height: 60, 
                     borderRadius: '50%', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    background: 'linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%)',
                     color: 'white',
                     fontWeight: 'bold',
-                    mb: 3,
-                    boxShadow: '0 8px 15px rgba(79, 172, 254, 0.4)',
-                    position: 'relative',
-                    '&:before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: '-5px',
-                      left: '-5px',
-                      right: '-5px',
-                      bottom: '-5px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                      opacity: 0.4,
-                      zIndex: -1
-                    }
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(194, 233, 251, 0.3)'
                   }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>3</Typography>
+                    <Typography variant="h6">3</Typography>
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#2196f3' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                     Motivasyonu Korur
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#546e7a', lineHeight: 1.6 }}>
+                  <Typography variant="body2" color="text.secondary">
                     Küçük hedefler belirleyerek motivasyonu yüksek tutar.
                   </Typography>
                 </Box>
               </Grid>
               
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  textAlign: 'center',
-                  p: 3,
-                  height: '100%',
-                  bgcolor: 'white',
-                  borderRadius: 4,
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-                  transition: 'transform 0.3s, box-shadow 0.3s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 12px 25px rgba(0,0,0,0.12)'
-                  }
-                }}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                   <Box sx={{ 
-                    width: 70, 
-                    height: 70, 
+                    width: 60, 
+                    height: 60, 
                     borderRadius: '50%', 
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'center',
-                    background: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
                     color: 'white',
                     fontWeight: 'bold',
-                    mb: 3,
-                    boxShadow: '0 8px 15px rgba(161, 140, 209, 0.4)',
-                    position: 'relative',
-                    '&:before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: '-5px',
-                      left: '-5px',
-                      right: '-5px',
-                      bottom: '-5px',
-                      borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-                      opacity: 0.4,
-                      zIndex: -1
-                    }
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(240, 147, 251, 0.3)'
                   }}>
-                    <Typography variant="h5" sx={{ fontWeight: 800 }}>4</Typography>
+                    <Typography variant="h6">4</Typography>
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: '#9c27b0' }}>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
                     Stresi Azaltır
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#546e7a', lineHeight: 1.6 }}>
+                  <Typography variant="body2" color="text.secondary">
                     Düzenli molalar zihinsel ve fiziksel stresi azaltır.
                   </Typography>
                 </Box>
@@ -1126,9 +959,9 @@ const PomodoroPage = () => {
               borderRadius: 6, 
               fontWeight: 600, 
               px: 3,
-              background: 'linear-gradient(135deg, #00b09b 0%, #96c93d 100%)',
+              bgcolor: '#333',
               '&:hover': {
-                background: 'linear-gradient(135deg, #009688 0%, #8bc34a 100%)',
+                bgcolor: '#222',
               },
               textTransform: 'none'
             }}

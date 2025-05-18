@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#5B8FB9',
+      main: '#55b3d9',
       light: '#7CA6C8',
       dark: '#3D6F94',
       contrastText: '#FFFFFF',
@@ -15,12 +15,52 @@ const theme = createTheme({
       contrastText: '#333333',
     },
     background: {
-      default: '#8ebdb9',
-      paper: '#8ebdb9',
+      default: '#abe7ff',
+      paper: '#abe7ff',
     },
     text: {
-      primary: '#303545',
-      secondary: '#5F6477',
+      primary: '#2a5956',
+      secondary: '#2a5956',
+    },
+    typography: {
+      fontFamily: '"Poppins", "Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
+      h1: {
+        fontWeight: 700,
+        letterSpacing: '-0.5px',
+      },
+      h2: {
+        fontWeight: 700,
+        letterSpacing: '-0.5px',
+      },
+      h3: {
+        fontWeight: 600,
+        letterSpacing: '-0.25px',
+      },
+      h4: {
+        fontWeight: 600,
+        letterSpacing: '-0.25px',
+      },
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+      body1: {
+        fontSize: '1rem',
+        lineHeight: 1.6,
+        letterSpacing: '0.15px',
+      },
+      body2: {
+        fontSize: '0.875rem',
+        lineHeight: 1.6,
+        letterSpacing: '0.15px',
+      },
+      button: {
+        fontWeight: 600,
+        letterSpacing: '0.5px',
+        textTransform: 'none',
+      },
     },
     error: {
       main: '#FF6B6B',
@@ -29,7 +69,7 @@ const theme = createTheme({
       main: '#FFD166',
     },
     info: {
-      main: '#5B8FB9',
+      main: '#55b3d9',
     },
     success: {
       main: '#06D6A0',
@@ -82,7 +122,7 @@ const theme = createTheme({
           backgroundColor: '#FFFFFF',
           borderRadius: 16,
           boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
-          border: '1px solid rgba(91, 143, 185, 0.15)',
+          border: '1px solid rgba(85, 179, 217, 0.15)',
           transition: 'box-shadow 0.3s ease, transform 0.3s ease',
           '&:hover': {
             boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
@@ -103,7 +143,7 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          backgroundColor: '#5B8FB9',
+          backgroundColor: '#55b3d9',
           '&:hover': {
             backgroundColor: '#3D6F94',
           },
@@ -122,16 +162,16 @@ const theme = createTheme({
           },
         },
         outlinedPrimary: {
-          borderColor: '#5B8FB9',
-          color: '#5B8FB9',
+          borderColor: '#55b3d9',
+          color: '#55b3d9',
           '&:hover': {
             borderColor: '#3D6F94',
-            backgroundColor: 'rgba(91, 143, 185, 0.04)',
+            backgroundColor: 'rgba(85, 179, 217, 0.04)',
           },
         },
         text: {
           '&:hover': {
-            backgroundColor: 'rgba(91, 143, 185, 0.04)',
+            backgroundColor: 'rgba(85, 179, 217, 0.04)',
           },
         },
       },

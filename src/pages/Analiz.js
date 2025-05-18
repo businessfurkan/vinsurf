@@ -282,13 +282,13 @@ const Analiz = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#FFFFF0' }}>
+    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#abe7ff' }}>
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' }} />
       <Typography
         variant="h5"
         fontWeight="bold"
         gutterBottom
-        sx={{ mb: 3, display: 'flex', alignItems: 'center', '&::before': { content: '""', width: 5, height: 24, backgroundColor: 'primary.main', borderRadius: 4, marginRight: 1.5 } }}
+        sx={{ mb: 3, display: 'flex', alignItems: 'center', '&::before': { content: '""', width: 5, height: 24, backgroundColor: '#5db6d9', borderRadius: 4, marginRight: 1.5 } }}
       >
         Çalışma Analizleri
       </Typography>
@@ -305,19 +305,19 @@ const Analiz = () => {
               onClick={() => handleOpenTopicDialog(subject)}
               sx={{
                 cursor: 'pointer',
-                borderRadius: '16px',
-                background: `linear-gradient(145deg, #FFFFF0 0%, ${getSubjectColor(subject)}10 100%)`,
-                boxShadow: `0 8px 20px 0 rgba(0,0,0,0.1), 0 2px 10px 0 ${getSubjectColor(subject)}30`,
-                minHeight: 180,
+                borderRadius: '20px',
+                background: `linear-gradient(145deg, #ffffff 0%, ${getSubjectColor(subject)}10 100%)`,
+                boxShadow: `0 10px 25px 0 rgba(0,0,0,0.08), 0 5px 15px 0 ${getSubjectColor(subject)}25`,
+                minHeight: 200,
                 display: 'flex',
                 flexDirection: 'column',
-                padding: 2,
-                border: `1.5px solid ${getSubjectColor(subject)}30`,
+                padding: 2.5,
+                border: `2px solid ${getSubjectColor(subject)}40`,
                 transition: 'all 0.3s ease',
                 '&:hover': { 
-                  boxShadow: `0 12px 32px 0 rgba(0,0,0,0.15), 0 4px 12px 0 ${getSubjectColor(subject)}40`, 
+                  boxShadow: `0 15px 35px 0 rgba(0,0,0,0.12), 0 8px 20px 0 ${getSubjectColor(subject)}50`, 
                   borderColor: getSubjectColor(subject),
-                  transform: 'translateY(-5px)'
+                  transform: 'translateY(-8px) scale(1.02)'
                 },
                 position: 'relative',
                 overflow: 'hidden'
@@ -329,31 +329,39 @@ const Analiz = () => {
                   top: 0,
                   left: 0,
                   width: '100%',
-                  height: '4px',
-                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`
+                  height: '6px',
+                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`,
+                  borderTopLeftRadius: '18px',
+                  borderTopRightRadius: '18px'
                 }}
               />
               
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5 }}>
                 <Avatar
                   sx={{
-                    bgcolor: `${getSubjectColor(subject)}20`,
-                    color: getSubjectColor(subject),
-                    width: 48,
-                    height: 48,
-                    boxShadow: `0 4px 12px ${getSubjectColor(subject)}30`,
-                    mr: 1.5
+                    bgcolor: getSubjectColor(subject),
+                    color: '#ffffff',
+                    width: 56,
+                    height: 56,
+                    boxShadow: `0 6px 16px ${getSubjectColor(subject)}50`,
+                    mr: 2,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'scale(1.1) rotate(5deg)'
+                    }
                   }}
                 >
                   {getSubjectIcon(subject)}
                 </Avatar>
                 <Typography 
                   sx={{ 
-                    fontSize: 18, 
+                    fontSize: 20, 
                     fontWeight: 800, 
-                    color: '#2c2c2c', 
+                    color: getSubjectColor(subject), 
                     fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
-                    lineHeight: 1.2
+                    lineHeight: 1.2,
+                    letterSpacing: '-0.5px',
+                    textShadow: '0 1px 2px rgba(0,0,0,0.05)'
                   }}
                 >
                   {subject}
@@ -361,24 +369,42 @@ const Analiz = () => {
               </Box>
               
               {/* Study time display */}
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, mt: 0.5 }}>
-                <AccessTimeIcon sx={{ fontSize: 16, color: 'text.secondary', mr: 0.7 }} />
-                <Typography variant="body2" color="text.secondary" fontWeight={500}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 0.5, backgroundColor: `${getSubjectColor(subject)}15`, p: 1.5, borderRadius: 2 }}>
+                <AccessTimeIcon sx={{ fontSize: 20, color: getSubjectColor(subject), mr: 1 }} />
+                <Typography variant="body1" color="text.primary" fontWeight={700} fontSize="1rem">
                   {formatTime(subjectData.totalTime || 0)}
                 </Typography>
               </Box>
               
               {/* Progress bar section */}
-              <Box sx={{ mt: 'auto', width: '100%' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
-                  <Typography variant="caption" fontWeight={600} color="text.secondary">
-                    {hasTarget ? 'İlerleme' : 'Hedef Yok'}
+              <Box sx={{ mt: 'auto', width: '100%', pt: 1 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Typography variant="body2" fontWeight={700} color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+                    {hasTarget ? (
+                      <>
+                        <FlagIcon sx={{ mr: 0.5, fontSize: 18, color: getSubjectColor(subject) }} />
+                        İlerleme
+                      </>
+                    ) : (
+                      <>
+                        <HelpOutlineIcon sx={{ mr: 0.5, fontSize: 18, color: 'warning.main' }} />
+                        Hedef Yok
+                      </>
+                    )}
                   </Typography>
                   {hasTarget && (
                     <Tooltip title={`Hedef: ${Math.round(studyTargets[subject] / 3600)} saat`} arrow placement="top">
-                      <Typography variant="caption" fontWeight={700} color={getSubjectColor(subject)}>
-                        {progress}%
-                      </Typography>
+                      <Chip 
+                        label={`${progress}%`} 
+                        size="small" 
+                        sx={{ 
+                          fontWeight: 800, 
+                          bgcolor: getSubjectColor(subject), 
+                          color: '#ffffff',
+                          fontSize: '0.8rem',
+                          height: 24
+                        }}
+                      />
                     </Tooltip>
                   )}
                 </Box>
@@ -387,13 +413,14 @@ const Analiz = () => {
                   variant="determinate"
                   value={hasTarget ? progress : 0}
                   sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: 'rgba(0,0,0,0.05)',
+                    height: 10,
+                    borderRadius: 5,
+                    bgcolor: 'rgba(0,0,0,0.06)',
                     '& .MuiLinearProgress-bar': {
                       bgcolor: getSubjectColor(subject),
                       backgroundImage: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`,
-                      borderRadius: 4,
+                      borderRadius: 5,
+                      boxShadow: `0 2px 6px ${getSubjectColor(subject)}40`
                     },
                   }}
                 />
@@ -412,57 +439,207 @@ const Analiz = () => {
           Konu Bazlı Çalışma Süreleri
         </Button>
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', p: 3, pb: 0 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)', color: 'white', mr: 2, boxShadow: '0 4px 12px rgba(63, 81, 181, 0.3)' }}>
-          <FlagIcon sx={{ fontSize: 20 }} />
-        </Box>
-        <Box>
-          <Typography variant="h6" fontWeight="bold">Çalışma Hedefi Belirle</Typography>
-          <Typography variant="body2" color="text.secondary">Her ders için hedeflediğin çalışma sürelerini ayarla</Typography>
+      <Box sx={{ 
+        p: 3, 
+        pb: 0, 
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(33, 150, 243, 0.02) 100%)',
+          borderRadius: '20px',
+          zIndex: -1,
+        }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          mb: 2
+        }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: 60, 
+            height: 60, 
+            borderRadius: '16px', 
+            background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)', 
+            color: 'white', 
+            mr: 2.5, 
+            boxShadow: '0 8px 20px rgba(33, 150, 243, 0.3)',
+            transform: 'rotate(-5deg)',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              transform: 'rotate(0deg) scale(1.05)',
+              boxShadow: '0 10px 25px rgba(33, 150, 243, 0.4)'
+            }
+          }}>
+            <FlagIcon sx={{ fontSize: 28 }} />
+          </Box>
+          <Box>
+            <Typography 
+              variant="h5" 
+              sx={{
+                fontWeight: 800,
+                color: '#1565C0',
+                mb: 0.5,
+                letterSpacing: '-0.5px',
+                textShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                fontFamily: "'Poppins', 'Montserrat', sans-serif"
+              }}
+            >
+              Çalışma Hedefi Belirle
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{
+                color: '#546E7A',
+                fontWeight: 500,
+                fontSize: '1rem',
+                letterSpacing: '0.2px'
+              }}
+            >
+              Her ders için hedeflediğin çalışma sürelerini ayarla
+            </Typography>
+          </Box>
         </Box>
       </Box>
-      <Divider sx={{ my: 3 }} />
+      <Divider sx={{ 
+        my: 3, 
+        borderColor: 'rgba(33, 150, 243, 0.2)',
+        '&::before, &::after': {
+          borderColor: 'rgba(33, 150, 243, 0.2)'
+        }
+      }} />
       <Box sx={{ px: 3, pb: 3 }}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={5}>
             <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle2" fontWeight="600" color="text.primary" gutterBottom>Ders Seç</Typography>
+              <Typography 
+                variant="subtitle1" 
+                sx={{
+                  fontWeight: 700, 
+                  color: '#55b3d9', 
+                  mb: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  '&::before': {
+                    content: '""',
+                    display: 'inline-block',
+                    width: 4,
+                    height: 18,
+                    backgroundColor: '#55b3d9',
+                    borderRadius: 4,
+                    mr: 1.5
+                  }
+                }}
+              >
+                Ders Seç
+              </Typography>
               <FormControl fullWidth>
                 <Select
                   value={targetSubject}
                   onChange={(e) => setTargetSubject(e.target.value)}
                   displayEmpty
                   sx={{
-                    borderRadius: 2,
-                    backgroundColor: '#f5f7fa',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.08)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.18)' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'primary.main' },
+                    borderRadius: 3,
+                    backgroundColor: '#5db6d9',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                    height: 56,
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(25, 118, 210, 0.2)' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(25, 118, 210, 0.5)' },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#55b3d9', borderWidth: 2 },
+                    '& .MuiSelect-select': { 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      py: 1.5
+                    }
                   }}
-                  MenuProps={{ PaperProps: { sx: { borderRadius: 2, boxShadow: '0 8px 16px rgba(0,0,0,0.1)', mt: 0.5 } } }}
+                  MenuProps={{ 
+                    PaperProps: { 
+                      sx: { 
+                        borderRadius: 3, 
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)', 
+                        mt: 0.5,
+                        maxHeight: 350
+                      } 
+                    } 
+                  }}
                 >
-                  <MenuItem value="" disabled>Lütfen bir ders seçin</MenuItem>
+                  <MenuItem value="" disabled>
+                    <Box sx={{ display: 'flex', alignItems: 'center', color: '#757575' }}>
+                      <SubjectIcon sx={{ mr: 1.5, fontSize: 20, opacity: 0.7 }} />
+                      Lütfen bir ders seçin
+                    </Box>
+                  </MenuItem>
                   {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].sort().map(subject => (
                     <MenuItem
                       key={subject}
                       value={subject}
                       sx={{
-                        borderLeft: `3px solid ${getSubjectColor(subject)}`,
-                        my: 0.5,
+                        borderLeft: `4px solid ${getSubjectColor(subject)}`,
+                        my: 0.8,
                         mx: 0.5,
-                        borderRadius: 1,
-                        '&.Mui-selected': { bgcolor: `${getSubjectColor(subject)}15`, fontWeight: 'bold' },
+                        borderRadius: 2,
+                        py: 1.5,
+                        transition: 'all 0.2s ease',
+                        '&.Mui-selected': { 
+                          bgcolor: `${getSubjectColor(subject)}15`, 
+                          fontWeight: 'bold',
+                          boxShadow: `0 2px 8px ${getSubjectColor(subject)}30`
+                        },
                         '&.Mui-selected:hover': { bgcolor: `${getSubjectColor(subject)}25` },
+                        '&:hover': { bgcolor: `${getSubjectColor(subject)}10` }
                       }}
                     >
-                      {subject}
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Avatar 
+                          sx={{ 
+                            width: 28, 
+                            height: 28, 
+                            bgcolor: getSubjectColor(subject),
+                            mr: 1.5,
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          {getSubjectIcon(subject)}
+                        </Avatar>
+                        <Typography sx={{ fontWeight: 600 }}>{subject}</Typography>
+                      </Box>
                     </MenuItem>
                   ))}
                 </Select>
               </FormControl>
             </Box>
             <Box>
-              <Typography variant="subtitle2" fontWeight="600" color="text.primary" gutterBottom sx={{ mb: 1 }}>Hedef Süre (Saat)</Typography>
+              <Typography 
+                variant="subtitle1" 
+                sx={{
+                  fontWeight: 700, 
+                  color: '#55b3d9', 
+                  mb: 1.5,
+                  mt: 3,
+                  display: 'flex',
+                  alignItems: 'center',
+                  '&::before': {
+                    content: '""',
+                    display: 'inline-block',
+                    width: 4,
+                    height: 18,
+                    backgroundColor: '#55b3d9',
+                    borderRadius: 4,
+                    mr: 1.5
+                  }
+                }}
+              >
+                Hedef Süre (Saat)
+              </Typography>
               <TextField
                 type="number"
                 value={targetHours}
@@ -479,36 +656,84 @@ const Analiz = () => {
                 sx={{
                   mb: 2,
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    backgroundColor: '#f5f7fa',
-                    '& fieldset': { borderColor: 'rgba(0,0,0,0.1)' },
-                    '&:hover fieldset': { borderColor: targetSubject ? getSubjectColor(targetSubject) : '#e53935' },
-                    '&.Mui-focused fieldset': { borderColor: targetSubject ? getSubjectColor(targetSubject) : '#e53935' },
+                    borderRadius: 3,
+                    backgroundColor: '#5db6d9',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                    height: 56,
+                    '& fieldset': { borderColor: targetSubject ? `${getSubjectColor(targetSubject)}50` : 'rgba(25, 118, 210, 0.2)' },
+                    '&:hover fieldset': { borderColor: targetSubject ? getSubjectColor(targetSubject) : '#55b3d9' },
+                    '&.Mui-focused fieldset': { borderColor: targetSubject ? getSubjectColor(targetSubject) : '#55b3d9', borderWidth: 2 },
                   },
-                  '& .MuiInputBase-input': { textAlign: 'center', fontSize: '1.2rem', fontWeight: 'bold', py: 1.5 },
+                  '& .MuiInputBase-input': { 
+                    textAlign: 'center', 
+                    fontSize: '1.5rem', 
+                    fontWeight: 'bold', 
+                    py: 1.5,
+                    color: targetSubject ? getSubjectColor(targetSubject) : '#55b3d9'
+                  },
+                  '& .MuiInputAdornment-root': {
+                    mr: 2
+                  }
                 }}
               />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 1, mb: 2 }}>
-                <Typography variant="caption" color="text.secondary">Minimum: 1 saat</Typography>
-                <Typography variant="caption" color="text.secondary">Maksimum: 150 saat</Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                px: 1, 
+                mb: 3,
+                mt: 1,
+                backgroundColor: 'rgba(33, 150, 243, 0.08)',
+                borderRadius: 2,
+                py: 1
+              }}>
+                <Chip 
+                  label="Minimum: 1 saat" 
+                  size="small" 
+                  sx={{ 
+                    bgcolor: 'rgba(33, 150, 243, 0.1)', 
+                    color: '#55b3d9',
+                    fontWeight: 600,
+                    border: '1px solid rgba(33, 150, 243, 0.2)'
+                  }}
+                />
+                <Chip 
+                  label="Maksimum: 150 saat" 
+                  size="small" 
+                  sx={{ 
+                    bgcolor: 'rgba(33, 150, 243, 0.1)', 
+                    color: '#55b3d9',
+                    fontWeight: 600,
+                    border: '1px solid rgba(33, 150, 243, 0.2)'
+                  }}
+                />
               </Box>
             </Box>
             <Box sx={{ mt: 3 }}>
               <Button
                 variant="contained"
                 color="primary"
-                startIcon={<SaveIcon />}
+                startIcon={<SaveIcon sx={{ fontSize: 22 }} />}
                 onClick={() => saveStudyTarget(targetSubject, targetHours)}
                 disabled={!targetSubject}
                 fullWidth
                 sx={{
-                  py: 1.2,
-                  borderRadius: 2,
-                  boxShadow: '0 4px 12px rgba(33, 150, 243, 0.2)',
-                  background: targetSubject ? `linear-gradient(135deg, ${getSubjectColor(targetSubject)} 0%, ${getLighterColor(getSubjectColor(targetSubject))} 100%)` : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
+                  py: 1.5,
+                  borderRadius: 3,
+                  boxShadow: targetSubject ? `0 6px 16px ${getSubjectColor(targetSubject)}40` : '0 6px 16px rgba(33, 150, 243, 0.3)',
+                  background: targetSubject ? `linear-gradient(135deg, ${getSubjectColor(targetSubject)} 0%, ${getLighterColor(getSubjectColor(targetSubject))} 100%)` : 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)',
                   transition: 'all 0.3s ease',
-                  '&:hover': { boxShadow: '0 6px 16px rgba(33, 150, 243, 0.25)', transform: 'translateY(-2px)' },
-                  '&:active': { transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(33, 150, 243, 0.15)' },
+                  fontSize: '1.1rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.5px',
+                  '&:hover': { 
+                    boxShadow: targetSubject ? `0 8px 20px ${getSubjectColor(targetSubject)}50` : '0 8px 20px rgba(33, 150, 243, 0.4)', 
+                    transform: 'translateY(-3px)' 
+                  },
+                  '&:active': { 
+                    transform: 'translateY(-1px)', 
+                    boxShadow: targetSubject ? `0 4px 12px ${getSubjectColor(targetSubject)}30` : '0 4px 12px rgba(33, 150, 243, 0.25)' 
+                  },
                 }}
               >
                 Hedefi Kaydet
@@ -517,12 +742,77 @@ const Analiz = () => {
           </Grid>
           <Grid item xs={12} md={7}>
             <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="subtitle2" fontWeight="600" color="text.primary" gutterBottom>Mevcut Hedefler</Typography>
-              <Box sx={{ flex: 1, bgcolor: '#f5f7fa', borderRadius: 2, p: 2, overflowY: 'auto', maxHeight: 250 }}>
+              <Typography 
+                variant="subtitle1" 
+                sx={{
+                  fontWeight: 700, 
+                  color: '#55b3d9', 
+                  mb: 1.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  '&::before': {
+                    content: '""',
+                    display: 'inline-block',
+                    width: 4,
+                    height: 18,
+                    backgroundColor: '#55b3d9',
+                    borderRadius: 4,
+                    mr: 1.5
+                  }
+                }}
+              >
+                Mevcut Hedefler
+              </Typography>
+              <Box sx={{ 
+                flex: 1, 
+                bgcolor: '#5db6d9', 
+                borderRadius: 3, 
+                p: 2.5, 
+                overflowY: 'auto', 
+                maxHeight: 280,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(33, 150, 243, 0.15)'
+              }}>
                 {Object.keys(studyTargets).length === 0 ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', p: 3, color: 'text.secondary', textAlign: 'center' }}>
-                    <HelpOutlineIcon sx={{ mb: 1, fontSize: 40, color: 'action.disabled' }} />
-                    <Typography variant="body2">Henüz hiç hedef belirlemedin. Hedefler, çalışma motivasyonunu artırmaya yardımcı olur.</Typography>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    height: '100%', 
+                    p: 4, 
+                    color: 'text.secondary', 
+                    textAlign: 'center',
+                    backgroundColor: 'rgba(33, 150, 243, 0.03)',
+                    borderRadius: 2
+                  }}>
+                    <Box
+                      sx={{
+                        width: 70,
+                        height: 70,
+                        borderRadius: '50%',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 2
+                      }}
+                    >
+                      <HelpOutlineIcon sx={{ fontSize: 40, color: '#55b3d9' }} />
+                    </Box>
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        fontWeight: 600, 
+                        color: '#55b3d9',
+                        mb: 1
+                      }}
+                    >
+                      Henüz Hedef Belirlemedin
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#546E7A', lineHeight: 1.6 }}>
+                      Hedefler, çalışma motivasyonunu artırmaya ve ilerlemeyi takip etmeye yardımcı olur.
+                    </Typography>
                   </Box>
                 ) : (
                   <List sx={{ p: 0 }}>
@@ -533,23 +823,54 @@ const Analiz = () => {
                         <Paper
                           key={subject}
                           sx={{
-                            mb: 1.5,
-                            p: 1.5,
-                            borderRadius: 2,
+                            mb: 2,
+                            p: 2,
+                            borderRadius: 3,
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                            borderLeft: `4px solid ${getSubjectColor(subject)}`,
-                            transition: 'all 0.2s ease',
-                            '&:hover': { transform: 'translateX(4px)', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' },
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                            borderLeft: `5px solid ${getSubjectColor(subject)}`,
+                            transition: 'all 0.3s ease',
+                            backgroundColor: '#5db6d9',
+                            '&:hover': { 
+                              transform: 'translateX(5px) scale(1.01)', 
+                              boxShadow: `0 6px 16px ${getSubjectColor(subject)}20` 
+                            },
                           }}
                         >
-                          <Box>
-                            <Typography variant="subtitle2" fontWeight="600">{subject}</Typography>
-                            <Typography variant="body2" color="text.secondary">{hours} saat</Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar 
+                              sx={{ 
+                                bgcolor: getSubjectColor(subject), 
+                                width: 36, 
+                                height: 36, 
+                                mr: 2,
+                                boxShadow: `0 3px 8px ${getSubjectColor(subject)}40`
+                              }}
+                            >
+                              {getSubjectIcon(subject)}
+                            </Avatar>
+                            <Box>
+                              <Typography variant="subtitle1" fontWeight="700" sx={{ color: getSubjectColor(subject) }}>{subject}</Typography>
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <AccessTimeIcon sx={{ fontSize: 16, mr: 0.7, color: 'text.secondary' }} />
+                                <Typography variant="body2" fontWeight="600" color="text.secondary">{hours} saat</Typography>
+                              </Box>
+                            </Box>
                           </Box>
-                          <IconButton size="small" onClick={() => handleDeleteTarget(subject)} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' } }}>
+                          <IconButton 
+                            size="small" 
+                            onClick={() => handleDeleteTarget(subject)} 
+                            sx={{ 
+                              color: 'text.secondary', 
+                              bgcolor: 'rgba(244, 67, 54, 0.1)',
+                              '&:hover': { 
+                                color: 'white', 
+                                bgcolor: 'error.main'
+                              } 
+                            }}
+                          >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </Paper>
@@ -558,9 +879,26 @@ const Analiz = () => {
                   </List>
                 )}
               </Box>
-              <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
-                <LightbulbIcon sx={{ color: 'warning.main', mr: 1 }} fontSize="small" />
-                <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>İpucu: Hedeflerini düzenli olarak gözden geçir ve güncelle.</Typography>
+              <Box sx={{ 
+                mt: 3, 
+                display: 'flex', 
+                alignItems: 'center',
+                p: 1.5,
+                borderRadius: 2,
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                border: '1px dashed rgba(255, 193, 7, 0.5)'
+              }}>
+                <LightbulbIcon sx={{ color: 'warning.main', mr: 1.5, fontSize: 24 }} />
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#F57F17', 
+                    fontWeight: 600,
+                    lineHeight: 1.5
+                  }}
+                >
+                  İpucu: Hedeflerini düzenli olarak gözden geçir ve güncelle. Gerçekçi hedefler motivasyonunu artırır.
+                </Typography>
               </Box>
             </Box>
           </Grid>

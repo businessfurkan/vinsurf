@@ -125,7 +125,7 @@ const App = () => {
       <CssBaseline />
       <NotificationProvider>
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: '#FFFFF0', minHeight: '100vh', position: 'relative' }}>
+        <Box sx={{ display: 'flex', bgcolor: '#abe7ff', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
@@ -133,7 +133,7 @@ const App = () => {
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
               overflow: 'auto',
-              bgcolor: '#FFFFF0',
+              bgcolor: '#abe7ff',
               transition: theme => theme.transitions.create(['margin', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
@@ -168,7 +168,7 @@ const App = () => {
                         left: 0,
                         width: '60px', // Sidebar genişliği
                         height: '100%',
-                        backgroundColor: '#FFFFF0',
+                        backgroundColor: '#abe7ff',
                         zIndex: 0,
                       },
                       '&::after': {
@@ -178,7 +178,7 @@ const App = () => {
                         right: 0,
                         width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
                         height: '100%',
-                        backgroundColor: '#FFFFF0',
+                        backgroundColor: '#abe7ff',
                         zIndex: 0,
                         '@media (max-width: 1200px)': {
                           width: '0px',

@@ -619,7 +619,7 @@ const KonuTakip = () => {
       sx={{ 
         flexGrow: 1, 
         p: 3,
-        backgroundColor: '#FFFFF0',
+        backgroundColor: '#abe7ff',
         minHeight: '100vh'
       }}
     >
@@ -631,7 +631,8 @@ const KonuTakip = () => {
           sx={{ 
             mb: 4, 
             fontWeight: 700,
-            color: '#2e3856',
+            color: '#2a5956',
+            fontFamily: 'Poppins, Montserrat, sans-serif',
             textAlign: 'center',
             position: 'relative',
             '&::after': {

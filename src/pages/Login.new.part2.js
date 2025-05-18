@@ -47,7 +47,7 @@ const Login = () => {
       title: "Pomodoro Tekniği",
       description: "Odaklanmış çalışma ve dinlenme döngüleriyle verimliliğinizi artırın",
       icon: <TimerIcon />,
-      color: "#5B8FB9"
+      color: "#55b3d9"
     },
     {
       title: "Detaylı Analitik",
