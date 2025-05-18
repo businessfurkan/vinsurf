@@ -11,8 +11,7 @@ import {
   Button,
   IconButton,
   Tooltip,
-  Paper,
-  Divider
+  Chip
 } from '@mui/material';
 import PomodoroTimer from '../components/PomodoroTimer';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -23,10 +22,10 @@ import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import SettingsIcon from '@mui/icons-material/Settings';
+// SettingsIcon kullanılmadığı için kaldırıldı
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
-import FlagIcon from '@mui/icons-material/Flag';
+// FlagIcon kullanılmadığı için kaldırıldı
 import AssignmentIcon from '@mui/icons-material/Assignment';
 
 const PomodoroPage = () => {

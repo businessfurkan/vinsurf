@@ -312,22 +312,7 @@ const PomodoroTimer = () => {
     }
   };
 
-  // Hedef başarı durumunu işleme fonksiyonu
-  const showGoalResultNotification = (completed) => {
-    setShowGoalResult(false);
-    
-    // Başarı durumuna göre bildirim göster
-    if (completed) {
-      showNotification('Tebrikler! Hedefinizi başarıyla tamamladınız! 🎉', 'success');
-    } else {
-      showNotification('Sorun değil, bir dahaki sefere daha iyi olacak! 💪', 'info');
-    }
-    
-    // Yeni bir pomodoro için hazırlan
-    setCurrentGoal('');
-    setGoal('');
-    handleReset();
-  };
+  // Not: Kullanılmayan fonksiyon kaldırıldı
 
   return (
     <Box sx={{ fontFamily: 'Quicksand, sans-serif', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
