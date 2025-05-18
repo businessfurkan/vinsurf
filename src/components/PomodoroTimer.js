@@ -508,210 +508,108 @@ const PomodoroTimer = () => {
                 {/* Pomodoro sayısı göstergesi */}
                 {mode === 'pomodoro' && (
                   <Typography 
-                    variant="caption" 
                     sx={{ 
-                      mt: -1, 
-                      color: 'text.secondary',
-                      fontSize: '0.85rem',
-                      fontWeight: 500
+                      borderRadius: 8,
+                      px: 3,
+                      py: 1.2,
+                      fontWeight: 600,
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                      backgroundColor: '#333',
+                      '&:hover': {
+                        backgroundColor: '#222',
+                        boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+                      },
+                      minWidth: { xs: '120px', sm: '140px' }
                     }}
                   >
-                    {completedPomodoros} pomodoro tamamlandı
-                  </Typography>
-                )}
-                
-                <Typography 
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    fontWeight: 700,
-                    fontSize: '1.1rem',
-                    mb: 1,
-                    fontFamily: 'Quicksand, sans-serif'
-                  }}
-                >
-                  {
-                    mode === 'pomodoro' ? 'Çalışma' : 
-                    mode === 'shortBreak' ? 'Kısa Mola' : 'Uzun Mola'
-                  }
-                </Typography>
+                    {isRunning ? 'Duraklat' : 'Başlat'}
+                  </Button>
+                  
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 1,
+                    flexDirection: { xs: 'row', sm: 'row' }
+                  }}>
+                    <Tooltip title="Sıfırla">
+                      <IconButton 
+                        onClick={handleReset} 
+                        color="inherit" 
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }
+                        }}
+                      >
+                        <RestartAltIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ayarlar">
+                      <IconButton 
+                        onClick={() => setShowSettings(true)} 
+                        color="inherit"
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }
+                        }}
+                      >
+                        <SettingsIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={muted ? "Sesi Aç" : "Sesi Kapat"}>
+                      <IconButton 
+                        onClick={toggleMute} 
+                        color="inherit"
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }
+                        }}
+                      >
+                        {muted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
+                      </IconButton>
+                    </Tooltip>
+                    {!currentGoal && !isRunning && (
+                      <Tooltip title="Hedef Belirle">
+                        <IconButton 
+                          onClick={() => setShowGoalInput(true)} 
+                          color="primary"
+                          size="small"
+                          sx={{ 
+                            bgcolor: 'rgba(51, 51, 51, 0.08)',
+                            '&:hover': {
+                              bgcolor: 'rgba(51, 51, 51, 0.15)',
+                            }
+                          }}
+                        >
+                          <AssignmentIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                </Box>
               </Box>
-            </Box>
-            
-            <Box sx={{ display: 'flex', mt: 2, gap: 2 }}>
-              <Tooltip title={muted ? "Sesi Aç" : "Sesi Kapat"}>
-                <IconButton onClick={() => { toggleMute(); playClickSound(); }} color="inherit" size="small">
-                  {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
-                </IconButton>
-              </Tooltip>
               
               <Typography 
                 variant="body2" 
                 sx={{ 
+                  textAlign: 'center', 
+                  mt: 2, 
                   color: 'text.secondary',
-                  fontFamily: 'Quicksand, sans-serif'
+                  fontSize: '0.8rem',
+                  fontStyle: 'italic' 
                 }}
               >
-                {completedPomodoros} pomodoro tamamlandı
+                Zamanlayıcıyı başlatın: odaklanın ve verimliliğinizi artırın!
               </Typography>
-            </Box>
-          </Box>
-          
-          {/* Aktif hedef gösterimi */}
-          {currentGoal && !showGoalResult && mode === 'pomodoro' && (
-            <Paper 
-              elevation={0}
-              sx={{ 
-                p: 2, 
-                mb: 3, 
-                borderRadius: 3,
-                border: '1px solid rgba(0,0,0,0.08)',
-                bgcolor: 'rgba(0,0,0,0.02)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                width: '100%',
-                maxWidth: 500
-              }}
-            >
-              <FlagIcon sx={{ color: '#0067b8' }} />
-              <Box>
-                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500, display: 'block', mb: 0.5 }}>
-                  Mevcut Hedefiniz:
-                </Typography>
-                <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  {currentGoal}
-                </Typography>
-              </Box>
-            </Paper>
-          )}
-          
-          {/* Hedef sonuç ekranı */}
-          {showGoalResult && (
-            <Zoom in={showGoalResult}>
-              <Card 
-                elevation={3}
-                sx={{ 
-                  mb: 3, 
-                  borderRadius: 4,
-                  overflow: 'hidden',
-                  maxWidth: 500,
-                  width: '100%',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.12)'
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      mb: 2, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 1,
-                      fontWeight: 700,
-                      color: '#0067b8'
-                    }}
-                  >
-                    <EmojiEventsIcon />
-                    Pomodoro Tamamlandı!
-                  </Typography>
-                  
-                  <Divider sx={{ mb: 2 }} />
-                  
-                  <Typography variant="body1" sx={{ mb: 1, fontWeight: 500 }}>
-                    Hedefiniz şuydu:
-                  </Typography>
-                  
-                  <Paper 
-                    elevation={0}
-                    sx={{ 
-                      p: 2, 
-                      mb: 3, 
-                      borderRadius: 2,
-                      bgcolor: 'rgba(0,0,0,0.03)',
-                      border: '1px solid rgba(0,0,0,0.08)'
-                    }}
-                  >
-                    <Typography variant="body1" sx={{ fontWeight: 600 }}>
-                      {currentGoal}
-                    </Typography>
-                  </Paper>
-                  
-                  <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
-                    Bu hedefe ulaştınız mı?
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleGoalResult(true)}
-                      startIcon={<CheckCircleIcon />}
-                      sx={{ 
-                        borderRadius: 6, 
-                        py: 1.2, 
-                        px: 3,
-                        fontWeight: 600,
-                        boxShadow: '0 4px 12px rgba(52,168,83,0.3)',
-                        textTransform: 'none'
-                      }}
-                    >
-                      Evet, başardım!
-                    </Button>
-                    
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleGoalResult(false)}
-                      startIcon={<CancelIcon />}
-                      sx={{ 
-                        borderRadius: 6, 
-                        py: 1.2, 
-                        px: 3,
-                        fontWeight: 600,
-                        textTransform: 'none'
-                      }}
-                    >
-                      Hayır, tamamlayamadım
-                    </Button>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Zoom>
-          )}
-          
-          {/* Timer Controls */}
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4, gap: 2, width: '100%' }}>
-            <Button 
-              size="large" 
-              variant="contained"
-              color={isRunning ? "warning" : "primary"}
-              onClick={() => { handleStartPause(); playClickSound(); }}
-              startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
-              sx={{ 
-                borderRadius: 28, 
-                px: 4,
-                py: 1.5,
-                textTransform: 'none',
-                fontSize: '1.1rem',
-                fontWeight: 700,
-                fontFamily: 'Quicksand, sans-serif',
-                boxShadow: isRunning 
-                  ? '0 6px 15px rgba(251, 188, 5, 0.4)' 
-                  : '0 6px 15px rgba(0, 103, 184, 0.4)',
-                backgroundColor: isRunning ? '#fbbc05' : '#0067b8',
-                transition: 'all 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-4px) scale(1.03)',
-                  backgroundColor: isRunning ? '#f0b400' : '#005da6',
-                  boxShadow: isRunning 
-                    ? '0 8px 20px rgba(251, 188, 5, 0.5)' 
-                    : '0 8px 20px rgba(0, 103, 184, 0.5)'
-                }
-              }}
-            >
-              {isRunning ? "Duraklat" : "Başlat"}
-            </Button>
+            </CardContent>
+          </Card>
             
             <Button 
               size="large" 
