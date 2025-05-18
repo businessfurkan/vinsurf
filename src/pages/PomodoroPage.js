@@ -15,7 +15,9 @@ import {
   TextField,
   Snackbar,
   Alert,
-  Stack
+  Stack,
+  Grid,
+  Paper
 } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -279,20 +281,67 @@ const PomodoroPage = () => {
                 justifyContent: 'center'
               }}>
                 {/* Zamanlayıcı Sayacı */}
-                <Typography
+                <Box
+                sx={{
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: { xs: '220px', sm: '280px', md: '320px' },
+                  height: { xs: '220px', sm: '280px', md: '320px' },
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.5)',
+                  border: '8px solid #FFFFF0',
+                  mb: 3,
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '85%',
+                    height: '85%',
+                    borderRadius: '50%',
+                    background: mode === 'pomodoro' 
+                      ? 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%)' 
+                      : mode === 'shortBreak'
+                        ? 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)'
+                        : 'linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)',
+                    opacity: 0.2,
+                    zIndex: 0
+                  }
+                }}
+              >
+                <Typography 
                   variant="h1"
                   component="div"
                   sx={{ 
                     fontWeight: 700, 
-                    fontSize: { xs: '4rem', sm: '5rem', md: '6rem' },
+                    fontSize: { xs: '3.5rem', sm: '4.5rem', md: '5.5rem' },
                     lineHeight: 1,
-                    color: '#333',
-                    mb: 1,
-                    textAlign: 'center'
+                    color: mode === 'pomodoro' ? '#e74c3c' : mode === 'shortBreak' ? '#27ae60' : '#8e44ad',
+                    textAlign: 'center',
+                    zIndex: 1,
+                    textShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                    letterSpacing: '-2px'
                   }}
                 >
                   {formatTime(timeLeft)}
                 </Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    color: mode === 'pomodoro' ? '#e74c3c' : mode === 'shortBreak' ? '#27ae60' : '#8e44ad',
+                    fontWeight: 600,
+                    opacity: 0.8,
+                    zIndex: 1
+                  }}
+                >
+                  {mode === 'pomodoro' ? 'ÇALIŞMA' : mode === 'shortBreak' ? 'KISA MOLA' : 'UZUN MOLA'}
+                </Typography>
+              </Box>
                 
                 {/* Tamamlanan Pomodoro Sayısı */}
                 <Box sx={{ 
@@ -605,22 +654,265 @@ const PomodoroPage = () => {
           </CardContent>
         </Card>
         
-        {/* Pomodoro Tekniği Açıklaması */}
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
+        {/* Pomodoro Tekniği Açıklaması - Genişletilmiş ve Daha Canlı */}
+        <Box sx={{ mb: 6, mt: 4 }}>
           <Typography 
-            variant="h6" 
+            variant="h5" 
             component="h3"
             sx={{ 
               fontWeight: 700, 
               color: '#333',
-              mb: 2
+              mb: 3,
+              textAlign: 'center',
+              position: 'relative',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: -10,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: '80px',
+                height: '4px',
+                background: 'linear-gradient(90deg, #ff9a9e 0%, #fad0c4 100%)',
+                borderRadius: '2px',
+              }
             }}
           >
-            Verimli Çalışma
+            Pomodoro Tekniği Nedir?
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Pomodoro tekniği, 25 dakikalık odaklanmış çalışma ve 5 dakikalık kısa molalardan oluşan bir zaman yönetimi metodudur.
-          </Typography>
+          
+          <Grid container spacing={4} sx={{ mt: 2 }}>
+            <Grid item xs={12} md={4}>
+              <Paper elevation={0} sx={{ 
+                p: 3, 
+                height: '100%',
+                borderRadius: 4,
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(0,0,0,0.05)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                },
+                background: 'linear-gradient(135deg, #fff6f6 0%, #ffe6e6 100%)'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mr: 2,
+                    boxShadow: '0 4px 10px rgba(255, 154, 158, 0.3)'
+                  }}>1</Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Çalışma Zamanı
+                  </Typography>
+                </Box>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
+                  25 dakikalık kesintisiz çalışma süresi içinde tamamen görevinize odaklanın. Bu süre içinde sosyal medya, telefon ve diğer dikkat dağıtıcılardan uzak durun.
+                </Typography>
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Paper elevation={0} sx={{ 
+                p: 3, 
+                height: '100%',
+                borderRadius: 4,
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(0,0,0,0.05)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                },
+                background: 'linear-gradient(120deg, #e0f7fa 0%, #c8e6c9 100%)'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mr: 2,
+                    boxShadow: '0 4px 10px rgba(132, 250, 176, 0.3)'
+                  }}>2</Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Kısa Mola
+                  </Typography>
+                </Box>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
+                  Her 25 dakikalık çalışma süresinden sonra 5 dakikalık bir mola verin. Bu sürede ayağa kalkın, gerinme hareketleri yapın veya kısa bir yürüyüş yapın. Zihninizi dinlendirin.
+                </Typography>
+              </Paper>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Paper elevation={0} sx={{ 
+                p: 3, 
+                height: '100%',
+                borderRadius: 4,
+                boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
+                border: '1px solid rgba(0,0,0,0.05)',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                '&:hover': {
+                  transform: 'translateY(-5px)',
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
+                },
+                background: 'linear-gradient(to top, #f3e7ff 0%, #ffe6fb 100%)'
+              }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ 
+                    width: 40, 
+                    height: 40, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(to top, #a18cd1 0%, #fbc2eb 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mr: 2,
+                    boxShadow: '0 4px 10px rgba(161, 140, 209, 0.3)'
+                  }}>3</Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    Uzun Mola
+                  </Typography>
+                </Box>
+                <Typography variant="body1" sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
+                  Her 4 pomodoro (çalışma süresi) tamamlandıktan sonra 15-30 dakikalık daha uzun bir mola verin. Bu süre içinde kendinizi ödüllendirin ve tamamen dinlenin.
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+          
+          <Box sx={{ mt: 5, p: 3, borderRadius: 4, bgcolor: 'rgba(0,0,0,0.02)', border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#333' }}>
+              Pomodoro Tekniğinin Faydaları
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Box sx={{ 
+                    width: 60, 
+                    height: 60, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(246, 211, 101, 0.3)'
+                  }}>
+                    <Typography variant="h6">1</Typography>
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    Odaklanmayı Artırır
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Kısa çalışma aralıkları daha yoğun odaklanmayı sağlar.
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Box sx={{ 
+                    width: 60, 
+                    height: 60, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #5ee7df 0%, #b490ca 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(94, 231, 223, 0.3)'
+                  }}>
+                    <Typography variant="h6">2</Typography>
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    Verimliliği Yükseltir
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Düzenli molalar zihinsel yorgunluğu azaltır ve verimliliği artırır.
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Box sx={{ 
+                    width: 60, 
+                    height: 60, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #c2e9fb 0%, #a1c4fd 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(194, 233, 251, 0.3)'
+                  }}>
+                    <Typography variant="h6">3</Typography>
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    Motivasyonu Korur
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Küçük hedefler belirleyerek motivasyonu yüksek tutar.
+                  </Typography>
+                </Box>
+              </Grid>
+              
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+                  <Box sx={{ 
+                    width: 60, 
+                    height: 60, 
+                    borderRadius: '50%', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    mb: 2,
+                    boxShadow: '0 4px 10px rgba(240, 147, 251, 0.3)'
+                  }}>
+                    <Typography variant="h6">4</Typography>
+                  </Box>
+                  <Typography variant="body1" sx={{ fontWeight: 600, mb: 1 }}>
+                    Stresi Azaltır
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Düzenli molalar zihinsel ve fiziksel stresi azaltır.
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+          
+          <Box sx={{ mt: 4, textAlign: 'center' }}>
+            <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+              &ldquo;Pomodoro Tekniği, Francesco Cirillo tarafından 1980&apos;lerde geliştirilmiş ve adını domates şeklindeki mutfak zamanlayıcısından almıştır.&rdquo;
+            </Typography>
+          </Box>
         </Box>
       </Container>
       
