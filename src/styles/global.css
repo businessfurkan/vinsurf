@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Glacial Indifference', 'Montserrat', sans-serif;
-  background-color: #FFFFF0;
+  background-color: #8ebdb9;
   color: #303545;
   line-height: 1.6;
   font-weight: 450; /* Slightly increase the default font weight */
@@ -61,7 +61,7 @@ a {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 16px !important;
   overflow: hidden;
-  background-color: #FFFFF0 !important;
+  background-color: #8ebdb9 !important;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
 }
 
@@ -73,7 +73,7 @@ a {
 /* Make all cards elegant */
 .MuiCard-root, .MuiPaper-root {
   border-radius: 16px !important;
-  background-color: #FFFFF0 !important;
+  background-color: #8ebdb9 !important;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
 }
 
@@ -83,7 +83,7 @@ a {
 }
 
 .analytics-card {
-  background-color: #FFFFF0 !important;
+  background-color: #8ebdb9 !important;
   border-radius: 16px !important;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
   overflow: hidden;
@@ -98,7 +98,7 @@ a {
 .chart-container {
   padding: 16px;
   border-radius: 16px;
-  background-color: #FFFFF0;
+  background-color: #8ebdb9;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
@@ -113,7 +113,7 @@ a {
   left: 0;
   z-index: 1200;
   transition: transform 0.3s ease;
-  background-color: #FFFFF0 !important;
+  background-color: #8ebdb9 !important;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -204,7 +204,7 @@ a {
 /* Home page specific styles */
 .home-card {
   border-radius: 16px !important;
-  background-color: #FFFFF0 !important;
+  background-color: #8ebdb9 !important;
   margin-bottom: 24px;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;

@@ -177,7 +177,7 @@ const PomodoroPage = () => {
         pt: { xs: 2, sm: 3, md: 4 },
         pb: { xs: 4, sm: 5, md: 6 },
         px: { xs: 1, sm: 2, md: 3 },
-        background: '#FFFFF0', // Açık krem rengi arka plan
+        background: '#8ebdb9', // Yeni arkaplan rengi
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'
@@ -293,7 +293,7 @@ const PomodoroPage = () => {
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
                   boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.5)',
-                  border: '8px solid #FFFFF0',
+                  border: '8px solid #8ebdb9',
                   mb: 3,
                   '&::before': {
                     content: '""',
