@@ -5,8 +5,6 @@ import {
   Container, 
   Card,
   CardContent,
-  useTheme,
-  alpha,
   Button,
   IconButton,
   Tooltip,
@@ -31,7 +29,6 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 
 const PomodoroPage = () => {
-  const theme = useTheme();
   const audioRef = useRef(null);
 
   // Pomodoro state'leri
