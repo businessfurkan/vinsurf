@@ -14,7 +14,12 @@ import {
   Tooltip,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  Paper,
+  Zoom,
+  Card,
+  CardContent,
+  Divider
 } from '@mui/material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../firebase';
@@ -26,7 +31,11 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import SettingsIcon from '@mui/icons-material/Settings';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import FlagIcon from '@mui/icons-material/Flag';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import SendIcon from '@mui/icons-material/Send';
 
 const PomodoroTimer = () => {
@@ -313,7 +322,7 @@ const PomodoroTimer = () => {
   };
 
   // Hedef başarı durumunu işleme fonksiyonu
-  const showGoalResultNotification = (completed) => {
+  const handleGoalResult = (completed) => {
     setShowGoalResult(false);
     
     // Başarı durumuna göre bildirim göster
@@ -460,196 +469,195 @@ const PomodoroTimer = () => {
           </Box>
           
           {/* Main Timer Display - Horizontal Layout */}
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'row', 
-            alignItems: 'center', 
-            justifyContent: 'space-between', 
-            mb: 4, 
-            width: '100%',
-            p: 3,
-            backgroundColor: '#FFFFF0',
-            borderRadius: 4,
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-            border: '1px solid rgba(0, 0, 0, 0.06)'
-          }}>
-            {/* Timer Display */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              justifyContent: 'flex-start',
-              flex: 1
-            }}>
-              <Typography 
-                variant="h1" 
-                sx={{ 
-                  fontSize: { xs: '3.5rem', sm: '4.5rem', md: '5rem' }, 
-                  fontWeight: 900,
-                  letterSpacing: '-2px',
-                  color: 
-                    mode === 'pomodoro' ? '#0067b8' : 
-                    mode === 'shortBreak' ? '#34a853' : '#ea4335',
-                  fontFamily: 'Montserrat, sans-serif'
-                }}
-              >
-                {formatTime(timeLeft)}
-              </Typography>
-            </Box>
-            
-            {/* Controls */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              gap: 2
-            }}>
-              {/* Main Start/Pause Button */}
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleStartPause}
-                startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
-                sx={{ 
-                  borderRadius: 8,
-                  px: 3,
-                  py: 1.2,
-                  fontWeight: 600,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-                  backgroundColor: '#333',
-                  '&:hover': {
-                    backgroundColor: '#222',
-                    boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
-                  },
-                  minWidth: { xs: '120px', sm: '140px' }
-                }}
-              >
-                {isRunning ? 'Duraklat' : 'Başlat'}
-              </Button>
-              
-              {/* Control Buttons */}
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 1,
-                alignItems: 'center'
-              }}>
-                <Tooltip title="Sıfırla">
-                  <IconButton 
-                    onClick={handleReset} 
-                    color="inherit" 
-                    size="small"
-                    sx={{ 
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                      '&:hover': {
-                        bgcolor: 'rgba(0, 0, 0, 0.08)',
-                      }
-                    }}
-                  >
-                    <RestartAltIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Ayarlar">
-                  <IconButton 
-                    onClick={() => setShowSettings(true)} 
-                    color="inherit"
-                    size="small"
-                    sx={{ 
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                      '&:hover': {
-                        bgcolor: 'rgba(0, 0, 0, 0.08)',
-                      }
-                    }}
-                  >
-                    <SettingsIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={muted ? "Sesi Aç" : "Sesi Kapat"}>
-                  <IconButton 
-                    onClick={toggleMute} 
-                    color="inherit"
-                    size="small"
-                    sx={{ 
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                      '&:hover': {
-                        bgcolor: 'rgba(0, 0, 0, 0.08)',
-                      }
-                    }}
-                  >
-                    {muted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
-                  </IconButton>
-                </Tooltip>
-                {!currentGoal && !isRunning && (
-                  <Tooltip title="Hedef Belirle">
-                    <IconButton 
-                      onClick={() => setShowGoalInput(true)} 
-                      color="primary"
-                      size="small"
-                      sx={{ 
-                        bgcolor: 'rgba(51, 51, 51, 0.08)',
-                        '&:hover': {
-                          bgcolor: 'rgba(51, 51, 51, 0.15)',
-                        }
-                      }}
-                    >
-                      <AssignmentIcon fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Box>
-            </Box>
-          </Box>
-          
-          {/* Motivational Text */}
-          <Box sx={{ 
-            width: '100%', 
-            textAlign: 'center', 
-            mt: 2, 
-            mb: 3 
-          }}>
-            <Typography 
-              variant="body2" 
+          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: 'center', justifyContent: 'center', mb: 4, width: '100%' }}>
+            <Box 
               sx={{ 
-                color: 'text.secondary',
-                fontSize: '0.9rem',
-                fontStyle: 'italic',
-                fontFamily: 'Quicksand, sans-serif'
+                position: 'relative', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                width: { xs: 220, sm: 220, md: 250 },
+                height: { xs: 120, sm: 120, md: 130 },
+                mr: { xs: 0, sm: 4, md: 6 }
               }}
             >
-              Zamanlayıcıyı başlatın: odaklanın ve verimliliğinizi artırın!
-            </Typography>
-          </Box>
+              <Box 
+                sx={{ 
+                  position: 'absolute',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 2
+                }}
+              >
+                <Typography 
+                  variant="h1" 
+                  sx={{ 
+                    fontSize: '5rem', 
+                    fontWeight: 900,
+                    letterSpacing: '-2px',
+                    color: 
+                      mode === 'pomodoro' ? '#0067b8' : 
+                      mode === 'shortBreak' ? '#34a853' : '#ea4335',
+                    fontFamily: 'Montserrat, sans-serif'
+                  }}
+                >
+                  {formatTime(timeLeft)}
+                </Typography>
+                
+                {/* Pomodoro sayısı göstergesi */}
+                {mode === 'pomodoro' && (
+                  <>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={handleStartPause}
+                      startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
+                      sx={{ 
+                        borderRadius: 8,
+                        px: 3,
+                        py: 1.2,
+                        fontWeight: 600,
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                        backgroundColor: '#333',
+                        '&:hover': {
+                          backgroundColor: '#222',
+                          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.2)',
+                        },
+                        minWidth: { xs: '120px', sm: '140px' }
+                      }}
+                    >
+                      {isRunning ? 'Duraklat' : 'Başlat'}
+                    </Button>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      gap: 1,
+                      flexDirection: { xs: 'row', sm: 'row' }
+                    }}>
+                    <Tooltip title="Sıfırla">
+                      <IconButton 
+                        onClick={handleReset} 
+                        color="inherit" 
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }
+                        }}
+                      >
+                        <RestartAltIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Ayarlar">
+                      <IconButton 
+                        onClick={() => setShowSettings(true)} 
+                        color="inherit"
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }
+                        }}
+                      >
+                        <SettingsIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title={muted ? "Sesi Aç" : "Sesi Kapat"}>
+                      <IconButton 
+                        onClick={toggleMute} 
+                        color="inherit"
+                        size="small"
+                        sx={{ 
+                          bgcolor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 0, 0, 0.08)',
+                          }
+                        }}
+                      >
+                        {muted ? <VolumeOffIcon fontSize="small" /> : <VolumeUpIcon fontSize="small" />}
+                      </IconButton>
+                    </Tooltip>
+                    {!currentGoal && !isRunning && (
+                      <Tooltip title="Hedef Belirle">
+                        <IconButton 
+                          onClick={() => setShowGoalInput(true)} 
+                          color="primary"
+                          size="small"
+                          sx={{ 
+                            bgcolor: 'rgba(51, 51, 51, 0.08)',
+                            '&:hover': {
+                              bgcolor: 'rgba(51, 51, 51, 0.15)',
+                            }
+                          }}
+                        >
+                          <AssignmentIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                  </>
+                )}
+              
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  textAlign: 'center', 
+                  mt: 2, 
+                  color: 'text.secondary',
+                  fontSize: '0.8rem',
+                  fontStyle: 'italic' 
+                }}
+              >
+                Zamanlayıcıyı başlatın: odaklanın ve verimliliğinizi artırın!
+              </Typography>
+            </CardContent>
+          </Card>
           
-          {/* Pomodoro Sayısı Göstergesi */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            mt: 2,
-            mb: 2,
-            gap: 1
-          }}>
-            {completedPomodoros > 0 && Array.from({ length: completedPomodoros }).map((_, index) => (
-              <Box 
-                key={index}
-                sx={{ 
-                  width: 12, 
-                  height: 12, 
-                  borderRadius: '50%', 
-                  backgroundColor: '#333',
-                  opacity: 0.8
-                }}
-              />
-            ))}
-            {currentGoal && completedPomodoros < currentGoal && Array.from({ length: currentGoal - completedPomodoros }).map((_, index) => (
-              <Box 
-                key={index + completedPomodoros}
-                sx={{ 
-                  width: 12, 
-                  height: 12, 
-                  borderRadius: '50%', 
-                  backgroundColor: 'rgba(0,0,0,0.15)'
-                }}
-              />
-            ))}
+          <Box sx={{ display: 'flex', gap: 2, mt: 3, justifyContent: 'center' }}>
+            <Button 
+              size="large" 
+              variant="outlined"
+              onClick={() => { handleReset(); playClickSound(); }}
+              startIcon={<RestartAltIcon />}
+              sx={{ 
+                borderRadius: 28, 
+                textTransform: 'none',
+                fontWeight: 600,
+                fontFamily: 'Quicksand, sans-serif',
+                borderColor: 'rgba(0,0,0,0.15)',
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: 'rgba(0,0,0,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.03)'
+                }
+              }}
+            >
+              Sıfırla
+            </Button>
+            <Button 
+              size="large" 
+              variant="outlined"
+              onClick={() => { setShowSettings(!showSettings); playClickSound(); }}
+              startIcon={<SettingsIcon />}
+              sx={{ 
+                borderRadius: 28, 
+                textTransform: 'none',
+                fontWeight: 600,
+                fontFamily: 'Quicksand, sans-serif',
+                borderColor: 'rgba(0,0,0,0.15)',
+                color: 'text.secondary',
+                '&:hover': {
+                  borderColor: 'rgba(0,0,0,0.3)',
+                  backgroundColor: 'rgba(0,0,0,0.03)'
+                }
+              }}
+              >
+                Ayarlar
+              </Button>
             </Box>
           
           {/* Hedef giriş diyaloğu */}

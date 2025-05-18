@@ -596,8 +596,6 @@ const BenimleCalis = () => {
                     variant="subtitle1" 
                     sx={{ 
                       fontWeight: 700, 
-                      color: '#333',
-                      background: '#FFFFF0',
                       color: '#2e3856',
                       background: 'linear-gradient(135deg, #2e3856 0%, #424242 100%)',
                       WebkitBackgroundClip: 'text',
