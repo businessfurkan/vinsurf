@@ -205,16 +205,19 @@ const PomodoroPage = () => {
                 <Box sx={{ 
                   border: '1px solid rgba(0, 0, 0, 0.1)',
                   borderRadius: 3,
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 2, sm: 3, md: 4 },
                   mb: 4,
                   background: 'rgba(255, 255, 240, 0.9)', // FFFFF0 ile uyumlu
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)'
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+                  width: '100%',
+                  maxWidth: '100%'
                 }}>
                   {/* Mod Seçici */}
                   <Box sx={{ 
                     display: 'flex', 
-                    justifyContent: 'center',
-                    mb: 3
+                    justifyContent: { xs: 'center', md: 'flex-start' },
+                    mb: 3,
+                    width: '100%'
                   }}>
                     <Box sx={{ 
                       display: 'flex', 
@@ -286,29 +289,32 @@ const PomodoroPage = () => {
                     </Box>
                   </Box>
                   
-                  {/* Ana Zamanlayıcı Alanı - Yatay Tasarım */}
+                  {/* Ana Zamanlayıcı Alanı - Genişletilmiş Yatay Tasarım */}
                   <Box sx={{ 
                     display: 'flex', 
-                    flexDirection: { xs: 'column', sm: 'row' },
-                    alignItems: 'center',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    alignItems: { xs: 'center', md: 'flex-start' },
                     justifyContent: 'space-between',
-                    gap: { xs: 3, sm: 4 },
-                    my: 3,
-                    px: { xs: 1, sm: 3 }
+                    gap: { xs: 4, md: 6 },
+                    my: 4,
+                    px: { xs: 2, sm: 3, md: 4 },
+                    width: '100%',
+                    maxWidth: '100%'
                   }}>
                     {/* Sol taraf - Zamanlayıcı */}
                     <Box sx={{ 
                       display: 'flex', 
                       flexDirection: 'column', 
-                      alignItems: { xs: 'center', sm: 'flex-start' },
-                      flex: 1
+                      alignItems: { xs: 'center', md: 'flex-start' },
+                      flex: { xs: '1', md: '0 0 40%' },
+                      mr: { md: 4 }
                     }}>
                       <Typography
                         variant="h1"
                         component="div"
                         sx={{ 
                           fontWeight: 700, 
-                          fontSize: { xs: '4rem', sm: '5rem' },
+                          fontSize: { xs: '4rem', sm: '5rem', md: '6rem' },
                           lineHeight: 1,
                           color: '#333',
                           mb: 1
