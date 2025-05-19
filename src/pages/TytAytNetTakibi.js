@@ -562,7 +562,7 @@ const TytAytNetTakibi = () => {
       p: 3, 
       pt: 4, 
       pb: 4, 
-      background: '#FFFFF0', 
+      background: 'linear-gradient(135deg, #f5f7fa 0%, #e4ecfb 100%)', 
       minHeight: '100vh',
       position: 'relative',
       overflow: 'hidden'
@@ -591,16 +591,32 @@ const TytAytNetTakibi = () => {
           justifyContent: 'space-between',
           mb: 4,
           pb: 2,
-          borderBottom: '2px solid #abe7ff'
+          borderBottom: '2px solid rgba(63, 81, 181, 0.2)',
+          position: 'relative',
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: -2,
+            left: 0,
+            width: '120px',
+            height: '2px',
+            background: 'linear-gradient(90deg, #3f51b5, #55b3d9)',
+            borderRadius: '2px'
+          }
         }}>
           <Typography variant="h4" sx={{ 
-            fontWeight: 700, 
-            color: '#3f51b5',
+            fontWeight: 800, 
+            background: 'linear-gradient(90deg, #3f51b5, #55b3d9)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
             fontFamily: 'Poppins, Quicksand, sans-serif',
             display: 'flex',
-            alignItems: 'center'
+            alignItems: 'center',
+            letterSpacing: '-0.5px'
           }}>
-            <SchoolIcon sx={{ mr: 1.5, fontSize: 32, color: '#55b3d9' }} />
+            <SchoolIcon sx={{ mr: 1.5, fontSize: 36, color: '#3f51b5' }} />
             TYT-AYT Net Takibi
           </Typography>
           
@@ -611,16 +627,21 @@ const TytAytNetTakibi = () => {
             }}
             variant="contained"
             sx={{
-              backgroundColor: showAddForm ? '#f44336' : '#5db6d9',
+              background: showAddForm 
+                ? 'linear-gradient(135deg, #ff4b2b 0%, #ff416c 100%)' 
+                : 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)',
               fontWeight: 600,
-              borderRadius: 12,
-              padding: '10px 20px',
+              borderRadius: '30px',
+              padding: '10px 24px',
               transition: 'all 0.3s ease',
-              boxShadow: '0 4px 12px rgba(85, 179, 217, 0.4)',
+              boxShadow: showAddForm 
+                ? '0 4px 15px rgba(255, 65, 108, 0.4)' 
+                : '0 4px 15px rgba(71, 118, 230, 0.4)',
               '&:hover': {
-                backgroundColor: showAddForm ? '#d32f2f' : '#55b3d9',
-                boxShadow: '0 6px 16px rgba(85, 179, 217, 0.6)',
-                transform: 'translateY(-2px)'
+                boxShadow: showAddForm 
+                  ? '0 8px 25px rgba(255, 65, 108, 0.5)' 
+                  : '0 8px 25px rgba(71, 118, 230, 0.5)',
+                transform: 'translateY(-3px)'
               }
             }}
           >
@@ -638,28 +659,45 @@ const TytAytNetTakibi = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
               >
-                <StyledCard sx={{ p: 4, backgroundColor: '#abe7ff' }}>
+                <StyledCard sx={{ 
+                  p: 4, 
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)',
+                  borderRadius: '24px',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(63, 81, 181, 0.15)',
+                  border: '1px solid rgba(63, 81, 181, 0.1)',
+                  overflow: 'visible'
+                }}>
                   <Box sx={{ 
                     display: 'flex', 
                     alignItems: 'center', 
-                    mb: 2,
+                    mb: 3,
                     pb: 2,
-                    borderBottom: '1px solid rgba(85, 179, 217, 0.2)',
+                    borderBottom: '1px solid rgba(63, 81, 181, 0.1)',
                     overflow: 'visible'
                   }}>
                   <Avatar sx={{ 
-                    bgcolor: '#5db6d9', 
+                    width: 56,
+                    height: 56,
+                    background: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)', 
                     mr: 2,
-                    boxShadow: '0 4px 8px rgba(85, 179, 217, 0.25)'
+                    boxShadow: '0 4px 10px rgba(71, 118, 230, 0.3)',
+                    transform: 'translateY(-4px)'
                   }}>
-                    <AddIcon />
+                    <AddIcon sx={{ fontSize: 28 }} />
                   </Avatar>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#3f51b5' }}>
+                  <Typography variant="h5" sx={{ 
+                    fontWeight: 700, 
+                    background: 'linear-gradient(90deg, #3f51b5, #8E54E9)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    letterSpacing: '0.5px'
+                  }}>
                     Yeni Net Ekle
                   </Typography>
                 </Box>
                 
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
                     <TextField
                       label="Doğru Sayısı"
@@ -671,21 +709,37 @@ const TytAytNetTakibi = () => {
                       error={!!errors.correctCount}
                       helperText={errors.correctCount}
                       InputProps={{ 
+                        startAdornment: (
+                          <Box sx={{ 
+                            mr: 1, 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            color: '#4CAF50'
+                          }}>
+                            <Box sx={{ 
+                              width: 8, 
+                              height: 8, 
+                              borderRadius: '50%', 
+                              bgcolor: '#4CAF50',
+                              mr: 0.5 
+                            }} />
+                          </Box>
+                        ),
                         sx: { 
-                          backgroundColor: '#abe7ff', 
+                          backgroundColor: 'rgba(76, 175, 80, 0.08)', 
                           borderRadius: 2,
-                          '&:hover': { backgroundColor: '#d6f3ff' },
-                          '&.Mui-focused': { backgroundColor: '#d6f3ff' }
+                          '&:hover': { backgroundColor: 'rgba(76, 175, 80, 0.12)' },
+                          '&.Mui-focused': { backgroundColor: 'rgba(76, 175, 80, 0.12)' }
                         }
                       }}
                       sx={{ 
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(85, 179, 217, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#55b3d9' },
-                          '&.Mui-focused fieldset': { borderColor: '#3f51b5' }
+                          '& fieldset': { borderColor: 'rgba(76, 175, 80, 0.3)' },
+                          '&:hover fieldset': { borderColor: '#4CAF50' },
+                          '&.Mui-focused fieldset': { borderColor: '#4CAF50' }
                         },
-                        '& .MuiInputLabel-root': { color: '#3f51b5' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
+                        '& .MuiInputLabel-root': { color: '#4CAF50' },
+                        '& .MuiInputLabel-root.Mui-focused': { color: '#4CAF50' }
                       }}
                     />
                   </Grid>
@@ -701,30 +755,46 @@ const TytAytNetTakibi = () => {
                       error={!!errors.incorrectCount}
                       helperText={errors.incorrectCount}
                       InputProps={{ 
+                        startAdornment: (
+                          <Box sx={{ 
+                            mr: 1, 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            color: '#F44336'
+                          }}>
+                            <Box sx={{ 
+                              width: 8, 
+                              height: 8, 
+                              borderRadius: '50%', 
+                              bgcolor: '#F44336',
+                              mr: 0.5 
+                            }} />
+                          </Box>
+                        ),
                         sx: { 
-                          backgroundColor: '#abe7ff', 
+                          backgroundColor: 'rgba(244, 67, 54, 0.08)', 
                           borderRadius: 2,
-                          '&:hover': { backgroundColor: '#d6f3ff' },
-                          '&.Mui-focused': { backgroundColor: '#d6f3ff' }
+                          '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.12)' },
+                          '&.Mui-focused': { backgroundColor: 'rgba(244, 67, 54, 0.12)' }
                         }
                       }}
                       sx={{ 
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(85, 179, 217, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#55b3d9' },
-                          '&.Mui-focused fieldset': { borderColor: '#3f51b5' }
+                          '& fieldset': { borderColor: 'rgba(244, 67, 54, 0.3)' },
+                          '&:hover fieldset': { borderColor: '#F44336' },
+                          '&.Mui-focused fieldset': { borderColor: '#F44336' }
                         },
-                        '& .MuiInputLabel-root': { color: '#3f51b5' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
+                        '& .MuiInputLabel-root': { color: '#F44336' },
+                        '& .MuiInputLabel-root.Mui-focused': { color: '#F44336' }
                       }}
                     />
                   </Grid>
                 </Grid>
                 
-                <Grid container spacing={2}>
+                <Grid container spacing={3} sx={{ mt: 1 }}>
                   <Grid item xs={12} sm={6}>
                     <FormControl fullWidth margin="normal">
-                      <InputLabel>Sınav Türü</InputLabel>
+                      <InputLabel sx={{ color: '#6200EA', fontWeight: 500 }}>Sınav Türü</InputLabel>
                       <Select
                         value={examType}
                         onChange={(e) => {
@@ -734,38 +804,127 @@ const TytAytNetTakibi = () => {
                         label="Sınav Türü"
                         sx={{
                           borderRadius: 2,
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                          backgroundColor: 'rgba(98, 0, 234, 0.04)',
+                          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(98, 0, 234, 0.3)' },
+                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(98, 0, 234, 0.5)' },
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6200EA' },
                           '& .MuiSelect-select': { fontWeight: 500 }
                         }}
                       >
-                        <MenuItem value="TYT">TYT</MenuItem>
-                        <MenuItem value="AYT">AYT</MenuItem>
+                        <MenuItem value="TYT" sx={{ 
+                          fontWeight: examType === 'TYT' ? 600 : 400,
+                          color: examType === 'TYT' ? '#6200EA' : 'inherit'
+                        }}>
+                          TYT
+                        </MenuItem>
+                        <MenuItem value="AYT" sx={{ 
+                          fontWeight: examType === 'AYT' ? 600 : 400,
+                          color: examType === 'AYT' ? '#6200EA' : 'inherit'
+                        }}>
+                          AYT
+                        </MenuItem>
                       </Select>
                     </FormControl>
                   </Grid>
+                  
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      label="Sınav Adı"
+                      value={examName}
+                      onChange={(e) => setExamName(e.target.value)}
+                      fullWidth
+                      margin="normal"
+                      error={!!errors.examName}
+                      helperText={errors.examName}
+                      InputProps={{ 
+                        startAdornment: (
+                          <Box sx={{ 
+                            mr: 1, 
+                            display: 'flex', 
+                            alignItems: 'center',
+                            color: '#6200EA'
+                          }}>
+                            <Box sx={{ 
+                              width: 8, 
+                              height: 8, 
+                              borderRadius: '50%', 
+                              bgcolor: '#6200EA',
+                              mr: 0.5 
+                            }} />
+                          </Box>
+                        ),
+                        sx: { 
+                          backgroundColor: 'rgba(98, 0, 234, 0.04)', 
+                          borderRadius: 2,
+                          '&:hover': { backgroundColor: 'rgba(98, 0, 234, 0.08)' },
+                          '&.Mui-focused': { backgroundColor: 'rgba(98, 0, 234, 0.08)' }
+                        }
+                      }}
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: 'rgba(98, 0, 234, 0.3)' },
+                          '&:hover fieldset': { borderColor: '#6200EA' },
+                          '&.Mui-focused fieldset': { borderColor: '#6200EA' }
+                        },
+                        '& .MuiInputLabel-root': { color: '#6200EA' },
+                        '& .MuiInputLabel-root.Mui-focused': { color: '#6200EA' }
+                      }}
+                    />
+                  </Grid>
                 </Grid>
                 
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  onClick={handleSubmit}
-                  sx={{
-                    mt: 2,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    boxShadow: '0 4px 14px rgba(0, 118, 255, 0.3)',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(0, 118, 255, 0.4)'
-                    }
-                  }}
-                >
-                  Kaydet
-                </Button>
+                <Box sx={{ mt: 4, position: 'relative' }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    size="large"
+                    onClick={handleSubmit}
+                    startIcon={<AddIcon />}
+                    sx={{
+                      py: 1.8,
+                      borderRadius: '30px',
+                      fontWeight: 700,
+                      fontSize: '1rem',
+                      letterSpacing: '0.5px',
+                      textTransform: 'none',
+                      background: 'linear-gradient(45deg, #6200EA 0%, #B388FF 100%)',
+                      boxShadow: '0 10px 20px rgba(98, 0, 234, 0.3)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 15px 30px rgba(98, 0, 234, 0.4)',
+                        background: 'linear-gradient(45deg, #5600D1 0%, #A370FF 100%)'
+                      },
+                      '&:active': {
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 5px 15px rgba(98, 0, 234, 0.4)'
+                      }
+                    }}
+                  >
+                    Kaydet ve Tamamla
+                  </Button>
+                  <Box sx={{
+                    position: 'absolute',
+                    bottom: -15,
+                    left: 0,
+                    right: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    pointerEvents: 'none'
+                  }}>
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: 'rgba(98, 0, 234, 0.7)',
+                        fontStyle: 'italic',
+                        fontWeight: 500
+                      }}
+                    >
+                      Tüm alanları doldurduğunuzdan emin olun
+                    </Typography>
+                  </Box>
+                </Box>
               </StyledCard>
             </motion.div>
           </Grid>
