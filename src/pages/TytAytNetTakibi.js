@@ -29,7 +29,8 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Avatar
+  Avatar,
+  FormHelperText
 } from '@mui/material';
 import { 
   BarChart, 
@@ -660,269 +661,354 @@ const TytAytNetTakibi = () => {
                 transition={{ duration: 0.5 }}
               >
                 <StyledCard sx={{ 
-                  p: 4, 
-                  background: 'linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%)',
-                  borderRadius: '24px',
-                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1), 0 5px 15px rgba(63, 81, 181, 0.15)',
-                  border: '1px solid rgba(63, 81, 181, 0.1)',
+                  p: 5, 
+                  background: 'linear-gradient(135deg, #ffffff 0%, #f8faff 100%)',
+                  borderRadius: '20px',
+                  boxShadow: '0 10px 30px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(63, 81, 181, 0.1)',
+                  border: '1px solid rgba(63, 81, 181, 0.05)',
                   overflow: 'visible'
                 }}>
                   <Box sx={{ 
                     display: 'flex', 
+                    flexDirection: 'column',
                     alignItems: 'center', 
-                    mb: 3,
-                    pb: 2,
-                    borderBottom: '1px solid rgba(63, 81, 181, 0.1)',
-                    overflow: 'visible'
+                    justifyContent: 'center',
+                    mb: 4,
+                    textAlign: 'center'
                   }}>
-                  <Avatar sx={{ 
-                    width: 56,
-                    height: 56,
-                    background: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)', 
-                    mr: 2,
-                    boxShadow: '0 4px 10px rgba(71, 118, 230, 0.3)',
-                    transform: 'translateY(-4px)'
+                    <Avatar sx={{ 
+                      width: 64,
+                      height: 64,
+                      background: 'linear-gradient(135deg, #4776E6 0%, #8E54E9 100%)', 
+                      mb: 2,
+                      boxShadow: '0 4px 10px rgba(71, 118, 230, 0.3)'
+                    }}>
+                      <AddIcon sx={{ fontSize: 32 }} />
+                    </Avatar>
+                    <Typography variant="h5" sx={{ 
+                      fontWeight: 700, 
+                      background: 'linear-gradient(90deg, #3f51b5, #8E54E9)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      letterSpacing: '0.5px',
+                      mb: 1
+                    }}>
+                      Yeni Net Ekle
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ maxWidth: '80%', mb: 2 }}>
+                      Sınav sonuçlarınızı kaydedin ve gelişiminizi takip edin
+                    </Typography>
+                    <Box sx={{ 
+                      width: '60px', 
+                      height: '4px', 
+                      background: 'linear-gradient(90deg, #4776E6, #8E54E9)', 
+                      borderRadius: '2px' 
+                    }} />
+                  </Box>
+                
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" sx={{ 
+                    mb: 2, 
+                    fontWeight: 600, 
+                    color: '#555',
+                    display: 'flex',
+                    alignItems: 'center'
                   }}>
-                    <AddIcon sx={{ fontSize: 28 }} />
-                  </Avatar>
-                  <Typography variant="h5" sx={{ 
-                    fontWeight: 700, 
-                    background: 'linear-gradient(90deg, #3f51b5, #8E54E9)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    letterSpacing: '0.5px'
-                  }}>
-                    Yeni Net Ekle
+                    <Box component="span" sx={{ 
+                      width: 4, 
+                      height: 16, 
+                      bgcolor: '#4776E6', 
+                      borderRadius: 1, 
+                      mr: 1.5, 
+                      display: 'inline-block' 
+                    }} />
+                    Soru Bilgileri
                   </Typography>
+                  
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Doğru Sayısı"
+                        type="number"
+                        value={correctCount}
+                        onChange={(e) => setCorrectCount(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.correctCount}
+                        helperText={errors.correctCount || "Doğru cevapladığınız soru sayısı"}
+                        InputProps={{ 
+                          startAdornment: (
+                            <Box sx={{ 
+                              mr: 1, 
+                              display: 'flex', 
+                              alignItems: 'center',
+                              color: '#4CAF50'
+                            }}>
+                              <Box sx={{ 
+                                width: 10, 
+                                height: 10, 
+                                borderRadius: '50%', 
+                                bgcolor: '#4CAF50',
+                                mr: 0.5 
+                              }} />
+                            </Box>
+                          ),
+                          sx: { 
+                            height: '56px',
+                            backgroundColor: 'rgba(76, 175, 80, 0.05)', 
+                            borderRadius: 2,
+                            '&:hover': { backgroundColor: 'rgba(76, 175, 80, 0.08)' },
+                            '&.Mui-focused': { backgroundColor: 'rgba(76, 175, 80, 0.08)' }
+                          }
+                        }}
+                        sx={{ 
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: 'rgba(76, 175, 80, 0.2)' },
+                            '&:hover fieldset': { borderColor: '#4CAF50' },
+                            '&.Mui-focused fieldset': { borderColor: '#4CAF50' }
+                          },
+                          '& .MuiInputLabel-root': { color: '#4CAF50' },
+                          '& .MuiInputLabel-root.Mui-focused': { color: '#4CAF50' },
+                          '& .MuiFormHelperText-root': { 
+                            margin: '8px 0 0 0',
+                            fontSize: '0.7rem',
+                            opacity: 0.7
+                          }
+                        }}
+                      />
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Yanlış Sayısı"
+                        type="number"
+                        value={incorrectCount}
+                        onChange={(e) => setIncorrectCount(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.incorrectCount}
+                        helperText={errors.incorrectCount || "Yanlış cevapladığınız soru sayısı"}
+                        InputProps={{ 
+                          startAdornment: (
+                            <Box sx={{ 
+                              mr: 1, 
+                              display: 'flex', 
+                              alignItems: 'center',
+                              color: '#F44336'
+                            }}>
+                              <Box sx={{ 
+                                width: 10, 
+                                height: 10, 
+                                borderRadius: '50%', 
+                                bgcolor: '#F44336',
+                                mr: 0.5 
+                              }} />
+                            </Box>
+                          ),
+                          sx: { 
+                            height: '56px',
+                            backgroundColor: 'rgba(244, 67, 54, 0.05)', 
+                            borderRadius: 2,
+                            '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.08)' },
+                            '&.Mui-focused': { backgroundColor: 'rgba(244, 67, 54, 0.08)' }
+                          }
+                        }}
+                        sx={{ 
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: 'rgba(244, 67, 54, 0.2)' },
+                            '&:hover fieldset': { borderColor: '#F44336' },
+                            '&.Mui-focused fieldset': { borderColor: '#F44336' }
+                          },
+                          '& .MuiInputLabel-root': { color: '#F44336' },
+                          '& .MuiInputLabel-root.Mui-focused': { color: '#F44336' },
+                          '& .MuiFormHelperText-root': { 
+                            margin: '8px 0 0 0',
+                            fontSize: '0.7rem',
+                            opacity: 0.7
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
                 </Box>
                 
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Doğru Sayısı"
-                      type="number"
-                      value={correctCount}
-                      onChange={(e) => setCorrectCount(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.correctCount}
-                      helperText={errors.correctCount}
-                      InputProps={{ 
-                        startAdornment: (
-                          <Box sx={{ 
-                            mr: 1, 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            color: '#4CAF50'
-                          }}>
-                            <Box sx={{ 
-                              width: 8, 
-                              height: 8, 
-                              borderRadius: '50%', 
-                              bgcolor: '#4CAF50',
-                              mr: 0.5 
-                            }} />
-                          </Box>
-                        ),
-                        sx: { 
-                          backgroundColor: 'rgba(76, 175, 80, 0.08)', 
-                          borderRadius: 2,
-                          '&:hover': { backgroundColor: 'rgba(76, 175, 80, 0.12)' },
-                          '&.Mui-focused': { backgroundColor: 'rgba(76, 175, 80, 0.12)' }
-                        }
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(76, 175, 80, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#4CAF50' },
-                          '&.Mui-focused fieldset': { borderColor: '#4CAF50' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#4CAF50' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#4CAF50' }
-                      }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Yanlış Sayısı"
-                      type="number"
-                      value={incorrectCount}
-                      onChange={(e) => setIncorrectCount(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.incorrectCount}
-                      helperText={errors.incorrectCount}
-                      InputProps={{ 
-                        startAdornment: (
-                          <Box sx={{ 
-                            mr: 1, 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            color: '#F44336'
-                          }}>
-                            <Box sx={{ 
-                              width: 8, 
-                              height: 8, 
-                              borderRadius: '50%', 
-                              bgcolor: '#F44336',
-                              mr: 0.5 
-                            }} />
-                          </Box>
-                        ),
-                        sx: { 
-                          backgroundColor: 'rgba(244, 67, 54, 0.08)', 
-                          borderRadius: 2,
-                          '&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.12)' },
-                          '&.Mui-focused': { backgroundColor: 'rgba(244, 67, 54, 0.12)' }
-                        }
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(244, 67, 54, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#F44336' },
-                          '&.Mui-focused fieldset': { borderColor: '#F44336' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#F44336' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#F44336' }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                <Grid container spacing={3} sx={{ mt: 1 }}>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel sx={{ color: '#6200EA', fontWeight: 500 }}>Sınav Türü</InputLabel>
-                      <Select
-                        value={examType}
-                        onChange={(e) => {
-                          setExamType(e.target.value);
-                          setSubject('');
-                        }}
-                        label="Sınav Türü"
-                        sx={{
-                          borderRadius: 2,
-                          backgroundColor: 'rgba(98, 0, 234, 0.04)',
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(98, 0, 234, 0.3)' },
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(98, 0, 234, 0.5)' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6200EA' },
-                          '& .MuiSelect-select': { fontWeight: 500 }
-                        }}
-                      >
-                        <MenuItem value="TYT" sx={{ 
-                          fontWeight: examType === 'TYT' ? 600 : 400,
-                          color: examType === 'TYT' ? '#6200EA' : 'inherit'
-                        }}>
-                          TYT
-                        </MenuItem>
-                        <MenuItem value="AYT" sx={{ 
-                          fontWeight: examType === 'AYT' ? 600 : 400,
-                          color: examType === 'AYT' ? '#6200EA' : 'inherit'
-                        }}>
-                          AYT
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Sınav Adı"
-                      value={examName}
-                      onChange={(e) => setExamName(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.examName}
-                      helperText={errors.examName}
-                      InputProps={{ 
-                        startAdornment: (
-                          <Box sx={{ 
-                            mr: 1, 
-                            display: 'flex', 
-                            alignItems: 'center',
-                            color: '#6200EA'
-                          }}>
-                            <Box sx={{ 
-                              width: 8, 
-                              height: 8, 
-                              borderRadius: '50%', 
-                              bgcolor: '#6200EA',
-                              mr: 0.5 
-                            }} />
-                          </Box>
-                        ),
-                        sx: { 
-                          backgroundColor: 'rgba(98, 0, 234, 0.04)', 
-                          borderRadius: 2,
-                          '&:hover': { backgroundColor: 'rgba(98, 0, 234, 0.08)' },
-                          '&.Mui-focused': { backgroundColor: 'rgba(98, 0, 234, 0.08)' }
-                        }
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(98, 0, 234, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#6200EA' },
-                          '&.Mui-focused fieldset': { borderColor: '#6200EA' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#6200EA' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#6200EA' }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                <Box sx={{ mt: 4, position: 'relative' }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    size="large"
-                    onClick={handleSubmit}
-                    startIcon={<AddIcon />}
-                    sx={{
-                      py: 1.8,
-                      borderRadius: '30px',
-                      fontWeight: 700,
-                      fontSize: '1rem',
-                      letterSpacing: '0.5px',
-                      textTransform: 'none',
-                      background: 'linear-gradient(45deg, #6200EA 0%, #B388FF 100%)',
-                      boxShadow: '0 10px 20px rgba(98, 0, 234, 0.3)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        boxShadow: '0 15px 30px rgba(98, 0, 234, 0.4)',
-                        background: 'linear-gradient(45deg, #5600D1 0%, #A370FF 100%)'
-                      },
-                      '&:active': {
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 5px 15px rgba(98, 0, 234, 0.4)'
-                      }
-                    }}
-                  >
-                    Kaydet ve Tamamla
-                  </Button>
-                  <Box sx={{
-                    position: 'absolute',
-                    bottom: -15,
-                    left: 0,
-                    right: 0,
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="subtitle1" sx={{ 
+                    mb: 2, 
+                    fontWeight: 600, 
+                    color: '#555',
                     display: 'flex',
-                    justifyContent: 'center',
-                    pointerEvents: 'none'
+                    alignItems: 'center'
                   }}>
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        color: 'rgba(98, 0, 234, 0.7)',
-                        fontStyle: 'italic',
-                        fontWeight: 500
+                    <Box component="span" sx={{ 
+                      width: 4, 
+                      height: 16, 
+                      bgcolor: '#8E54E9', 
+                      borderRadius: 1, 
+                      mr: 1.5, 
+                      display: 'inline-block' 
+                    }} />
+                    Sınav Bilgileri
+                  </Typography>
+                  
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <FormControl fullWidth variant="outlined" sx={{ mb: 1 }}>
+                        <InputLabel sx={{ color: '#6200EA', fontWeight: 500 }}>Sınav Türü</InputLabel>
+                        <Select
+                          value={examType}
+                          onChange={(e) => {
+                            setExamType(e.target.value);
+                            setSubject('');
+                          }}
+                          label="Sınav Türü"
+                          sx={{
+                            height: '56px',
+                            borderRadius: 2,
+                            backgroundColor: 'rgba(98, 0, 234, 0.04)',
+                            '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(98, 0, 234, 0.2)' },
+                            '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(98, 0, 234, 0.5)' },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#6200EA' },
+                            '& .MuiSelect-select': { fontWeight: 500 }
+                          }}
+                        >
+                          <MenuItem value="TYT" sx={{ 
+                            fontWeight: examType === 'TYT' ? 600 : 400,
+                            color: examType === 'TYT' ? '#6200EA' : 'inherit'
+                          }}>
+                            TYT
+                          </MenuItem>
+                          <MenuItem value="AYT" sx={{ 
+                            fontWeight: examType === 'AYT' ? 600 : 400,
+                            color: examType === 'AYT' ? '#6200EA' : 'inherit'
+                          }}>
+                            AYT
+                          </MenuItem>
+                        </Select>
+                        <FormHelperText sx={{ margin: '8px 0 0 0', fontSize: '0.7rem', opacity: 0.7 }}>
+                          Sınav türünü seçin
+                        </FormHelperText>
+                      </FormControl>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        label="Sınav Adı"
+                        value={examName}
+                        onChange={(e) => setExamName(e.target.value)}
+                        fullWidth
+                        variant="outlined"
+                        error={!!errors.examName}
+                        helperText={errors.examName || "Sınavın adını girin (TYT-3, Deneme-5 vb.)"}
+                        InputProps={{ 
+                          startAdornment: (
+                            <Box sx={{ 
+                              mr: 1, 
+                              display: 'flex', 
+                              alignItems: 'center',
+                              color: '#6200EA'
+                            }}>
+                              <Box sx={{ 
+                                width: 10, 
+                                height: 10, 
+                                borderRadius: '50%', 
+                                bgcolor: '#6200EA',
+                                mr: 0.5 
+                              }} />
+                            </Box>
+                          ),
+                          sx: { 
+                            height: '56px',
+                            backgroundColor: 'rgba(98, 0, 234, 0.04)', 
+                            borderRadius: 2,
+                            '&:hover': { backgroundColor: 'rgba(98, 0, 234, 0.08)' },
+                            '&.Mui-focused': { backgroundColor: 'rgba(98, 0, 234, 0.08)' }
+                          }
+                        }}
+                        sx={{ 
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: 'rgba(98, 0, 234, 0.2)' },
+                            '&:hover fieldset': { borderColor: '#6200EA' },
+                            '&.Mui-focused fieldset': { borderColor: '#6200EA' }
+                          },
+                          '& .MuiInputLabel-root': { color: '#6200EA' },
+                          '& .MuiInputLabel-root.Mui-focused': { color: '#6200EA' },
+                          '& .MuiFormHelperText-root': { 
+                            margin: '8px 0 0 0',
+                            fontSize: '0.7rem',
+                            opacity: 0.7
+                          }
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                <Box sx={{ mt: 5, position: 'relative' }}>
+                  <Box sx={{ 
+                    position: 'relative',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -20,
+                      left: 0,
+                      right: 0,
+                      height: 1,
+                      background: 'linear-gradient(90deg, rgba(71, 118, 230, 0.1), rgba(142, 84, 233, 0.3), rgba(71, 118, 230, 0.1))',
+                    }
+                  }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      fullWidth
+                      size="large"
+                      onClick={handleSubmit}
+                      startIcon={<AddIcon />}
+                      sx={{
+                        py: 2,
+                        borderRadius: '16px',
+                        fontWeight: 700,
+                        fontSize: '1.1rem',
+                        letterSpacing: '0.5px',
+                        textTransform: 'none',
+                        background: 'linear-gradient(45deg, #55b3d9 0%, #3f51b5 100%)',
+                        boxShadow: '0 10px 20px rgba(85, 179, 217, 0.3)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-3px)',
+                          boxShadow: '0 15px 30px rgba(85, 179, 217, 0.4)',
+                          background: 'linear-gradient(45deg, #4ba3c7 0%, #3849a3 100%)'
+                        },
+                        '&:active': {
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 5px 15px rgba(85, 179, 217, 0.4)'
+                        }
                       }}
                     >
-                      Tüm alanları doldurduğunuzdan emin olun
-                    </Typography>
+                      Kaydet ve Tamamla
+                    </Button>
+                    <Box sx={{
+                      position: 'absolute',
+                      bottom: -22,
+                      left: 0,
+                      right: 0,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      pointerEvents: 'none'
+                    }}>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: 'rgba(85, 179, 217, 0.8)',
+                          fontStyle: 'italic',
+                          fontWeight: 500,
+                          fontSize: '0.7rem'
+                        }}
+                      >
+                        Tüm alanları doldurduğunuzdan emin olun
+                      </Typography>
+                    </Box>
                   </Box>
                 </Box>
               </StyledCard>
