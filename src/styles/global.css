@@ -99,7 +99,7 @@ a {
 .chart-container {
   padding: 16px;
   border-radius: 16px;
-  background-color: #5db6d9;
+  background-color: #ede8ce;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
@@ -114,7 +114,7 @@ a {
   left: 0;
   z-index: 1200;
   transition: transform 0.3s ease;
-  background-color: #5db6d9 !important;
+  background-color: #ede8ce !important;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08) !important;
 }
 
@@ -209,7 +209,7 @@ a {
 /* Home page specific styles */
 .home-card {
   border-radius: 16px !important;
-  background-color: #5db6d9 !important;
+  background-color: #ede8ce !important;
   margin-bottom: 24px;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;

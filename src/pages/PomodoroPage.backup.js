@@ -294,7 +294,7 @@ const PomodoroPage = () => {
                   borderRadius: '50%',
                   background: 'linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%)',
                   boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.5)',
-                  border: '8px solid #5db6d9',
+                  border: '8px solid #ede8ce',
                   mb: 3,
                   '&::before': {
                     content: '""',

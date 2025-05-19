@@ -288,7 +288,7 @@ const Analiz = () => {
         variant="h5"
         fontWeight="bold"
         gutterBottom
-        sx={{ mb: 3, display: 'flex', alignItems: 'center', '&::before': { content: '""', width: 5, height: 24, backgroundColor: '#5db6d9', borderRadius: 4, marginRight: 1.5 } }}
+        sx={{ mb: 3, display: 'flex', alignItems: 'center', '&::before': { content: '""', width: 5, height: 24, backgroundColor: '#ede8ce', borderRadius: 4, marginRight: 1.5 } }}
       >
         Çalışma Analizleri
       </Typography>
@@ -547,7 +547,7 @@ const Analiz = () => {
                   displayEmpty
                   sx={{
                     borderRadius: 3,
-                    backgroundColor: '#5db6d9',
+                    backgroundColor: '#ede8ce',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                     height: 56,
                     '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(25, 118, 210, 0.2)' },
@@ -657,7 +657,7 @@ const Analiz = () => {
                   mb: 2,
                   '& .MuiOutlinedInput-root': {
                     borderRadius: 3,
-                    backgroundColor: '#5db6d9',
+                    backgroundColor: '#ede8ce',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
                     height: 56,
                     '& fieldset': { borderColor: targetSubject ? `${getSubjectColor(targetSubject)}50` : 'rgba(25, 118, 210, 0.2)' },
@@ -765,7 +765,7 @@ const Analiz = () => {
               </Typography>
               <Box sx={{ 
                 flex: 1, 
-                bgcolor: '#5db6d9', 
+                bgcolor: '#ede8ce', 
                 borderRadius: 3, 
                 p: 2.5, 
                 overflowY: 'auto', 
@@ -832,7 +832,7 @@ const Analiz = () => {
                             boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
                             borderLeft: `5px solid ${getSubjectColor(subject)}`,
                             transition: 'all 0.3s ease',
-                            backgroundColor: '#5db6d9',
+                            backgroundColor: '#ede8ce',
                             '&:hover': { 
                               transform: 'translateX(5px) scale(1.01)', 
                               boxShadow: `0 6px 16px ${getSubjectColor(subject)}20` 

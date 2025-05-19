@@ -762,7 +762,7 @@ const Analytics = () => {
                         sx={{
                           p: 4,
                           borderRadius: 2,
-                          bgcolor: '#5db6d9',
+                          bgcolor: '#ede8ce',
                           border: '1px dashed #FFD54F',
                           textAlign: 'center'
                         }}
@@ -796,7 +796,7 @@ const Analytics = () => {
                           sx={{
                             p: 3,
                             borderRadius: 2,
-                            bgcolor: '#5db6d9',
+                            bgcolor: '#ede8ce',
                             border: `1px solid ${subject.color}40`,
                             transition: 'all 0.3s ease',
                             position: 'relative',

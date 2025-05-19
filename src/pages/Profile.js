@@ -69,7 +69,7 @@ const StyledPaper = styled(Paper)(({ theme }) => ({
   borderRadius: theme.spacing(2),
   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)',
   marginBottom: theme.spacing(4),
-  backgroundColor: '#5db6d9',
+  backgroundColor: '#ede8ce',
 }));
 
 const Profile = () => {
@@ -257,14 +257,14 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', backgroundColor: '#5db6d9' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', backgroundColor: '#ede8ce' }}>
         <CircularProgress />
       </Box>
     );
   }
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, px: 2, backgroundColor: '#5db6d9' }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, px: 2, backgroundColor: '#ede8ce' }}>
       <Typography 
         variant="h4" 
         gutterBottom 

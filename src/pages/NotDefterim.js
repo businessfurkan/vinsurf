@@ -1086,7 +1086,7 @@ const NotDefterim = () => {
         <form onSubmit={handleUpdateNote}>
           <Box sx={{
             p: 2.5,
-            background: '#5db6d9',
+            background: '#ede8ce',
             color: 'white',
             position: 'relative',
             overflow: 'hidden'
