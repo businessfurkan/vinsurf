@@ -5,8 +5,15 @@
 [build.environment]
   NODE_VERSION = "16.14.0"
 
+# Bu yönlendirme kuralı, tüm rotaları index.html'e yönlendirir
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
   force = true
+
+# Tarayıcı önbelleğini devre dışı bırak
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
