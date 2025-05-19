@@ -23,38 +23,61 @@ import {
   TableHead,
   TableRow,
   IconButton,
+  FormHelperText,
   Chip,
   Card,
   CardContent,
   CircularProgress,
   Snackbar,
   Alert,
-  Avatar
+  Tabs,
+  Tab,
+  Divider,
+  Avatar,
+  Fade,
+  Zoom,
+  Container,
+  Stack
 } from '@mui/material';
 import { 
   BarChart, 
   Bar, 
+  LineChart, 
+  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip as RechartsTooltip, 
   Legend, 
-  ResponsiveContainer 
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  RadialBarChart,
+  RadialBar,
+  PieChart,
+  Pie,
+  Cell
 } from 'recharts';
-import {
-  School as SchoolIcon,
-  Close as CloseIcon,
-  Add as AddIcon,
-  BarChart as BarChartIcon,
-  Timeline as TimelineIcon,
-  PieChart as PieChartIcon,
-  Delete as DeleteIcon,
-  RestartAlt as RestartAltIcon,
-  QueryStats as QueryStatsIcon,
-  HelpOutline as HelpOutlineIcon
-} from '@mui/icons-material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import QueryStatsIcon from '@mui/icons-material/QueryStats';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import PieChartIcon from '@mui/icons-material/PieChart';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrendingDownIcon from '@mui/icons-material/TrendingDown';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import SchoolIcon from '@mui/icons-material/School';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import InsightsIcon from '@mui/icons-material/Insights';
+import SaveIcon from '@mui/icons-material/Save';
+import FilterListIcon from '@mui/icons-material/FilterList';
+import SortIcon from '@mui/icons-material/Sort';
 
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
+import { useAuthState } from 'react-firebase-hooks/auth';
 import { 
   collection, 
   addDoc, 
@@ -91,9 +114,39 @@ const aytSubjects = [
 
 // Animations
 const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(171, 231, 255, 0.4);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(171, 231, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(171, 231, 255, 0);
+  }
+`;
+
+const float = keyframes`
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+`;
+
+const shimmer = keyframes`
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 `;
 
 // Styled components
@@ -112,40 +165,67 @@ const StyledCard = styled(Card)(({ theme, color = '#abe7ff' }) => ({
   }
 }));
 
-// Subject color mapping for charts
-const getSubjectColor = (subject) => {
-  const colors = {
-    'Türkçe': '#FF6B6B',
-    'Matematik': '#4ECDC4',
-    'Fizik': '#45B7D1',
-    'Kimya': '#98D4BB',
-    'Biyoloji': '#F9C74F',
-    'Tarih': '#F8961E',
-    'Coğrafya': '#90BE6D',
-    'Felsefe': '#577590',
-    'Din Kültürü': '#F94144',
-    'Yabancı Dil': '#F2CC8F'
-  };
-  return colors[subject] || '#4ECDC4';
+const GradientButton = styled(Button)(({ theme, color = '#55b3d9' }) => ({
+  background: `linear-gradient(135deg, ${color} 0%, ${color}dd 100%)`,
+  color: '#fff',
+  fontWeight: 700,
+  borderRadius: 12,
+  padding: '10px 20px',
+  transition: 'all 0.3s ease',
+  boxShadow: `0 4px 12px ${color}40`,
+  '&:hover': {
+    background: `linear-gradient(135deg, ${color}dd 0%, ${color} 100%)`,
+    boxShadow: `0 6px 16px ${color}60`,
+    transform: 'translateY(-2px)'
+  }
+}));
+
+const AnimatedBox = styled(Box)(({ theme, animation = pulse, duration = '1.5s' }) => ({
+  animation: `${animation} ${duration} infinite`
+}));
+
+// Subject color mapping
+const subjectColors = {
+  'Türkçe': '#FF6B6B',
+  'Sosyal Bilimler': '#4ECDC4',
+  'Temel Matematik': '#FFD166',
+  'Fen Bilimleri': '#06D6A0',
+  'Matematik': '#118AB2',
+  'Fizik': '#073B4C',
+  'Kimya': '#7209B7',
+  'Biyoloji': '#4CC9F0',
+  'Edebiyat': '#F72585',
+  'Tarih-1': '#B5838D',
+  'Coğrafya-1': '#6D6875',
+  'Tarih-2': '#E5989B',
+  'Coğrafya-2': '#A7A5C6',
+  'Felsefe': '#3D405B',
+  'Din Kültürü': '#81B29A',
+  'Yabancı Dil': '#F2CC8F'
 };
 
 const TytAytNetTakibi = () => {
-  const [user] = useState(null);
+  const [user] = useAuthState(auth);
   const [examType, setExamType] = useState('TYT');
   const [subject, setSubject] = useState('');
   const [correctCount, setCorrectCount] = useState('');
   const [incorrectCount, setIncorrectCount] = useState('');
-  const [examDate, setExamDate] = useState('');
   const [examName, setExamName] = useState('');
+  const [examDate, setExamDate] = useState('');
+  const [errors, setErrors] = useState({});
   const [netRecords, setNetRecords] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
-  const [errors, setErrors] = useState({});
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
   const [selectedGraphSubject, setSelectedGraphSubject] = useState('');
   const [selectedRecordsSubject, setSelectedRecordsSubject] = useState('');
   const [selectedExamType, setSelectedExamType] = useState('');
+  const [activeTab, setActiveTab] = useState(0);
   const [chartType, setChartType] = useState('bar');
+  const [showAddForm, setShowAddForm] = useState(false);
 
   // Bildirim sistemini kullan
   const { addNotification } = useNotifications() || { addNotification: () => {} };
@@ -535,7 +615,6 @@ const TytAytNetTakibi = () => {
     
     return Object.keys(data).map(subject => ({
       subject,
-      color: getSubjectColor(subject),
       data: data[subject].sort((a, b) => {
         // Try to compare by date first
         const dateA = new Date(a.date.split('.').reverse().join('-'));
@@ -549,7 +628,7 @@ const TytAytNetTakibi = () => {
       })
     }));
   };
-  
+
   const chartData = processChartData();
   
   const formatDate = (date) => {
@@ -593,19 +672,31 @@ const TytAytNetTakibi = () => {
           pb: 2,
           borderBottom: '2px solid #abe7ff'
         }}>
-          <Typography variant="h4" sx={{ 
-            fontWeight: 700, 
-            color: '#3f51b5',
-            fontFamily: 'Poppins, Quicksand, sans-serif',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
-            <SchoolIcon sx={{ mr: 1.5, fontSize: 32, color: '#55b3d9' }} />
-            TYT-AYT Net Takibi
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Avatar sx={{ 
+              bgcolor: '#5db6d9', 
+              width: 50, 
+              height: 50,
+              boxShadow: '0 4px 10px rgba(85, 179, 217, 0.3)',
+              mr: 2
+            }}>
+              <InsightsIcon fontSize="large" />
+            </Avatar>
+            <Typography 
+              variant="h4" 
+              fontWeight="bold"
+              sx={{ 
+                fontFamily: 'Poppins, sans-serif',
+                color: '#2a5956',
+                letterSpacing: '-0.5px'
+              }}
+            >
+              TYT-AYT Net Takibi
+            </Typography>
+          </Box>
           
-          <Button
-            startIcon={showAddForm ? <CloseIcon /> : <AddIcon />}
+          <Button 
+            startIcon={showAddForm ? <RestartAltIcon /> : <AddCircleOutlineIcon />}
             onClick={() => {
               setShowAddForm(!showAddForm);
             }}
@@ -628,151 +719,304 @@ const TytAytNetTakibi = () => {
           </Button>
         </Box>
 
-        {/* Main content */}
-        <Grid container spacing={4}>
-          {/* Form section - conditionally rendered */}
-          {showAddForm && (
-            <Grid item xs={12} md={6}>
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <StyledCard sx={{ p: 4, backgroundColor: '#abe7ff' }}>
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    mb: 2,
-                    pb: 2,
-                    borderBottom: '1px solid rgba(85, 179, 217, 0.2)',
-                    overflow: 'visible'
-                  }}>
+      {/* Main content */}
+      <Grid container spacing={4}>
+        {/* Form section - conditionally rendered */}
+        {showAddForm && (
+          <Grid item xs={12} md={6}>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <StyledCard sx={{ p: 4, backgroundColor: '#abe7ff' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  mb: 2,
+                  pb: 2,
+                  borderBottom: '1px solid rgba(85, 179, 217, 0.2)'
+                }}>
                   <Avatar sx={{ 
                     bgcolor: '#5db6d9', 
-                    mr: 2,
-                    boxShadow: '0 4px 8px rgba(85, 179, 217, 0.25)'
+                    width: 36, 
+                    height: 36,
+                    mr: 1.5
                   }}>
-                    <AddIcon />
+                    <AddCircleOutlineIcon />
                   </Avatar>
-                  <Typography variant="h6" sx={{ fontWeight: 600, color: '#3f51b5' }}>
+                  <Typography 
+                    variant="h6" 
+                    fontWeight="bold"
+                    sx={{ 
+                      fontFamily: 'Poppins, sans-serif',
+                      color: '#2a5956'
+                    }}
+                  >
                     Yeni Net Ekle
                   </Typography>
                 </Box>
-                
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Doğru Sayısı"
-                      type="number"
-                      value={correctCount}
-                      onChange={(e) => setCorrectCount(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.correctCount}
-                      helperText={errors.correctCount}
-                      InputProps={{ 
-                        sx: { 
-                          backgroundColor: '#abe7ff', 
-                          borderRadius: 2,
-                          '&:hover': { backgroundColor: '#d6f3ff' },
-                          '&.Mui-focused': { backgroundColor: '#d6f3ff' }
-                        }
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(85, 179, 217, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#55b3d9' },
-                          '&.Mui-focused fieldset': { borderColor: '#3f51b5' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#3f51b5' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
-                      }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      label="Yanlış Sayısı"
-                      type="number"
-                      value={incorrectCount}
-                      onChange={(e) => setIncorrectCount(e.target.value)}
-                      fullWidth
-                      margin="normal"
-                      error={!!errors.incorrectCount}
-                      helperText={errors.incorrectCount}
-                      InputProps={{ 
-                        sx: { 
-                          backgroundColor: '#abe7ff', 
-                          borderRadius: 2,
-                          '&:hover': { backgroundColor: '#d6f3ff' },
-                          '&.Mui-focused': { backgroundColor: '#d6f3ff' }
-                        }
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(85, 179, 217, 0.3)' },
-                          '&:hover fieldset': { borderColor: '#55b3d9' },
-                          '&.Mui-focused fieldset': { borderColor: '#3f51b5' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#3f51b5' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
-                      }}
-                    />
-                  </Grid>
-                </Grid>
-                
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <FormControl fullWidth margin="normal">
-                      <InputLabel>Sınav Türü</InputLabel>
-                      <Select
-                        value={examType}
-                        onChange={(e) => {
-                          setExamType(e.target.value);
-                          setSubject('');
-                        }}
-                        label="Sınav Türü"
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Sınav Türü</InputLabel>
+              <Select
+                value={examType}
+                onChange={(e) => {
+                  setExamType(e.target.value);
+                  setSubject('');
+                }}
+                label="Sınav Türü"
+                sx={{
+                  borderRadius: 12,
+                  backgroundColor: '#abe7ff',
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(85, 179, 217, 0.2)' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(85, 179, 217, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#55b3d9' },
+                  '& .MuiSelect-select': { fontWeight: 500 }
+                }}
+                MenuProps={{ 
+                  PaperProps: { 
+                    sx: { 
+                      borderRadius: 2, 
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                      mt: 0.5 
+                    } 
+                  } 
+                }}
+              >
+                <MenuItem value="TYT" sx={{ borderRadius: 8, my: 0.5, mx: 0.5, fontWeight: examType === 'TYT' ? 600 : 400 }}>TYT</MenuItem>
+                <MenuItem value="AYT" sx={{ borderRadius: 8, my: 0.5, mx: 0.5, fontWeight: examType === 'AYT' ? 600 : 400 }}>AYT</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Sınav Türü</InputLabel>
+              <Select
+                value={examType}
+                onChange={(e) => {
+                  setExamType(e.target.value);
+                  setSubject('');
+                }}
+                label="Sınav Türü"
+                sx={{
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                  '& .MuiSelect-select': { fontWeight: 500 }
+                }}
+                MenuProps={{ 
+                  PaperProps: { 
+                    sx: { 
+                      borderRadius: 2, 
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                      mt: 0.5 
+                    } 
+                  } 
+                }}
+              >
+                <MenuItem value="TYT" sx={{ borderRadius: 1, my: 0.5, mx: 0.5, fontWeight: examType === 'TYT' ? 600 : 400 }}>TYT</MenuItem>
+                <MenuItem value="AYT" sx={{ borderRadius: 1, my: 0.5, mx: 0.5, fontWeight: examType === 'AYT' ? 600 : 400 }}>AYT</MenuItem>
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal" error={!!errors.subject}>
+              <InputLabel>Ders</InputLabel>
+              <Select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                label="Ders"
+                sx={{
+                  borderRadius: 2,
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                  '& .MuiSelect-select': { fontWeight: 500 }
+                }}
+                MenuProps={{ 
+                  PaperProps: { 
+                    sx: { 
+                      borderRadius: 2, 
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.1)', 
+                      mt: 0.5,
+                      maxHeight: 300
+                    } 
+                  } 
+                }}
+              >
+                {examType === 'TYT' 
+                  ? tytSubjects.map(subj => (
+                      <MenuItem 
+                        key={subj} 
+                        value={subj}
                         sx={{
-                          borderRadius: 2,
-                          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.2)' },
-                          '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
-                          '& .MuiSelect-select': { fontWeight: 500 }
+                          borderRadius: 1, 
+                          my: 0.5, 
+                          mx: 0.5, 
+                          fontWeight: subject === subj ? 600 : 400,
+                          borderLeft: subject === subj ? '3px solid #3f51b5' : 'none',
+                          pl: subject === subj ? 1.5 : 2
                         }}
                       >
-                        <MenuItem value="TYT">TYT</MenuItem>
-                        <MenuItem value="AYT">AYT</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-                
-                <Button
-                  variant="contained"
-                  color="primary"
-                  fullWidth
-                  onClick={handleSubmit}
-                  sx={{
-                    mt: 2,
-                    py: 1.5,
-                    borderRadius: 2,
-                    fontWeight: 600,
-                    boxShadow: '0 4px 14px rgba(0, 118, 255, 0.3)',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      boxShadow: '0 6px 20px rgba(0, 118, 255, 0.4)'
-                    }
-                  }}
-                >
-                  Kaydet
-                </Button>
-              </StyledCard>
-            </motion.div>
-          </Grid>
-        )}
+                        {subj}
+                      </MenuItem>
+                    ))
+                  : aytSubjects.map(subj => (
+                      <MenuItem 
+                        key={subj} 
+                        value={subj}
+                        sx={{
+                          borderRadius: 1, 
+                          my: 0.5, 
+                          mx: 0.5, 
+                          fontWeight: subject === subj ? 600 : 400,
+                          borderLeft: subject === subj ? '3px solid #3f51b5' : 'none',
+                          pl: subject === subj ? 1.5 : 2
+                        }}
+                      >
+                        {subj}
+                      </MenuItem>
+                    ))
+                }
+              </Select>
+            </FormControl>
+              </Grid>
+            </Grid>
 
-        {/* Grafik ve Tablo Bölümü */}
-        <Grid item xs={12} md={showAddForm ? 6 : 12}>
+            <Box 
+              sx={{ 
+                p: 3, 
+                background: 'linear-gradient(135deg, rgba(85, 179, 217, 0.08) 0%, rgba(85, 179, 217, 0.15) 100%)', 
+                borderRadius: 3, 
+                mt: 3, 
+                mb: 3,
+                border: '1px solid rgba(85, 179, 217, 0.2)',
+                boxShadow: '0 4px 12px rgba(85, 179, 217, 0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
+            >
+              <Box sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.8) 10%, transparent 10.5%)',
+                backgroundSize: '20px 20px',
+                opacity: 0.5,
+                zIndex: 0
+              }} />
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  color: '#55b3d9', 
+                  mb: 0.5, 
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: 1,
+                  position: 'relative',
+                  zIndex: 1
+                }}
+              >
+                NET SONUÇ
+              </Typography>
+              <Typography 
+                variant="h3" 
+                align="center" 
+                sx={{ 
+                  fontWeight: 800, 
+                  color: '#5db6d9',
+                  fontFamily: 'Poppins, Quicksand, sans-serif',
+                  textShadow: '0 2px 10px rgba(85, 179, 217, 0.2)',
+                  position: 'relative',
+                  zIndex: 1
+                }}
+              >
+                {calculateNet(correctCount, incorrectCount)}
+              </Typography>
+            </Box>
+
+            <TextField
+              label="Deneme Adı"
+              value={examName}
+              onChange={(e) => setExamName(e.target.value)}
+              fullWidth
+              margin="normal"
+              error={!!errors.examName}
+              helperText={errors.examName}
+              InputProps={{ 
+                sx: { 
+                  borderRadius: 2,
+                  backgroundColor: '#abe7ff',
+                  '& input': { fontWeight: 500 }
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#5db6d9' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#5db6d9' },
+                },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#5db6d9' }
+              }}
+            />
+
+            <TextField
+              label="Tarih"
+              type="date"
+              value={examDate}
+              onChange={(e) => setExamDate(e.target.value)}
+              fullWidth
+              margin="normal"
+              InputLabelProps={{ shrink: true }}
+              error={!!errors.examDate}
+              helperText={errors.examDate}
+              InputProps={{ 
+                sx: { 
+                  borderRadius: 2,
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(63, 81, 181, 0.5)' },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#3f51b5' },
+                },
+                '& .MuiInputLabel-root.Mui-focused': { color: '#3f51b5' }
+              }}
+            />
+
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              fullWidth
+              sx={{ 
+                mt: 3,
+                py: 1.5,
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #5db6d9 0%, #55b3d9 100%)',
+                boxShadow: '0 4px 12px rgba(85, 179, 217, 0.3)',
+                borderRadius: 2,
+                transition: 'all 0.3s ease',
+                '&:hover': { 
+                  boxShadow: '0 6px 16px rgba(85, 179, 217, 0.4)', 
+                  transform: 'translateY(-2px)'
+                },
+                '&:active': { 
+                  transform: 'translateY(0)', 
+                  boxShadow: '0 2px 8px rgba(85, 179, 217, 0.3)' 
+                },
+              }}
+            >
+              Kaydet
+            </Button>
+          </Paper>
+        </Grid>
+
+        <Grid item xs={12} md={8}>
           <Paper 
             elevation={0} 
             sx={{ 
@@ -851,7 +1095,7 @@ const TytAytNetTakibi = () => {
                       fontWeight: selectedExamType === 'AYT' ? 600 : 400,
                       '&:hover': {
                         backgroundColor: 'rgba(85, 179, 217, 0.08)',
-                        borderColor: 'rgba(85, 179, 217, 0.5)'
+                        borderColor: 'rgba(85, 179, 217, 0.5)',
                       }
                     }}
                   >
@@ -993,10 +1237,10 @@ const TytAytNetTakibi = () => {
             </Box>
 
             {loading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 8 }}>
-                <CircularProgress size={40} thickness={4} sx={{ color: '#55b3d9' }} />
+              <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+                <CircularProgress />
               </Box>
-            ) : netRecords.length === 0 ? (
+            ) : selectedExamType && !selectedRecordsSubject ? (
               <Box sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
@@ -1545,8 +1789,7 @@ const TytAytNetTakibi = () => {
           </Paper>
         </Grid>
       </Grid>
-      </Box>
-
+      
       {/* Notification */}
       <Snackbar 
         open={notification.open} 
