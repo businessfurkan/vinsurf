@@ -133,9 +133,9 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                   px: 2.5,
                   borderRadius: '10px',
                   transition: 'all 0.3s ease',
-                  background: isActive ? `${item.color}15` : 'transparent',
+                  background: 'transparent',
                   '&:hover': {
-                    background: `${item.color}10`,
+                    background: 'transparent',
                     transform: 'translateY(-2px)',
                   },
                 }}

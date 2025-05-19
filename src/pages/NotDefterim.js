@@ -126,7 +126,7 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   alignItems: 'center',
   borderRadius: 16,
   marginBottom: theme.spacing(3),
-  backgroundColor: '#aee1f5',
+  backgroundColor: '#D9D4BB',
   boxShadow: '0 8px 25px rgba(0,0,0,0.1), 0 2px 5px rgba(0,0,0,0.07)',
   border: '1px solid rgba(0,0,0,0.04)',
   transition: 'all 0.3s ease',
@@ -143,7 +143,7 @@ const NoteListItem = styled(ListItem)(({ theme, categorycolor }) => ({
   overflow: 'hidden',
   transition: 'all 0.25s ease',
   boxShadow: '0 4px 15px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05)',
-  backgroundColor: '#aee1f5',
+  backgroundColor: '#D9D4BB',
   border: '1px solid rgba(0,0,0,0.03)',
   position: 'relative',
   '&::before': {
@@ -627,7 +627,7 @@ const NotDefterim = () => {
         </HeaderRow>
       </PageHeader>
       
-      <SearchBar elevation={3} sx={{ backgroundColor: '#aee1f5 !important' }}>
+      <SearchBar elevation={3} sx={{ backgroundColor: '#D9D4BB !important' }}>
         <SearchIcon sx={{ mr: 1, color: 'primary.main' }} />
         <TextField
           fullWidth
@@ -790,7 +790,7 @@ const NotDefterim = () => {
       ) : (
         <List sx={{ padding: 0 }}>
           {getFilteredNotes().map((note) => (
-            <NoteListItem key={note.id} categorycolor={getCategoryColor(note.category)} style={{backgroundColor: '#aee1f5'}}>
+            <NoteListItem key={note.id} categorycolor={getCategoryColor(note.category)} style={{backgroundColor: '#D9D4BB'}}>
               <NoteListItemContent onClick={() => handleOpenViewDialog(note)}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

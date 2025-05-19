@@ -472,14 +472,14 @@ a {
 .MuiPaper-root[elevation="3"],
 div[role="search"],
 .MuiPaper-root.MuiPaper-elevation3 {
-  background-color: #aee1f5 !important;
+  background-color: #D9D4BB !important;
 }
 
 /* Not kartları */
 .MuiListItem-root,
 .MuiPaper-root.MuiListItem-root,
 .MuiListItem-root.MuiListItem-gutters {
-  background-color: #aee1f5 !important;
+  background-color: #D9D4BB !important;
 }
 
 /* MUI overrides for better visibility */
