@@ -1083,7 +1083,7 @@ const RekaNET = () => {
                             </Box>
                             
                             {/* Net Detayları */}
-                            <Box sx={{ p: 3, bgcolor: 'white' }}>
+                            <Box sx={{ p: 3, minHeight: '100vh', backgroundColor: '#ede8ce' }}>
                               <Grid container spacing={3}>
                                 {/* TYT Net */}
                                 <Grid item xs={6}>
