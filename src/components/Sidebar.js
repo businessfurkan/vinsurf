@@ -148,7 +148,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                     fontSize: 22,
                     opacity: isActive ? 1 : 0.9,
                     filter: isActive ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.15))' : 'none',
-                    backgroundColor: '#D9D4BB',
+                    backgroundColor: '#d9d4bb',
                     '& .MuiSvgIcon-root': {
                       fontSize: 22,
                     }
