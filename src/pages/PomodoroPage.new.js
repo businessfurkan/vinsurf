@@ -178,7 +178,7 @@ const PomodoroPage = () => {
         pt: { xs: 2, sm: 3, md: 4 },
         pb: { xs: 4, sm: 5, md: 6 },
         px: { xs: 1, sm: 2, md: 3 },
-        background: '#abe7ff', // Yeni arkaplan rengi
+        background: '#D9D4BB', // Yeni arkaplan rengi
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center'

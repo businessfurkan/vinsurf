@@ -69,7 +69,7 @@ const Home = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        backgroundColor: '#abe7ff',
+        backgroundColor: '#D9D4BB',
       }}
     >
       <Container 
@@ -88,7 +88,7 @@ const Home = () => {
             borderRadius: '16px', 
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
-            background: '#abe7ff',
+            background: '#D9D4BB',
             boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,
@@ -166,7 +166,7 @@ const Home = () => {
             borderRadius: '16px', 
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
-            background: '#abe7ff',
+            background: '#D9D4BB',
             boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,

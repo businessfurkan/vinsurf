@@ -40,7 +40,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
-  backgroundColor: '#abe7ff',
+  backgroundColor: '#D9D4BB',
   boxShadow: '0 2px 10px rgba(0,0,0,0.08)',
   zIndex: theme.zIndex.drawer + 1,
 }));

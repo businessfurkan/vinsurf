@@ -619,7 +619,7 @@ const KonuTakip = () => {
       sx={{ 
         flexGrow: 1, 
         p: 3,
-        backgroundColor: '#abe7ff',
+        backgroundColor: '#D9D4BB',
         minHeight: '100vh'
       }}
     >

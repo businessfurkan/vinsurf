@@ -34,7 +34,7 @@ const closedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   width: `${drawerWidth}px`,
-  background: '#abe7ff',
+  background: '#D9D4BB',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
   position: 'relative',
@@ -88,7 +88,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         py: 2,
         display: 'flex', 
         justifyContent: 'center',
-        background: '#abe7ff',
+        background: '#D9D4BB',
         mb: 1,
       }}>
         <Box sx={{ 

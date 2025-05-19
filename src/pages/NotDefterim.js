@@ -950,7 +950,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#536DFE',
                           borderWidth: 2
@@ -984,7 +984,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#536DFE',
                           borderWidth: 2
@@ -1020,7 +1020,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#536DFE',
                           borderWidth: 2
@@ -1158,7 +1158,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#FF9800',
                           borderWidth: 2
@@ -1192,7 +1192,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#FF9800',
                           borderWidth: 2
@@ -1228,7 +1228,7 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                           borderColor: '#FF9800',
                           borderWidth: 2

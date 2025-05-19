@@ -529,7 +529,7 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: '#abe7ff',
+        background: '#D9D4BB',
         position: 'relative',
         overflow: 'hidden',
         '&::after': {

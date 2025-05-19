@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Poppins', 'Montserrat', 'Roboto', sans-serif;
-  background-color: #abe7ff;
+  background-color: #D9D4BB;
   color: #FFFFF0;
   line-height: 1.6;
   font-weight: 450; /* Slightly increase the default font weight */
@@ -62,7 +62,7 @@ a {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 16px !important;
   overflow: hidden;
-  background-color: #abe7ff !important;
+  background-color: #D9D4BB !important;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
 }
 
@@ -74,7 +74,7 @@ a {
 /* Make all cards elegant */
 .MuiCard-root, .MuiPaper-root {
   border-radius: 16px !important;
-  background-color: #abe7ff !important;
+  background-color: #D9D4BB !important;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
 }
 
@@ -84,7 +84,7 @@ a {
 }
 
 .analytics-card {
-  background-color: #abe7ff !important;
+  background-color: #D9D4BB !important;
   border-radius: 16px !important;
   box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
   overflow: hidden;
@@ -464,7 +464,7 @@ a {
 
 /* TYT-AYT Net Takibi sayfası için özel stiller */
 .MuiPaper-root {
-  background-color: #abe7ff !important;
+  background-color: #D9D4BB !important;
 }
 
 /* Not Defterim sayfası için özel stiller */

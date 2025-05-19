@@ -99,7 +99,7 @@ const BenimleCalis = () => {
       minHeight: '90vh',
       position: 'relative',
       overflow: 'hidden',
-      backgroundColor: '#abe7ff',
+      backgroundColor: '#D9D4BB',
       borderRadius: 4,
       boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
     }}>
@@ -177,7 +177,7 @@ const BenimleCalis = () => {
               overflow: 'hidden',
               boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
               height: '100%',
-              background: '#abe7ff'
+              background: '#D9D4BB'
             }}
           >
             {loading ? (
@@ -306,9 +306,9 @@ const BenimleCalis = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       sx={{ 
-                        backgroundColor: '#abe7ff',
+                        backgroundColor: '#D9D4BB',
                         '&:hover': {
-                          backgroundColor: '#abe7ff',
+                          backgroundColor: '#D9D4BB',
                         }
                       }}
                     >
@@ -568,12 +568,12 @@ const BenimleCalis = () => {
                 sx={{
                   borderRadius: 3,
                   py: 2,
-                  background: '#abe7ff',
+                  background: '#D9D4BB',
                   boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
                   color: '#2a5956',
                   border: '1px solid rgba(0,0,0,0.1)',
                   '&:hover': {
-                    background: '#abe7ff',
+                    background: '#D9D4BB',
                     boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
                   },
                   textTransform: 'none',
@@ -618,11 +618,11 @@ const BenimleCalis = () => {
                   borderWidth: 2,
                   borderColor: 'rgba(0,0,0,0.2)',
                   color: '#2a5956',
-                  backgroundColor: '#abe7ff',
+                  backgroundColor: '#D9D4BB',
                   backdropFilter: 'blur(5px)',
                   '&:hover': {
                     borderColor: 'rgba(0,0,0,0.3)',
-                    backgroundColor: '#abe7ff',
+                    backgroundColor: '#D9D4BB',
                     transform: 'translateY(-2px)',
                   },
                   textTransform: 'none',
