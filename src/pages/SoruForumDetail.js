@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -24,7 +24,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  Container
 } from '@mui/material';
 import {
 
@@ -209,7 +210,7 @@ const SoruForumDetail = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   
   // Fetch post from Firestore
-  const fetchPost = async () => {
+  const fetchPost = useCallback(async () => {
     try {
       const postDoc = await getDoc(doc(db, 'forumPosts', postId));
       
@@ -241,10 +242,10 @@ const SoruForumDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId, navigate, showNotification]);
 
   // Fetch comments from Firestore
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     try {
       const commentsQuery = query(
         collection(db, 'forumComments'),
@@ -281,7 +282,7 @@ const SoruForumDetail = () => {
       console.error('Error fetching comments:', error);
       showNotification('Yorumlar yüklenirken bir hata oluştu', 'error');
     }
-  };
+  }, [postId, organizeComments, showNotification]);
 
   // Organize comments into threads
   const organizeComments = (commentsArray) => {
@@ -316,13 +317,12 @@ const SoruForumDetail = () => {
   };
 
   // Load post and comments on component mount
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (postId) {
       fetchPost();
       fetchComments();
     }
-  }, [postId]);
+  }, [postId, fetchPost, fetchComments]);
 
   // Handle adding a new comment
   const handleAddComment = async () => {
@@ -981,21 +981,27 @@ const SoruForumDetail = () => {
   }
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1000, mx: 'auto' }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 3 }}>
-        <Link to="/soru-forum" style={{ textDecoration: 'none', color: '#2e3856' }}>
-          <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Breadcrumbs sx={{ mb: 3 }}>
+          <Link 
+            to="/soru-forum" 
+            style={{ 
+              textDecoration: 'none', 
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              fontWeight: 500
+            }}
+          >
             <ArrowBackIcon fontSize="small" sx={{ mr: 0.5 }} />
-            Forum
+            Soru Forum
+          </Link>
+          <Typography color="text.primary" sx={{ fontWeight: 500 }}>
+            {post?.title || 'Gönderi Detayı'}
           </Typography>
-        </Link>
-        <Typography variant="body2" color="text.secondary">
-          {post.title.length > 30 ? post.title.substring(0, 30) + '...' : post.title}
-        </Typography>
-      </Breadcrumbs>
-      
-      {/* Post card */}
+        </Breadcrumbs>
+      </Box>
       <StyledCard sx={{ mb: 4, position: 'relative', overflow: 'visible' }}>
         {/* Renkli üst şerit */}
         <Box 
@@ -1567,7 +1573,7 @@ const SoruForumDetail = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </Container>
   );
 };
 

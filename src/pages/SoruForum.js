@@ -20,23 +20,20 @@ import {
   Alert,
   Snackbar,
   styled,
-  alpha
+  alpha,
+  Grid,
+  Container,
+  Divider
 } from '@mui/material';
 import {
   AddPhotoAlternate as AddPhotoIcon,
   Send as SendIcon,
   ThumbUp as ThumbUpIcon,
   Comment as CommentIcon,
-
   Search as SearchIcon,
-
-  LocalOffer as TagIcon,
-
   ArrowDownward as ArrowDownwardIcon,
-
-
-
-  Close as CloseIcon
+  Close as CloseIcon,
+  QuestionAnswer as QuestionIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
@@ -54,7 +51,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { formatDistance } from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 
@@ -124,6 +121,7 @@ const SoruForum = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [popularTags, setPopularTags] = useState([]);
   
   // Refs
   const fileInputRef = useRef(null);
@@ -360,245 +358,327 @@ const SoruForum = () => {
     navigate(`/soru-forum/${postId}`);
   };
 
+  // Bu fonksiyon artık doğrudan render kısmında kullanılıyor
 
+  // Popüler etiketleri hesapla
+  useEffect(() => {
+    if (posts.length > 0) {
+      const tagsCount = {};
+      posts.forEach(post => {
+        if (post.tags && Array.isArray(post.tags)) {
+          post.tags.forEach(tag => {
+            tagsCount[tag] = (tagsCount[tag] || 0) + 1;
+          });
+        }
+      });
+      
+      // En popüler 5 etiketi al
+      const sortedTags = Object.keys(tagsCount).sort((a, b) => tagsCount[b] - tagsCount[a]).slice(0, 5);
+      setPopularTags(sortedTags);
+    }
+  }, [posts]);
 
-  // Format date for display
-  const formatDate = (date) => {
-    if (!date) return '';
-    return formatDistance(date, new Date(), { addSuffix: true, locale: tr });
+  // Arama terimini değiştirme fonksiyonu
+  const handleSearchTermChange = (e) => {
+    setSearchTerm(e.target.value);
   };
 
-  // Filter posts by search term
-  const filteredPosts = posts.filter(post => 
-    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    post.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
-  );
-
   return (
-    <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: 'auto' }}>
-      {/* Header */}
-      <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography variant="h4" component="h1" sx={{ 
-          fontWeight: 700, 
-          mb: 1,
-          color: '#2e3856',
-          textAlign: 'center'
-        }}>
-          Soru Forum
-        </Typography>
-        <Typography variant="body1" sx={{ 
-          color: 'text.secondary', 
-          mb: 3, 
-          textAlign: 'center',
-          maxWidth: 700
-        }}>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Header Section */}
+      <Box sx={{ mb: 5, textAlign: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+          <QuestionIcon color="primary" sx={{ fontSize: 36, mr: 1 }} />
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 700, color: '#2e3856' }}>
+            Soru Forum
+          </Typography>
+        </Box>
+        <Typography variant="h6" sx={{ mb: 3, color: 'text.secondary', fontWeight: 400 }}>
           Sorularınızı paylaşın, diğer öğrencilerle tartışın ve birlikte öğrenin.
         </Typography>
-        
-        {/* Search and filter bar */}
-        <Box sx={{ 
-          display: 'flex', 
-          width: '100%', 
-          flexDirection: { xs: 'column', sm: 'row' }, 
-          gap: 2,
-          mb: 3,
-          justifyContent: 'space-between',
-          alignItems: { xs: 'stretch', sm: 'center' }
-        }}>
-          <StyledTextField
-            placeholder="Gönderilerde ara..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            variant="outlined"
-            fullWidth
-            sx={{ maxWidth: { sm: 400 } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon color="action" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          
-          <StyledButton
-            variant="contained"
-            color="primary"
-            startIcon={<AddPhotoIcon />}
-            onClick={handleOpenPostDialog}
-            sx={{ minWidth: { xs: '100%', sm: 'auto' } }}
-          >
-            Yeni Soru Sor
-          </StyledButton>
-        </Box>
-        
-        {/* Tabs for sorting */}
-        <Tabs 
-          value={tabValue} 
-          onChange={handleTabChange}
-          sx={{ 
-            mb: 3,
-            '& .MuiTabs-indicator': {
-              backgroundColor: '#4285F4',
-              height: 3,
-              borderRadius: '3px 3px 0 0',
-            },
-            '& .MuiTab-root': {
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '0.95rem',
-              color: '#2e3856',
-              '&.Mui-selected': {
-                color: '#4285F4',
-              },
-            },
-          }}
-        >
-          <Tab 
-            icon={<ArrowDownwardIcon fontSize="small" />} 
-            iconPosition="start" 
-            label="En Yeni" 
-          />
-          <Tab 
-            icon={<ThumbUpIcon fontSize="small" />} 
-            iconPosition="start" 
-            label="En Popüler" 
-          />
-        </Tabs>
+        <Divider sx={{ mb: 4 }} />
       </Box>
       
-      {/* Posts grid */}
+      {/* Action Bar */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={8}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Tabs 
+              value={tabValue} 
+              onChange={handleTabChange}
+              sx={{
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#4285F4',
+                  height: 3,
+                  borderRadius: '3px 3px 0 0',
+                },
+                '& .MuiTab-root': {
+                  textTransform: 'none',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  minWidth: 100,
+                  '&.Mui-selected': {
+                    color: '#4285F4',
+                  },
+                },
+              }}
+            >
+              <Tab label="En Yeni" />
+              <Tab label="En Popüler" />
+            </Tabs>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <TextField
+              placeholder="Ara..."
+              size="small"
+              value={searchTerm}
+              onChange={handleSearchTermChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon color="action" />
+                  </InputAdornment>
+                ),
+                sx: { borderRadius: 2 }
+              }}
+              sx={{ width: '100%', maxWidth: 300 }}
+            />
+          </Box>
+        </Grid>
+      </Grid>
+      
+      {/* New Post Button */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenPostDialog}
+          disabled={!user}
+          startIcon={<SendIcon />}
+          sx={{
+            borderRadius: 8,
+            py: 1.5,
+            px: 4,
+            fontWeight: 600,
+            textTransform: 'none',
+            fontSize: '1rem',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+            background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)',
+            '&:hover': {
+              boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+            }
+          }}
+        >
+          Yeni Soru Sor
+        </Button>
+      </Box>
+      
+      {/* Popular Tags */}
+      {popularTags.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+            Popüler Etiketler
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {popularTags.map((tag, index) => (
+              <Chip 
+                key={index} 
+                label={tag} 
+                clickable
+                onClick={() => setSearchTerm(tag)}
+                sx={{
+                  borderRadius: '20px',
+                  fontWeight: 500,
+                  backgroundColor: alpha('#4285F4', 0.1),
+                  color: '#4285F4',
+                  '&:hover': {
+                    backgroundColor: alpha('#4285F4', 0.2),
+                  }
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+      )}
+      
+      {/* Content */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 8 }}>
           <CircularProgress />
         </Box>
-      ) : filteredPosts.length === 0 ? (
+      ) : posts.length === 0 ? (
         <Paper 
           elevation={0} 
           sx={{ 
-            p: 4, 
+            p: 6, 
             textAlign: 'center',
-            borderRadius: 3,
-            backgroundColor: alpha('#4285F4', 0.05),
-            border: `1px dashed ${alpha('#4285F4', 0.3)}`
+            borderRadius: 4,
+            backgroundColor: '#f8f9fa',
+            border: '1px dashed rgba(0,0,0,0.1)'
           }}
         >
-          <Typography variant="h6" sx={{ mb: 1, color: '#2e3856' }}>
-            Henüz gönderi bulunmuyor
+          <QuestionIcon sx={{ fontSize: 60, color: 'text.disabled', mb: 2 }} />
+          <Typography variant="h5" sx={{ mb: 1, color: 'text.secondary', fontWeight: 600 }}>
+            Henüz soru yok
           </Typography>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-            İlk gönderiyi oluşturmak için &quot;Yeni Soru Sor&quot; butonuna tıklayın
+          <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+            İlk soruyu sormak için &quot;Yeni Soru Sor&quot; butonuna tıklayın.
           </Typography>
-          <StyledButton
-            variant="contained"
-            color="primary"
-            startIcon={<AddPhotoIcon />}
-            onClick={handleOpenPostDialog}
-          >
-            Yeni Soru Sor
-          </StyledButton>
+          {user ? (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenPostDialog}
+              startIcon={<SendIcon />}
+              sx={{
+                borderRadius: 8,
+                py: 1.5,
+                px: 4,
+                fontWeight: 600,
+                textTransform: 'none',
+                fontSize: '1rem',
+                boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)',
+              }}
+            >
+              Yeni Soru Sor
+            </Button>
+          ) : (
+            <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+              Soru sormak için giriş yapmalısınız.
+            </Typography>
+          )}
         </Paper>
       ) : (
-        <Box sx={{ width: '100%' }}>
-          {filteredPosts.map(post => (
-            <Paper
-              key={post.id}
-              elevation={0}
-              sx={{
-                p: 2,
-                mb: 2,
-                borderRadius: 2,
-                border: '1px solid rgba(0,0,0,0.08)',
-                transition: 'all 0.2s ease',
-                cursor: 'pointer',
-                '&:hover': {
-                  backgroundColor: alpha('#4285F4', 0.03),
-                  borderColor: alpha('#4285F4', 0.2),
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-                },
-              }}
-              onClick={() => handleViewPost(post.id)}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+        <Grid container spacing={3}>
+          {posts.filter(post => {
+            if (!searchTerm) return true;
+            const searchLower = searchTerm.toLowerCase();
+            return (
+              post.title.toLowerCase().includes(searchLower) ||
+              post.content.toLowerCase().includes(searchLower) ||
+              (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchLower)))
+            );
+          }).map(post => (
+            <Grid item xs={12} key={post.id}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 4,
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  '&:hover': {
+                    transform: 'translateY(-3px)',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                  },
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleViewPost(post.id)}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <Avatar 
-                    src={post.userInfo?.photoURL || post.userPhotoURL} 
-                    alt={post.userInfo?.displayName || post.userName}
-                    sx={{ width: 32, height: 32, mr: 1.5 }}
+                    src={post.userPhotoURL} 
+                    alt={post.userName}
+                    sx={{ width: 48, height: 48, mr: 2 }}
                   />
-                  <Box sx={{ flex: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2e3856', mr: 1 }}>
-                        {post.userInfo?.displayName || post.userName || 'İsimsiz Kullanıcı'}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {formatDate(post.createdAt)}
-                      </Typography>
-                    </Box>
-                    
-                    <Typography 
-                      variant="body1" 
-                      component="h2" 
-                      sx={{ 
-                        fontWeight: 600, 
-                        color: '#2e3856',
-                      }}
-                    >
-                      {post.title}
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {post.userName}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                      {formatDistanceToNow(post.createdAt, { addSuffix: true, locale: tr })}
                     </Typography>
                   </Box>
                 </Box>
                 
-                <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-                    <ThumbUpIcon 
-                      fontSize="small" 
-                      sx={{ 
-                        mr: 0.5, 
-                        color: 'text.secondary',
-                        opacity: 0.7,
-                        fontSize: '0.9rem'
+                <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700 }}>
+                  {post.title}
+                </Typography>
+                
+                <Typography 
+                  variant="body1" 
+                  sx={{ 
+                    mb: 2.5,
+                    color: 'text.secondary',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: 1.6
+                  }}
+                >
+                  {post.content}
+                </Typography>
+                
+                {post.imageURL && (
+                  <Box 
+                    sx={{ 
+                      mb: 2.5, 
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                    }}
+                  >
+                    <img 
+                      src={post.imageURL} 
+                      alt="Post" 
+                      style={{ 
+                        width: '100%', 
+                        height: 'auto',
+                        objectFit: 'cover',
+                        maxHeight: '300px',
+                        display: 'block',
                       }} 
                     />
-                    <Typography variant="caption" color="text.secondary">
-                      {post.likeCount || 0}
-                    </Typography>
                   </Box>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <CommentIcon 
-                      fontSize="small" 
-                      sx={{ 
-                        mr: 0.5, 
-                        color: 'text.secondary',
-                        opacity: 0.7,
-                        fontSize: '0.9rem'
-                      }} 
-                    />
-                    <Typography variant="caption" color="text.secondary">
-                      {post.commentCount || 0}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-              
-              {post.tags && post.tags.length > 0 && (
-                <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap' }}>
-                  {post.tags.map(tag => (
-                    <StyledChip 
-                      key={tag} 
-                      label={tag} 
-                      size="small"
-                      icon={<TagIcon fontSize="small" />}
-                    />
+                )}
+                
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2.5, gap: 1 }}>
+                  {post.tags && post.tags.map((tag, index) => (
+                    <StyledChip key={index} label={tag} />
                   ))}
                 </Box>
-              )}
-            </Paper>
+                
+                <Divider sx={{ mb: 2 }} />
+                
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ThumbUpIcon fontSize="small" sx={{ mr: 0.5, color: post.likes?.includes(user?.uid) ? 'primary.main' : 'text.secondary' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: post.likes?.includes(user?.uid) ? 'primary.main' : 'text.secondary' }}>
+                        {post.likeCount || 0}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CommentIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.secondary' }}>
+                        {post.commentCount || 0}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: 'primary.main',
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    Devamını Gör
+                    <ArrowDownwardIcon sx={{ ml: 0.5, fontSize: 16, transform: 'rotate(270deg)' }} />
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
           ))}
-        </Box>
+        </Grid>
       )}
       
       {/* New Post Dialog */}
@@ -777,7 +857,7 @@ const SoruForum = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </Container>
   );
 };
 

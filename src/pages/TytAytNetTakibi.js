@@ -3,6 +3,16 @@ import { motion } from 'framer-motion';
 import '../styles/tyt-ayt-modern.css';
 import { styled } from '@mui/system';
 import { 
+  LineChart, 
+  Line, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer 
+} from 'recharts';
+import { 
   Box, 
   Typography, 
   TextField, 
@@ -115,6 +125,11 @@ const TytAytNetTakibi = () => {
   const [netRecords, setNetRecords] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
+  
+  // State for records view
+  const [viewMode, setViewMode] = useState('form'); // 'form' or 'records'
+  const [selectedExamType, setSelectedExamType] = useState('TYT');
+  const [selectedSubject, setSelectedSubject] = useState('');
   
   // Helper functions
   const calculateNet = (correct, incorrect) => {
@@ -557,6 +572,73 @@ const TytAytNetTakibi = () => {
     }
   };
   
+  // Prepare data for progress chart
+  const prepareChartData = useCallback((subject) => {
+    if (!subject || netRecords.length === 0) return [];
+    
+    // Filter records for the selected subject
+    const subjectRecords = netRecords.filter(record => record.subject === subject);
+    
+    // Sort by date
+    subjectRecords.sort((a, b) => {
+      const dateA = a.examDate?.toDate?.() || new Date(0);
+      const dateB = b.examDate?.toDate?.() || new Date(0);
+      return dateA - dateB;
+    });
+    
+    // Create chart data
+    return subjectRecords.map(record => ({
+      name: record.examName,
+      date: record.examDate?.toDate ? format(record.examDate.toDate(), 'dd/MM/yyyy') : '',
+      net: parseFloat(record.net) || 0
+    }));
+  }, [netRecords]);
+  
+  // Handle exam type change
+  const handleExamTypeChange = (type) => {
+    setSelectedExamType(type);
+    setSelectedSubject('');
+  };
+  
+  // Handle subject selection
+  const handleSubjectSelection = (subject) => {
+    setSelectedSubject(subject);
+  };
+  
+  // Render progress chart
+  const renderProgressChart = () => {
+    const chartData = prepareChartData(selectedSubject);
+    
+    if (chartData.length === 0) {
+      return (
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography variant="body1">Seçilen derse ait veri bulunmamaktadır.</Typography>
+        </Box>
+      );
+    }
+    
+    return (
+      <Box sx={{ width: '100%', height: 300, mt: 3 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="date" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Line 
+              type="monotone" 
+              dataKey="net" 
+              stroke="#8884d8" 
+              activeDot={{ r: 8 }} 
+              name="Net Puan"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      </Box>
+    );
+  };
+  
   // Render the list of saved records
   const renderRecordsList = () => {
     if (netRecords.length === 0) {
@@ -567,86 +649,125 @@ const TytAytNetTakibi = () => {
       );
     }
     
-    // Group records by exam name and date
-    const groupedRecords = {};
+    // Get subjects based on selected exam type
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
     
-    netRecords.forEach(record => {
-      const key = `${record.examName}_${record.examDate?.toDate?.().getTime() || 'unknown'}`;
-      
-      if (!groupedRecords[key]) {
-        groupedRecords[key] = {
-          examName: record.examName,
-          examDate: record.examDate,
-          examType: record.examType,
-          subjects: []
-        };
-      }
-      
-      groupedRecords[key].subjects.push({
-        id: record.id,
-        subject: record.subject,
-        correctCount: record.correctCount,
-        incorrectCount: record.incorrectCount,
-        emptyCount: record.emptyCount,
-        net: record.net
-      });
+    // Filter records by exam type
+    const filteredRecords = netRecords.filter(record => {
+      return record.subject.startsWith(selectedExamType);
+    });
+    
+    // Group records by subject
+    const subjectRecords = {};
+    subjects.forEach(subject => {
+      subjectRecords[subject] = filteredRecords.filter(record => record.subject === subject);
     });
     
     return (
-      <Grid container spacing={3} sx={{ mt: 1 }}>
-        {Object.values(groupedRecords).map((group, index) => (
-          <Grid item xs={12} md={6} key={index}>
-            <StyledCard>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                  <Typography variant="h6">{group.examName}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {group.examDate?.toDate ? format(group.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale }) : ''}
-                  </Typography>
-                </Box>
-                
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Ders</TableCell>
-                        <TableCell align="right">D</TableCell>
-                        <TableCell align="right">Y</TableCell>
-                        <TableCell align="right">B</TableCell>
-                        <TableCell align="right">Net</TableCell>
-                        <TableCell align="right">İşlem</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {group.subjects.map((subject) => (
-                        <TableRow key={subject.id}>
-                          <TableCell component="th" scope="row">
-                            {subject.subject}
-                          </TableCell>
-                          <TableCell align="right">{subject.correctCount}</TableCell>
-                          <TableCell align="right">{subject.incorrectCount}</TableCell>
-                          <TableCell align="right">{subject.emptyCount}</TableCell>
-                          <TableCell align="right">{subject.net}</TableCell>
-                          <TableCell align="right">
-                            <IconButton 
-                              size="small" 
-                              color="error"
-                              onClick={() => handleDelete(subject.id)}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </CardContent>
-            </StyledCard>
-          </Grid>
-        ))}
-      </Grid>
+      <Box sx={{ mt: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+          <Button 
+            variant={selectedExamType === 'TYT' ? 'contained' : 'outlined'}
+            onClick={() => handleExamTypeChange('TYT')}
+            sx={{ mr: 2 }}
+          >
+            TYT
+          </Button>
+          <Button 
+            variant={selectedExamType === 'AYT' ? 'contained' : 'outlined'}
+            onClick={() => handleExamTypeChange('AYT')}
+          >
+            AYT
+          </Button>
+        </Box>
+        
+        <Grid container spacing={2}>
+          {subjects.map(subject => {
+            const records = subjectRecords[subject] || [];
+            const latestRecord = records.length > 0 ? 
+              records.sort((a, b) => {
+                const dateA = a.examDate?.toDate?.() || new Date(0);
+                const dateB = b.examDate?.toDate?.() || new Date(0);
+                return dateB - dateA; // Descending order
+              })[0] : null;
+            
+            return (
+              <Grid item xs={12} sm={6} md={4} key={subject}>
+                <StyledCard 
+                  sx={{ 
+                    cursor: 'pointer',
+                    border: selectedSubject === subject ? '2px solid #8884d8' : 'none',
+                    transform: selectedSubject === subject ? 'scale(1.02)' : 'none'
+                  }}
+                  onClick={() => handleSubjectSelection(subject)}
+                >
+                  <CardContent>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Typography variant="h6" gutterBottom>{subject}</Typography>
+                      {latestRecord && (
+                        <IconButton 
+                          size="small" 
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRecordDelete(latestRecord.id);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      )}
+                    </Box>
+                    {latestRecord ? (
+                      <>
+                        <Typography variant="body2" color="text.secondary">
+                          Son Deneme: {latestRecord.examName}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Tarih: {latestRecord.examDate?.toDate ? 
+                            format(latestRecord.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale }) : ''}
+                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                          <Typography variant="body2">
+                            D: {latestRecord.correctCount}
+                          </Typography>
+                          <Typography variant="body2">
+                            Y: {latestRecord.incorrectCount}
+                          </Typography>
+                          <Typography variant="body2">
+                            B: {latestRecord.emptyCount}
+                          </Typography>
+                        </Box>
+                        <Typography variant="h6" align="center" sx={{ mt: 1 }}>
+                          Net: {latestRecord.net}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        Henüz kayıt bulunmamaktadır.
+                      </Typography>
+                    )}
+                  </CardContent>
+                </StyledCard>
+              </Grid>
+            );
+          })}
+        </Grid>
+        
+        {selectedSubject && renderProgressChart()}
+      </Box>
     );
+  };
+  
+  // Toggle between form and records view
+  const toggleViewMode = () => {
+    setViewMode(viewMode === 'form' ? 'records' : 'form');
+  };
+  
+  // Handle record deletion with confirmation
+  const handleRecordDelete = (id) => {
+    if (window.confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
+      handleDelete(id);
+    }
   };
   
   return (
@@ -674,78 +795,92 @@ const TytAytNetTakibi = () => {
             <CircularProgress />
           </Box>
         )}
-        <Typography variant="h4" gutterBottom sx={{ 
+        <Box sx={{ 
           display: 'flex', 
+          justifyContent: 'space-between', 
           alignItems: 'center',
           borderBottom: '2px solid #f0f0f0',
           pb: 2,
           mb: 4
         }}>
-          <SchoolIcon sx={{ mr: 1 }} /> TYT-AYT Net Takibi
-        </Typography>
+          <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center' }}>
+            <SchoolIcon sx={{ mr: 1 }} /> TYT-AYT Net Takibi
+          </Typography>
+          <Button 
+            variant="outlined" 
+            color="primary"
+            onClick={toggleViewMode}
+          >
+            {viewMode === 'form' ? 'Kayıtları Görüntüle' : 'Yeni Deneme Ekle'}
+          </Button>
+        </Box>
         
-        {/* Multi-step form */}
-        <StyledCard sx={{ mb: 4 }}>
-          <CardContent>
-            <Stepper activeStep={activeStep} alternativeLabel>
-              {steps.map((label) => (
-                <Step key={label}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-            
-            <Box sx={{ mt: 3 }}>
-              {activeStep === steps.length ? (
-                <Box sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="h6" gutterBottom>
-                    Tüm adımlar tamamlandı
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSubmit}
-                    startIcon={<CheckCircleIcon />}
-                    sx={{ mt: 2 }}
-                  >
-                    Kaydet
-                  </Button>
-                </Box>
-              ) : (
-                <>
-                  {getStepContent(activeStep)}
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 3 }}>
-                    <Button
-                      disabled={activeStep === 0}
-                      onClick={handleBack}
-                      startIcon={<NavigateBeforeIcon />}
-                    >
-                      Geri
-                    </Button>
-                    
+        {viewMode === 'form' ? (
+          /* Multi-step form */
+          <StyledCard sx={{ mb: 4 }}>
+            <CardContent>
+              <Stepper activeStep={activeStep} alternativeLabel>
+                {steps.map((label) => (
+                  <Step key={label}>
+                    <StepLabel>{label}</StepLabel>
+                  </Step>
+                ))}
+              </Stepper>
+              
+              <Box sx={{ mt: 3 }}>
+                {activeStep === steps.length ? (
+                  <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography variant="h6" gutterBottom>
+                      Tüm adımlar tamamlandı
+                    </Typography>
                     <Button
                       variant="contained"
                       color="primary"
-                      onClick={handleNext}
-                      endIcon={<NavigateNextIcon />}
-                      disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
+                      onClick={handleSubmit}
+                      startIcon={<CheckCircleIcon />}
+                      sx={{ mt: 2 }}
                     >
-                      {activeStep === steps.length - 1 ? 'Bitir' : 'İleri'}
+                      Kaydet
                     </Button>
                   </Box>
-                </>
-              )}
-            </Box>
-          </CardContent>
-        </StyledCard>
-        
-        {/* Records list */}
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h5" gutterBottom>
-            Kaydedilmiş Denemeler
-          </Typography>
-          {renderRecordsList()}
-        </Box>
+                ) : (
+                  <>
+                    {getStepContent(activeStep)}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 3 }}>
+                      <Button
+                        disabled={activeStep === 0}
+                        onClick={handleBack}
+                        startIcon={<NavigateBeforeIcon />}
+                      >
+                        Geri
+                      </Button>
+                      
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleNext}
+                        endIcon={<NavigateNextIcon />}
+                        disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
+                      >
+                        {activeStep === steps.length - 1 ? 'Bitir' : 'İleri'}
+                      </Button>
+                    </Box>
+                  </>
+                )}
+              </Box>
+            </CardContent>
+          </StyledCard>
+        ) : (
+          /* Records view */
+          <StyledCard>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Deneme Sonuçları
+              </Typography>
+              {renderRecordsList()}
+            </CardContent>
+          </StyledCard>
+        )}
         
         {/* Notification */}
         <Snackbar 
