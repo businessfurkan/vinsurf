@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import '../styles/tyt-ayt-modern.css';
 import { styled } from '@mui/system';
+import { useNotifications } from '../context/NotificationContext';
 import { 
   LineChart, 
   Line, 
@@ -144,6 +145,9 @@ const TytAytNetTakibi = () => {
   const [viewMode, setViewMode] = useState('form'); // 'form' or 'records'
   const [selectedExamType, setSelectedExamType] = useState('TYT');
   const [selectedSubject, setSelectedSubject] = useState('');
+  
+  // Bildirim sistemi için context
+  const { addNotification } = useNotifications();
   
   // Helper functions
   const calculateNet = (correct, incorrect) => {
@@ -320,6 +324,10 @@ const TytAytNetTakibi = () => {
       });
       
       setNetRecords(records);
+      
+      // Yapay zeka tavsiye sistemini çalıştır
+      analyzePerformanceAndSendRecommendations(records);
+      
     } catch (error) {
       console.error('Error fetching records:', error);
       showNotification('Kayıtlar yüklenirken bir hata oluştu', 'error');
@@ -327,6 +335,110 @@ const TytAytNetTakibi = () => {
       setLoading(false);
     }
   }, [showNotification, setLoading, setNetRecords]);
+  
+  // Yapay zeka tavsiye sistemi
+  const analyzePerformanceAndSendRecommendations = useCallback((records) => {
+    if (!records || records.length < 3) return; // En az 3 deneme olmalı
+    
+    try {
+      // TYT ve AYT derslerini birleştir
+      const allSubjects = [...tytSubjects, ...aytSubjects];
+      
+      // Her ders için son 3 denemeyi analiz et
+      allSubjects.forEach(subject => {
+        // Bu derse ait son 3 denemeyi bul
+        const subjectRecords = records
+          .filter(record => record.subject === subject)
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt?.seconds * 1000 || 0);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt?.seconds * 1000 || 0);
+            return dateB - dateA; // Tarihe göre azalan sıralama (en yeniden en eskiye)
+          })
+          .slice(0, 3); // Son 3 deneme
+        
+        // En az 3 deneme yoksa analiz yapma
+        if (subjectRecords.length < 3) return;
+        
+        // Net puanları al
+        const nets = subjectRecords.map(record => parseFloat(record.net) || 0);
+        
+        // Son 3 denemede düşüş var mı kontrol et
+        // En yeni deneme en eskisinden düşükse ve bir trend varsa
+        if (nets[0] < nets[2] && nets[0] < nets[1]) {
+          // Düşüş yüzdesini hesapla
+          const decreasePercentage = ((nets[2] - nets[0]) / nets[2]) * 100;
+          
+          // Eğer düşüş %10'dan fazlaysa tavsiye gönder
+          if (decreasePercentage > 10) {
+            sendRecommendation(subject, decreasePercentage);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Performans analizi sırasında hata:', error);
+    }
+  }, []);
+  
+  // Tavsiye gönderme fonksiyonu
+  const sendRecommendation = useCallback((subject, decreasePercentage) => {
+    // Ders adından konu tahmini yap
+    let topic = '';
+    let resources = [];
+    
+    // Derse göre konu ve kaynak önerileri
+    if (subject.includes('Matematik')) {
+      topic = 'problemler';
+      resources = ['Matematik Problemi Çözme Teknikleri', 'Problem Çözüm Stratejileri', 'Matematik Problem Bankası'];
+    } else if (subject.includes('Türkçe')) {
+      topic = 'paragraf soruları';
+      resources = ['Paragraf Çözüm Teknikleri', 'TYT Türkçe Soru Bankası', 'Dil Bilgisi Konu Anlatımı'];
+    } else if (subject.includes('Fizik')) {
+      topic = 'hareket problemleri';
+      resources = ['Fizik Formül Kartları', 'Fizik Soru Bankası', 'Konu Anlatımlı Fizik'];
+    } else if (subject.includes('Kimya')) {
+      topic = 'kimyasal tepkimeler';
+      resources = ['Kimya Reaksiyon Kartları', 'Kimya Soru Bankası', 'Organik Kimya Konu Anlatımı'];
+    } else if (subject.includes('Biyoloji')) {
+      topic = 'hücre konusu';
+      resources = ['Biyoloji Hücre Atlası', 'Biyoloji Soru Bankası', 'Genetik Konu Anlatımı'];
+    } else if (subject.includes('Tarih')) {
+      topic = 'tarih kronolojisi';
+      resources = ['Tarih Kronoloji Kartları', 'Tarih Soru Bankası', 'Osmanlı Tarihi Konu Anlatımı'];
+    } else if (subject.includes('Coğrafya')) {
+      topic = 'harita bilgisi';
+      resources = ['Coğrafya Atlas Çalışması', 'Coğrafya Soru Bankası', 'Türkiye Coğrafyası Konu Anlatımı'];
+    } else if (subject.includes('Edebiyat')) {
+      topic = 'edebi akımlar';
+      resources = ['Edebiyat Akımları Özeti', 'Edebiyat Soru Bankası', 'Divan Edebiyatı Konu Anlatımı'];
+    } else if (subject.includes('Sosyal')) {
+      topic = 'vatandaşlık konuları';
+      resources = ['Vatandaşlık Konu Özeti', 'TYT Sosyal Bilimler Soru Bankası', 'Güncel Bilgiler'];
+    } else if (subject.includes('Fen')) {
+      topic = 'deney soruları';
+      resources = ['Fen Bilimleri Deney Kitabı', 'TYT Fen Bilimleri Soru Bankası', 'Fen Konu Anlatımı'];
+    } else {
+      topic = 'genel konular';
+      resources = ['Konu Tekrar Kitabı', 'Soru Bankası', 'Online Eğitim Platformları'];
+    }
+    
+    // Düşüş yüzdesine göre mesaj şiddetini ayarla
+    let severity = 'info';
+    if (decreasePercentage > 30) {
+      severity = 'warning';
+    }
+    
+    // Tavsiye mesajını oluştur
+    const message = `Son 3 denemeye göre ${subject} dersinde ${topic} kısmında zorlanıyorsun. Sana şu kaynakları öneriyorum: ${resources.join(', ')}.`;
+    
+    // Bildirim gönder
+    addNotification(message, severity, {
+      title: 'Yapay Zeka Tavsiye Sistemi',
+      subject: subject,
+      resources: resources,
+      decreasePercentage: decreasePercentage.toFixed(1)
+    });
+    
+  }, [addNotification]);
   
   // Delete a record
   const handleDelete = async (id) => {

@@ -10,7 +10,6 @@ import {
   ListItemText, 
   Checkbox,
   FormControlLabel,
-  Chip,
   Alert,
   Snackbar,
   Dialog,
@@ -24,8 +23,7 @@ import {
   CardActionArea,
   Paper,
   LinearProgress,
-  Avatar,
-  alpha
+  Avatar
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ScienceIcon from '@mui/icons-material/Science';
@@ -587,81 +585,79 @@ const KonuTakip = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ mb: 4, bgcolor: '#bbb38a', p: 3, borderRadius: 2 }}>
-        <Typography variant="h4" gutterBottom sx={{ 
-          fontWeight: 'bold',
-          color: '#333',
-          mb: 3,
-          textAlign: 'center'
-        }}>
-          Konu Takip Sistemi
-        </Typography>
+      <Typography variant="h4" gutterBottom sx={{ 
+        fontWeight: 700,
+        color: '#333',
+        mb: 4,
+        textAlign: 'center'
+      }}>
+        Konu Takip Sistemi
+      </Typography>
+      
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Box sx={{ bgcolor: '#f5f5f5', borderRadius: 2, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+          <Tabs 
+            value={sinavTipi} 
+            onChange={(e, newValue) => setSinavTipi(newValue)}
+            sx={{ 
+              minHeight: 48,
+              '& .MuiTabs-indicator': {
+                backgroundColor: '#5ec837',
+                height: 3
+              },
+              '& .MuiTab-root': {
+                fontWeight: 'bold',
+                minWidth: 100
+              }
+            }}
+          >
+            <Tab value="TYT" label="TYT" />
+            <Tab value="AYT" label="AYT" />
+          </Tabs>
+        </Box>
         
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
-          <Paper sx={{ bgcolor: '#f5f5f0', borderRadius: 2, overflow: 'hidden' }}>
-            <Tabs 
-              value={sinavTipi} 
-              onChange={(e, newValue) => setSinavTipi(newValue)}
-              sx={{ 
-                minHeight: 48,
-                '& .MuiTabs-indicator': {
-                  backgroundColor: '#5ec837',
-                  height: 3
-                },
-                '& .MuiTab-root': {
-                  fontWeight: 'bold',
-                  minWidth: 100
-                }
-              }}
-            >
-              <Tab value="TYT" label="TYT" />
-              <Tab value="AYT" label="AYT" />
-            </Tabs>
-          </Paper>
-          
-          <Box sx={{ display: 'flex', gap: 1, bgcolor: '#f5f5f0', p: 1, borderRadius: 2 }}>
-            <Button
-              variant={filter === 'all' ? 'contained' : 'outlined'}
-              color="primary"
-              onClick={() => setFilter('all')}
-              size="small"
-              sx={{ 
-                bgcolor: filter === 'all' ? '#5ec837' : 'transparent',
-                fontWeight: 'bold',
-                minWidth: 80
-              }}
-            >
-              Tümü
-            </Button>
-            <Button
-              variant={filter === 'completed' ? 'contained' : 'outlined'}
-              color="success"
-              onClick={() => setFilter('completed')}
-              size="small"
-              startIcon={<CheckCircleIcon />}
-              sx={{ 
-                bgcolor: filter === 'completed' ? '#4caf50' : 'transparent',
-                fontWeight: 'bold',
-                minWidth: 120
-              }}
-            >
-              Tamamlanan
-            </Button>
-            <Button
-              variant={filter === 'inProgress' ? 'contained' : 'outlined'}
-              color="warning"
-              onClick={() => setFilter('inProgress')}
-              size="small"
-              startIcon={<AccessTimeIcon />}
-              sx={{ 
-                bgcolor: filter === 'inProgress' ? '#ff9800' : 'transparent',
-                fontWeight: 'bold',
-                minWidth: 120
-              }}
-            >
-              Devam Eden
-            </Button>
-          </Box>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant={filter === 'all' ? 'contained' : 'outlined'}
+            color="primary"
+            onClick={() => setFilter('all')}
+            size="small"
+            sx={{ 
+              bgcolor: filter === 'all' ? '#5ec837' : 'transparent',
+              fontWeight: 'bold',
+              minWidth: 80
+            }}
+          >
+            Tümü
+          </Button>
+          <Button
+            variant={filter === 'completed' ? 'contained' : 'outlined'}
+            color="success"
+            onClick={() => setFilter('completed')}
+            size="small"
+            startIcon={<CheckCircleIcon />}
+            sx={{ 
+              bgcolor: filter === 'completed' ? '#4caf50' : 'transparent',
+              fontWeight: 'bold',
+              minWidth: 120
+            }}
+          >
+            Tamamlanan
+          </Button>
+          <Button
+            variant={filter === 'inProgress' ? 'contained' : 'outlined'}
+            color="warning"
+            onClick={() => setFilter('inProgress')}
+            size="small"
+            startIcon={<AccessTimeIcon />}
+            sx={{ 
+              bgcolor: filter === 'inProgress' ? '#ff9800' : 'transparent',
+              fontWeight: 'bold',
+              minWidth: 120
+            }}
+          >
+            Devam Eden
+          </Button>
         </Box>
       </Box>
 
@@ -670,7 +666,7 @@ const KonuTakip = () => {
           <LinearProgress />
         </Box>
       ) : (
-        <Grid container spacing={2} sx={{ justifyContent: 'center', px: 1 }}>
+        <Grid container spacing={3} sx={{ justifyContent: 'flex-start', px: 1 }}>
           {filteredDersler.map((ders) => {
             const ilerleme = getKonuIlerleme(ders.id);
             const durumFiltresi = filter === 'all' || 
@@ -683,72 +679,79 @@ const KonuTakip = () => {
               <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ mb: 2 }}>
                 <Card 
                   sx={{
-                    height: 220, // Sabit yükseklik
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: 'transform 0.3s, box-shadow 0.3s',
+                    transition: 'box-shadow 0.2s',
                     '&:hover': {
-                      transform: 'translateY(-5px)',
-                      boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                     },
-                    bgcolor: '#bbb38a',
-                    borderLeft: `4px solid ${ders.color}`,
-                    minWidth: 250, // Minimum genişlik
-                    mx: 'auto', // Yatay olarak merkezleme
-                    width: '100%' // Tam genişlik
+                    borderRadius: '8px',
+                    overflow: 'hidden',
+                    bgcolor: 'white',
+                    border: '1px solid #eaeaea',
+                    minWidth: 250,
+                    mx: 'auto',
+                    width: '100%',
+                    height: '100%'
                   }}
                 >
-                  <CardActionArea onClick={() => handleDersClick(ders)} sx={{ flexGrow: 1, p: 1 }}>
-                    <CardContent sx={{ p: 2 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-                        <Avatar sx={{ bgcolor: ders.color, mr: 2, width: 45, height: 45 }}>
-                          {getDersIcon(ders.ad)}
-                        </Avatar>
-                        <Typography variant="h6" component="div" sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
-                          {ders.ad}
+                  <CardActionArea onClick={() => handleDersClick(ders)} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', height: '100%' }}>
+                    <Box sx={{ 
+                      bgcolor: ders.color, 
+                      py: 2, 
+                      px: 3, 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      justifyContent: 'flex-start',
+                      gap: 2
+                    }}>
+                      <Avatar sx={{ 
+                        bgcolor: 'white', 
+                        color: ders.color,
+                        width: 40, 
+                        height: 40,
+                        '& .MuiSvgIcon-root': { fontSize: '1.5rem' }
+                      }}>
+                        {getDersIcon(ders.ad)}
+                      </Avatar>
+                      <Typography 
+                        variant="h6" 
+                        component="div" 
+                        sx={{ 
+                          fontSize: '1.2rem', 
+                          fontWeight: 700,
+                          color: 'white'
+                        }}
+                      >
+                        {ders.ad}
+                      </Typography>
+                    </Box>
+                    
+                    <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#555' }}>
+                          Toplam: {ders.konular.length} konu
                         </Typography>
                       </Box>
                       
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="body1" color="text.primary" gutterBottom sx={{ fontWeight: 500 }}>
-                          {ders.konular.length} konu
-                        </Typography>
+                      <Box sx={{ mt: 'auto' }}>
                         <LinearProgress 
                           variant="determinate" 
                           value={ilerleme} 
                           sx={{ 
-                            height: 10, 
-                            borderRadius: 5,
-                            bgcolor: alpha(ders.color, 0.2),
+                            height: 6, 
+                            borderRadius: 3,
+                            mb: 1.5,
+                            bgcolor: '#f0f0f0',
                             '& .MuiLinearProgress-bar': {
                               bgcolor: ders.color
                             }
                           }} 
                         />
-                      </Box>
-                      
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium', fontSize: '0.9rem' }}>
-                          {Math.round(ilerleme)}% tamamlandı
+                        
+                        <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
+                          {Math.round(ilerleme * ders.konular.length / 100)} konu tamamlandı
                         </Typography>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          {Object.values(konuDurumu[ders.id] || {}).some(durum => 
-                            durum === 'needsReview' || durum === 'completedNeedsReview'
-                          ) && (
-                            <Chip 
-                              size="small" 
-                              label="Tekrar"
-                              color="warning"
-                              sx={{ fontSize: '0.7rem', fontWeight: 'bold', height: 20 }}
-                            />
-                          )}
-                          <Chip 
-                            size="small" 
-                            label={ilerleme === 100 ? "Tamamlandı" : ilerleme > 0 ? "Devam Ediyor" : "Başlanmadı"}
-                            color={ilerleme === 100 ? "success" : ilerleme > 0 ? "warning" : "default"}
-                            sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
-                          />
-                        </Box>
                       </Box>
                     </CardContent>
                   </CardActionArea>
