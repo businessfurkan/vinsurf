@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { 
   Box, 
@@ -64,9 +64,10 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [activeItem, setActiveItem] = useState('');
   
   // Menü öğeleri - Canlı ve modern renkler
-  const menuItems = [
+  const menuItems = React.useMemo(() => [
     { text: 'Anasayfa', icon: <HomeIcon />, path: '/', color: '#2196F3' }, // Canlı Mavi
     { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro', color: '#E91E63' }, // Canlı Pembe
     { text: 'TYT/AYT Net', icon: <AssessmentIcon />, path: '/tyt-ayt-net-takibi', color: '#FFC107' }, // Canlı Sarı
@@ -76,8 +77,16 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
     { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#8BC34A' }, // Canlı Açık Yeşil
     { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#F44336' }, // Canlı Kırmızı
     { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#673AB7' }, // Canlı Mor
-    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#03A9F4' }, // Canlı Açık Mavi
-  ];
+    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#03A9F4' } // Canlı Açık Mavi
+  ], []);
+  
+  // Sayfa yüklendiğinde veya rota değiştiğinde aktif öğeyi güncelle
+  useEffect(() => {
+    const currentItem = menuItems.find(item => item.path === location.pathname);
+    if (currentItem) {
+      setActiveItem(currentItem.text);
+    }
+  }, [location.pathname, menuItems]);
 
   return (
     <StyledDrawer
@@ -119,36 +128,43 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 display: 'block',
                 padding: 0,
                 position: 'relative',
-                mb: 0.5,
+                mb: 1.5, // Dikey boşluğu artır
+                alignItems: 'center',
+                justifyContent: 'center',
               }}
               onMouseEnter={() => setHoveredItem(item.text)}
               onMouseLeave={() => setHoveredItem(null)}
             >
               <ListItemButton
                 id={`sidebar-item-${item.text}`}
-                onClick={() => navigate(item.path)}
+                onClick={() => {
+                setActiveItem(item.text);
+                navigate(item.path);
+              }}
                 sx={{
                   minHeight: 42,
                   justifyContent: 'center',
-                  px: 2.5,
+                  p: 0.5,
                   borderRadius: '10px',
-                  transition: 'all 0.3s ease',
-                  background: 'transparent',
                   '&:hover': {
-                    background: 'transparent',
-                    transform: 'translateY(-2px)',
+                    backgroundColor: 'rgba(0,0,0,0.03)',
                   },
                 }}
               >
                 <ListItemIcon
                   sx={{
-                    minWidth: 0,
-                    color: isActive ? item.color : `${item.color}`,
-                    transition: 'all 0.3s ease',
+                    color: item.color,
                     fontSize: 22,
                     opacity: isActive ? 1 : 0.9,
                     filter: isActive ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.15))' : 'none',
                     backgroundColor: '#d9d4bb',
+                    position: 'relative',
+                    zIndex: 1,
+                    padding: '6px',
+                    borderRadius: '50%',
+                    border: activeItem === item.text ? `2px solid ${item.color}` : '2px solid transparent',
+                    transition: 'all 0.2s ease',
+                    minWidth: 'auto', // Minimum genişliği kaldır
                     '& .MuiSvgIcon-root': {
                       fontSize: 22,
                     }

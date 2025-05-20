@@ -10,7 +10,6 @@ import {
   ListItemText, 
   Checkbox,
   FormControlLabel,
-  Divider,
   Chip,
   Alert,
   Snackbar,
@@ -22,12 +21,25 @@ import {
   Tabs,
   Card,
   CardContent,
-  CardActionArea
+  CardActionArea,
+  Paper,
+  LinearProgress,
+  Avatar,
+  alpha
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ScienceIcon from '@mui/icons-material/Science';
-import PsychologyIcon from '@mui/icons-material/Psychology';
 import SaveIcon from '@mui/icons-material/Save';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
+import FunctionsIcon from '@mui/icons-material/Functions';
+import SquareFootIcon from '@mui/icons-material/SquareFoot';
+import BiotechIcon from '@mui/icons-material/Biotech';
+import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
+import PublicIcon from '@mui/icons-material/Public';
+import PsychologyAltIcon from '@mui/icons-material/Psychology';
+import TranslateIcon from '@mui/icons-material/Translate';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { 
@@ -169,7 +181,10 @@ const dersler = [
       'Osmanlı Devleti Kuruluş Dönemi',
       'Osmanlı Devleti Yükselme Dönemi',
       'Osmanlı Devleti Duraklama Dönemi',
-      'Osmanlı Devleti Gerileme Dönemi'
+      'Osmanlı Devleti Gerileme Dönemi',
+      'Osmanlı Devleti Dağılma Dönemi',
+      'I. Dünya Savaşı',
+      'Kurtuluş Savaşı'
     ]
   },
   {
@@ -180,16 +195,17 @@ const dersler = [
     konular: [
       'Doğa ve İnsan',
       'Dünyanın Şekli ve Hareketleri',
-      'Coğrafi Konum',
       'Harita Bilgisi',
       'Atmosfer ve Sıcaklık',
       'İklimler',
       'Basınç ve Rüzgarlar',
       'Nem, Yağış ve Buharlaşma',
-      'İklim Tipleri ve Bitki Örtüsü',
+      'İç Kuvvetler / Dış Kuvvetler',
+      'Su - Toprak ve Bitkiler',
       'Nüfus',
       'Göç',
-      'Yerleşme'
+      'Yerleşme',
+      'Türkiyenin Yer Şekilleri'
     ]
   },
   {
@@ -221,12 +237,13 @@ const dersler = [
       'Olasılık',
       'İstatistik',
       'Karmaşık Sayılar',
+      'İkinci Dereceden Denklemler',
+      'Parabol',
       'Logaritma',
-      'Türev',
-      'İntegral',
-      'Limit',
       'Diziler',
-      'Seriler'
+      'Limit',
+      'Türev',
+      'İntegral'
     ]
   },
   {
@@ -235,18 +252,13 @@ const dersler = [
     color: '#EA4335',
     type: 'AYT',
     konular: [
-      'Çemberde Açılar',
-      'Çemberde Uzunluk',
-      'Dairede Alan',
-      'Prizmalar',
-      'Piramitler',
-      'Küre',
-      'Silindir',
-      'Koni',
-      'Koordinat Düzlemi',
-      'Analitik Geometri',
-      'Vektörler',
-      'Uzay Geometri'
+      'Doğrunun Analitik İncelenmesi',
+      'Çemberin Analitik İncelenmesi',
+      'Dönüşümler',
+      'Katı Cisimler',
+      'Uzay Geometri',
+      'Çember ve Daire',
+      'Trigonometri'
     ]
   },
   {
@@ -279,14 +291,13 @@ const dersler = [
       'Kimya ve Enerji',
       'Kimyasal Tepkimelerde Hız',
       'Kimyasal Tepkimelerde Denge',
-      'Çözünürlük Dengesi',
       'Asit-Baz Dengesi',
-      'Kimya ve Elektrik',
-      'Karbon Kimyasına Giriş',
-      'Organik Kimya',
-      'Karboksilli Asitler',
-      'Esterler',
-      'Aromatik Bileşikler'
+      'Çözünürlük Dengesi',
+      'Elektrokimya',
+      'Organik Kimyaya Giriş',
+      'Hidrokarbonlar',
+      'Organik Bileşikler',
+      'Endüstride Organik Bileşikler'
     ]
   },
   {
@@ -295,9 +306,6 @@ const dersler = [
     color: '#FF9800',
     type: 'AYT',
     konular: [
-      'Ekosistem Ekolojisi',
-      'Popülasyon Ekolojisi',
-      'Komünite ve Biyom Ekolojisi',
       'Sinir Sistemi',
       'Endokrin Sistem',
       'Duyu Organları',
@@ -324,41 +332,32 @@ const dersler = [
       'Tiyatro',
       'Destan-Efsane',
       'Masal-Fabl',
-      'Anı-Gezi Yazısı',
-      'Biyografi-Otobiyografi',
-      'Mektup-Günlük',
       'Halk Edebiyatı',
       'Divan Edebiyatı',
       'Tanzimat Edebiyatı',
       'Servet-i Fünun Edebiyatı',
+      'Fecr-i Ati Edebiyatı',
       'Milli Edebiyat',
       'Cumhuriyet Dönemi Edebiyatı',
-      'Dünya Edebiyatı'
+      'Cumhuriyet Dönemi Şiiri',
+      'Cumhuriyet Dönemi Romanı',
+      'Cumhuriyet Dönemi Tiyatrosu'
     ]
   },
   {
-    id: 'tarih-1-ayt',
-    ad: 'Tarih-1',
-    color: '#00BCD4',
-    type: 'AYT',
-    konular: [
-      'Osmanlı Devleti Dağılma Dönemi',
-      'I. Dünya Savaşı',
-      'Kurtuluş Savaşı Hazırlık Dönemi',
-      'Kurtuluş Savaşı',
-      'Türk İnkılabı',
-      'Atatürk Dönemi Türk Dış Politikası',
-      'Atatürk İlkeleri',
-      'Atatürk Dönemi İç ve Dış Politika'
-    ]
-  },
-  {
-    id: 'cografya-1-ayt',
-    ad: 'Coğrafya-1',
+    id: 'cografya-ayt',
+    ad: 'Coğrafya',
     color: '#4CAF50',
     type: 'AYT',
     konular: [
-      'Türkiyenin Yer Şekilleri',
+      'Doğal Sistemler',
+      'Beşeri Sistemler',
+      'Mekansal Sentez: Türkiye',
+      'Küresel Ortam: Bölgeler ve Ülkeler',
+      'Çevre ve Toplum',
+      'Türkiyenin Fiziki Coğrafyası',
+      'Türkiyenin Beşeri ve Ekonomik Coğrafyası',
+      'Türkiyenin Bölgesel Coğrafyası',
       'Türkiyenin İklimi',
       'Türkiyenin Bitki Örtüsü',
       'Türkiyenin Nüfusu ve Yerleşmesi',
@@ -378,20 +377,13 @@ const dersler = [
       'Soğuk Savaş Dönemi',
       'Yumuşama Dönemi',
       'Küreselleşen Dünya',
-      'Türkiye Cumhuriyeti Tarihi (1938-1980)',
-      'Türkiye Cumhuriyeti Tarihi (1980 Sonrası)'
-    ]
-  },
-  {
-    id: 'cografya-2-ayt',
-    ad: 'Coğrafya-2',
-    color: '#4CAF50',
-    type: 'AYT',
-    konular: [
-      'Doğal Sistemler',
-      'Beşeri Sistemler',
-      'Ekonomik Faaliyetler',
-      'Çevre ve Toplum'
+      'Türkiye Cumhuriyeti Tarihi',
+      'Atatürk İlkeleri',
+      'Atatürk İnkılapları',
+      'Türk İnkılabının Temel İlkeleri',
+      'Cumhuriyet Dönemi Gelişmeleri',
+      'Türkiye Ekonomisi',
+      'Türk Dış Politikası'
     ]
   },
   {
@@ -400,26 +392,18 @@ const dersler = [
     color: '#795548',
     type: 'AYT',
     konular: [
+      'MÖ 6. Yüzyıl-MS 2. Yüzyıl Felsefesi',
+      'MS 2. Yüzyıl-MS 15. Yüzyıl Felsefesi',
+      '15. Yüzyıl-17. Yüzyıl Felsefesi',
+      '18. Yüzyıl-19. Yüzyıl Felsefesi',
+      '20. Yüzyıl Felsefesi',
+      'Bilgi Felsefesi',
+      'Varlık Felsefesi',
+      'Ahlak Felsefesi',
       'Sanat Felsefesi',
       'Din Felsefesi',
       'Siyaset Felsefesi',
-      'Bilim Felsefesi',
-      'Mantık',
-      'Psikoloji',
-      'Sosyoloji'
-    ]
-  },
-  {
-    id: 'din-kulturu-ayt',
-    ad: 'Din Kültürü',
-    color: '#607D8B',
-    type: 'AYT',
-    konular: [
-      'İslam ve İbadet',
-      'İslam Düşüncesi',
-      'İslam ve Ahlak',
-      'İslam ve Bilim',
-      'Yaşayan Dinler'
+      'Bilim Felsefesi'
     ]
   },
   {
@@ -436,541 +420,459 @@ const dersler = [
       'Çeviri',
       'Okuma Parçası'
     ]
+  },
+  {
+    id: 'yabanci-dil-tyt',
+    ad: 'Yabancı Dil',
+    color: '#9C27B0',
+    type: 'TYT',
+    konular: [
+      'Kelime Bilgisi',
+      'Dil Bilgisi',
+      'Cümle Tamamlama',
+      'Cümlede Anlam',
+      'Paragraf',
+      'Diyalog Tamamlama',
+      'Anlam Bütünlüğünü Bozan Cümleyi Bulma',
+      'Verilen Durumda Söylenecek İfade'
+    ]
   }
 ];
 
 const KonuTakip = () => {
   const [user] = useAuthState(auth);
   const [selectedDers, setSelectedDers] = useState(null);
-  const [konuDurumu, setKonuDurumu] = useState({});
-  const [, setLoading] = useState(true);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
-  const [examType, setExamType] = useState('TYT');
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [konuDurumu, setKonuDurumu] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all'); // 'all', 'completed', 'inProgress'
+  const [sinavTipi, setSinavTipi] = useState('TYT'); // 'TYT' veya 'AYT'
 
-  // Firestore'dan konu durumlarını yükle
   useEffect(() => {
-    const loadKonuDurumu = async () => {
-      if (!user) {
-        // Kullanıcı giriş yapmamışsa localStorage'dan yükle
+    if (user) {
+      const fetchKonuDurumu = async () => {
         try {
-          const savedData = localStorage.getItem('konuDurumu_anonymous');
-          if (savedData) {
-            setKonuDurumu(JSON.parse(savedData));
+          setLoading(true);
+          const docRef = doc(db, 'konuDurumu', user.uid);
+          const docSnap = await getDoc(docRef);
+          
+          if (docSnap.exists()) {
+            setKonuDurumu(docSnap.data().durumlar || {});
+          } else {
+            // Yeni kullanıcı için boş durum oluştur
+            await setDoc(docRef, { durumlar: {}, updatedAt: serverTimestamp() });
           }
         } catch (error) {
-          console.error('LocalStorage yükleme hatası:', error);
+          console.error('Konu durumu yüklenirken hata oluştu:', error);
+          setSnackbarMessage('Konu durumu yüklenirken bir hata oluştu.');
+          setSnackbarOpen(true);
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        // Basit bir sorgu kullanarak indeks hatalarını önle
-        const konuTakipRef = doc(db, 'konuTakip', user.uid);
-        const docSnap = await getDoc(konuTakipRef);
-
-        if (docSnap.exists()) {
-          // Veri varsa konular alanını al, yoksa boş obje kullan
-          const data = docSnap.data();
-          setKonuDurumu(data?.konular || {});
-        } else {
-          // Döküman yoksa boş bir obje oluştur
-          try {
-            await setDoc(konuTakipRef, {
-              userId: user.uid,
-              konular: {},
-              createdAt: serverTimestamp(),
-              updatedAt: serverTimestamp()
-            });
-          } catch (writeError) {
-            console.error('Yeni döküman oluşturma hatası:', writeError);
-          }
-        }
-      } catch (error) {
-        console.error('Konu durumu yükleme hatası:', error);
-        showSnackbar('Konu durumu yüklenirken bir hata oluştu', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadKonuDurumu();
+      };
+      
+      fetchKonuDurumu();
+    }
   }, [user]);
 
-
-
-  // Konu durumu değişikliği
-  const handleKonuDurumuChange = (konu, durum, value) => {
-    setKonuDurumu(prevState => {
-      if (!selectedDers) return prevState;
-      
-      const dersId = selectedDers.id;
-      const konuKey = `${dersId}_${konu}`;
-      
-      // Mevcut konu durumunu al veya yeni oluştur
-      const prevKonuDurumu = prevState[konuKey] || {
-        ogrendim: false,
-        testCozdüm: false,
-        tekrarEttim: false,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      // Yeni durumu oluştur
-      const newKonuDurumu = {
-        ...prevKonuDurumu,
-        [durum]: value,
-        lastUpdated: new Date().toISOString()
-      };
-      
-      return {
-        ...prevState,
-        [konuKey]: newKonuDurumu
-      };
-    });
-  };
-
-  // Değişiklikleri kaydet
-  const saveChanges = async () => {
-    if (!user) {
-      // Kullanıcı giriş yapmamışsa localStorage'a kaydet
-      try {
-        localStorage.setItem('konuDurumu_anonymous', JSON.stringify(konuDurumu));
-        showSnackbar('Değişiklikler kaydedildi', 'success');
-      } catch (error) {
-        console.error('LocalStorage kaydetme hatası:', error);
-        showSnackbar('Değişiklikler kaydedilirken bir hata oluştu', 'error');
-      }
-      return;
-    }
-
-    try {
-      const konuTakipRef = doc(db, 'konuTakip', user.uid);
-      // Önce dökümanın var olup olmadığını kontrol et
-      const docSnap = await getDoc(konuTakipRef);
-      
-      if (docSnap.exists()) {
-        // Döküman varsa güncelle
-        await updateDoc(konuTakipRef, {
-          konular: konuDurumu,
-          updatedAt: serverTimestamp()
-        });
-      } else {
-        // Döküman yoksa oluştur
-        await setDoc(konuTakipRef, {
-          userId: user.uid,
-          konular: konuDurumu,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
-        });
-      }
-      showSnackbar('Değişiklikler kaydedildi', 'success');
-    } catch (error) {
-      console.error('Firestore kaydetme hatası:', error);
-      showSnackbar('Değişiklikler kaydedilirken bir hata oluştu', 'error');
-    }
-  };
-
-  // Snackbar göster
-  const showSnackbar = (message, severity) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setOpenSnackbar(true);
-  };
-
-  // Konu tamamlanma yüzdesini hesapla
-  const calculateProgress = (dersId) => {
-    const dersKonulari = dersler.find(d => d.id === dersId)?.konular || [];
-    if (dersKonulari.length === 0) return 0;
-    
-    let tamamlananKonuSayisi = 0;
-    
-    dersKonulari.forEach(konu => {
-      const konuKey = `${dersId}_${konu}`;
-      const konuData = konuDurumu[konuKey];
-      if (konuData && konuData.ogrendim) {
-        tamamlananKonuSayisi++;
-      }
-    });
-    
-    return Math.round((tamamlananKonuSayisi / dersKonulari.length) * 100);
-  };
-
-  // Handle dialog open/close
-  const handleOpenDialog = (ders) => {
+  const handleDersClick = (ders) => {
     setSelectedDers(ders);
-    setDialogOpen(true);
+    setOpenDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleDialogClose = () => {
+    setOpenDialog(false);
+    setSelectedDers(null);
   };
 
-  // Handle tab change between TYT and AYT
-  const handleExamTypeChange = (event, newValue) => {
-    setExamType(newValue);
+  const handleKonuDurumuChange = (dersId, konuIndex, durum) => {
+    setKonuDurumu(prevDurum => {
+      const newDurum = { ...prevDurum };
+      if (!newDurum[dersId]) {
+        newDurum[dersId] = {};
+      }
+      newDurum[dersId][konuIndex] = durum;
+      return newDurum;
+    });
   };
+  
+  const handleTekrarDurumuChange = (dersId, konuIndex, tekrarEdilecek) => {
+    setKonuDurumu(prevDurum => {
+      const newDurum = { ...prevDurum };
+      if (!newDurum[dersId]) {
+        newDurum[dersId] = {};
+      }
+      
+      // Eğer mevcut durum yoksa, notStarted olarak ayarla
+      const mevcutDurum = newDurum[dersId][konuIndex] || 'notStarted';
+      
+      // Tekrar edilecek durumunu ekle
+      newDurum[dersId][konuIndex] = tekrarEdilecek ? 
+        mevcutDurum === 'completed' ? 'completedNeedsReview' : 'needsReview' : 
+        mevcutDurum === 'completedNeedsReview' ? 'completed' : 'notStarted';
+      
+      return newDurum;
+    });
+  };
+
+  const saveKonuDurumu = async () => {
+    if (!user) return;
+    
+    try {
+      const docRef = doc(db, 'konuDurumu', user.uid);
+      await updateDoc(docRef, { 
+        durumlar: konuDurumu,
+        updatedAt: serverTimestamp()
+      });
+      setSnackbarMessage('Konu durumu başarıyla kaydedildi.');
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error('Konu durumu kaydedilirken hata oluştu:', error);
+      setSnackbarMessage('Konu durumu kaydedilirken bir hata oluştu.');
+      setSnackbarOpen(true);
+    }
+  };
+
+  const getDersIcon = (dersAdi) => {
+    switch(dersAdi.toLowerCase()) {
+      case 'türkçe': return <MenuBookIcon />;
+      case 'temel matematik': return <FunctionsIcon />;
+      case 'geometri': return <SquareFootIcon />;
+      case 'fizik': return <ScienceIcon />;
+      case 'kimya': return <BiotechIcon />;
+      case 'biyoloji': return <BiotechIcon />;
+      case 'tarih': return <HistoryEduIcon />;
+      case 'coğrafya': return <PublicIcon />;
+      case 'felsefe': return <PsychologyAltIcon />;
+      case 'din kültürü': return <AutoStoriesIcon />;
+      case 'yabancı dil': return <TranslateIcon />;
+      default: return <MenuBookIcon />;
+    }
+  };
+
+  const getKonuIlerleme = (dersId) => {
+    if (!konuDurumu[dersId]) return 0;
+    
+    const ders = dersler.find(d => d.id === dersId);
+    if (!ders) return 0;
+    
+    const tamamlananKonuSayisi = Object.values(konuDurumu[dersId]).filter(
+      durum => durum === 'completed' || durum === 'completedNeedsReview'
+    ).length;
+    return (tamamlananKonuSayisi / ders.konular.length) * 100;
+  };
+
+  const filteredDersler = dersler.filter(ders => ders.type === sinavTipi);
+
+  if (!user) {
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Typography variant="h5" gutterBottom>
+            Konu takibi yapabilmek için giriş yapmalısınız.
+          </Typography>
+          <Button 
+            variant="contained" 
+            href="/login"
+            sx={{ bgcolor: '#5ec837', '&:hover': { bgcolor: '#4eb02c' } }}
+          >
+            Giriş Yap
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
 
   return (
-    <Box 
-      sx={{ 
-        flexGrow: 1, 
-        p: 3,
-        backgroundColor: '#D9D4BB',
-        minHeight: '100vh'
-      }}
-    >
-      <Container maxWidth="lg">
-        <Typography 
-          variant="h4" 
-          component="h1" 
-          gutterBottom 
-          sx={{ 
-            mb: 4, 
-            fontWeight: 700,
-            color: '#2a5956',
-            fontFamily: 'Poppins, Montserrat, sans-serif',
-            textAlign: 'center',
-            position: 'relative',
-            '&::after': {
-              content: '""',
-              position: 'absolute',
-              bottom: '-10px',
-              left: '50%',
-              width: '80px',
-              height: '3px',
-              background: 'linear-gradient(90deg, #4285F4, #0F9D58)',
-              transform: 'translateX(-50%)'
-            }
-          }}
-        >
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{ mb: 4, bgcolor: '#bbb38a', p: 3, borderRadius: 2 }}>
+        <Typography variant="h4" gutterBottom sx={{ 
+          fontWeight: 'bold',
+          color: '#333',
+          mb: 3,
+          textAlign: 'center'
+        }}>
           Konu Takip Sistemi
         </Typography>
-
-        {/* TYT/AYT Tab Selector */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs 
-            value={examType} 
-            onChange={handleExamTypeChange} 
-            centered
-            sx={{
-              '& .MuiTabs-indicator': {
-                backgroundColor: examType === 'TYT' ? '#4285F4' : '#E91E63',
-                height: 3
-              }
-            }}
-          >
-            <Tab 
-              label="TYT Dersleri" 
-              value="TYT" 
-              sx={{
-                fontWeight: examType === 'TYT' ? 600 : 400,
-                color: examType === 'TYT' ? '#4285F4' : 'text.secondary',
-                '&.Mui-selected': {
-                  color: examType === 'TYT' ? '#4285F4' : '#E91E63'
+        
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', alignItems: 'center' }}>
+          <Paper sx={{ bgcolor: '#f5f5f0', borderRadius: 2, overflow: 'hidden' }}>
+            <Tabs 
+              value={sinavTipi} 
+              onChange={(e, newValue) => setSinavTipi(newValue)}
+              sx={{ 
+                minHeight: 48,
+                '& .MuiTabs-indicator': {
+                  backgroundColor: '#5ec837',
+                  height: 3
+                },
+                '& .MuiTab-root': {
+                  fontWeight: 'bold',
+                  minWidth: 100
                 }
               }}
-            />
-            <Tab 
-              label="AYT Dersleri" 
-              value="AYT" 
-              sx={{
-                fontWeight: examType === 'AYT' ? 600 : 400,
-                color: examType === 'AYT' ? '#E91E63' : 'text.secondary',
-                '&.Mui-selected': {
-                  color: examType === 'AYT' ? '#E91E63' : '#4285F4'
-                }
+            >
+              <Tab value="TYT" label="TYT" />
+              <Tab value="AYT" label="AYT" />
+            </Tabs>
+          </Paper>
+          
+          <Box sx={{ display: 'flex', gap: 1, bgcolor: '#f5f5f0', p: 1, borderRadius: 2 }}>
+            <Button
+              variant={filter === 'all' ? 'contained' : 'outlined'}
+              color="primary"
+              onClick={() => setFilter('all')}
+              size="small"
+              sx={{ 
+                bgcolor: filter === 'all' ? '#5ec837' : 'transparent',
+                fontWeight: 'bold',
+                minWidth: 80
               }}
-            />
-          </Tabs>
+            >
+              Tümü
+            </Button>
+            <Button
+              variant={filter === 'completed' ? 'contained' : 'outlined'}
+              color="success"
+              onClick={() => setFilter('completed')}
+              size="small"
+              startIcon={<CheckCircleIcon />}
+              sx={{ 
+                bgcolor: filter === 'completed' ? '#4caf50' : 'transparent',
+                fontWeight: 'bold',
+                minWidth: 120
+              }}
+            >
+              Tamamlanan
+            </Button>
+            <Button
+              variant={filter === 'inProgress' ? 'contained' : 'outlined'}
+              color="warning"
+              onClick={() => setFilter('inProgress')}
+              size="small"
+              startIcon={<AccessTimeIcon />}
+              sx={{ 
+                bgcolor: filter === 'inProgress' ? '#ff9800' : 'transparent',
+                fontWeight: 'bold',
+                minWidth: 120
+              }}
+            >
+              Devam Eden
+            </Button>
+          </Box>
         </Box>
+      </Box>
 
-        {/* Ders Kartları Grid */}
-        <Grid container spacing={3} sx={{ mt: 2 }}>
-          {/* Wrap the grid items in groups of 4 */}
-          {(() => {
-            const filteredDersler = dersler.filter(ders => ders.type === examType);
-            const rows = [];
+      {loading ? (
+        <Box sx={{ width: '100%', mt: 4 }}>
+          <LinearProgress />
+        </Box>
+      ) : (
+        <Grid container spacing={2} sx={{ justifyContent: 'center', px: 1 }}>
+          {filteredDersler.map((ders) => {
+            const ilerleme = getKonuIlerleme(ders.id);
+            const durumFiltresi = filter === 'all' || 
+              (filter === 'completed' && ilerleme === 100) || 
+              (filter === 'inProgress' && ilerleme > 0 && ilerleme < 100);
             
-            for (let i = 0; i < filteredDersler.length; i += 4) {
-              const rowItems = filteredDersler.slice(i, i + 4);
-              rows.push(
-                <Grid container item spacing={3} key={`row-${i}`} sx={{ mb: 3 }}>
-                  {rowItems.map((ders) => (
-                    <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ display: 'flex' }}>
-                      <Card 
-                        elevation={4}
-                        sx={{ 
-                          width: '100%',
-                          height: 220, // Fixed height for consistency
-                          display: 'flex',
-                          flexDirection: 'column',
-                          borderRadius: 3,
-                          overflow: 'hidden',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-8px)',
-                            boxShadow: '0 12px 28px rgba(0,0,0,0.15)'
-                          },
-                          position: 'relative',
-                          '&::before': {
-                            content: '""',
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            background: `linear-gradient(135deg, ${ders.color}05 0%, ${ders.color}15 100%)`,
-                            zIndex: 0
-                          }
-                        }}
-                      >
-                        <CardActionArea 
-                          onClick={() => handleOpenDialog(ders)}
+            if (!durumFiltresi) return null;
+            
+            return (
+              <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ mb: 2 }}>
+                <Card 
+                  sx={{
+                    height: 220, // Sabit yükseklik
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.3s, box-shadow 0.3s',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+                    },
+                    bgcolor: '#bbb38a',
+                    borderLeft: `4px solid ${ders.color}`,
+                    minWidth: 250, // Minimum genişlik
+                    mx: 'auto', // Yatay olarak merkezleme
+                    width: '100%' // Tam genişlik
+                  }}
+                >
+                  <CardActionArea onClick={() => handleDersClick(ders)} sx={{ flexGrow: 1, p: 1 }}>
+                    <CardContent sx={{ p: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                        <Avatar sx={{ bgcolor: ders.color, mr: 2, width: 45, height: 45 }}>
+                          {getDersIcon(ders.ad)}
+                        </Avatar>
+                        <Typography variant="h6" component="div" sx={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                          {ders.ad}
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body1" color="text.primary" gutterBottom sx={{ fontWeight: 500 }}>
+                          {ders.konular.length} konu
+                        </Typography>
+                        <LinearProgress 
+                          variant="determinate" 
+                          value={ilerleme} 
                           sx={{ 
-                            height: '100%',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'stretch',
-                            justifyContent: 'flex-start',
-                            zIndex: 1
-                          }}
-                        >
-                          <Box 
-                            sx={{ 
-                              backgroundColor: ders.color,
-                              color: 'white',
-                              py: 2.5,
-                              display: 'flex',
-                              justifyContent: 'center',
-                              alignItems: 'center',
-                              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
-                            }}
-                          >
-                            <Typography variant="h6" component="h2" align="center" sx={{ fontWeight: 700 }}>
-                              {ders.ad}
-                            </Typography>
-                          </Box>
-                          <CardContent sx={{ 
-                            flexGrow: 1, 
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            justifyContent: 'space-between',
-                            p: 3
-                          }}>
-                            <Typography 
-                              variant="body1" 
-                              color="text.primary" 
-                              align="center" 
-                              sx={{ 
-                                mb: 2, 
-                                fontWeight: 500,
-                                fontSize: '1rem'
-                              }}
-                            >
-                              {ders.konular.length} konu
-                            </Typography>
-                            
-                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
-                              <Chip 
-                                label={`${calculateProgress(ders.id)}% Tamamlandı`} 
-                                sx={{ 
-                                  backgroundColor: ders.color,
-                                  color: 'white',
-                                  fontWeight: 'bold',
-                                  borderRadius: '20px',
-                                  py: 0.5,
-                                  px: 1
-                                }}
-                              />
-                            </Box>
-                          </CardContent>
-                        </CardActionArea>
-                      </Card>
-                    </Grid>
-                  ))}
-                </Grid>
-              );
-            }
-            
-            return rows;
-          })()}
+                            height: 10, 
+                            borderRadius: 5,
+                            bgcolor: alpha(ders.color, 0.2),
+                            '& .MuiLinearProgress-bar': {
+                              bgcolor: ders.color
+                            }
+                          }} 
+                        />
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 3 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 'medium', fontSize: '0.9rem' }}>
+                          {Math.round(ilerleme)}% tamamlandı
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          {Object.values(konuDurumu[ders.id] || {}).some(durum => 
+                            durum === 'needsReview' || durum === 'completedNeedsReview'
+                          ) && (
+                            <Chip 
+                              size="small" 
+                              label="Tekrar"
+                              color="warning"
+                              sx={{ fontSize: '0.7rem', fontWeight: 'bold', height: 20 }}
+                            />
+                          )}
+                          <Chip 
+                            size="small" 
+                            label={ilerleme === 100 ? "Tamamlandı" : ilerleme > 0 ? "Devam Ediyor" : "Başlanmadı"}
+                            color={ilerleme === 100 ? "success" : ilerleme > 0 ? "warning" : "default"}
+                            sx={{ fontSize: '0.75rem', fontWeight: 'bold' }}
+                          />
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
-      </Container>
-
-      {/* Konu Dialog */}
+      )}
+      
       <Dialog 
-        open={dialogOpen} 
-        onClose={handleCloseDialog}
-        maxWidth="md"
+        open={openDialog} 
+        onClose={handleDialogClose}
         fullWidth
+        maxWidth="md"
         PaperProps={{
           sx: {
             borderRadius: 2,
-            maxHeight: '80vh'
+            overflow: 'hidden'
           }
         }}
       >
         {selectedDers && (
           <>
             <DialogTitle sx={{ 
-              backgroundColor: selectedDers.color,
-              color: 'white',
+              bgcolor: '#bbb38a',
               display: 'flex',
-              justifyContent: 'space-between',
               alignItems: 'center',
-              py: 2
+              p: 2
             }}>
-              <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-                {selectedDers.ad} Konuları
-              </Typography>
-              <Chip 
-                label={`${calculateProgress(selectedDers.id)}% Tamamlandı`} 
-                size="small"
-                sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  fontWeight: 'bold'
-                }}
-              />
+              <Avatar sx={{ bgcolor: selectedDers.color, mr: 2, width: 45, height: 45 }}>
+                {getDersIcon(selectedDers.ad)}
+              </Avatar>
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{selectedDers.ad} - Konular</Typography>
             </DialogTitle>
-            <DialogContent dividers sx={{ p: 0 }}>
-              <List sx={{ width: '100%', bgcolor: 'background.paper', p: 0 }}>
+            <DialogContent dividers sx={{ bgcolor: '#f5f5f0', p: 0 }}>
+              <List sx={{ p: 0 }}>
                 {selectedDers.konular.map((konu, index) => {
-                  const konuKey = `${selectedDers.id}_${konu}`;
-                  const konuData = konuDurumu[konuKey] || {
-                    ogrendim: false,
-                    testCozdüm: false,
-                    tekrarEttim: false
-                  };
+                  const konuKey = `${selectedDers.id}-${index}`;
+                  const durum = konuDurumu[selectedDers.id]?.[index] || 'notStarted';
                   
                   return (
-                    <React.Fragment key={konuKey}>
-                      {index > 0 && <Divider />}
-                      <ListItem 
-                        sx={{ 
-                          py: 1.5,
-                          backgroundColor: konuData.ogrendim ? `${selectedDers.color}10` : 'transparent'
+                    <ListItem 
+                      key={konuKey} 
+                      divider 
+                      sx={{ 
+                        p: 2,
+                        '&:hover': { bgcolor: '#e8e8e0' },
+                        transition: 'background-color 0.2s'
+                      }}
+                    >
+                      <ListItemText 
+                        primary={konu} 
+                        primaryTypographyProps={{ 
+                          fontWeight: durum === 'completed' || durum === 'completedNeedsReview' ? 'bold' : 'normal',
+                          color: durum === 'completed' || durum === 'completedNeedsReview' ? 'text.primary' : 'text.secondary',
+                          fontSize: '1rem'
                         }}
-                      >
-                        <ListItemText 
-                          primary={konu} 
-                          sx={{ 
-                            '& .MuiTypography-root': { 
-                              fontWeight: konuData.ogrendim ? 600 : 400,
-                              color: konuData.ogrendim ? selectedDers.color : 'inherit'
-                            }
-                          }}
+                      />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={durum === 'completed' || durum === 'completedNeedsReview'}
+                              onChange={(e) => handleKonuDurumuChange(
+                                selectedDers.id, 
+                                index, 
+                                e.target.checked ? 
+                                  durum === 'needsReview' || durum === 'completedNeedsReview' ? 'completedNeedsReview' : 'completed' : 
+                                  durum === 'needsReview' || durum === 'completedNeedsReview' ? 'needsReview' : 'notStarted'
+                              )}
+                              color="success"
+                              sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                            />
+                          }
+                          label="Tamamlandı"
+                          sx={{ m: 0 }}
                         />
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox 
-                                checked={konuData.ogrendim} 
-                                onChange={(e) => handleKonuDurumuChange(konu, 'ogrendim', e.target.checked)}
-                                icon={<CheckCircleIcon />}
-                                checkedIcon={<CheckCircleIcon />}
-                                sx={{ 
-                                  color: '#bdbdbd',
-                                  '&.Mui-checked': {
-                                    color: '#4CAF50'
-                                  },
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(76, 175, 80, 0.08)'
-                                  }
-                                }}
-                              />
-                            }
-                            label="Öğrendim"
-                            sx={{ 
-                              mr: 1,
-                              '& .MuiFormControlLabel-label': {
-                                color: konuData.ogrendim ? '#4CAF50' : 'inherit',
-                                fontWeight: konuData.ogrendim ? 600 : 400
-                              }
-                            }}
-                          />
-                          <FormControlLabel
-                            control={
-                              <Checkbox 
-                                checked={konuData.testCozdüm} 
-                                onChange={(e) => handleKonuDurumuChange(konu, 'testCozdüm', e.target.checked)}
-                                icon={<ScienceIcon />}
-                                checkedIcon={<ScienceIcon />}
-                                sx={{ 
-                                  color: '#bdbdbd',
-                                  '&.Mui-checked': {
-                                    color: '#2196F3'
-                                  },
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(33, 150, 243, 0.08)'
-                                  }
-                                }}
-                              />
-                            }
-                            label="Test Çözdüm"
-                            sx={{ 
-                              mr: 1,
-                              '& .MuiFormControlLabel-label': {
-                                color: konuData.testCozdüm ? '#2196F3' : 'inherit',
-                                fontWeight: konuData.testCozdüm ? 600 : 400
-                              }
-                            }}
-                          />
-                          <FormControlLabel
-                            control={
-                              <Checkbox 
-                                checked={konuData.tekrarEttim} 
-                                onChange={(e) => handleKonuDurumuChange(konu, 'tekrarEttim', e.target.checked)}
-                                icon={<PsychologyIcon />}
-                                checkedIcon={<PsychologyIcon />}
-                                sx={{ 
-                                  color: '#bdbdbd',
-                                  '&.Mui-checked': {
-                                    color: '#FF9800'
-                                  },
-                                  '&:hover': {
-                                    backgroundColor: 'rgba(255, 152, 0, 0.08)'
-                                  }
-                                }}
-                              />
-                            }
-                            label="Tekrar Ettim"
-                            sx={{ 
-                              '& .MuiFormControlLabel-label': {
-                                color: konuData.tekrarEttim ? '#FF9800' : 'inherit',
-                                fontWeight: konuData.tekrarEttim ? 600 : 400
-                              }
-                            }}
-                          />
-                        </Box>
-                      </ListItem>
-                    </React.Fragment>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={durum === 'needsReview' || durum === 'completedNeedsReview'}
+                              onChange={(e) => handleTekrarDurumuChange(
+                                selectedDers.id, 
+                                index, 
+                                e.target.checked
+                              )}
+                              color="warning"
+                              sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                            />
+                          }
+                          label="Tekrar Edilecek"
+                          sx={{ m: 0 }}
+                        />
+                      </Box>
+                    </ListItem>
                   );
                 })}
               </List>
             </DialogContent>
-            <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+            <DialogActions sx={{ p: 2, bgcolor: '#bbb38a', justifyContent: 'space-between' }}>
               <Button 
-                onClick={handleCloseDialog} 
-                color="inherit"
-                sx={{ fontWeight: 500 }}
+                onClick={handleDialogClose}
+                variant="outlined"
+                sx={{ 
+                  borderColor: '#555',
+                  color: '#333',
+                  '&:hover': { borderColor: '#333', bgcolor: 'rgba(0,0,0,0.05)' }
+                }}
               >
                 Kapat
               </Button>
               <Button 
-                onClick={saveChanges} 
+                onClick={() => {
+                  saveKonuDurumu();
+                  handleDialogClose();
+                }}
                 variant="contained" 
+                color="primary"
                 startIcon={<SaveIcon />}
-                sx={{
-                  backgroundColor: selectedDers.color,
-                  '&:hover': {
-                    backgroundColor: selectedDers.color,
-                    opacity: 0.9
-                  }
+                sx={{ 
+                  bgcolor: '#5ec837',
+                  '&:hover': { bgcolor: '#4eb02c' },
+                  px: 3
                 }}
               >
                 Kaydet
@@ -979,23 +881,23 @@ const KonuTakip = () => {
           </>
         )}
       </Dialog>
-
-      {/* Bildirim Snackbar */}
-      <Snackbar 
-        open={openSnackbar} 
-        autoHideDuration={4000} 
-        onClose={() => setOpenSnackbar(false)}
+      
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <Alert 
-          onClose={() => setOpenSnackbar(false)} 
-          severity={snackbarSeverity} 
+          onClose={() => setSnackbarOpen(false)} 
+          severity="success" 
+          variant="filled"
           sx={{ width: '100%' }}
         >
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Box>
+    </Container>
   );
 };
 

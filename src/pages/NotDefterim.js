@@ -1054,18 +1054,20 @@ const NotDefterim = () => {
             <Button 
               type="submit" 
               variant="contained"
+              color="primary"
               startIcon={<SaveIcon />}
-              disabled={isLoading}
+              disabled={isLoading || !currentNote.title || !currentNote.content}
               sx={{ 
                 borderRadius: 2,
                 px: 3,
-                boxShadow: `0 4px 12px ${alpha('#536DFE', 0.3)}`,
-                background: `linear-gradient(45deg, #536DFE 0%, ${alpha('#3949AB', 0.85)} 100%)`,
+                boxShadow: '0 4px 12px rgba(94, 200, 55, 0.3)',
+                backgroundColor: '#5ec837',
                 textTransform: 'none',
                 fontWeight: 500,
                 transition: 'all 0.3s',
                 '&:hover': {
-                  boxShadow: `0 6px 16px ${alpha('#536DFE', 0.4)}`,
+                  backgroundColor: '#4eb02c',
+                  boxShadow: '0 6px 16px rgba(94, 200, 55, 0.4)',
                   transform: 'translateY(-1px)'
                 }
               }}

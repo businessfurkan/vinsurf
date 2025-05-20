@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -7,7 +7,6 @@ import {
   TextField,
   Card,
   CardContent,
-  CardMedia,
   CardActions,
   Avatar,
   Chip,
@@ -28,7 +27,6 @@ import {
   Container
 } from '@mui/material';
 import {
-
   Send as SendIcon,
   ThumbUp as ThumbUpIcon,
   Comment as CommentIcon,
@@ -36,7 +34,6 @@ import {
   Reply as ReplyIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
-  ArrowBack as ArrowBackIcon,
   LocalOffer as TagIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
@@ -49,7 +46,6 @@ import {
   doc, 
   getDoc, 
   updateDoc, 
-  deleteDoc, 
   query, 
   where, 
   orderBy, 
@@ -59,8 +55,6 @@ import {
   arrayUnion,
   arrayRemove
 } from 'firebase/firestore';
-
-
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { formatDistance } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -71,26 +65,26 @@ const StyledCard = styled(Card)(({ theme }) => ({
   overflow: 'hidden',
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   border: 'none',
-  background: '#FFFFFF',
-  boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+  background: 'linear-gradient(to bottom, #ffffff, #f8f9fa)',
+  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
   '&:hover': {
     transform: 'translateY(-4px)',
-    boxShadow: '0 12px 40px rgba(0,0,0,0.12)',
+    boxShadow: '0 15px 35px rgba(0,0,0,0.12)',
   },
+  padding: theme.spacing(3),
+  margin: theme.spacing(2, 0),
 }));
 
 const StyledChip = styled(Chip)(({ theme, colorIndex, label }) => {
-  // Renkli etiketler için renk paleti
   const colors = [
-    { bg: '#E3F2FD', color: '#55b3d9' }, // Mavi
-    { bg: '#E8F5E9', color: '#2E7D32' }, // Yeşil
-    { bg: '#FFF8E1', color: '#F57F17' }, // Sarı
-    { bg: '#F3E5F5', color: '#7B1FA2' }, // Mor
-    { bg: '#FFEBEE', color: '#C62828' }, // Kırmızı
-    { bg: '#E0F7FA', color: '#00838F' }, // Turkuaz
+    { bg: '#e3f2fd', color: '#1976d2', gradient: 'linear-gradient(135deg, #bbdefb, #e3f2fd)' },
+    { bg: '#e8f5e9', color: '#2e7d32', gradient: 'linear-gradient(135deg, #c8e6c9, #e8f5e9)' },
+    { bg: '#fff8e1', color: '#f57f17', gradient: 'linear-gradient(135deg, #ffecb3, #fff8e1)' },
+    { bg: '#f3e5f5', color: '#7b1fa2', gradient: 'linear-gradient(135deg, #e1bee7, #f3e5f5)' },
+    { bg: '#ffebee', color: '#c62828', gradient: 'linear-gradient(135deg, #ffcdd2, #ffebee)' },
+    { bg: '#e0f7fa', color: '#00838f', gradient: 'linear-gradient(135deg, #b2ebf2, #e0f7fa)' },
   ];
   
-  // Hash fonksiyonu ile tag'e göre renk seçimi
   const getColorIndex = (tag) => {
     let hash = 0;
     for (let i = 0; i < tag.length; i++) {
@@ -99,96 +93,132 @@ const StyledChip = styled(Chip)(({ theme, colorIndex, label }) => {
     return Math.abs(hash) % colors.length;
   };
   
-  // Eğer colorIndex belirtilmemişse ve label varsa, label'a göre renk seç
   const index = colorIndex !== undefined ? colorIndex : (label ? getColorIndex(label) : 0);
   const colorObj = colors[index];
   
   return {
-    borderRadius: '20px',
-    fontWeight: 600,
-    fontSize: '0.75rem',
-    backgroundColor: colorObj.bg,
+    borderRadius: '30px',
+    fontWeight: 700,
+    fontSize: '0.8rem',
+    background: colorObj.gradient,
     color: colorObj.color,
-    border: `1px solid ${alpha(colorObj.color, 0.2)}`,
+    border: 'none',
+    boxShadow: `0 2px 8px ${alpha(colorObj.color, 0.25)}`,
     '&:hover': {
-      backgroundColor: alpha(colorObj.color, 0.15)
+      background: colorObj.gradient,
+      boxShadow: `0 4px 12px ${alpha(colorObj.color, 0.35)}`,
+      transform: 'translateY(-2px)'
     },
     margin: theme.spacing(0.5),
     transition: 'all 0.2s ease',
-    padding: '4px 10px'
+    padding: '6px 14px',
+    height: '28px'
   };
 });
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: '30px',
-  padding: '8px 24px',
-  fontWeight: 600,
+  padding: '10px 28px',
+  fontWeight: 700,
+  fontSize: '0.95rem',
   textTransform: 'none',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  boxShadow: '0 6px 15px rgba(0,0,0,0.12)',
   transition: 'all 0.3s ease',
   '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 6px 15px rgba(0,0,0,0.15)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
   },
   '&.MuiButton-containedPrimary': {
-    background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)',
+    background: 'linear-gradient(45deg, #5ec837, #4eb02c)',
+    '&:hover': {
+      background: 'linear-gradient(45deg, #4eb02c, #3d9020)',
+    }
   },
+  '&.MuiButton-outlined': {
+    borderWidth: '2px',
+    '&:hover': {
+      borderWidth: '2px'
+    }
+  }
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    borderRadius: '12px',
+    borderRadius: '16px',
+    backgroundColor: '#f8f9fa',
+    transition: 'all 0.3s ease',
     '& fieldset': {
-      borderColor: alpha(theme.palette.primary.main, 0.2),
+      borderColor: alpha(theme.palette.primary.main, 0.15),
+      borderWidth: '2px',
+    },
+    '&:hover': {
+      backgroundColor: '#f0f2f5',
     },
     '&:hover fieldset': {
-      borderColor: alpha(theme.palette.primary.main, 0.5),
+      borderColor: alpha(theme.palette.primary.main, 0.4),
+    },
+    '&.Mui-focused': {
+      backgroundColor: '#ffffff',
+      boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.15)}`,
     },
     '&.Mui-focused fieldset': {
       borderColor: theme.palette.primary.main,
+      borderWidth: '2px',
     },
   },
   '& .MuiInputBase-input': {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
+    padding: '16px 20px',
+    '&::placeholder': {
+      fontStyle: 'italic',
+      opacity: 0.7,
+    },
   },
   '& .MuiInputLabel-root': {
-    fontSize: '0.95rem',
+    fontSize: '1rem',
+    fontWeight: 500,
+    '&.Mui-focused': {
+      color: theme.palette.primary.main,
+    },
   },
+  marginBottom: theme.spacing(2),
 }));
 
 const CommentCard = styled(Paper)(({ theme, isReply }) => ({
-  padding: theme.spacing(2.5),
-  marginBottom: theme.spacing(2.5),
-  marginLeft: isReply ? theme.spacing(6) : 0,
-  borderRadius: '16px',
-  border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
-  backgroundColor: isReply ? '#F8FAFF' : '#FFFFFF',
+  padding: theme.spacing(3),
+  marginBottom: theme.spacing(3),
+  marginLeft: isReply ? theme.spacing(7) : 0,
+  borderRadius: '20px',
+  border: 'none',
+  backgroundColor: isReply ? 'linear-gradient(to right, #f8f9ff, #f0f4ff)' : 'linear-gradient(to right, #ffffff, #fafbfc)',
+  boxShadow: isReply ? '0 4px 12px rgba(0,0,0,0.04)' : '0 6px 18px rgba(0,0,0,0.06)',
   position: 'relative',
-  boxShadow: isReply ? 'none' : '0 4px 15px rgba(0,0,0,0.05)',
-  transition: 'all 0.2s ease',
+  transition: 'all 0.3s ease',
   '&:hover': {
-    boxShadow: isReply ? 'none' : '0 6px 20px rgba(0,0,0,0.08)',
-    borderColor: alpha(theme.palette.primary.main, 0.2)
+    boxShadow: isReply ? '0 5px 15px rgba(0,0,0,0.06)' : '0 8px 24px rgba(0,0,0,0.09)',
+    transform: 'translateY(-2px)'
   },
   '&::before': isReply ? {
     content: '""',
     position: 'absolute',
-    left: '-20px',
-    top: '20px',
-    width: '20px',
+    left: '-25px',
+    top: '25px',
+    width: '25px',
     height: '2px',
-    backgroundColor: alpha(theme.palette.primary.main, 0.2)
+    backgroundColor: alpha(theme.palette.primary.main, 0.3),
+    borderRadius: '2px'
   } : {}
 }));
 
-// Main SoruForumDetail component
 const SoruForumDetail = () => {
   const { postId } = useParams();
-  const [user] = useAuthState(auth);
   const navigate = useNavigate();
+  const [user] = useAuthState(auth);
+  const commentInputRef = useRef(null);
+  
   const [post, setPost] = useState(null);
-  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [replyText, setReplyText] = useState('');
   const [replyingTo, setReplyingTo] = useState(null);
@@ -196,57 +226,151 @@ const SoruForumDetail = () => {
   const [editText, setEditText] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedComment, setSelectedComment] = useState(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success'
-  });
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [editPostData, setEditPostData] = useState({
     title: '',
     content: '',
     tags: ''
   });
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  
-  // Fetch post from Firestore
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  const showNotification = (message, severity) => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
   const fetchPost = useCallback(async () => {
+    console.log('Gönderi yükleniyor, postId:', postId);
     try {
-      const postDoc = await getDoc(doc(db, 'forumPosts', postId));
+      if (!postId) {
+        console.error('PostId tanımlı değil!');
+        setLoading(false);
+        return;
+      }
+
+      const postRef = doc(db, 'forumPosts', postId);
+      console.log('Gönderi referansı oluşturuldu:', postRef.path);
+      
+      const postDoc = await getDoc(postRef);
+      console.log('Gönderi dökümanı alındı, var mı?', postDoc.exists());
       
       if (!postDoc.exists()) {
+        console.error('Gönderi bulunamadı, postId:', postId);
         showNotification('Gönderi bulunamadı', 'error');
         navigate('/soru-forum');
         return;
       }
       
-      const postData = { id: postDoc.id, ...postDoc.data() };
+      const rawData = postDoc.data();
+      console.log('Gönderi veri formatı:', JSON.stringify(rawData, null, 2));
       
-      // Convert Firestore timestamp to JS Date
-      if (postData.createdAt) {
-        postData.createdAt = postData.createdAt.toDate();
-      }
+      const postData = { id: postDoc.id, ...rawData };
       
-      // Get user info
-      if (postData.userId) {
-        const userDoc = await getDoc(doc(db, 'users', postData.userId));
-        if (userDoc.exists()) {
-          postData.userInfo = userDoc.data();
+      // createdAt alanını kontrol et ve dönüştür
+      if (postData.createdAt && typeof postData.createdAt.toDate === 'function') {
+        try {
+          postData.createdAt = postData.createdAt.toDate();
+        } catch (dateError) {
+          console.error('Tarih dönüştürme hatası:', dateError);
+          postData.createdAt = new Date(); // Varsayılan tarih
         }
+      } else if (!postData.createdAt) {
+        console.warn('Gönderi için createdAt alanı bulunamadı:', postDoc.id);
+        postData.createdAt = new Date(); // Varsayılan tarih
       }
       
+      // Kullanıcı bilgilerini getir
+      if (postData.userId) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', postData.userId));
+          if (userDoc.exists()) {
+            postData.userInfo = userDoc.data();
+            console.log('Kullanıcı bilgileri alındı:', postData.userId);
+          } else {
+            console.warn(`Kullanıcı bulunamadı: ${postData.userId}`);
+            // Varsayılan kullanıcı bilgileri
+            postData.userInfo = {
+              displayName: 'İsimsiz Kullanıcı',
+              photoURL: null
+            };
+          }
+        } catch (userError) {
+          console.error('Kullanıcı bilgisi alınırken hata:', userError);
+          // Varsayılan kullanıcı bilgileri
+          postData.userInfo = {
+            displayName: 'İsimsiz Kullanıcı',
+            photoURL: null
+          };
+        }
+      } else {
+        console.warn('Gönderi için userId alanı bulunamadı:', postDoc.id);
+        // Varsayılan kullanıcı bilgileri
+        postData.userInfo = {
+          displayName: 'İsimsiz Kullanıcı',
+          photoURL: null
+        };
+      }
+      
+      // Gerekli alanların varlığını kontrol et
+      if (!postData.title) {
+        console.warn('Gönderi başlığı bulunamadı:', postDoc.id);
+        postData.title = 'Başlıksız Gönderi';
+      }
+      
+      if (!postData.content) {
+        console.warn('Gönderi içeriği bulunamadı:', postDoc.id);
+        postData.content = '[Gönderi içeriği bulunamadı]';
+      }
+      
+      if (!postData.likedBy) {
+        postData.likedBy = [];
+      }
+      
+      if (!postData.likeCount && postData.likeCount !== 0) {
+        postData.likeCount = 0;
+      }
+      
+      if (!postData.commentCount && postData.commentCount !== 0) {
+        postData.commentCount = 0;
+      }
+      
+      if (!postData.tags || !Array.isArray(postData.tags)) {
+        postData.tags = [];
+      }
+      
+      console.log('Gönderi verileri işlendi, state güncelleniyor');
       setPost(postData);
+      setEditPostData({
+        title: postData.title || '',
+        content: postData.content || '',
+        tags: postData.tags?.join(', ') || ''
+      });
     } catch (error) {
-      console.error('Error fetching post:', error);
+      console.error('Gönderi yüklenirken hata oluştu:', error);
+      console.error('Hata detayları:', error.message, error.stack);
       showNotification('Gönderi yüklenirken bir hata oluştu', 'error');
     } finally {
       setLoading(false);
     }
-  }, [postId, navigate, showNotification]);
+  }, [postId, navigate]);
 
-  // Fetch comments from Firestore
+  // Yorumları yüklemek için optimize edilmiş fonksiyon
   const fetchComments = useCallback(async () => {
+    // Sorgu sayısını azaltmak için yükleme durumunu kontrol et
+    if (!postId || !post) {
+      return;
+    }
+
     try {
+      // Yorumları tek bir sorguda al
       const commentsQuery = query(
         collection(db, 'forumComments'),
         where('postId', '==', postId),
@@ -254,221 +378,229 @@ const SoruForumDetail = () => {
       );
       
       const querySnapshot = await getDocs(commentsQuery);
+      
+      if (querySnapshot.empty) {
+        // Yorum yoksa boş bir dizi ayarla ve işlemi sonlandır
+        setComments([]);
+        return;
+      }
+      
+      // Tüm yorumları bir kerede işle
       const commentsData = [];
       
-      for (const docSnapshot of querySnapshot.docs) {
-        const commentData = { id: docSnapshot.id, ...docSnapshot.data() };
+      // Önce tüm yorumları işle
+      querySnapshot.docs.forEach(docSnapshot => {
+        const rawData = docSnapshot.data();
+        const commentData = { id: docSnapshot.id, ...rawData };
         
-        // Convert Firestore timestamp to JS Date
-        if (commentData.createdAt) {
-          commentData.createdAt = commentData.createdAt.toDate();
-        }
-        
-        // Get user info
-        if (commentData.userId) {
-          const userDoc = await getDoc(doc(db, 'users', commentData.userId));
-          if (userDoc.exists()) {
-            commentData.userInfo = userDoc.data();
+        // Tarih dönüştürme
+        if (commentData.createdAt && typeof commentData.createdAt.toDate === 'function') {
+          try {
+            commentData.createdAt = commentData.createdAt.toDate();
+          } catch {
+            commentData.createdAt = new Date();
           }
+        } else if (!commentData.createdAt) {
+          commentData.createdAt = new Date();
         }
+        
+        // Varsayılan değerleri ayarla
+        if (!commentData.content) {
+          commentData.content = '[Yorum içeriği bulunamadı]';
+        }
+        
+        if (!commentData.likedBy) {
+          commentData.likedBy = [];
+        }
+        
+        if (!commentData.likeCount && commentData.likeCount !== 0) {
+          commentData.likeCount = 0;
+        }
+        
+        // Varsayılan kullanıcı bilgilerini ayarla
+        commentData.userInfo = {
+          displayName: commentData.userName || 'İsimsiz Kullanıcı',
+          photoURL: commentData.userPhotoURL || null
+        };
         
         commentsData.push(commentData);
-      }
+      });
       
-      // Organize comments into threads
-      const organizedComments = organizeComments(commentsData);
-      setComments(organizedComments);
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-      showNotification('Yorumlar yüklenirken bir hata oluştu', 'error');
-    }
-  }, [postId, organizeComments, showNotification]);
-
-  // Organize comments into threads
-  const organizeComments = (commentsArray) => {
-    const commentMap = {};
-    const rootComments = [];
-    
-    // First pass: create a map of all comments
-    commentsArray.forEach(comment => {
-      commentMap[comment.id] = {
-        ...comment,
-        replies: []
-      };
-    });
-    
-    // Second pass: organize into parent-child relationships
-    commentsArray.forEach(comment => {
-      if (comment.parentId) {
-        // This is a reply
-        if (commentMap[comment.parentId]) {
-          commentMap[comment.parentId].replies.push(commentMap[comment.id]);
-        } else {
-          // Parent comment not found, treat as root
-          rootComments.push(commentMap[comment.id]);
+      // Yorumları organize et (ana yorumlar ve yanıtlar)
+      const organizeComments = (commentsArray) => {
+        try {
+          const commentMap = {};
+          const rootComments = [];
+          
+          // Önce tüm yorumları map'e ekle
+          commentsArray.forEach(comment => {
+            if (comment && comment.id) {
+              commentMap[comment.id] = { ...comment, replies: [] };
+            }
+          });
+          
+          // Sonra yanıtları düzenle
+          commentsArray.forEach(comment => {
+            if (!comment || !comment.id) return;
+            
+            if (comment.parentId && commentMap[comment.parentId]) {
+              // Eğer üst yorum varsa, yanıt olarak ekle
+              commentMap[comment.parentId].replies.push(commentMap[comment.id]);
+            } else {
+              // Üst yorum yoksa veya parentId yoksa, kök yorum olarak ekle
+              rootComments.push(commentMap[comment.id]);
+            }
+          });
+          
+          return rootComments;
+        } catch (organizeError) {
+          // Hata durumunda düz bir liste döndür
+          return commentsArray.filter(comment => !comment.parentId);
         }
-      } else {
-        // This is a root comment
-        rootComments.push(commentMap[comment.id]);
+      };
+      
+      const organizedComments = organizeComments(commentsData);
+      
+      // Organize edilmiş yorumları state'e kaydet (tek seferde güncelle)
+      setComments(organizedComments);
+      
+      // Post'un yorum sayısını güncelle (UI için)
+      if (post && post.commentCount !== commentsData.length) {
+        setPost(prevPost => ({
+          ...prevPost,
+          commentCount: commentsData.length
+        }));
       }
-    });
-    
-    return rootComments;
-  };
+    } catch (error) {
+      console.error('Yorumlar yüklenirken hata oluştu:', error);
+      // Hata durumunda boş yorumlar gösterme
+      setComments([]);
+    }
+  }, [postId, post]);
 
-  // Load post and comments on component mount
+  // Sayfa yüklenirken verileri getir
   useEffect(() => {
-    if (postId) {
-      fetchPost();
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (postId && isMounted) {
+        setLoading(true);
+        await fetchPost();
+        setLoading(false);
+      }
+    };
+    
+    loadData();
+    
+    // Temizleme fonksiyonu
+    return () => {
+      isMounted = false;
+    };
+  }, [postId, fetchPost]);
+  
+  // Post yüklendikten sonra yorumları getir
+  useEffect(() => {
+    if (post && !loading) {
       fetchComments();
     }
-  }, [postId, fetchPost, fetchComments]);
-
-  // Handle adding a new comment
-  const handleAddComment = async () => {
-    if (!user) {
-      showNotification('Yorum yapmak için giriş yapmalısınız', 'warning');
-      return;
+  }, [post, loading, fetchComments]);
+  
+  // Yorumların yüklenip yüklenmediğini kontrol etmek için debug bilgisi
+  useEffect(() => {
+    console.log('Yorumlar state güncellendi:', comments.length, 'yorum var');
+    if (comments.length > 0) {
+      console.log('İlk yorum örneği:', comments[0]);
     }
-    
-    if (!commentText.trim()) {
-      showNotification('Lütfen bir yorum yazın', 'error');
+  }, [comments]);
+
+  const handleAddComment = async () => {
+    if (!user || commentText.trim() === '') {
+      showNotification('Yorum yapmak için giriş yapmalısınız veya yorum boş olamaz', 'warning');
       return;
     }
     
     try {
-      // Create comment document
+      // Yorum verilerini hazırla
+      const now = new Date();
+      const serverNow = serverTimestamp();
+      
       const commentData = {
         postId: postId,
         content: commentText.trim(),
         userId: user.uid,
         userName: user.displayName || 'İsimsiz Kullanıcı',
         userPhotoURL: user.photoURL || null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: serverNow,
+        updatedAt: serverNow,
         likeCount: 0,
         likedBy: []
       };
       
-      await addDoc(collection(db, 'forumComments'), commentData);
+      // Yorumu ekle
+      const commentRef = await addDoc(collection(db, 'forumComments'), commentData);
+      console.log('Yorum eklendi, ID:', commentRef.id);
       
-      // Update post comment count
+      // Post'un yorum sayısını güncelle
       const postRef = doc(db, 'forumPosts', postId);
       await updateDoc(postRef, {
         commentCount: increment(1)
       });
       
+      // Gönderi sahibine bildirim gönder (eğer gönderi sahibi kendisi değilse)
+      if (post.userId && post.userId !== user.uid) {
+        try {
+          const notificationRef = collection(db, 'notifications');
+          await addDoc(notificationRef, {
+            recipientId: post.userId,
+            senderId: user.uid,
+            senderName: user.displayName || 'Bir kullanıcı',
+            type: 'newComment',
+            postId: postId,
+            commentId: commentRef.id,
+            postTitle: post.title,
+            commentContent: commentText.substring(0, 50) + (commentText.length > 50 ? '...' : ''),
+            read: false,
+            createdAt: serverNow
+          });
+          console.log('Gönderi sahibine bildirim gönderildi');
+        } catch (notificationError) {
+          console.error('Bildirim gönderilirken hata:', notificationError);
+          // Bildirim gönderilemese bile devam et
+        }
+      }
+      
+      // Yorumu doğrudan state'e ekle (veritabanından tekrar yüklemeye gerek kalmadan)
+      const newComment = {
+        id: commentRef.id,
+        ...commentData,
+        createdAt: now, // JavaScript Date objesi olarak
+        userInfo: {
+          displayName: user.displayName || 'İsimsiz Kullanıcı',
+          photoURL: user.photoURL,
+          // Diğer kullanıcı bilgileri
+        },
+        replies: []
+      };
+      
+      // Mevcut yorumlara yeni yorumu ekle
+      setComments(prevComments => [...prevComments, newComment]);
+      
+      // Post'un yorum sayısını güncelle (UI için)
+      if (post) {
+        setPost(prevPost => ({
+          ...prevPost,
+          commentCount: (prevPost.commentCount || 0) + 1
+        }));
+      }
+      
       showNotification('Yorum başarıyla eklendi', 'success');
       setCommentText('');
-      fetchComments();
-      fetchPost(); // Refresh post to update comment count
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error('Yorum eklenirken hata:', error);
       showNotification('Yorum eklenirken bir hata oluştu', 'error');
     }
   };
 
-  // Handle adding a reply to a comment
-  const handleAddReply = async () => {
-    if (!user) {
-      showNotification('Yanıt vermek için giriş yapmalısınız', 'warning');
-      return;
-    }
-    
-    if (!replyText.trim() || !replyingTo) {
-      showNotification('Lütfen bir yanıt yazın', 'error');
-      return;
-    }
-    
-    try {
-      // Create reply document
-      const replyData = {
-        postId: postId,
-        parentId: replyingTo.id,
-        content: replyText.trim(),
-        userId: user.uid,
-        userName: user.displayName || 'İsimsiz Kullanıcı',
-        userPhotoURL: user.photoURL || null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-        likeCount: 0,
-        likedBy: []
-      };
-      
-      await addDoc(collection(db, 'forumComments'), replyData);
-      
-      // Update post comment count
-      const postRef = doc(db, 'forumPosts', postId);
-      await updateDoc(postRef, {
-        commentCount: increment(1)
-      });
-      
-      showNotification('Yanıt başarıyla eklendi', 'success');
-      setReplyText('');
-      setReplyingTo(null);
-      fetchComments();
-      fetchPost(); // Refresh post to update comment count
-    } catch (error) {
-      console.error('Error adding reply:', error);
-      showNotification('Yanıt eklenirken bir hata oluştu', 'error');
-    }
-  };
-
-  // Handle editing a comment
-  const handleEditComment = async () => {
-    if (!user || !editingComment) {
-      return;
-    }
-    
-    if (!editText.trim()) {
-      showNotification('Yorum boş olamaz', 'error');
-      return;
-    }
-    
-    try {
-      const commentRef = doc(db, 'forumComments', editingComment.id);
-      
-      await updateDoc(commentRef, {
-        content: editText.trim(),
-        updatedAt: serverTimestamp(),
-        isEdited: true
-      });
-      
-      showNotification('Yorum başarıyla düzenlendi', 'success');
-      setEditingComment(null);
-      setEditText('');
-      fetchComments();
-    } catch (error) {
-      console.error('Error editing comment:', error);
-      showNotification('Yorum düzenlenirken bir hata oluştu', 'error');
-    }
-  };
-
-  // Handle deleting a comment
-  const handleDeleteComment = async (commentId) => {
-    if (!user) {
-      return;
-    }
-    
-    try {
-      await deleteDoc(doc(db, 'forumComments', commentId));
-      
-      // Update post comment count
-      const postRef = doc(db, 'forumPosts', postId);
-      await updateDoc(postRef, {
-        commentCount: increment(-1)
-      });
-      
-      showNotification('Yorum başarıyla silindi', 'success');
-      fetchComments();
-      fetchPost(); // Refresh post to update comment count
-    } catch (error) {
-      console.error('Error deleting comment:', error);
-      showNotification('Yorum silinirken bir hata oluştu', 'error');
-    }
-  };
-
-  // Handle liking a comment
   const handleLikeComment = async (commentId) => {
     if (!user) {
       showNotification('Beğenmek için giriş yapmalısınız', 'warning');
@@ -485,20 +617,36 @@ const SoruForumDetail = () => {
       }
       
       const commentData = commentDoc.data();
-      const isLiked = commentData.likedBy && commentData.likedBy.includes(user.uid);
+      const isLiked = commentData.likedBy?.includes(user.uid);
       
       if (isLiked) {
-        // Unlike
         await updateDoc(commentRef, {
           likeCount: increment(-1),
           likedBy: arrayRemove(user.uid)
         });
+        showNotification('Yorum beğenisi kaldırıldı', 'info');
       } else {
-        // Like
         await updateDoc(commentRef, {
           likeCount: increment(1),
           likedBy: arrayUnion(user.uid)
         });
+        
+        if (commentData.userId !== user.uid) {
+          const notificationRef = collection(db, 'notifications');
+          await addDoc(notificationRef, {
+            recipientId: commentData.userId,
+            senderId: user.uid,
+            senderName: user.displayName || 'Bir kullanıcı',
+            type: 'commentLike',
+            postId: postId,
+            commentId: commentId,
+            postTitle: post.title,
+            read: false,
+            createdAt: serverTimestamp()
+          });
+        }
+        
+        showNotification('Yorum beğenildi', 'success');
       }
       
       fetchComments();
@@ -508,143 +656,169 @@ const SoruForumDetail = () => {
     }
   };
 
-  // Check if post can be edited (within 2 hours of creation)
-  const canEditPost = () => {
-    if (!post || !user || user.uid !== post.userId) return false;
-    
-    const now = new Date();
-    const postTime = post.createdAt;
-    const timeDiff = now - postTime; // time difference in milliseconds
-    const hoursDiff = timeDiff / (1000 * 60 * 60); // convert to hours
-    
-    return hoursDiff <= 2; // can edit if less than 2 hours old
-  };
-
-  // Handle opening edit dialog
-  const handleOpenEditDialog = () => {
-    if (!canEditPost()) {
-      showNotification('Gönderi düzenleme süresi dolmuştur (2 saat)', 'warning');
-      return;
-    }
-    
-    setEditPostData({
-      title: post.title,
-      content: post.content,
-      tags: post.tags ? post.tags.join(', ') : ''
-    });
-    setEditDialogOpen(true);
-  };
-
-  // Handle closing edit dialog
-  const handleCloseEditDialog = () => {
-    setEditDialogOpen(false);
-  };
-
-  // Handle edit input change
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditPostData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  // Handle saving edited post
-  const handleSaveEditedPost = async () => {
-    if (!user || !post) return;
-    
-    if (!editPostData.title.trim()) {
-      showNotification('Lütfen bir başlık girin', 'error');
-      return;
-    }
-    
-    if (!editPostData.content.trim()) {
-      showNotification('Lütfen bir açıklama girin', 'error');
+  const handleAddReply = async () => {
+    if (!user || !replyingTo || replyText.trim() === '') {
+      showNotification('Yanıt vermek için giriş yapmalısınız veya yanıt boş olamaz', 'warning');
       return;
     }
     
     try {
-      // Process tags
-      const tagsArray = editPostData.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+      // Yanıt verilerini hazırla
+      const now = new Date();
+      const serverNow = serverTimestamp();
       
+      const replyData = {
+        postId,
+        userId: user.uid,
+        userName: user.displayName || 'İsimsiz Kullanıcı',
+        userPhotoURL: user.photoURL || '',
+        content: replyText,
+        parentId: replyingTo.id,
+        likeCount: 0,
+        likedBy: [],
+        createdAt: serverNow
+      };
+      
+      // Yanıtı ekle
+      const replyRef = await addDoc(collection(db, 'forumComments'), replyData);
+      console.log('Yanıt eklendi, ID:', replyRef.id);
+      
+      // Post'un yorum sayısını güncelle
       const postRef = doc(db, 'forumPosts', postId);
       await updateDoc(postRef, {
-        title: editPostData.title.trim(),
-        content: editPostData.content.trim(),
-        tags: tagsArray,
-        updatedAt: serverTimestamp(),
-        isEdited: true
+        commentCount: increment(1)
       });
       
-      showNotification('Gönderi başarıyla güncellendi', 'success');
-      setEditDialogOpen(false);
-      fetchPost(); // Refresh post data
+      // Bildirim gönder (eğer yanıt başka bir kullanıcıya ise)
+      if (replyingTo.userId !== user.uid) {
+        try {
+          const notificationRef = collection(db, 'notifications');
+          await addDoc(notificationRef, {
+            recipientId: replyingTo.userId,
+            senderId: user.uid,
+            senderName: user.displayName || 'Bir kullanıcı',
+            type: 'commentReply',
+            postId: postId,
+            commentId: replyRef.id,
+            parentCommentId: replyingTo.id,
+            postTitle: post.title,
+            commentContent: replyText.substring(0, 50) + (replyText.length > 50 ? '...' : ''),
+            read: false,
+            createdAt: serverNow
+          });
+          console.log('Yorum sahibine bildirim gönderildi');
+        } catch (notificationError) {
+          console.error('Bildirim gönderilirken hata:', notificationError);
+          // Bildirim gönderilemese bile devam et
+        }
+      }
+      
+      // Yanıtı doğrudan state'e ekle
+      const newReply = {
+        id: replyRef.id,
+        ...replyData,
+        createdAt: now, // JavaScript Date objesi olarak
+        userInfo: {
+          displayName: user.displayName || 'İsimsiz Kullanıcı',
+          photoURL: user.photoURL,
+          // Diğer kullanıcı bilgileri
+        },
+        replies: []
+      };
+      
+      // Mevcut yorumları güncelle, yanıtı ilgili yoruma ekle
+      setComments(prevComments => {
+        return prevComments.map(comment => {
+          if (comment.id === replyingTo.id) {
+            // Bu, yanıt verilen yorumsa, yanıtı ekle
+            return {
+              ...comment,
+              replies: [...(comment.replies || []), newReply]
+            };
+          } else if (comment.replies && comment.replies.length > 0) {
+            // Alt yorumları kontrol et
+            const hasReplyingComment = comment.replies.some(reply => reply.id === replyingTo.id);
+            if (hasReplyingComment) {
+              return {
+                ...comment,
+                replies: comment.replies.map(reply => {
+                  if (reply.id === replyingTo.id) {
+                    return {
+                      ...reply,
+                      replies: [...(reply.replies || []), newReply]
+                    };
+                  }
+                  return reply;
+                })
+              };
+            }
+          }
+          return comment;
+        });
+      });
+      
+      // Post'un yorum sayısını güncelle (UI için)
+      if (post) {
+        setPost(prevPost => ({
+          ...prevPost,
+          commentCount: (prevPost.commentCount || 0) + 1
+        }));
+      }
+      
+      setReplyText('');
+      setReplyingTo(null);
+      showNotification('Yanıt başarıyla eklendi', 'success');
     } catch (error) {
-      console.error('Error updating post:', error);
-      showNotification('Gönderi güncellenirken bir hata oluştu', 'error');
+      console.error('Yanıt eklenirken hata:', error);
+      showNotification('Yanıt eklenirken bir hata oluştu', 'error');
     }
   };
 
-  // Handle deleting post
-  const handleDeletePost = async () => {
-    if (!user || !post || user.uid !== post.userId) {
-      showNotification('Bu gönderiyi silme yetkiniz yok', 'error');
-      return;
-    }
-    
-    try {
-      // Delete the post document
-      await deleteDoc(doc(db, 'forumPosts', postId));
-      
-      // Delete all comments associated with this post
-      const commentsQuery = query(
-        collection(db, 'forumComments'),
-        where('postId', '==', postId)
-      );
-      
-      const querySnapshot = await getDocs(commentsQuery);
-      const batch = writeBatch(db);
-      
-      querySnapshot.forEach(docSnapshot => {
-        batch.delete(docSnapshot.ref);
-      });
-      
-      await batch.commit();
-      
-      showNotification('Gönderi başarıyla silindi', 'success');
-      navigate('/soru-forum');
-    } catch (error) {
-      console.error('Error deleting post:', error);
-      showNotification('Gönderi silinirken bir hata oluştu', 'error');
-    }
-  };
-
-  // Handle liking the post
   const handleLikePost = async () => {
-    if (!user || !post) {
+    if (!user) {
       showNotification('Beğenmek için giriş yapmalısınız', 'warning');
       return;
     }
     
     try {
       const postRef = doc(db, 'forumPosts', postId);
-      const isLiked = post.likedBy && post.likedBy.includes(user.uid);
+      const postDoc = await getDoc(postRef);
+      
+      if (!postDoc.exists()) {
+        showNotification('Gönderi bulunamadı', 'error');
+        return;
+      }
+      
+      const postData = postDoc.data();
+      const isLiked = postData.likedBy?.includes(user.uid);
       
       if (isLiked) {
-        // Unlike
         await updateDoc(postRef, {
           likeCount: increment(-1),
           likedBy: arrayRemove(user.uid)
         });
+        showNotification('Gönderi beğenisi kaldırıldı', 'info');
       } else {
-        // Like
         await updateDoc(postRef, {
           likeCount: increment(1),
           likedBy: arrayUnion(user.uid)
         });
+        
+        if (postData.userId !== user.uid) {
+          const notificationRef = collection(db, 'notifications');
+          await addDoc(notificationRef, {
+            recipientId: postData.userId,
+            senderId: user.uid,
+            senderName: user.displayName || 'Bir kullanıcı',
+            type: 'postLike',
+            postId: postId,
+            postTitle: postData.title,
+            read: false,
+            createdAt: serverTimestamp()
+          });
+        }
+        
+        showNotification('Gönderi beğenildi', 'success');
       }
       
       fetchPost();
@@ -654,420 +828,234 @@ const SoruForumDetail = () => {
     }
   };
 
-  // Handle opening comment menu
+  const handleEditComment = async () => {
+    if (!user || !editingComment || editText.trim() === '') {
+      showNotification('Yorum düzenlemek için giriş yapmalısınız veya yorum boş olamaz', 'warning');
+      return;
+    }
+    
+    try {
+      const commentRef = doc(db, 'forumComments', editingComment.id);
+      await updateDoc(commentRef, {
+        content: editText,
+        isEdited: true,
+        updatedAt: serverTimestamp()
+      });
+      
+      showNotification('Yorum başarıyla düzenlendi', 'success');
+      setEditingComment(null);
+      setEditText('');
+      fetchComments();
+    } catch (error) {
+      console.error('Error editing comment:', error);
+      showNotification('Yorum düzenlenirken bir hata oluştu', 'error');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!user) {
+      showNotification('Yorum silmek için giriş yapmalısınız', 'warning');
+      return;
+    }
+    
+    try {
+      const commentRef = doc(db, 'forumComments', commentId);
+      const commentDoc = await getDoc(commentRef);
+      
+      if (!commentDoc.exists()) {
+        showNotification('Yorum bulunamadı', 'error');
+        return;
+      }
+      
+      const batch = writeBatch(db);
+      
+      batch.delete(commentRef);
+      
+      const repliesQuery = query(
+        collection(db, 'forumComments'),
+        where('parentId', '==', commentId)
+      );
+      const replySnapshot = await getDocs(repliesQuery);
+      replySnapshot.forEach(reply => {
+        batch.delete(doc(db, 'forumComments', reply.id));
+      });
+      
+      const postRef = doc(db, 'forumPosts', postId);
+      batch.update(postRef, {
+        commentCount: increment(-(1 + replySnapshot.size))
+      });
+      
+      await batch.commit();
+      
+      showNotification('Yorum ve yanıtları başarıyla silindi', 'success');
+      fetchComments();
+      fetchPost();
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      showNotification('Yorum silinirken bir hata oluştu', 'error');
+    }
+  };
+
   const handleOpenMenu = (event, comment) => {
     setAnchorEl(event.currentTarget);
     setSelectedComment(comment);
   };
 
-  // Handle closing comment menu
   const handleCloseMenu = () => {
     setAnchorEl(null);
     setSelectedComment(null);
   };
 
-  // Show notification
-  const showNotification = (message, severity = 'success') => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
+  const handleOpenEditDialog = () => {
+    if (!canEditPost()) {
+      showNotification('Gönderi düzenleme süresi doldu', 'warning');
+      return;
+    }
+    setEditDialogOpen(true);
   };
 
-  // Handle closing snackbar
-  const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({
-      ...prev,
-      open: false
-    }));
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
   };
 
-  // Format date for display
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditPostData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveEditedPost = async () => {
+    if (!user || !editPostData.title.trim() || !editPostData.content.trim()) {
+      showNotification('Başlık ve içerik boş olamaz', 'warning');
+      return;
+    }
+    
+    try {
+      const tagsArray = editPostData.tags
+        .split(',')
+        .map(tag => tag.trim())
+        .filter(tag => tag !== '');
+      
+      const postRef = doc(db, 'forumPosts', postId);
+      await updateDoc(postRef, {
+        title: editPostData.title,
+        content: editPostData.content,
+        tags: tagsArray,
+        updatedAt: serverTimestamp(),
+        isEdited: true
+      });
+      
+      showNotification('Gönderi başarıyla düzenlendi', 'success');
+      setEditDialogOpen(false);
+      fetchPost();
+    } catch (error) {
+      console.error('Error editing post:', error);
+      showNotification('Gönderi düzenlenirken bir hata oluştu', 'error');
+    }
+  };
+
+  const handleDeletePost = async () => {
+    if (!user) {
+      showNotification('Gönderi silmek için giriş yapmalısınız', 'warning');
+      return;
+    }
+    
+    try {
+      const batch = writeBatch(db);
+      
+      batch.delete(doc(db, 'forumPosts', postId));
+      
+      const commentsQuery = query(
+        collection(db, 'forumComments'),
+        where('postId', '==', postId)
+      );
+      const commentSnapshot = await getDocs(commentsQuery);
+      commentSnapshot.forEach(comment => {
+        batch.delete(doc(db, 'forumComments', comment.id));
+      });
+      
+      await batch.commit();
+      
+      showNotification('Gönderi ve tüm yorumları başarıyla silindi', 'success');
+      navigate('/soru-forum');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      showNotification('Gönderi silinirken bir hata oluştu', 'error');
+    }
+  };
+
+  const canEditPost = () => {
+    if (!post || !post.createdAt) return false;
+    const twoHoursInMs = 2 * 60 * 60 * 1000;
+    return (new Date() - post.createdAt) <= twoHoursInMs;
+  };
+
   const formatDate = (date) => {
-    if (!date) return '';
-    return formatDistance(date, new Date(), { addSuffix: true, locale: tr });
+    if (!date) return 'Bilinmeyen tarih';
+    return formatDistance(new Date(date), new Date(), { addSuffix: true, locale: tr });
   };
-
-  // Render comment with replies
-  const renderComment = (comment, isReply = false) => (
-    <Box key={comment.id}>
-      <CommentCard isReply={isReply} elevation={0}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Avatar 
-              src={comment.userInfo?.photoURL || comment.userPhotoURL} 
-              alt={comment.userInfo?.displayName || comment.userName}
-              sx={{ 
-                width: 36, 
-                height: 36, 
-                mr: 1.5,
-                border: isReply ? '1px solid #4285F4' : '2px solid #4285F4',
-                boxShadow: isReply ? 'none' : '0 2px 6px rgba(66, 133, 244, 0.15)'
-              }}
-            />
-            <Box>
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: '#2e3856',
-                  fontSize: '0.9rem'
-                }}
-              >
-                {comment.userInfo?.displayName || comment.userName || 'İsimsiz Kullanıcı'}
-              </Typography>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  color: 'text.secondary',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5
-                }}
-              >
-                <Box 
-                  component="span" 
-                  sx={{ 
-                    width: 6, 
-                    height: 6, 
-                    borderRadius: '50%', 
-                    backgroundColor: comment.isEdited ? '#FFA000' : '#4CAF50',
-                    display: 'inline-block'
-                  }} 
-                />
-                {formatDate(comment.createdAt)}
-                {comment.isEdited && ' (düzenlendi)'}
-              </Typography>
-            </Box>
-          </Box>
-          
-          {user && (user.uid === comment.userId || user.uid === post?.userId) && (
-            <IconButton 
-              size="small"
-              onClick={(e) => handleOpenMenu(e, comment)}
-              sx={{
-                color: '#9e9e9e',
-                '&:hover': {
-                  backgroundColor: alpha('#000', 0.04),
-                  color: '#616161'
-                }
-              }}
-            >
-              <MoreVertIcon fontSize="small" />
-            </IconButton>
-          )}
-        </Box>
-        
-        {editingComment && editingComment.id === comment.id ? (
-          <Box sx={{ mt: 2, mb: 2 }}>
-            <StyledTextField
-              fullWidth
-              multiline
-              rows={2}
-              value={editText}
-              onChange={(e) => setEditText(e.target.value)}
-              variant="outlined"
-              sx={{ 
-                mb: 1.5,
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: '#FFFFFF'
-                }
-              }}
-            />
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-              <Button 
-                size="small"
-                onClick={() => {
-                  setEditingComment(null);
-                  setEditText('');
-                }}
-                sx={{
-                  borderRadius: '20px',
-                  px: 2,
-                  fontWeight: 600,
-                  textTransform: 'none'
-                }}
-              >
-                İptal
-              </Button>
-              <Button 
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={handleEditComment}
-                sx={{
-                  borderRadius: '20px',
-                  px: 2,
-                  fontWeight: 600,
-                  textTransform: 'none',
-                  background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)'
-                }}
-              >
-                Kaydet
-              </Button>
-            </Box>
-          </Box>
-        ) : (
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              mt: 1.5, 
-              mb: 2.5, 
-              whiteSpace: 'pre-wrap',
-              lineHeight: 1.6,
-              color: '#424242',
-              fontSize: '0.95rem'
-            }}
-          >
-            {comment.content}
-          </Typography>
-        )}
-        
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Button 
-            size="small" 
-            startIcon={
-              <ThumbUpIcon 
-                color={comment.likedBy?.includes(user?.uid) ? 'primary' : 'action'} 
-                fontSize="small" 
-              />
-            }
-            onClick={() => handleLikeComment(comment.id)}
-            sx={{ 
-              color: comment.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
-              fontWeight: 600,
-              borderRadius: '20px',
-              px: 1.5,
-              backgroundColor: comment.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.08) : 'transparent',
-              '&:hover': {
-                backgroundColor: comment.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.12) : alpha('#000', 0.04)
-              }
-            }}
-          >
-            {comment.likeCount || 0}
-          </Button>
-          
-          {!isReply && (
-            <Button 
-              size="small" 
-              startIcon={<ReplyIcon fontSize="small" />}
-              onClick={() => setReplyingTo(comment)}
-              sx={{ 
-                color: 'text.secondary', 
-                fontWeight: 600,
-                borderRadius: '20px',
-                px: 1.5,
-                '&:hover': {
-                  backgroundColor: alpha('#000', 0.04)
-                }
-              }}
-            >
-              Yanıtla
-            </Button>
-          )}
-        </Box>
-      </CommentCard>
-      
-      {/* Reply form */}
-      {replyingTo && replyingTo.id === comment.id && (
-        <Box 
-          sx={{ 
-            ml: 6, 
-            mb: 3, 
-            mt: 1,
-            p: 2,
-            borderRadius: '12px',
-            border: '1px solid rgba(66, 133, 244, 0.15)',
-            backgroundColor: alpha('#F8FAFF', 0.7)
-          }}
-        >
-          <Typography 
-            variant="subtitle2" 
-            sx={{ 
-              mb: 1.5, 
-              color: '#2e3856',
-              fontWeight: 600,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.5
-            }}
-          >
-            <ReplyIcon fontSize="small" sx={{ color: '#4285F4' }} />
-            Yanıt yazıyorsunuz
-          </Typography>
-          
-          <StyledTextField
-            fullWidth
-            multiline
-            rows={2}
-            placeholder="Yanıtınızı yazın..."
-            value={replyText}
-            onChange={(e) => setReplyText(e.target.value)}
-            variant="outlined"
-            sx={{ 
-              mb: 1.5,
-              '& .MuiOutlinedInput-root': {
-                backgroundColor: '#FFFFFF'
-              }
-            }}
-          />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-            <Button 
-              size="small"
-              onClick={() => {
-                setReplyingTo(null);
-                setReplyText('');
-              }}
-              sx={{
-                borderRadius: '20px',
-                px: 2,
-                fontWeight: 600,
-                textTransform: 'none'
-              }}
-            >
-              İptal
-            </Button>
-            <StyledButton 
-              size="small"
-              variant="contained"
-              color="primary"
-              onClick={handleAddReply}
-              disabled={!replyText.trim()}
-              sx={{
-                borderRadius: '20px',
-                px: 2,
-                fontWeight: 600,
-                textTransform: 'none'
-              }}
-            >
-              Yanıtla
-            </StyledButton>
-          </Box>
-        </Box>
-      )}
-      
-      {/* Render replies */}
-      {comment.replies && comment.replies.length > 0 && (
-        <Box sx={{ ml: isReply ? 0 : 5 }}>
-          {comment.replies.map(reply => renderComment(reply, true))}
-        </Box>
-      )}
-    </Box>
-  );
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+      <Container maxWidth="md" sx={{ py: 4, textAlign: 'center' }}>
         <CircularProgress />
-      </Box>
+      </Container>
     );
   }
 
   if (!post) {
     return (
-      <Box sx={{ p: 3, textAlign: 'center' }}>
-        <Typography variant="h6">Gönderi bulunamadı</Typography>
-        <Button 
-          component={Link} 
-          to="/soru-forum"
-          startIcon={<ArrowBackIcon />}
-          sx={{ mt: 2 }}
-        >
-          Geri Dön
-        </Button>
-      </Box>
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Alert severity="error">Gönderi bulunamadı</Alert>
+      </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Breadcrumbs sx={{ mb: 3 }}>
-          <Link 
-            to="/soru-forum" 
-            style={{ 
-              textDecoration: 'none', 
-              color: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              fontWeight: 500
-            }}
-          >
-            <ArrowBackIcon fontSize="small" sx={{ mr: 0.5 }} />
-            Soru Forum
-          </Link>
-          <Typography color="text.primary" sx={{ fontWeight: 500 }}>
-            {post?.title || 'Gönderi Detayı'}
-          </Typography>
-        </Breadcrumbs>
-      </Box>
-      <StyledCard sx={{ mb: 4, position: 'relative', overflow: 'visible' }}>
-        {/* Renkli üst şerit */}
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            height: '8px', 
-            background: 'linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335)',
-            borderTopLeftRadius: '16px',
-            borderTopRightRadius: '16px',
-            zIndex: 1
-          }}
-        />
-        
-        {post.imageUrl && (
-          <CardMedia
-            component="img"
-            height="350"
-            image={post.imageUrl}
-            alt={post.title}
-            sx={{ 
-              objectFit: 'contain', 
-              backgroundColor: '#f8f9fa',
-              borderBottom: '1px solid rgba(0,0,0,0.06)'
-            }}
-          />
-        )}
-        <CardContent sx={{ pt: 3, px: { xs: 2, sm: 3 } }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            mb: 3,
-            pb: 2,
-            borderBottom: '1px dashed rgba(0,0,0,0.08)'
-          }}>
+    <Container maxWidth="md" sx={{ py: 4 }}>
+      <Breadcrumbs sx={{ mb: 3 }}>
+        <Link to="/soru-forum" style={{ textDecoration: 'none', color: '#4285F4' }}>
+          Soru Forum
+        </Link>
+        <Typography color="text.primary">{post.title}</Typography>
+      </Breadcrumbs>
+
+      <StyledCard>
+        <CardContent sx={{ px: { xs: 2, sm: 3 }, py: 3 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
             <Avatar 
-              src={post.userInfo?.photoURL || post.userPhotoURL} 
-              alt={post.userInfo?.displayName || post.userName}
+              src={post.userInfo?.photoURL || ''} 
               sx={{ 
-                width: 48, 
-                height: 48, 
+                width: 50, 
+                height: 50, 
                 mr: 2,
-                border: '2px solid #4285F4',
-                boxShadow: '0 2px 8px rgba(66, 133, 244, 0.2)'
+                border: '2px solid #ffffff',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                backgroundColor: '#f0f4ff'
               }}
-            />
+            >
+              {post.userInfo?.displayName?.charAt(0).toUpperCase() || 'U'}
+            </Avatar>
             <Box>
               <Typography 
                 variant="subtitle1" 
                 sx={{ 
                   fontWeight: 700, 
-                  color: '#2e3856',
-                  fontSize: '1.1rem'
+                  color: '#2e3856', 
+                  fontSize: '1.1rem',
+                  letterSpacing: '-0.01em'
                 }}
               >
-                {post.userInfo?.displayName || post.userName || 'İsimsiz Kullanıcı'}
+                {post.userInfo?.displayName || 'İsimsiz Kullanıcı'}
               </Typography>
               <Typography 
                 variant="caption" 
                 sx={{ 
-                  color: 'text.secondary',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 0.5
+                  color: 'text.secondary', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 0.8,
+                  fontSize: '0.85rem',
+                  mt: 0.5
                 }}
               >
                 <Box 
@@ -1076,24 +1064,34 @@ const SoruForumDetail = () => {
                     width: 8, 
                     height: 8, 
                     borderRadius: '50%', 
-                    backgroundColor: '#4CAF50',
-                    display: 'inline-block'
+                    backgroundColor: post.isEdited ? '#FFA000' : '#4CAF50',
+                    display: 'inline-block',
+                    boxShadow: '0 0 4px rgba(0,0,0,0.15)'
                   }} 
                 />
                 {formatDate(post.createdAt)}
+                {post.isEdited && ' (düzenlendi)'}
               </Typography>
             </Box>
           </Box>
-          
+
           <Typography 
             variant="h5" 
             component="h1" 
             sx={{ 
               fontWeight: 800, 
-              mb: 2.5,
-              color: '#2e3856',
+              color: '#1a2b4a',
+              mt: 3,
+              mb: 3,
+              fontSize: { xs: '1.6rem', md: '2rem' },
               lineHeight: 1.3,
-              fontSize: { xs: '1.5rem', sm: '1.8rem' }
+              background: 'linear-gradient(to right, #ffffff, #f8f9fa)',
+              p: 3,
+              borderRadius: '16px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+              borderLeft: '4px solid #5ec837',
+              letterSpacing: '-0.02em',
+              fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
             }}
           >
             {post.title}
@@ -1101,12 +1099,17 @@ const SoruForumDetail = () => {
           
           <Typography 
             variant="body1" 
-            sx={{
-              mb: 3.5,
+            sx={{ 
+              color: '#2c3e50',
+              mb: 4,
               whiteSpace: 'pre-wrap',
-              lineHeight: 1.7,
-              color: '#424242',
-              fontSize: '1rem',
+              fontSize: '1.05rem',
+              lineHeight: 1.8,
+              background: 'linear-gradient(to right, #f8f9ff, #f0f4ff)',
+              p: 4,
+              borderRadius: '16px',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
+              fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
               letterSpacing: '0.01em'
             }}
           >
@@ -1114,13 +1117,13 @@ const SoruForumDetail = () => {
           </Typography>
           
           {post.tags && post.tags.length > 0 && (
-            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            <Box sx={{ mb: 3, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {post.tags.map((tag, index) => (
                 <StyledChip 
                   key={tag} 
                   label={tag} 
-                  size="small"
-                  icon={<TagIcon fontSize="small" />}
+                  size="medium"
+                  icon={<TagIcon sx={{ fontSize: '1rem' }} />}
                 />
               ))}
             </Box>
@@ -1129,127 +1132,167 @@ const SoruForumDetail = () => {
         
         <Divider sx={{ opacity: 0.6 }} />
         
-        <CardActions sx={{ px: { xs: 2, sm: 3 }, py: 2, display: 'flex', justifyContent: 'space-between' }}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
+        <CardActions sx={{ px: { xs: 2, sm: 3 }, py: 3, display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+          <Box sx={{ display: 'flex', gap: 2 }}>
+            <Button
               startIcon={
                 <ThumbUpIcon 
-                  color={post.likedBy?.includes(user?.uid) ? 'primary' : 'action'} 
-                  fontSize="small"
+                  sx={{ 
+                    color: post.likedBy?.includes(user?.uid) ? '#5ec837' : '#9e9e9e',
+                    fontSize: '1.2rem'
+                  }} 
                 />
               }
               onClick={handleLikePost}
+              disabled={!user}
               sx={{ 
-                color: post.likedBy?.includes(user?.uid) ? 'primary.main' : 'text.secondary',
-                fontWeight: 600,
-                borderRadius: '20px',
-                px: 2,
-                backgroundColor: post.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.1) : 'transparent',
-                '&:hover': {
-                  backgroundColor: post.likedBy?.includes(user?.uid) ? alpha('#4285F4', 0.15) : alpha('#000', 0.04)
-                }
+                textTransform: 'none',
+                fontWeight: 700,
+                color: post.likedBy?.includes(user?.uid) ? '#5ec837' : '#757575',
+                backgroundColor: post.likedBy?.includes(user?.uid) ? 'rgba(94, 200, 55, 0.1)' : 'rgba(0,0,0,0.03)',
+                borderRadius: '30px',
+                px: 3,
+                py: 1.2,
+                '&:hover': { 
+                  backgroundColor: post.likedBy?.includes(user?.uid) ? 'rgba(94, 200, 55, 0.15)' : 'rgba(0,0,0,0.06)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: post.likedBy?.includes(user?.uid) ? '0 4px 12px rgba(94, 200, 55, 0.2)' : '0 4px 12px rgba(0,0,0,0.05)'
+                },
+                mr: 2,
+                fontSize: '0.95rem',
+                transition: 'all 0.2s ease'
               }}
             >
               {post.likeCount || 0} Beğeni
             </Button>
             
-            <Button 
-              startIcon={<CommentIcon fontSize="small" />}
+            <Button
+              startIcon={
+                <CommentIcon 
+                  sx={{ 
+                    color: '#4a6da7',
+                    fontSize: '1.2rem'
+                  }} 
+                />
+              }
               sx={{ 
-                color: 'text.secondary', 
-                fontWeight: 600,
-                borderRadius: '20px',
-                px: 2,
-                '&:hover': {
-                  backgroundColor: alpha('#000', 0.04)
-                }
+                textTransform: 'none',
+                fontWeight: 700,
+                color: '#4a6da7',
+                backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                borderRadius: '30px',
+                px: 3,
+                py: 1.2,
+                fontSize: '0.95rem',
+                '&:hover': { 
+                  backgroundColor: 'rgba(25, 118, 210, 0.1)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)'
+                },
+                transition: 'all 0.2s ease'
               }}
+              onClick={() => commentInputRef.current?.focus()}
             >
-              {post.commentCount || 0} Yorum
+              {comments.length} Yorum
             </Button>
           </Box>
 
-          {user && user.uid === post.userId && (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button 
-                startIcon={<EditIcon fontSize="small" />}
-                onClick={handleOpenEditDialog}
-                sx={{ 
-                  color: canEditPost() ? 'primary.main' : 'text.disabled',
-                  fontWeight: 600,
-                  borderRadius: '20px',
-                  px: 2,
-                  backgroundColor: canEditPost() ? alpha('#4285F4', 0.1) : 'transparent',
-                  '&:hover': {
-                    backgroundColor: canEditPost() ? alpha('#4285F4', 0.15) : 'transparent'
-                  }
-                }}
-                disabled={!canEditPost()}
-              >
-                Düzenle
-              </Button>
-              
-              <Button 
-                startIcon={<DeleteIcon fontSize="small" />}
-                onClick={() => setDeleteConfirmOpen(true)}
-                sx={{ 
-                  color: 'error.main',
-                  fontWeight: 600,
-                  borderRadius: '20px',
-                  px: 2,
-                  backgroundColor: alpha('#f44336', 0.1),
-                  '&:hover': {
-                    backgroundColor: alpha('#f44336', 0.15)
-                  }
-                }}
-              >
-                Sil
-              </Button>
-            </Box>
-          )}
+          <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
+            <Button
+              startIcon={<ThumbUpIcon />}
+              variant="contained"
+              size="small"
+              onClick={handleLikePost}
+              disabled={!user}
+              sx={{ 
+                borderRadius: '20px',
+                textTransform: 'none',
+                mr: 1,
+                backgroundColor: post.likedBy?.includes(user?.uid) ? '#5ec837' : '#f0f0f0',
+                color: post.likedBy?.includes(user?.uid) ? '#ffffff' : '#555555',
+                boxShadow: 'none',
+                '&:hover': {
+                  backgroundColor: post.likedBy?.includes(user?.uid) ? '#4eb02c' : '#e0e0e0',
+                  boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+                }
+              }}
+            >
+              {post.likedBy?.includes(user?.uid) ? 'Beğenildi' : 'Beğen'}
+            </Button>
+            
+            {user && user.uid === post.userId && (
+              <>
+                <Button 
+                  startIcon={<EditIcon fontSize="small" />}
+                  variant="outlined"
+                  size="small"
+                  onClick={handleOpenEditDialog}
+                  disabled={!canEditPost()}
+                  sx={{ 
+                    borderRadius: '20px',
+                    textTransform: 'none',
+                    mr: 1,
+                    borderColor: alpha('#4285F4', 0.5),
+                    color: '#4285F4',
+                    '&:hover': {
+                      borderColor: '#4285F4',
+                      backgroundColor: alpha('#4285F4', 0.04)
+                    }
+                  }}
+                >
+                  Düzenle
+                </Button>
+                <Button 
+                  startIcon={<DeleteIcon fontSize="small" />}
+                  variant="outlined"
+                  size="small"
+                  onClick={() => setDeleteConfirmOpen(true)}
+                  sx={{ 
+                    borderRadius: '20px',
+                    textTransform: 'none',
+                    borderColor: alpha('#F44336', 0.5),
+                    color: '#F44336',
+                    '&:hover': {
+                      borderColor: '#F44336',
+                      backgroundColor: alpha('#F44336', 0.04)
+                    }
+                  }}
+                >
+                  Sil
+                </Button>
+              </>
+            )}
+          </Box>
         </CardActions>
       </StyledCard>
       
-      {/* Comments section */}
-      <Box 
-        sx={{ 
-          display: 'flex',
-          alignItems: 'center',
-          mb: 3,
-          mt: 4,
-          position: 'relative',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: -8,
-            left: 0,
-            width: '60px',
-            height: '3px',
-            backgroundColor: '#4285F4',
-            borderRadius: '10px'
-          }
-        }}
-      >
-        <CommentIcon 
-          sx={{ 
-            color: '#4285F4', 
-            mr: 1.5,
-            fontSize: '1.8rem'
-          }} 
-        />
+      <Box sx={{ mt: 4 }}>
         <Typography 
-          variant="h5" 
+          variant="h6" 
           sx={{ 
-            fontWeight: 700,
+            mb: 3, 
+            fontWeight: 700, 
             color: '#2e3856',
-            fontSize: '1.5rem'
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#f5f5f0',
+            p: 2,
+            borderRadius: '10px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            '&::before': {
+              content: '""',
+              width: '4px',
+              height: '24px',
+              backgroundColor: '#5ec837',
+              borderRadius: '4px',
+              marginRight: '12px'
+            }
           }}
         >
           Yorumlar ({post.commentCount || 0})
         </Typography>
       </Box>
       
-      {/* Comment form */}
       {user ? (
         <Box 
           sx={{ 
@@ -1279,6 +1322,7 @@ const SoruForumDetail = () => {
           </Box>
           
           <StyledTextField
+            inputRef={commentInputRef}
             fullWidth
             multiline
             rows={3}
@@ -1314,43 +1358,475 @@ const SoruForumDetail = () => {
         </Alert>
       )}
       
-      {/* Comments list */}
-      {comments.length === 0 ? (
-        <Paper 
-          elevation={0} 
-          sx={{ 
-            p: 4, 
-            textAlign: 'center',
-            borderRadius: 4,
-            backgroundColor: alpha('#4285F4', 0.05),
-            border: `1px dashed ${alpha('#4285F4', 0.3)}`,
-            mt: 2
-          }}
-        >
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-            <CommentIcon sx={{ fontSize: 40, color: alpha('#4285F4', 0.4) }} />
-            <Typography 
-              variant="h6" 
-              sx={{ 
-                color: '#2e3856', 
-                fontWeight: 600,
-                mb: 1
-              }}
-            >
-              Henüz yorum yapılmamış
+      {/* Yorumları görüntüle */}
+      <Box sx={{ mt: 2 }}>
+        {comments.length === 0 ? (
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              p: 4, 
+              textAlign: 'center',
+              borderRadius: 4,
+              backgroundColor: alpha('#4285F4', 0.05),
+              border: `1px dashed ${alpha('#4285F4', 0.3)}`,
+              mt: 2
+            }}
+          >
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <CommentIcon sx={{ fontSize: 40, color: alpha('#4285F4', 0.4) }} />
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: '#2e3856', 
+                  fontWeight: 600,
+                  mb: 1
+                }}
+              >
+                Henüz yorum yapılmamış
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', maxWidth: '80%' }}>
+                Bu gönderiye ilk yorumu siz yapın ve tartışmayı başlatın!
+              </Typography>
+            </Box>
+          </Paper>
+        ) : (
+          <>
+            {/* Yorum sayısını göster */}
+            <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: '#555' }}>
+              Toplam {comments.length} yorum görüntüleniyor
             </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', maxWidth: '80%' }}>
-              Bu gönderiye ilk yorumu siz yapın ve tartışmayı başlatın!
-            </Typography>
-          </Box>
-        </Paper>
-      ) : (
-        <Box sx={{ mt: 2 }}>
-          {comments.map(comment => renderComment(comment))}
-        </Box>
-      )}
+            
+            {/* Tüm yorumları listele */}
+            {comments.map((comment) => (
+              <Box key={comment.id} sx={{ mb: 3 }}>
+                <CommentCard isReply={false} elevation={0}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <Avatar 
+                        src={comment.userPhotoURL || ''} 
+                        sx={{ 
+                          width: 45, 
+                          height: 45, 
+                          mr: 2,
+                          border: '2px solid #ffffff',
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                          backgroundColor: '#f0f4ff'
+                        }}
+                      >
+                        {comment.userName?.charAt(0).toUpperCase() || 'U'}
+                      </Avatar>
+                      <Box>
+                        <Typography 
+                          variant="subtitle1" 
+                          sx={{ 
+                            fontWeight: 700, 
+                            color: '#2e3856', 
+                            fontSize: '1rem',
+                            letterSpacing: '-0.01em'
+                          }}
+                        >
+                          {comment.userName || 'İsimsiz Kullanıcı'}
+                        </Typography>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: 'text.secondary', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 0.8,
+                            fontSize: '0.8rem',
+                            mt: 0.3
+                          }}
+                        >
+                          <Box 
+                            component="span" 
+                            sx={{ 
+                              width: 8, 
+                              height: 8, 
+                              borderRadius: '50%', 
+                              backgroundColor: comment.isEdited ? '#FFA000' : '#4CAF50',
+                              display: 'inline-block',
+                              boxShadow: '0 0 4px rgba(0,0,0,0.15)'
+                            }} 
+                          />
+                          {formatDate(comment.createdAt)}
+                          {comment.isEdited && ' (düzenlendi)'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    {user && (user.uid === comment.userId || user.uid === post?.userId) && (
+                      <IconButton 
+                        size="small"
+                        onClick={(e) => handleOpenMenu(e, comment)}
+                        sx={{
+                          color: '#9e9e9e',
+                          backgroundColor: 'rgba(0,0,0,0.03)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0,0,0,0.08)',
+                            color: '#616161'
+                          },
+                          width: 36,
+                          height: 36
+                        }}
+                      >
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                  
+                  {editingComment && editingComment.id === comment.id ? (
+                    <Box sx={{ mt: 2, mb: 2 }}>
+                      <StyledTextField
+                        fullWidth
+                        multiline
+                        rows={3}
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        variant="outlined"
+                        placeholder="Yorumunuzu düzenleyin..."
+                        sx={{ mb: 2 }}
+                      />
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                        <Button 
+                          onClick={() => {
+                            setEditingComment(null);
+                            setEditText('');
+                          }}
+                          sx={{
+                            borderRadius: '30px',
+                            px: 3,
+                            py: 1,
+                            fontWeight: 600,
+                            textTransform: 'none'
+                          }}
+                        >
+                          İptal
+                        </Button>
+                        <StyledButton 
+                          variant="contained"
+                          color="primary"
+                          onClick={handleEditComment}
+                          disabled={!editText.trim()}
+                        >
+                          Kaydet
+                        </StyledButton>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Typography 
+                      variant="body1" 
+                      sx={{ 
+                        mt: 2, 
+                        mb: 3, 
+                        whiteSpace: 'pre-wrap',
+                        lineHeight: 1.7,
+                        color: '#2c3e50',
+                        fontSize: '1rem',
+                        fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                        letterSpacing: '0.01em'
+                      }}
+                    >
+                      {comment.content}
+                    </Typography>
+                  )}
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                    <Button 
+                      startIcon={
+                        <ThumbUpIcon 
+                          sx={{ 
+                            color: comment.likedBy?.includes(user?.uid) ? '#5ec837' : '#9e9e9e',
+                            fontSize: '1.1rem'
+                          }} 
+                        />
+                      }
+                      onClick={() => handleLikeComment(comment.id)}
+                      sx={{ 
+                        color: comment.likedBy?.includes(user?.uid) ? '#5ec837' : '#757575',
+                        fontWeight: 600,
+                        borderRadius: '30px',
+                        px: 2.5,
+                        py: 1,
+                        backgroundColor: comment.likedBy?.includes(user?.uid) ? 'rgba(94, 200, 55, 0.08)' : 'rgba(0,0,0,0.03)',
+                        '&:hover': {
+                          backgroundColor: comment.likedBy?.includes(user?.uid) ? 'rgba(94, 200, 55, 0.15)' : 'rgba(0,0,0,0.06)',
+                          transform: 'translateY(-2px)'
+                        },
+                        textTransform: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                      disabled={!user}
+                    >
+                      {comment.likeCount || 0} Beğeni
+                    </Button>
+                    
+                    <Button 
+                      startIcon={<ReplyIcon sx={{ color: '#4a6da7', fontSize: '1.1rem' }} />}
+                      onClick={() => {
+                        if (replyingTo?.id === comment.id) {
+                          setReplyingTo(null);
+                          setReplyText('');
+                        } else {
+                          setReplyingTo(comment);
+                          setReplyText('');
+                        }
+                      }}
+                      sx={{ 
+                        color: replyingTo?.id === comment.id ? '#1976d2' : '#4a6da7',
+                        fontWeight: 600,
+                        borderRadius: '30px',
+                        px: 2.5,
+                        py: 1,
+                        backgroundColor: replyingTo?.id === comment.id ? 'rgba(25, 118, 210, 0.1)' : 'rgba(0,0,0,0.03)',
+                        '&:hover': {
+                          backgroundColor: replyingTo?.id === comment.id ? 'rgba(25, 118, 210, 0.15)' : 'rgba(0,0,0,0.06)',
+                          transform: 'translateY(-2px)'
+                        },
+                        textTransform: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                      disabled={!user}
+                    >
+                      {replyingTo?.id === comment.id ? 'Yanıtlamaktan Vazgeç' : 'Yanıtla'}
+                    </Button>
+                  </Box>
+                  
+                  {replyingTo?.id === comment.id && (
+                    <Box sx={{ mt: 3, ml: { xs: 0, sm: 2 } }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Avatar 
+                          src={user?.photoURL} 
+                          alt={user?.displayName}
+                          sx={{ 
+                            width: 32, 
+                            height: 32, 
+                            mr: 1.5,
+                            border: '2px solid #4285F4'
+                          }}
+                        />
+                        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: '#2e3856' }}>
+                          {user?.displayName || user?.email?.split('@')[0] || 'Kullanıcı'}
+                        </Typography>
+                      </Box>
+                      
+                      <StyledTextField
+                        fullWidth
+                        multiline
+                        rows={2}
+                        placeholder={`${comment.userName || 'Kullanıcı'}'a yanıt verin...`}
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        variant="outlined"
+                        sx={{ mb: 2 }}
+                      />
+                      
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                        <Button 
+                          onClick={() => {
+                            setReplyingTo(null);
+                            setReplyText('');
+                          }}
+                          sx={{
+                            borderRadius: '30px',
+                            px: 3,
+                            py: 1,
+                            fontWeight: 600,
+                            textTransform: 'none'
+                          }}
+                        >
+                          İptal
+                        </Button>
+                        <StyledButton 
+                          variant="contained"
+                          color="primary"
+                          onClick={handleAddReply}
+                          disabled={!replyText.trim()}
+                          endIcon={<SendIcon />}
+                        >
+                          Yanıtla
+                        </StyledButton>
+                      </Box>
+                    </Box>
+                  )}
+                  
+                  {/* Yanıtları göster */}
+                  {comment.replies && comment.replies.length > 0 && (
+                    <Box sx={{ mt: 3, ml: { xs: 0, sm: 4 } }}>
+                      {comment.replies.map((reply) => (
+                        <CommentCard key={reply.id} isReply={true} elevation={0} sx={{ mb: 2 }}>
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <Avatar 
+                                src={reply.userPhotoURL || ''} 
+                                sx={{ 
+                                  width: 35, 
+                                  height: 35, 
+                                  mr: 1.5,
+                                  border: '2px solid #ffffff',
+                                  boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                                  backgroundColor: '#f0f4ff'
+                                }}
+                              >
+                                {reply.userName?.charAt(0).toUpperCase() || 'U'}
+                              </Avatar>
+                              <Box>
+                                <Typography 
+                                  variant="subtitle1" 
+                                  sx={{ 
+                                    fontWeight: 700, 
+                                    color: '#2e3856', 
+                                    fontSize: '0.95rem',
+                                    letterSpacing: '-0.01em'
+                                  }}
+                                >
+                                  {reply.userName || 'İsimsiz Kullanıcı'}
+                                </Typography>
+                                <Typography 
+                                  variant="caption" 
+                                  sx={{ 
+                                    color: 'text.secondary', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: 0.8,
+                                    fontSize: '0.75rem',
+                                    mt: 0.3
+                                  }}
+                                >
+                                  <Box 
+                                    component="span" 
+                                    sx={{ 
+                                      width: 6, 
+                                      height: 6, 
+                                      borderRadius: '50%', 
+                                      backgroundColor: reply.isEdited ? '#FFA000' : '#4CAF50',
+                                      display: 'inline-block',
+                                      boxShadow: '0 0 4px rgba(0,0,0,0.15)'
+                                    }} 
+                                  />
+                                  {formatDate(reply.createdAt)}
+                                  {reply.isEdited && ' (düzenlendi)'}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            
+                            {user && (user.uid === reply.userId || user.uid === post?.userId) && (
+                              <IconButton 
+                                size="small"
+                                onClick={(e) => handleOpenMenu(e, reply)}
+                                sx={{
+                                  color: '#9e9e9e',
+                                  backgroundColor: 'rgba(0,0,0,0.03)',
+                                  '&:hover': {
+                                    backgroundColor: 'rgba(0,0,0,0.08)',
+                                    color: '#616161'
+                                  },
+                                  width: 32,
+                                  height: 32
+                                }}
+                              >
+                                <MoreVertIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </Box>
+                          
+                          {editingComment && editingComment.id === reply.id ? (
+                            <Box sx={{ mt: 2, mb: 2 }}>
+                              <StyledTextField
+                                fullWidth
+                                multiline
+                                rows={3}
+                                value={editText}
+                                onChange={(e) => setEditText(e.target.value)}
+                                variant="outlined"
+                                placeholder="Yanıtınızı düzenleyin..."
+                                sx={{ mb: 2 }}
+                              />
+                              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
+                                <Button 
+                                  onClick={() => {
+                                    setEditingComment(null);
+                                    setEditText('');
+                                  }}
+                                  sx={{
+                                    borderRadius: '30px',
+                                    px: 3,
+                                    py: 1,
+                                    fontWeight: 600,
+                                    textTransform: 'none'
+                                  }}
+                                >
+                                  İptal
+                                </Button>
+                                <StyledButton 
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={handleEditComment}
+                                  disabled={!editText.trim()}
+                                >
+                                  Kaydet
+                                </StyledButton>
+                              </Box>
+                            </Box>
+                          ) : (
+                            <Typography 
+                              variant="body1" 
+                              sx={{ 
+                                mt: 1, 
+                                mb: 2, 
+                                whiteSpace: 'pre-wrap',
+                                lineHeight: 1.6,
+                                color: '#2c3e50',
+                                fontSize: '0.95rem',
+                                fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                                letterSpacing: '0.01em'
+                              }}
+                            >
+                              {reply.content}
+                            </Typography>
+                          )}
+                          
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Button 
+                              startIcon={
+                                <ThumbUpIcon 
+                                  sx={{ 
+                                    color: reply.likedBy?.includes(user?.uid) ? '#5ec837' : '#9e9e9e',
+                                    fontSize: '1rem'
+                                  }} 
+                                />
+                              }
+                              onClick={() => handleLikeComment(reply.id)}
+                              sx={{ 
+                                color: reply.likedBy?.includes(user?.uid) ? '#5ec837' : '#757575',
+                                fontWeight: 600,
+                                borderRadius: '30px',
+                                px: 2,
+                                py: 0.75,
+                                backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(94, 200, 55, 0.08)' : 'rgba(0,0,0,0.03)',
+                                '&:hover': {
+                                  backgroundColor: reply.likedBy?.includes(user?.uid) ? 'rgba(94, 200, 55, 0.15)' : 'rgba(0,0,0,0.06)',
+                                  transform: 'translateY(-2px)'
+                                },
+                                textTransform: 'none',
+                                fontSize: '0.85rem'
+                              }}
+                              disabled={!user}
+                            >
+                              {reply.likeCount || 0} Beğeni
+                            </Button>
+                          </Box>
+                        </CommentCard>
+                      ))}
+                    </Box>
+                  )}
+                </CommentCard>
+              </Box>
+            ))}
+          </>
+        )}
+      </Box>
       
-      {/* Comment menu */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -1411,7 +1887,6 @@ const SoruForumDetail = () => {
         )}
       </Menu>
       
-      {/* Edit Post Dialog */}
       <Dialog
         open={editDialogOpen}
         onClose={handleCloseEditDialog}
@@ -1508,7 +1983,6 @@ const SoruForumDetail = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
@@ -1557,7 +2031,6 @@ const SoruForumDetail = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

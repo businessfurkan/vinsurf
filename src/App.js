@@ -1,7 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { NotificationProvider } from './context/NotificationContext';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+import Button from '@mui/material/Button';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -40,6 +47,30 @@ import CheckAdminStatus from './pages/CheckAdminStatus';
 
 const App = () => {
   const [user, loading] = useAuthState(auth);
+  
+  // Mobil cihaz uyarısı için state
+  const [mobileWarningOpen, setMobileWarningOpen] = useState(false);
+  
+  // Mobil cihaz kontrolü için media query
+  const isMobile = useMediaQuery('(max-width:767px)');
+  
+  // Mobil cihaz uyarısını göster
+  useEffect(() => {
+    // LocalStorage'dan daha önce uyarının gösterilip gösterilmediğini kontrol et
+    const hasShownMobileWarning = localStorage.getItem('hasShownMobileWarning');
+    
+    // Eğer mobil cihazsa ve daha önce uyarı gösterilmediyse uyarıyı göster
+    if (isMobile && !hasShownMobileWarning) {
+      setMobileWarningOpen(true);
+    }
+  }, [isMobile]);
+  
+  // Mobil uyarı diyaloğunu kapat
+  const handleCloseMobileWarning = () => {
+    setMobileWarningOpen(false);
+    // Uyarının gösterildiğini localStorage'a kaydet
+    localStorage.setItem('hasShownMobileWarning', 'true');
+  };
   
   // Kullanıcı giriş takibi
   React.useEffect(() => {
@@ -124,6 +155,63 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <NotificationProvider>
+        {/* Mobil cihaz uyarı diyaloğu */}
+        <Dialog
+          open={mobileWarningOpen}
+          onClose={handleCloseMobileWarning}
+          aria-labelledby="mobile-warning-dialog-title"
+          aria-describedby="mobile-warning-dialog-description"
+          sx={{
+            '& .MuiDialog-paper': {
+              width: '90%',
+              maxWidth: '500px',
+              borderRadius: '12px',
+              padding: '10px',
+              backgroundColor: '#f8f9fa'
+            }
+          }}
+        >
+          <DialogTitle 
+            id="mobile-warning-dialog-title"
+            sx={{ 
+              textAlign: 'center', 
+              fontWeight: 'bold',
+              color: '#e74c3c',
+              fontSize: '1.2rem'
+            }}
+          >
+            Uyarı
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText 
+              id="mobile-warning-dialog-description"
+              sx={{ 
+                textAlign: 'center',
+                color: '#2c3e50',
+                fontSize: '1rem'
+              }}
+            >
+              Panelimiz Masaüstü - Laptop ve Tabletlerde çalışmaktadır lütfen bu cihazlardan biri ile sitemize giriş yapınız.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+            <Button 
+              onClick={handleCloseMobileWarning} 
+              variant="contained"
+              sx={{ 
+                backgroundColor: '#3498db',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: '#2980b9'
+                },
+                borderRadius: '8px',
+                padding: '8px 24px'
+              }}
+            >
+              Tamam
+            </Button>
+          </DialogActions>
+        </Dialog>
       {user ? (
         <Box sx={{ display: 'flex', bgcolor: '#D9D4BB', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />

@@ -31,7 +31,6 @@ import {
   ThumbUp as ThumbUpIcon,
   Comment as CommentIcon,
   Search as SearchIcon,
-  ArrowDownward as ArrowDownwardIcon,
   Close as CloseIcon,
   QuestionAnswer as QuestionIcon
 } from '@mui/icons-material';
@@ -51,22 +50,49 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow } from 'date-fns';
-import { tr } from 'date-fns/locale';
 
 
 
-const StyledChip = styled(Chip)(({ theme }) => ({
-  borderRadius: '20px',
-  fontWeight: 500,
-  fontSize: '0.75rem',
-  backgroundColor: alpha(theme.palette.primary.main, 0.1),
-  color: theme.palette.primary.main,
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.primary.main, 0.2),
-  },
-  margin: theme.spacing(0.5),
-}));
+const StyledChip = styled(Chip)(({ theme, colorIndex, label }) => {
+  const colors = [
+    { bg: '#e3f2fd', color: '#1976d2', gradient: 'linear-gradient(135deg, #bbdefb, #e3f2fd)' },
+    { bg: '#e8f5e9', color: '#2e7d32', gradient: 'linear-gradient(135deg, #c8e6c9, #e8f5e9)' },
+    { bg: '#fff8e1', color: '#f57f17', gradient: 'linear-gradient(135deg, #ffecb3, #fff8e1)' },
+    { bg: '#f3e5f5', color: '#7b1fa2', gradient: 'linear-gradient(135deg, #e1bee7, #f3e5f5)' },
+    { bg: '#ffebee', color: '#c62828', gradient: 'linear-gradient(135deg, #ffcdd2, #ffebee)' },
+    { bg: '#e0f7fa', color: '#00838f', gradient: 'linear-gradient(135deg, #b2ebf2, #e0f7fa)' },
+  ];
+  
+  const getColorIndex = (tag) => {
+    let hash = 0;
+    for (let i = 0; i < tag.length; i++) {
+      hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return Math.abs(hash) % colors.length;
+  };
+  
+  const index = colorIndex !== undefined ? colorIndex : (label ? getColorIndex(label) : 0);
+  const colorObj = colors[index];
+  
+  return {
+    borderRadius: '30px',
+    fontWeight: 700,
+    fontSize: '0.8rem',
+    background: colorObj.gradient,
+    color: colorObj.color,
+    border: 'none',
+    boxShadow: `0 2px 8px ${alpha(colorObj.color, 0.25)}`,
+    '&:hover': {
+      background: colorObj.gradient,
+      boxShadow: `0 4px 12px ${alpha(colorObj.color, 0.35)}`,
+      transform: 'translateY(-2px)'
+    },
+    margin: theme.spacing(0.5),
+    transition: 'all 0.2s ease',
+    padding: '6px 14px',
+    height: '28px'
+  };
+});
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: '30px',
@@ -515,15 +541,16 @@ const SoruForum = () => {
             p: 6, 
             textAlign: 'center',
             borderRadius: 4,
-            backgroundColor: '#f8f9fa',
-            border: '1px dashed rgba(0,0,0,0.1)'
+            background: 'linear-gradient(to right, #f9f9f9, #f0f4ff)',
+            border: '1px dashed rgba(0,0,0,0.1)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
           }}
         >
-          <QuestionIcon sx={{ fontSize: 60, color: 'text.disabled', mb: 2 }} />
-          <Typography variant="h5" sx={{ mb: 1, color: 'text.secondary', fontWeight: 600 }}>
+          <QuestionIcon sx={{ fontSize: 70, color: '#4285F4', mb: 2, opacity: 0.7 }} />
+          <Typography variant="h5" sx={{ mb: 1, color: '#2e3856', fontWeight: 700 }}>
             Henüz soru yok
           </Typography>
-          <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+          <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary', fontSize: '1.1rem' }}>
             İlk soruyu sormak için &quot;Yeni Soru Sor&quot; butonuna tıklayın.
           </Typography>
           {user ? (
@@ -536,23 +563,28 @@ const SoruForum = () => {
                 borderRadius: 8,
                 py: 1.5,
                 px: 4,
-                fontWeight: 600,
+                fontWeight: 700,
                 textTransform: 'none',
                 fontSize: '1rem',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+                boxShadow: '0 8px 20px rgba(66, 133, 244, 0.3)',
                 background: 'linear-gradient(45deg, #4285F4 30%, #5C9CFF 90%)',
+                '&:hover': {
+                  boxShadow: '0 10px 25px rgba(66, 133, 244, 0.4)',
+                  transform: 'translateY(-2px)'
+                },
+                transition: 'all 0.3s ease'
               }}
             >
               Yeni Soru Sor
             </Button>
           ) : (
-            <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+            <Typography variant="body1" sx={{ fontStyle: 'italic', color: 'text.secondary', fontSize: '1.05rem' }}>
               Soru sormak için giriş yapmalısınız.
             </Typography>
           )}
         </Paper>
       ) : (
-        <Grid container spacing={3}>
+        <Box>
           {posts.filter(post => {
             if (!searchTerm) return true;
             const searchLower = searchTerm.toLowerCase();
@@ -562,123 +594,120 @@ const SoruForum = () => {
               (post.tags && post.tags.some(tag => tag.toLowerCase().includes(searchLower)))
             );
           }).map(post => (
-            <Grid item xs={12} key={post.id}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 3,
-                  borderRadius: 4,
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                  border: '1px solid rgba(0,0,0,0.08)',
-                  '&:hover': {
-                    transform: 'translateY(-3px)',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
-                  },
-                  cursor: 'pointer',
+            <Paper
+              key={post.id}
+              elevation={0}
+              sx={{
+                mb: 1.5,
+                borderRadius: 2,
+                transition: 'all 0.2s ease',
+                border: '1px solid rgba(0,0,0,0.06)',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+                  backgroundColor: '#f0e8d3'
+                },
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '10px 16px',
+                backgroundColor: '#e8dec1'
+              }}
+              onClick={() => handleViewPost(post.id)}
+            >
+              {/* Left - User avatar */}
+              <Avatar 
+                src={post.userPhotoURL} 
+                alt={post.userName}
+                sx={{ 
+                  width: 36, 
+                  height: 36, 
+                  border: '2px solid white',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  mr: 2
                 }}
-                onClick={() => handleViewPost(post.id)}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                  <Avatar 
-                    src={post.userPhotoURL} 
-                    alt={post.userName}
-                    sx={{ width: 48, height: 48, mr: 2 }}
-                  />
-                  <Box>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                      {post.userName}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                      {formatDistanceToNow(post.createdAt, { addSuffix: true, locale: tr })}
-                    </Typography>
-                  </Box>
-                </Box>
-                
-                <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700 }}>
+                {post.userName?.charAt(0).toUpperCase() || 'U'}
+              </Avatar>
+              
+              {/* Middle - Post title only */}
+              <Box sx={{ flex: 1, overflow: 'hidden' }}>
+                <Typography 
+                  variant="subtitle1" 
+                  sx={{ 
+                    fontWeight: 600,
+                    color: '#2e3856',
+                    fontSize: '0.95rem',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
                   {post.title}
                 </Typography>
                 
-                <Typography 
-                  variant="body1" 
-                  sx={{ 
-                    mb: 2.5,
-                    color: 'text.secondary',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: 1.6
-                  }}
-                >
-                  {post.content}
-                </Typography>
-                
-                {post.imageURL && (
-                  <Box 
-                    sx={{ 
-                      mb: 2.5, 
-                      borderRadius: 3,
-                      overflow: 'hidden',
-                      boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-                    }}
-                  >
-                    <img 
-                      src={post.imageURL} 
-                      alt="Post" 
-                      style={{ 
-                        width: '100%', 
-                        height: 'auto',
-                        objectFit: 'cover',
-                        maxHeight: '300px',
-                        display: 'block',
-                      }} 
-                    />
-                  </Box>
-                )}
-                
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', mb: 2.5, gap: 1 }}>
-                  {post.tags && post.tags.map((tag, index) => (
-                    <StyledChip key={index} label={tag} />
-                  ))}
-                </Box>
-                
-                <Divider sx={{ mb: 2 }} />
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <ThumbUpIcon fontSize="small" sx={{ mr: 0.5, color: post.likes?.includes(user?.uid) ? 'primary.main' : 'text.secondary' }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: post.likes?.includes(user?.uid) ? 'primary.main' : 'text.secondary' }}>
-                        {post.likeCount || 0}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CommentIcon fontSize="small" sx={{ mr: 0.5, color: 'text.secondary' }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: 'text.secondary' }}>
-                        {post.commentCount || 0}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Typography 
                     variant="body2" 
                     sx={{ 
-                      color: 'primary.main',
-                      fontWeight: 600,
-                      display: 'flex',
-                      alignItems: 'center'
+                      color: '#555',
+                      fontSize: '0.8rem',
+                      fontWeight: 500
                     }}
                   >
-                    Devamını Gör
-                    <ArrowDownwardIcon sx={{ ml: 0.5, fontSize: 16, transform: 'rotate(270deg)' }} />
+                    {post.userName}
                   </Typography>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', ml: 2 }}>
+                    <ThumbUpIcon sx={{ fontSize: '0.85rem', mr: 0.5, color: '#666' }} />
+                    <Typography variant="caption" sx={{ color: '#666', mr: 1.5 }}>
+                      {post.likeCount || 0}
+                    </Typography>
+                    
+                    <CommentIcon sx={{ fontSize: '0.85rem', mr: 0.5, color: '#666' }} />
+                    <Typography variant="caption" sx={{ color: '#666' }}>
+                      {post.commentCount || 0}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Paper>
-            </Grid>
+              </Box>
+              
+              {/* Right - Post date and tag */}
+              <Box sx={{ ml: 2, display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <Typography 
+                  variant="caption" 
+                  sx={{ 
+                    color: '#555',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.75rem',
+                    mb: 0.5
+                  }}
+                >
+                  {new Date(post.createdAt).toLocaleDateString('tr-TR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </Typography>
+                
+                {post.tags && post.tags.length > 0 && (
+                  <StyledChip 
+                    label={post.tags[0]} 
+                    size="small"
+                    sx={{ 
+                      height: 22, 
+                      '& .MuiChip-label': { 
+                        px: 1, 
+                        py: 0, 
+                        fontSize: '0.7rem' 
+                      } 
+                    }}
+                  />
+                )}
+              </Box>
+            </Paper>
           ))}
-        </Grid>
+        </Box>
       )}
       
       {/* New Post Dialog */}

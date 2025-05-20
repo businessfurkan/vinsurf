@@ -84,6 +84,20 @@ const aytSubjects = [
 ];
 
 // Styled components
+// Stepper için özel StyledCard bileşeni
+const StepperCard = styled(Card)(({ theme }) => ({
+  borderRadius: 16,
+  backgroundColor: '#cacab3',
+  backgroundImage: 'none',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(202, 202, 179, 0.15)',
+  border: '1px solid rgba(202, 202, 179, 0.1)',
+  transition: 'all 0.3s ease-in-out',
+  overflow: 'hidden',
+  position: 'relative',
+  width: '100%'
+}));
+
+// Normal kartlar için StyledCard bileşeni
 const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: 16,
   background: 'linear-gradient(145deg, #ffffff 0%, #f0efe9 100%)',
@@ -376,7 +390,25 @@ const TytAytNetTakibi = () => {
                     fullWidth: true,
                     error: !!errors.examDate,
                     helperText: errors.examDate,
-                    sx: { mt: 2 }
+                    sx: { 
+                      mt: 2,
+                      '& .MuiOutlinedInput-root': {
+                        backgroundColor: '#cacab3',
+                        color: '#FFFFF0',
+                        '& fieldset': {
+                          borderColor: '#cacab3'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: '#b8b89f'
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#cacab3'
+                        }
+                      },
+                      '& .MuiInputLabel-root': {
+                        color: '#FFFFF0'
+                      }
+                    }
                   }
                 }}
               />
@@ -390,14 +422,27 @@ const TytAytNetTakibi = () => {
               Sınav Türünü Seçin
             </Typography>
             <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel>Sınav Türü</InputLabel>
+              <InputLabel sx={{ color: '#FFFFF0' }}>Sınav Türü</InputLabel>
               <Select
                 value={examType}
                 label="Sınav Türü"
                 onChange={(e) => setExamType(e.target.value)}
+                sx={{
+                  backgroundColor: '#cacab3',
+                  color: '#FFFFF0',
+                  '& .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#cacab3'
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#b8b89f'
+                  },
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: '#cacab3'
+                  }
+                }}
               >
-                <MenuItem value="TYT">TYT</MenuItem>
-                <MenuItem value="AYT">AYT</MenuItem>
+                <MenuItem value="TYT" sx={{ backgroundColor: '#cacab3', '&:hover': { backgroundColor: '#b8b89f' }, '&.Mui-selected': { backgroundColor: '#b8b89f' } }}>TYT</MenuItem>
+                <MenuItem value="AYT" sx={{ backgroundColor: '#cacab3', '&:hover': { backgroundColor: '#b8b89f' }, '&.Mui-selected': { backgroundColor: '#b8b89f' } }}>AYT</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -427,7 +472,15 @@ const TytAytNetTakibi = () => {
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                         borderColor: '#d9d4bb'
                       },
-                      color: '#FFFFF0'
+                      color: '#FFFFF0',
+                      height: '56px',
+                      fontSize: '1.1rem',
+                      minWidth: '300px',
+                      '& .MuiSelect-select': {
+                        paddingTop: '12px',
+                        paddingBottom: '12px',
+                        width: '100%'
+                      }
                     }}
                   >
                     {(examType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
@@ -559,30 +612,146 @@ const TytAytNetTakibi = () => {
             
             {Object.keys(subjectData).length > 0 && (
               <Box sx={{ mt: 4 }}>
-                <Typography variant="h6" gutterBottom sx={{ color: '#FFFFF0' }}>
-                  Eklenen Dersler
+                <Typography 
+                  variant="h6" 
+                  gutterBottom 
+                  sx={{ 
+                    color: '#2c3e50', 
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 2
+                  }}
+                >
+                  <SchoolIcon sx={{ mr: 1 }} /> Eklenen Dersler
                 </Typography>
-                <TableContainer component={Paper} sx={{ backgroundColor: 'rgba(217, 212, 187, 0.1)', borderRadius: '8px' }}>
+                <TableContainer component={Paper} sx={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
                   <Table>
                     <TableHead>
-                      <TableRow sx={{ backgroundColor: '#d9d4bb' }}>
-                        <TableCell sx={{ color: '#FFFFF0', fontWeight: 'bold' }}>Ders</TableCell>
-                        <TableCell align="right" sx={{ color: '#FFFFF0', fontWeight: 'bold' }}>Doğru</TableCell>
-                        <TableCell align="right" sx={{ color: '#FFFFF0', fontWeight: 'bold' }}>Yanlış</TableCell>
-                        <TableCell align="right" sx={{ color: '#FFFFF0', fontWeight: 'bold' }}>Boş</TableCell>
-                        <TableCell align="right" sx={{ color: '#FFFFF0', fontWeight: 'bold' }}>Net</TableCell>
+                      <TableRow>
+                        <TableCell 
+                          sx={{ 
+                            backgroundColor: '#333333', 
+                            color: '#ffffff', 
+                            fontWeight: 'bold', 
+                            fontSize: '1rem',
+                            padding: '12px 16px'
+                          }}
+                        >
+                          Ders
+                        </TableCell>
+                        <TableCell 
+                          align="center" 
+                          sx={{ 
+                            backgroundColor: '#2ecc71', 
+                            color: '#000000', 
+                            fontWeight: 'bold', 
+                            fontSize: '1rem',
+                            padding: '12px 16px'
+                          }}
+                        >
+                          Doğru
+                        </TableCell>
+                        <TableCell 
+                          align="center" 
+                          sx={{ 
+                            backgroundColor: '#e74c3c', 
+                            color: '#000000', 
+                            fontWeight: 'bold', 
+                            fontSize: '1rem',
+                            padding: '12px 16px'
+                          }}
+                        >
+                          Yanlış
+                        </TableCell>
+                        <TableCell 
+                          align="center" 
+                          sx={{ 
+                            backgroundColor: '#95a5a6', 
+                            color: '#000000', 
+                            fontWeight: 'bold', 
+                            fontSize: '1rem',
+                            padding: '12px 16px'
+                          }}
+                        >
+                          Boş
+                        </TableCell>
+                        <TableCell 
+                          align="center" 
+                          sx={{ 
+                            backgroundColor: '#3498db', 
+                            color: '#000000', 
+                            fontWeight: 'bold', 
+                            fontSize: '1rem',
+                            padding: '12px 16px'
+                          }}
+                        >
+                          Net
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {Object.entries(subjectData).map(([subject, data]) => (
-                        <TableRow key={subject}>
-                          <TableCell component="th" scope="row">
+                      {Object.entries(subjectData).map(([subject, data], index) => (
+                        <TableRow 
+                          key={subject}
+                          sx={{ 
+                            backgroundColor: index % 2 === 0 ? '#f9f4ff' : 'white',
+                            '&:hover': { backgroundColor: '#f0e6ff' }
+                          }}
+                        >
+                          <TableCell 
+                            component="th" 
+                            scope="row"
+                            sx={{ 
+                              color: '#2c3e50', 
+                              fontWeight: 800,
+                              fontSize: '1rem'
+                            }}
+                          >
                             {subject}
                           </TableCell>
-                          <TableCell align="right">{data.correctCount}</TableCell>
-                          <TableCell align="right">{data.incorrectCount}</TableCell>
-                          <TableCell align="right">{data.emptyCount}</TableCell>
-                          <TableCell align="right">{data.net}</TableCell>
+                          <TableCell 
+                            align="center"
+                            sx={{ 
+                              color: '#2ecc71', 
+                              fontWeight: 'bold',
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {data.correctCount}
+                          </TableCell>
+                          <TableCell 
+                            align="center"
+                            sx={{ 
+                              color: '#e74c3c', 
+                              fontWeight: 'bold',
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {data.incorrectCount}
+                          </TableCell>
+                          <TableCell 
+                            align="center"
+                            sx={{ 
+                              color: '#7f8c8d', 
+                              fontWeight: 'bold',
+                              fontSize: '0.95rem'
+                            }}
+                          >
+                            {data.emptyCount}
+                          </TableCell>
+                          <TableCell 
+                            align="center"
+                            sx={{ 
+                              color: '#3498db', 
+                              fontWeight: 'bold',
+                              fontSize: '0.95rem',
+                              backgroundColor: '#ebf5fb',
+                              borderRadius: '4px'
+                            }}
+                          >
+                            {data.net}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -595,52 +764,240 @@ const TytAytNetTakibi = () => {
       case 4:
         return (
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography 
+              variant="h5" 
+              gutterBottom 
+              sx={{ 
+                color: '#2c3e50', 
+                fontWeight: 'bold',
+                textAlign: 'center',
+                mb: 3,
+                borderBottom: '2px solid #5ec837',
+                paddingBottom: '10px'
+              }}
+            >
               Deneme Bilgileri Özeti
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Deneme Adı:</Typography>
-                <Typography variant="body1" gutterBottom>{examName}</Typography>
+            
+            <Grid container spacing={3}>
+              {/* Deneme bilgileri kartları */}
+              <Grid item xs={12} md={4}>
+                <Paper 
+                  elevation={3} 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: '12px',
+                    backgroundColor: '#f0f8ff',
+                    height: '100%',
+                    borderLeft: '4px solid #3498db'
+                  }}
+                >
+                  <Typography variant="subtitle1" sx={{ color: '#3498db', fontWeight: 'bold', mb: 1 }}>
+                    Deneme Adı
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
+                    {examName || 'Belirtilmemiş'}
+                  </Typography>
+                </Paper>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Tarih:</Typography>
-                <Typography variant="body1" gutterBottom>
-                  {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
-                </Typography>
+              
+              <Grid item xs={12} md={4}>
+                <Paper 
+                  elevation={3} 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: '12px',
+                    backgroundColor: '#fff8f0',
+                    height: '100%',
+                    borderLeft: '4px solid #e67e22'
+                  }}
+                >
+                  <Typography variant="subtitle1" sx={{ color: '#e67e22', fontWeight: 'bold', mb: 1 }}>
+                    Tarih
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
+                    {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
+                  </Typography>
+                </Paper>
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle1">Sınav Türü:</Typography>
-                <Typography variant="body1" gutterBottom>{examType}</Typography>
+              
+              <Grid item xs={12} md={4}>
+                <Paper 
+                  elevation={3} 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: '12px',
+                    backgroundColor: '#f0fff8',
+                    height: '100%',
+                    borderLeft: '4px solid #2ecc71'
+                  }}
+                >
+                  <Typography variant="subtitle1" sx={{ color: '#2ecc71', fontWeight: 'bold', mb: 1 }}>
+                    Sınav Türü
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
+                    {examType}
+                  </Typography>
+                </Paper>
               </Grid>
-              <Grid item xs={12}>
-                <Typography variant="subtitle1">Dersler:</Typography>
-                <TableContainer component={Paper} sx={{ mt: 1 }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Ders</TableCell>
-                        <TableCell align="right">Doğru</TableCell>
-                        <TableCell align="right">Yanlış</TableCell>
-                        <TableCell align="right">Boş</TableCell>
-                        <TableCell align="right">Net</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Object.entries(subjectData).map(([subject, data]) => (
-                        <TableRow key={subject}>
-                          <TableCell component="th" scope="row">
-                            {subject}
+              
+              {/* Dersler tablosu */}
+              <Grid item xs={12} sx={{ mt: 2 }}>
+                <Paper 
+                  elevation={3} 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: '12px',
+                    backgroundColor: '#ffffff',
+                    borderTop: '4px solid #9b59b6'
+                  }}
+                >
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      color: '#9b59b6', 
+                      fontWeight: 'bold', 
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    <SchoolIcon sx={{ mr: 1 }} /> Dersler ve Sonuçlar
+                  </Typography>
+                  
+                  <TableContainer sx={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell 
+                            sx={{ 
+                              backgroundColor: '#333333', 
+                              color: '#ffffff', 
+                              fontWeight: 'bold', 
+                              fontSize: '1rem',
+                              padding: '12px 16px'
+                            }}
+                          >
+                            Ders
                           </TableCell>
-                          <TableCell align="right">{data.correctCount}</TableCell>
-                          <TableCell align="right">{data.incorrectCount}</TableCell>
-                          <TableCell align="right">{data.emptyCount}</TableCell>
-                          <TableCell align="right">{data.net}</TableCell>
+                          <TableCell 
+                            align="center" 
+                            sx={{ 
+                              backgroundColor: '#2ecc71', 
+                              color: '#000000', 
+                              fontWeight: 'bold', 
+                              fontSize: '1rem',
+                              padding: '12px 16px'
+                            }}
+                          >
+                            Doğru
+                          </TableCell>
+                          <TableCell 
+                            align="center" 
+                            sx={{ 
+                              backgroundColor: '#e74c3c', 
+                              color: '#000000', 
+                              fontWeight: 'bold', 
+                              fontSize: '1rem',
+                              padding: '12px 16px'
+                            }}
+                          >
+                            Yanlış
+                          </TableCell>
+                          <TableCell 
+                            align="center" 
+                            sx={{ 
+                              backgroundColor: '#95a5a6', 
+                              color: '#000000', 
+                              fontWeight: 'bold', 
+                              fontSize: '1rem',
+                              padding: '12px 16px'
+                            }}
+                          >
+                            Boş
+                          </TableCell>
+                          <TableCell 
+                            align="center" 
+                            sx={{ 
+                              backgroundColor: '#3498db', 
+                              color: '#000000', 
+                              fontWeight: 'bold', 
+                              fontSize: '1rem',
+                              padding: '12px 16px'
+                            }}
+                          >
+                            Net
+                          </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {Object.entries(subjectData).map(([subject, data], index) => (
+                          <TableRow 
+                            key={subject}
+                            sx={{ 
+                              backgroundColor: index % 2 === 0 ? '#f9f4ff' : 'white',
+                              '&:hover': { backgroundColor: '#f0e6ff' }
+                            }}
+                          >
+                            <TableCell 
+                              component="th" 
+                              scope="row"
+                              sx={{ 
+                                color: '#2c3e50', 
+                                fontWeight: 800,
+                                fontSize: '1rem'
+                              }}
+                            >
+                              {subject}
+                            </TableCell>
+                            <TableCell 
+                              align="center"
+                              sx={{ 
+                                color: '#2ecc71', 
+                                fontWeight: 'bold',
+                                fontSize: '0.95rem'
+                              }}
+                            >
+                              {data.correctCount}
+                            </TableCell>
+                            <TableCell 
+                              align="center"
+                              sx={{ 
+                                color: '#e74c3c', 
+                                fontWeight: 'bold',
+                                fontSize: '0.95rem'
+                              }}
+                            >
+                              {data.incorrectCount}
+                            </TableCell>
+                            <TableCell 
+                              align="center"
+                              sx={{ 
+                                color: '#7f8c8d', 
+                                fontWeight: 'bold',
+                                fontSize: '0.95rem'
+                              }}
+                            >
+                              {data.emptyCount}
+                            </TableCell>
+                            <TableCell 
+                              align="center"
+                              sx={{ 
+                                color: '#3498db', 
+                                fontWeight: 'bold',
+                                fontSize: '1rem',
+                                backgroundColor: '#ebf5fb',
+                                borderRadius: '4px'
+                              }}
+                            >
+                              {data.net}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Paper>
               </Grid>
             </Grid>
           </Box>
@@ -920,8 +1277,8 @@ const TytAytNetTakibi = () => {
           borderBottom: '2px solid #d9d4bb',
           pb: 2,
           mb: 4,
-          mt: 5, // Başlığı aşağıya almak için margin-top eklendi
-          pt: 2 // Üstte biraz boşluk için padding-top eklendi
+          mt: 8, // Başlığı daha aşağıya almak için margin-top arttırıldı
+          pt: 3 // Üstte daha fazla boşluk için padding-top arttırıldı
         }}>
           <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', color: '#FFFFF0' }}>
             <SchoolIcon sx={{ mr: 1, color: '#d9d4bb' }} /> TYT-AYT Net Takibi
@@ -933,11 +1290,15 @@ const TytAytNetTakibi = () => {
               backgroundColor: '#d9d4bb',
               color: '#FFFFF0',
               fontWeight: 'bold',
-              padding: '8px 16px',
-              boxShadow: '0 4px 8px rgba(217, 212, 187, 0.3)',
+              padding: '10px 20px',
+              fontSize: '1.05rem',
+              borderRadius: '8px',
+              boxShadow: '0 6px 10px rgba(217, 212, 187, 0.4)',
+              transition: 'all 0.3s ease',
               '&:hover': {
                 backgroundColor: '#c5c0a7',
-                boxShadow: '0 6px 12px rgba(217, 212, 187, 0.4)'
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 15px rgba(217, 212, 187, 0.5)'
               }
             }}
           >
@@ -947,30 +1308,99 @@ const TytAytNetTakibi = () => {
         
         {viewMode === 'form' ? (
           /* Multi-step form */
-          <StyledCard sx={{ mb: 4, mt: 3 }}>
-            <CardContent sx={{ pt: 3 }}>
+          <StepperCard sx={{ mb: 4, mt: 3 }}>
+            <CardContent sx={{ pt: 3, backgroundColor: 'transparent' }}>
               <Stepper 
                 activeStep={activeStep} 
                 alternativeLabel
                 sx={{
                   '& .MuiStepIcon-root': {
-                    color: 'rgba(217, 212, 187, 0.5)',
-                    '&.Mui-active, &.Mui-completed': {
-                      color: '#d9d4bb'
+                    color: 'rgba(0, 0, 0, 0.3)',
+                    fontSize: '2rem',
+                    transition: 'all 0.3s ease',
+                    backgroundColor: 'transparent',
+                    '&:hover': {
+                      color: '#3498db',
+                      transform: 'scale(1.1)'
+                    },
+                    '&.Mui-active': {
+                      color: '#3498db',
+                      transform: 'scale(1.2)'
+                    },
+                    '&.Mui-completed': {
+                      color: '#2ecc71'
                     }
                   },
+                  '& .MuiStepConnector-line': {
+                    borderColor: 'rgba(0, 0, 0, 0.2)',
+                    borderTopWidth: '3px',
+                    transition: 'all 0.3s ease'
+                  },
+                  '& .MuiStepConnector-active .MuiStepConnector-line': {
+                    borderColor: '#3498db'
+                  },
+                  '& .MuiStepConnector-completed .MuiStepConnector-line': {
+                    borderColor: '#2ecc71'
+                  },
                   '& .MuiStepLabel-label': {
-                    color: '#FFFFF0',
+                    color: '#000',
+                    fontWeight: 'normal',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      color: '#3498db',
+                      transform: 'translateY(-2px)'
+                    },
                     '&.Mui-active': {
-                      color: '#FFFFF0',
-                      fontWeight: 'bold'
+                      color: '#000',
+                      fontWeight: 'bold',
+                      fontSize: '1rem'
+                    },
+                    '&.Mui-completed': {
+                      color: '#000'
                     }
+                  },
+                  '& .MuiStepIcon-text': {
+                    fill: '#fff' // Numara rengini beyaz yapma
+                  },
+                  '& .MuiStepLabel-iconContainer': {
+                    background: 'transparent',
+                    padding: 0,
+                    '& .MuiSvgIcon-root': {
+                      background: 'transparent',
+                      borderRadius: '50%'
+                    }
+                  },
+                  // Tüm arka plan renklerini şeffaf yapma
+                  background: 'transparent',
+                  '& .MuiPaper-root': {
+                    backgroundColor: 'transparent',
+                    boxShadow: 'none'
+                  },
+                  '& .MuiStep-root': {
+                    backgroundColor: 'transparent'
                   }
                 }}
               >
-                {steps.map((label) => (
+                {steps.map((label, index) => (
                   <Step key={label}>
-                    <StepLabel>{label}</StepLabel>
+                    <StepLabel
+                      StepIconProps={{
+                        icon: index + 1,
+                        className: 'custom-step-icon'
+                      }}
+                      sx={{
+                        '& .custom-step-icon': {
+                          backgroundColor: 'transparent !important',
+                          '& circle': {
+                            fill: activeStep === index ? '#3498db' : 
+                                  activeStep > index ? '#2ecc71' : 'rgba(0, 0, 0, 0.3)'
+                          }
+                        }
+                      }}
+                    >
+                      {label}
+                    </StepLabel>
                   </Step>
                 ))}
               </Stepper>
@@ -987,10 +1417,10 @@ const TytAytNetTakibi = () => {
                       startIcon={<CheckCircleIcon sx={{ color: '#FFFFF0' }} />}
                       sx={{ 
                         mt: 2,
-                        backgroundColor: '#d9d4bb',
-                        color: '#FFFFF0',
+                        backgroundColor: '#5ec837',
+                        color: '#FFFFFF',
                         '&:hover': {
-                          backgroundColor: '#c5c0a7'
+                          backgroundColor: '#4eb02c'
                         }
                       }}
                     >
@@ -1021,14 +1451,14 @@ const TytAytNetTakibi = () => {
                         endIcon={<NavigateNextIcon sx={{ color: '#FFFFF0' }} />}
                         disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
                         sx={{ 
-                          backgroundColor: '#d9d4bb',
-                          color: '#FFFFF0',
+                          backgroundColor: '#5ec837',
+                          color: '#FFFFFF',
                           '&:hover': {
-                            backgroundColor: '#c5c0a7'
+                            backgroundColor: '#4eb02c'
                           },
                           '&.Mui-disabled': {
-                            backgroundColor: 'rgba(217, 212, 187, 0.5)',
-                            color: 'rgba(255, 255, 240, 0.5)'
+                            backgroundColor: 'rgba(94, 200, 55, 0.5)',
+                            color: 'rgba(255, 255, 255, 0.5)'
                           }
                         }}
                       >
@@ -1039,7 +1469,7 @@ const TytAytNetTakibi = () => {
                 )}
               </Box>
             </CardContent>
-          </StyledCard>
+          </StepperCard>
         ) : (
           /* Records view */
           <StyledCard sx={{ mt: 3 }}>
