@@ -26,7 +26,8 @@ import {
   Step,
   StepLabel,
   Snackbar,
-  Alert
+  Alert,
+  CircularProgress
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -654,7 +655,25 @@ const TytAytNetTakibi = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Box sx={{ maxWidth: 1200, mx: 'auto', p: 2 }}>
+      <Box sx={{ maxWidth: 1200, mx: 'auto', p: 2, position: 'relative' }}>
+        {loading && (
+          <Box
+            sx={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              zIndex: 1000,
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        )}
         <Typography variant="h4" gutterBottom sx={{ 
           display: 'flex', 
           alignItems: 'center',
