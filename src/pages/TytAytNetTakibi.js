@@ -919,20 +919,25 @@ const TytAytNetTakibi = () => {
           alignItems: 'center',
           borderBottom: '2px solid #d9d4bb',
           pb: 2,
-          mb: 4
+          mb: 4,
+          mt: 5, // Başlığı aşağıya almak için margin-top eklendi
+          pt: 2 // Üstte biraz boşluk için padding-top eklendi
         }}>
           <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', color: '#FFFFF0' }}>
             <SchoolIcon sx={{ mr: 1, color: '#d9d4bb' }} /> TYT-AYT Net Takibi
           </Typography>
           <Button 
-            variant="outlined" 
+            variant="contained" 
             onClick={toggleViewMode}
             sx={{
-              color: '#d9d4bb',
-              borderColor: '#d9d4bb',
+              backgroundColor: '#d9d4bb',
+              color: '#FFFFF0',
+              fontWeight: 'bold',
+              padding: '8px 16px',
+              boxShadow: '0 4px 8px rgba(217, 212, 187, 0.3)',
               '&:hover': {
-                borderColor: '#c5c0a7',
-                backgroundColor: 'rgba(217, 212, 187, 0.04)'
+                backgroundColor: '#c5c0a7',
+                boxShadow: '0 6px 12px rgba(217, 212, 187, 0.4)'
               }
             }}
           >
@@ -942,8 +947,8 @@ const TytAytNetTakibi = () => {
         
         {viewMode === 'form' ? (
           /* Multi-step form */
-          <StyledCard sx={{ mb: 4 }}>
-            <CardContent>
+          <StyledCard sx={{ mb: 4, mt: 3 }}>
+            <CardContent sx={{ pt: 3 }}>
               <Stepper 
                 activeStep={activeStep} 
                 alternativeLabel
@@ -1037,8 +1042,8 @@ const TytAytNetTakibi = () => {
           </StyledCard>
         ) : (
           /* Records view */
-          <StyledCard>
-            <CardContent>
+          <StyledCard sx={{ mt: 3 }}>
+            <CardContent sx={{ pt: 3 }}>
               <Typography variant="h5" gutterBottom sx={{ color: '#FFFFF0' }}>
                 Deneme Sonuçları
               </Typography>
