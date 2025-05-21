@@ -3,7 +3,6 @@ import {
   Box, 
   Container, 
   Typography, 
-  Grid, 
   Button, 
   List, 
   ListItem, 
@@ -19,8 +18,6 @@ import {
   Tab,
   Tabs,
   Card,
-  CardContent,
-  CardActionArea,
   Paper,
   LinearProgress,
   Avatar
@@ -38,6 +35,7 @@ import PsychologyAltIcon from '@mui/icons-material/Psychology';
 import TranslateIcon from '@mui/icons-material/Translate';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { 
@@ -738,7 +736,7 @@ const KonuTakip = () => {
           <LinearProgress />
         </Box>
       ) : (
-        <Grid container spacing={3} sx={{ justifyContent: 'flex-start', px: 1 }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3, px: 1 }}>
           {filteredDersler.map((ders) => {
             const ilerleme = getKonuIlerleme(ders.id);
             const durumFiltresi = filter === 'all' || 
@@ -747,177 +745,221 @@ const KonuTakip = () => {
             
             if (!durumFiltresi) return null;
             
+            // Tamamlanan konu sayısı
+            const tamamlananKonuSayisi = Math.round(ilerleme * ders.konular.length / 100);
+            
             return (
-              <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ mb: 3 }}>
-                <Card 
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      boxShadow: `0 10px 30px ${ders.color}30`,
-                      transform: 'translateY(-8px) scale(1.02)',
-                    },
-                    borderRadius: '16px',
-                    overflow: 'hidden',
-                    bgcolor: 'white',
-                    border: 'none',
-                    minWidth: 250,
-                    mx: 'auto',
-                    width: '100%',
+              <Card
+                key={ders.id}
+                elevation={0}
+                onClick={() => handleDersClick(ders)}
+                sx={{
+                  cursor: 'pointer',
+                  borderRadius: '16px',
+                  background: '#ffffff',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'all 0.3s ease',
+                  overflow: 'hidden',
+                  border: `1px solid ${ders.color}30`,
+                  '&:hover': { 
+                    transform: 'translateY(-8px)',
+                    boxShadow: `0 15px 30px rgba(0,0,0,0.1), 0 8px 15px ${ders.color}30`
+                  },
+                  position: 'relative'
+                }}
+              >
+                {/* Ders Başlık Bölümü */}
+                <Box sx={{
+                  background: ders.color,
+                  p: 2.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                    width: '30%',
                     height: '100%',
-                    position: 'relative',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
-                    '&::before': {
-                      content: '""',
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      background: `linear-gradient(135deg, ${ders.color}10, ${ders.color}05)`,
-                      zIndex: 0
-                    }
-                  }}
-                >
-                  <CardActionArea 
-                    onClick={() => handleDersClick(ders)} 
-                    sx={{ 
-                      flexGrow: 1, 
-                      display: 'flex', 
-                      flexDirection: 'column', 
-                      alignItems: 'stretch', 
-                      height: '100%',
-                      zIndex: 1,
-                      position: 'relative'
+                    background: `linear-gradient(to right, transparent, ${ders.color}90)`,
+                    zIndex: 1
+                  }
+                }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: '#ffffff',
+                      color: ders.color,
+                      width: 52,
+                      height: 52,
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                      zIndex: 2,
+                      transition: 'transform 0.3s ease',
+                      '&:hover': {
+                        transform: 'rotate(10deg) scale(1.1)'
+                      }
                     }}
                   >
-                    <Box sx={{ 
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '4px',
-                        background: `linear-gradient(90deg, transparent, ${ders.color}, transparent)`,
-                      }
+                    {getDersIcon(ders.ad)}
+                  </Avatar>
+                  <Typography 
+                    variant="h6"
+                    sx={{ 
+                      fontWeight: 900, 
+                      color: '#ffffff',
+                      textShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      zIndex: 2,
+                      fontSize: '1.25rem',
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    {ders.ad}
+                  </Typography>
+                </Box>
+                
+                {/* İçerik Bölümü */}
+                <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
+                  {/* Konu Bilgisi */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    p: 1.5, 
+                    borderRadius: '10px',
+                    bgcolor: '#f8f9fa',
+                    border: '1px solid #eaecef',
+                    mb: 2.5
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <FormatListBulletedIcon sx={{ color: ders.color, mr: 1.5, fontSize: '1.2rem' }} />
+                      <Typography sx={{ fontWeight: 700, color: '#495057', fontSize: '0.95rem' }}>
+                        Toplam Konu
+                      </Typography>
+                    </Box>
+                    <Typography sx={{ 
+                      fontWeight: 800, 
+                      color: ders.color, 
+                      fontSize: '1.1rem',
+                      bgcolor: `${ders.color}15`,
+                      px: 1.5,
+                      py: 0.5,
+                      borderRadius: '30px'
                     }}>
+                      {ders.konular.length}
+                    </Typography>
+                  </Box>
+                  
+                  {/* İlerleme Bölümü */}
+                  <Box sx={{ mt: 'auto' }}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center', 
+                      mb: 1.5
+                    }}>
+                      <Typography sx={{ fontWeight: 600, color: '#495057', fontSize: '0.9rem' }}>
+                        İlerleme Durumu
+                      </Typography>
                       <Box sx={{ 
-                        py: 2.5, 
-                        px: 3, 
-                        display: 'flex', 
+                        bgcolor: ilerleme > 0 ? (ilerleme === 100 ? '#4caf5020' : '#ff980020') : '#e0e0e020',
+                        color: ilerleme > 0 ? (ilerleme === 100 ? '#2e7d32' : '#e65100') : '#757575',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: '30px',
+                        display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'flex-start',
-                        gap: 2,
+                        gap: 0.5
                       }}>
-                        <Avatar sx={{ 
-                          bgcolor: ders.color, 
-                          color: 'white',
-                          width: 56, 
-                          height: 56,
-                          boxShadow: `0 4px 10px ${ders.color}70`,
-                          '& .MuiSvgIcon-root': { fontSize: '2rem' },
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'rotate(10deg)'
-                          }
-                        }}>
-                          {getDersIcon(ders.ad)}
-                        </Avatar>
-                        <Typography 
-                          variant="h6" 
-                          component="div" 
-                          sx={{ 
-                            fontSize: '1.5rem', 
-                            fontWeight: 900,
-                            color: '#b4c0d6',
-                            letterSpacing: '0.5px',
-                            position: 'relative',
-                            display: 'inline-block',
-                            '&::after': {
-                              content: '""',
-                              position: 'absolute',
-                              bottom: -2,
-                              left: 0,
-                              width: '100%',
-                              height: '2px',
-                              background: `linear-gradient(90deg, ${ders.color}80, transparent)`,
-                            }
-                          }}
-                        >
-                          {ders.ad}
-                        </Typography>
+                        {ilerleme > 0 ? (
+                          ilerleme === 100 ? (
+                            <>
+                              <CheckCircleIcon fontSize="small" />
+                              Tamamlandı
+                            </>
+                          ) : (
+                            <>
+                              <AccessTimeIcon fontSize="small" />
+                              Devam Ediyor
+                            </>
+                          )
+                        ) : (
+                          'Başlanmadı'
+                        )}
                       </Box>
                     </Box>
                     
-                    <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'center', 
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={ilerleme} 
+                      sx={{ 
+                        height: 10, 
+                        borderRadius: 5,
+                        mb: 2,
+                        bgcolor: '#f0f0f0',
+                        '& .MuiLinearProgress-bar': {
+                          background: ilerleme === 100 
+                            ? 'linear-gradient(90deg, #4caf50, #81c784)' 
+                            : `linear-gradient(90deg, ${ders.color}, ${ders.color}90)`,
+                          borderRadius: 5
+                        }
+                      }} 
+                    />
+                    
+                    {/* Tamamlanan Konu Sayacı */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center',
+                      p: 2,
+                      borderRadius: '12px',
+                      bgcolor: '#f8f9fa',
+                      border: `2px solid ${ders.color}30`,
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: `${ilerleme}%`,
+                        height: '100%',
+                        background: `linear-gradient(to right, ${ders.color}10, ${ders.color}20)`,
+                        zIndex: 0
+                      }
+                    }}>
+                      <Typography sx={{ 
+                        fontWeight: 800, 
+                        color: '#495057', 
+                        fontSize: '1rem',
+                        zIndex: 1,
+                        display: 'flex',
                         alignItems: 'center',
-                        mb: 3,
-                        mt: 1,
-                        p: 1.5,
-                        borderRadius: '12px',
-                        background: `linear-gradient(135deg, ${ders.color}15, ${ders.color}05)`,
-                        border: `1px dashed ${ders.color}40`,
+                        gap: 1
                       }}>
-                        <Typography variant="body1" sx={{ fontWeight: 800, color: ders.color, fontSize: '1.1rem' }}>
-                          {ders.konular.length} Konu
-                        </Typography>
-                      </Box>
-                      
-                      <Box sx={{ 
-                        mt: 'auto',
-                        pt: 2,
-                        borderTop: '1px solid #eee'
-                      }}>
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={ilerleme} 
-                          sx={{ 
-                            height: 10, 
-                            borderRadius: 5,
-                            mb: 2,
-                            bgcolor: '#f0f0f0',
-                            '& .MuiLinearProgress-bar': {
-                              background: `linear-gradient(90deg, ${ders.color}, ${ders.color}90)`,
-                              borderRadius: 5
-                            }
-                          }} 
-                        />
-                        
-                        <Box sx={{ 
-                          display: 'flex', 
-                          justifyContent: 'center', 
-                          alignItems: 'center', 
-                          py: 1.5,
-                          borderRadius: '12px',
-                          background: `linear-gradient(135deg, ${ders.color}10, ${ders.color}05)`,
-                          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
+                        <span style={{ 
+                          color: ders.color, 
+                          fontWeight: 900, 
+                          fontSize: '1.2rem',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.05)'
                         }}>
-                          <Typography variant="body2" sx={{ 
-                            color: '#555', 
-                            fontWeight: 700, 
-                            fontSize: '1rem',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1
-                          }}>
-                            <span style={{ color: ders.color, fontWeight: 800 }}>{Math.round(ilerleme * ders.konular.length / 100)}</span> / {ders.konular.length} Konu Tamamlandı
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-              </Grid>
+                          {tamamlananKonuSayisi}
+                        </span> 
+                        / {ders.konular.length} Konu Tamamlandı
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Card>
             );
           })}
-        </Grid>
+        </Box>
       )}
       
       <Dialog 
