@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { auth, db } from '../firebase';
-import { collection, addDoc, query, where, getDocs, orderBy, limit, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
 
 const NotificationContext = createContext();
 
@@ -17,19 +17,25 @@ export const NotificationProvider = ({ children }) => {
       if (!user) return;
       
       try {
+        // Sadece userId filtrelemesi yapıyoruz, sıralamayı client tarafında yapacağız
         const q = query(
           collection(db, 'notifications'),
-          where('userId', '==', user.uid),
-          orderBy('createdAt', 'desc'),
-          limit(20)
+          where('userId', '==', user.uid)
+          // orderBy ve limit kaldırıldı, indeks gerektirmeyen basit sorgu
         );
         
         const querySnapshot = await getDocs(q);
-        const notificationsData = querySnapshot.docs.map(doc => ({
+        let notificationsData = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
           createdAt: doc.data().createdAt?.toDate() || new Date()
         }));
+        
+        // JavaScript tarafında sıralama yap
+        notificationsData.sort((a, b) => b.createdAt - a.createdAt);
+        
+        // En son 20 bildirimi al
+        notificationsData = notificationsData.slice(0, 20);
         
         setNotifications(notificationsData);
         setUnreadCount(notificationsData.filter(n => !n.read).length);

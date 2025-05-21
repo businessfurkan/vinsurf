@@ -320,13 +320,13 @@ const RekaNET = () => {
                 
                 <Grid container spacing={4}>
                   {/* Türkçe */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Türkçe (40 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -337,7 +337,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -348,7 +348,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -369,13 +369,13 @@ const RekaNET = () => {
                   </Grid>
                   
                   {/* Sosyal Bilimler */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Sosyal Bilimler (20 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -386,7 +386,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -397,7 +397,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -418,13 +418,13 @@ const RekaNET = () => {
                   </Grid>
                   
                   {/* Matematik */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Matematik (40 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -435,7 +435,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -446,7 +446,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -467,13 +467,13 @@ const RekaNET = () => {
                   </Grid>
                   
                   {/* Fen Bilimleri */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Fen Bilimleri (20 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -484,7 +484,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -495,7 +495,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -563,13 +563,13 @@ const RekaNET = () => {
                 
                 <Grid container spacing={4}>
                   {/* Matematik */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Matematik (40 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -580,7 +580,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -591,7 +591,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -612,13 +612,13 @@ const RekaNET = () => {
                   </Grid>
                   
                   {/* Fizik */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Fizik (14 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -629,7 +629,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -640,7 +640,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -661,13 +661,13 @@ const RekaNET = () => {
                   </Grid>
                   
                   {/* Kimya */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Kimya (13 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -678,7 +678,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -689,7 +689,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -710,13 +710,13 @@ const RekaNET = () => {
                   </Grid>
                   
                   {/* Biyoloji */}
-                  <Grid item xs={12} md={6}>
+                  <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                     <Card elevation={1} sx={{ p: 2, borderRadius: 2, height: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 2, color: '#3F51B5', fontWeight: 600 }}>
                         Biyoloji (13 Soru)
                       </Typography>
                       <Grid container spacing={2}>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Doğru"
                             type="number"
@@ -727,7 +727,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Yanlış"
                             type="number"
@@ -738,7 +738,7 @@ const RekaNET = () => {
                             size="small"
                           />
                         </Grid>
-                        <Grid item xs={4}>
+                        <Grid gridColumn="span 4">
                           <TextField
                             label="Boş"
                             type="number"
@@ -825,7 +825,7 @@ const RekaNET = () => {
                   </Box>
                   <Box sx={{ p: 3 }}>
                     <Grid container spacing={3}>
-                      <Grid item xs={12} md={6}>
+                      <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                         <Typography variant="body1" sx={{ mb: 1 }}>
                           <strong>Türkçe:</strong> {calculateTYTNet('turkish')} net
                         </Typography>
@@ -833,7 +833,7 @@ const RekaNET = () => {
                           <strong>Sosyal Bilimler:</strong> {calculateTYTNet('social')} net
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                         <Typography variant="body1" sx={{ mb: 1 }}>
                           <strong>Matematik:</strong> {calculateTYTNet('mathTYT')} net
                         </Typography>
@@ -859,7 +859,7 @@ const RekaNET = () => {
                   </Box>
                   <Box sx={{ p: 3 }}>
                     <Grid container spacing={3}>
-                      <Grid item xs={12} md={6}>
+                      <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                         <Typography variant="body1" sx={{ mb: 1 }}>
                           <strong>Matematik:</strong> {calculateAYTNet('mathAYT')} net
                         </Typography>
@@ -867,7 +867,7 @@ const RekaNET = () => {
                           <strong>Fizik:</strong> {calculateAYTNet('physics')} net
                         </Typography>
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid gridColumn={{xs: "span 12", md: "span 6"}}>
                         <Typography variant="body1" sx={{ mb: 1 }}>
                           <strong>Kimya:</strong> {calculateAYTNet('chemistry')} net
                         </Typography>

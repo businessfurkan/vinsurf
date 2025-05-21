@@ -671,7 +671,7 @@ const PomodoroPage = () => {
           </Typography>
           
           <Grid container spacing={4} sx={{ mt: 2 }}>
-            <Grid item xs={12} md={4}>
+            <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
               <Paper elevation={0} sx={{ 
                 p: 3, 
                 height: '100%',
@@ -709,7 +709,7 @@ const PomodoroPage = () => {
               </Paper>
             </Grid>
             
-            <Grid item xs={12} md={4}>
+            <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
               <Paper elevation={0} sx={{ 
                 p: 3, 
                 height: '100%',
@@ -747,7 +747,7 @@ const PomodoroPage = () => {
               </Paper>
             </Grid>
             
-            <Grid item xs={12} md={4}>
+            <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
               <Paper elevation={0} sx={{ 
                 p: 3, 
                 height: '100%',
@@ -835,7 +835,7 @@ const PomodoroPage = () => {
             
             <Grid container spacing={4}>
               {/* İlk satır: 1 ve 2 yan yana */}
-              <Grid item xs={12} sm={6}>
+              <Grid gridColumn={{xs: "span 12", sm: "span 6"}}>
                 <Box sx={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
@@ -889,7 +889,7 @@ const PomodoroPage = () => {
                 </Box>
               </Grid>
               
-              <Grid item xs={12} sm={6}>
+              <Grid gridColumn={{xs: "span 12", sm: "span 6"}}>
                 <Box sx={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
@@ -944,7 +944,7 @@ const PomodoroPage = () => {
               </Grid>
               
               {/* İkinci satır: 3 ve 4 yan yana */}
-              <Grid item xs={12} sm={6}>
+              <Grid gridColumn={{xs: "span 12", sm: "span 6"}}>
                 <Box sx={{ 
                   display: 'flex', 
                   flexDirection: 'column', 
@@ -998,7 +998,7 @@ const PomodoroPage = () => {
                 </Box>
               </Grid>
               
-              <Grid item xs={12} sm={6}>
+              <Grid gridColumn={{xs: "span 12", sm: "span 6"}}>
                 <Box sx={{ 
                   display: 'flex', 
                   flexDirection: 'column', 

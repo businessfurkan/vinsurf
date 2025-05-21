@@ -4,7 +4,6 @@ import {
   Box, 
   Drawer, 
   List, 
-  ListItem, 
   ListItemButton, 
   ListItemIcon
 } from '@mui/material';
@@ -121,9 +120,9 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <ListItem
+            <Box
               key={item.text}
-              disablePadding
+              component="li"
               sx={{
                 display: 'block',
                 padding: 0,
@@ -174,15 +173,20 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 </ListItemIcon>
               </ListItemButton>
               
-              {hoveredItem === item.text && ReactDOM.createPortal(
+              {hoveredItem === item.text && (() => {
+                // Element kontrolünü ReactDOM.createPortal'dan önce yapıyoruz
+                const element = document.getElementById(`sidebar-item-${item.text}`);
+                if (!element) return null; // Element yoksa tooltip gösterme
+                
+                const rect = element.getBoundingClientRect();
+                const topPosition = rect.top + rect.height/2 - 15;
+                
+                return ReactDOM.createPortal(
                 <Box
                   sx={{
                     position: 'fixed',
                     left: `${drawerWidth + 10}px`,
-                    top: (event) => {
-                      const rect = document.getElementById(`sidebar-item-${item.text}`).getBoundingClientRect();
-                      return rect.top + rect.height/2 - 15;
-                    },
+                    top: topPosition, // Hesaplanmış değeri doğrudan kullanıyoruz
                     transform: 'translateY(-50%)',
                     background: `linear-gradient(135deg, ${item.color}15, ${item.color}25)`,
                     boxShadow: `0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.12)`,
@@ -255,8 +259,9 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                   </Box>
                 </Box>,
                 document.body
-              )}
-            </ListItem>
+              );
+              })()}
+            </Box>
           );
         })}
       </List>

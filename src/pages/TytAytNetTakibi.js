@@ -91,14 +91,23 @@ const aytSubjects = [
 // Stepper için özel StyledCard bileşeni
 const StepperCard = styled(Card)(({ theme }) => ({
   borderRadius: 16,
-  backgroundColor: '#cacab3',
-  backgroundImage: 'none',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(202, 202, 179, 0.15)',
-  border: '1px solid rgba(202, 202, 179, 0.1)',
+  background: 'linear-gradient(135deg, #2c3e50 0%, #4a6491 100%)',
+  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
   transition: 'all 0.3s ease-in-out',
   overflow: 'hidden',
   position: 'relative',
-  width: '100%'
+  width: '100%',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'radial-gradient(circle at top right, rgba(78, 133, 253, 0.15), transparent 70%)',
+    pointerEvents: 'none'
+  }
 }));
 
 // Normal kartlar için StyledCard bileşeni
@@ -119,11 +128,11 @@ const StyledCard = styled(Card)(({ theme }) => ({
 
 // Steps for the form
 const steps = [
-  'Deneme Adı',
-  'Tarih',
-  'Sınav Türü',
-  'Ders Bilgileri',
-  'Özet'
+  '1. Deneme Adı',
+  '2. Tarih',
+  '3. Sınav Türü',
+  '4. Ders Bilgileri',
+  '5. Özet'
 ];
 
 const TytAytNetTakibi = () => {
@@ -421,6 +430,12 @@ const TytAytNetTakibi = () => {
     try {
       setLoading(true);
       
+      // Kullanıcı oturum açmamışsa işlemi durdur
+      if (!user || !user.uid) {
+        console.log('Kullanıcı oturum açmamış, veriler yüklenemiyor');
+        return;
+      }
+      
       const q = query(
         collection(db, 'netRecords'),
         where('userId', '==', user.uid),
@@ -440,7 +455,9 @@ const TytAytNetTakibi = () => {
       setNetRecords(records);
       
       // Yapay zeka tavsiye sistemini çalıştır
-      analyzePerformanceAndSendRecommendations(records);
+      if (records.length > 0) {
+        analyzePerformanceAndSendRecommendations(records);
+      }
       
     } catch (error) {
       console.error('Error fetching records:', error);
@@ -448,7 +465,7 @@ const TytAytNetTakibi = () => {
     } finally {
       setLoading(false);
     }
-  }, [showNotification, setLoading, setNetRecords, analyzePerformanceAndSendRecommendations, user?.uid]);
+  }, [showNotification, setLoading, setNetRecords, analyzePerformanceAndSendRecommendations, user]);
   
 
   
@@ -482,7 +499,7 @@ const TytAytNetTakibi = () => {
       case 0:
         return (
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
               Deneme Adını Girin
             </Typography>
             <TextField
@@ -493,15 +510,40 @@ const TytAytNetTakibi = () => {
               onChange={(e) => setExamName(e.target.value)}
               error={!!errors.examName}
               helperText={errors.examName}
-              placeholder="Örn: TYT Genel Deneme 5"
-              sx={{ mt: 2 }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: 'rgba(44, 62, 80, 0.6)',
+                  color: '#ffffff',
+                  '& fieldset': {
+                    borderColor: 'rgba(255, 255, 255, 0.5)'
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#ffffff'
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#ffffff'
+                  }
+                },
+                '& .MuiInputLabel-root': {
+                  color: '#ffffff'
+                },
+                '& .MuiInputLabel-root.Mui-focused': {
+                  color: '#ffffff'
+                },
+                '& .MuiInputBase-input': {
+                  color: '#ffffff'
+                },
+                '& .MuiFormHelperText-root': {
+                  color: '#ffffff'
+                }
+              }}
             />
           </Box>
         );
       case 1:
         return (
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
               Deneme Tarihini Seçin
             </Typography>
             <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={trLocale}>
@@ -517,20 +559,26 @@ const TytAytNetTakibi = () => {
                     sx: { 
                       mt: 2,
                       '& .MuiOutlinedInput-root': {
-                        backgroundColor: '#cacab3',
-                        color: '#FFFFF0',
+                        backgroundColor: 'rgba(44, 62, 80, 0.6)',
+                        color: '#ffffff',
                         '& fieldset': {
-                          borderColor: '#cacab3'
+                          borderColor: 'rgba(255, 255, 255, 0.5)'
                         },
                         '&:hover fieldset': {
-                          borderColor: '#b8b89f'
+                          borderColor: '#ffffff'
                         },
                         '&.Mui-focused fieldset': {
-                          borderColor: '#cacab3'
+                          borderColor: '#ffffff'
                         }
                       },
                       '& .MuiInputLabel-root': {
-                        color: '#FFFFF0'
+                        color: '#ffffff'
+                      },
+                      '& .MuiInputBase-input': {
+                        color: '#ffffff'
+                      },
+                      '& .MuiFormHelperText-root': {
+                        color: '#ffffff'
                       }
                     }
                   }
@@ -542,31 +590,31 @@ const TytAytNetTakibi = () => {
       case 2:
         return (
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
               Sınav Türünü Seçin
             </Typography>
             <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel sx={{ color: '#FFFFF0' }}>Sınav Türü</InputLabel>
+              <InputLabel sx={{ color: '#f4f2f5' }}>Sınav Türü</InputLabel>
               <Select
                 value={examType}
                 label="Sınav Türü"
                 onChange={(e) => setExamType(e.target.value)}
                 sx={{
-                  backgroundColor: '#cacab3',
-                  color: '#FFFFF0',
+                  backgroundColor: 'rgba(44, 62, 80, 0.6)',
+                  color: '#ffffff',
                   '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#cacab3'
+                    borderColor: 'rgba(255, 255, 255, 0.5)'
                   },
                   '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#b8b89f'
+                    borderColor: '#ffffff'
                   },
                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#cacab3'
+                    borderColor: '#ffffff'
                   }
                 }}
               >
-                <MenuItem value="TYT" sx={{ backgroundColor: '#cacab3', '&:hover': { backgroundColor: '#b8b89f' }, '&.Mui-selected': { backgroundColor: '#b8b89f' } }}>TYT</MenuItem>
-                <MenuItem value="AYT" sx={{ backgroundColor: '#cacab3', '&:hover': { backgroundColor: '#b8b89f' }, '&.Mui-selected': { backgroundColor: '#b8b89f' } }}>AYT</MenuItem>
+                <MenuItem value="TYT" sx={{ backgroundColor: 'rgba(44, 62, 80, 0.8)', color: '#ffffff', '&:hover': { backgroundColor: 'rgba(44, 62, 80, 0.9)' }, '&.Mui-selected': { backgroundColor: 'rgba(44, 62, 80, 0.9)' } }}>TYT</MenuItem>
+                <MenuItem value="AYT" sx={{ backgroundColor: 'rgba(44, 62, 80, 0.8)', color: '#ffffff', '&:hover': { backgroundColor: 'rgba(44, 62, 80, 0.9)' }, '&.Mui-selected': { backgroundColor: 'rgba(44, 62, 80, 0.9)' } }}>AYT</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -574,12 +622,12 @@ const TytAytNetTakibi = () => {
       case 3:
         return (
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#FFFFF0' }}>
+            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
               Ders Bilgilerini Girin
             </Typography>
             
             <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid item xs={12}>
+              <Grid item xs={12} md={6}>
                 <FormControl fullWidth>
                   <InputLabel sx={{ color: '#f4f2f5' }}>Ders Seçin</InputLabel>
                   <Select
@@ -588,17 +636,18 @@ const TytAytNetTakibi = () => {
                     onChange={(e) => handleSubjectSelect(e.target.value)}
                     sx={{
                       '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f4f2f5'
+                        borderColor: 'rgba(255, 255, 255, 0.5)'
                       },
                       '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f4f2f5'
+                        borderColor: '#ffffff'
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#f4f2f5'
+                        borderColor: '#ffffff'
                       },
-                      color: '#FFFFF0',
+                      color: '#ffffff',
                       height: '56px',
                       fontSize: '1.1rem',
+                      backgroundColor: 'rgba(44, 62, 80, 0.6)',
                       minWidth: '300px',
                       '& .MuiSelect-select': {
                         paddingTop: '12px',
@@ -618,110 +667,140 @@ const TytAytNetTakibi = () => {
               
               {currentSubject && (
                 <>
-                  <Grid item xs={12} sm={4}>
+                  <Grid gridColumn={{xs: "span 12", sm: "span 4"}}>
                     <TextField
                       fullWidth
                       label="Doğru"
                       type="number"
                       InputProps={{ 
                         inputProps: { min: 0 },
-                        sx: { color: '#FFFFF0' }
+                        sx: { color: '#f4f2f5' }
                       }}
                       value={correctCount}
                       onChange={(e) => setCorrectCount(e.target.value)}
                       error={!!errors.correctCount}
                       helperText={errors.correctCount}
                       sx={{
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgba(44, 62, 80, 0.6)',
+                          color: '#ffffff',
+                          '& fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.5)'
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#ffffff'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#ffffff'
+                          }
                         },
                         '& .MuiInputLabel-root': {
-                          color: '#f4f2f5'
+                          color: '#ffffff'
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#f4f2f5'
+                          color: '#ffffff'
+                        },
+                        '& .MuiInputBase-input': {
+                          color: '#ffffff'
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#ffffff'
                         }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid gridColumn={{xs: "span 12", sm: "span 4"}}>
                     <TextField
                       fullWidth
                       label="Yanlış"
                       type="number"
                       InputProps={{ 
                         inputProps: { min: 0 },
-                        sx: { color: '#FFFFF0' }
+                        sx: { color: '#f4f2f5' }
                       }}
                       value={incorrectCount}
                       onChange={(e) => setIncorrectCount(e.target.value)}
                       error={!!errors.incorrectCount}
                       helperText={errors.incorrectCount}
                       sx={{
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgba(44, 62, 80, 0.6)',
+                          color: '#ffffff',
+                          '& fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.5)'
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#ffffff'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#ffffff'
+                          }
                         },
                         '& .MuiInputLabel-root': {
-                          color: '#f4f2f5'
+                          color: '#ffffff'
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#f4f2f5'
+                          color: '#ffffff'
+                        },
+                        '& .MuiInputBase-input': {
+                          color: '#ffffff'
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#ffffff'
                         }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4}>
+                  <Grid gridColumn={{xs: "span 12", sm: "span 4"}}>
                     <TextField
                       fullWidth
                       label="Boş"
                       type="number"
                       InputProps={{ 
                         inputProps: { min: 0 },
-                        sx: { color: '#FFFFF0' }
+                        sx: { color: '#f4f2f5' }
                       }}
                       value={emptyCount}
                       onChange={(e) => setEmptyCount(e.target.value)}
                       error={!!errors.emptyCount}
                       helperText={errors.emptyCount}
                       sx={{
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#f4f2f5'
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgba(44, 62, 80, 0.6)',
+                          color: '#ffffff',
+                          '& fieldset': {
+                            borderColor: 'rgba(255, 255, 255, 0.5)'
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#ffffff'
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#ffffff'
+                          }
                         },
                         '& .MuiInputLabel-root': {
-                          color: '#f4f2f5'
+                          color: '#ffffff'
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#f4f2f5'
+                          color: '#ffffff'
+                        },
+                        '& .MuiInputBase-input': {
+                          color: '#ffffff'
+                        },
+                        '& .MuiFormHelperText-root': {
+                          color: '#ffffff'
                         }
                       }}
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid gridColumn="span 12">
                     <Button
                       variant="contained"
                       onClick={handleNext}
-                      startIcon={<AddIcon sx={{ color: '#FFFFF0' }} />}
+                      startIcon={<AddIcon sx={{ color: '#f4f2f5' }} />}
                       sx={{ 
                         backgroundColor: '#f4f2f5',
-                        color: '#FFFFF0',
+                        color: '#2e5559',
                         '&:hover': {
                           backgroundColor: '#c5c0a7'
                         }
@@ -740,14 +819,14 @@ const TytAytNetTakibi = () => {
                   variant="h6" 
                   gutterBottom 
                   sx={{ 
-                    color: '#2c3e50', 
+                    color: '#f4f2f5', 
                     fontWeight: 'bold',
                     display: 'flex',
                     alignItems: 'center',
                     mb: 2
                   }}
                 >
-                  <SchoolIcon sx={{ mr: 1 }} /> Eklenen Dersler
+                  <SchoolIcon sx={{ mr: 1, color: '#f4f2f5' }} /> Eklenen Dersler
                 </Typography>
                 <TableContainer component={Paper} sx={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
                   <Table>
@@ -827,7 +906,7 @@ const TytAytNetTakibi = () => {
                             component="th" 
                             scope="row"
                             sx={{ 
-                              color: '#2c3e50', 
+                              color: '#f4f2f5', 
                               fontWeight: 800,
                               fontSize: '1rem'
                             }}
@@ -867,10 +946,10 @@ const TytAytNetTakibi = () => {
                           <TableCell 
                             align="center"
                             sx={{ 
-                              color: '#3498db', 
+                              color: '#f4f2f5', 
                               fontWeight: 'bold',
-                              fontSize: '0.95rem',
-                              backgroundColor: '#ebf5fb',
+                              fontSize: '1rem',
+                              backgroundColor: 'rgba(44, 62, 80, 0.8)',
                               borderRadius: '4px'
                             }}
                           >
@@ -892,11 +971,11 @@ const TytAytNetTakibi = () => {
               variant="h5" 
               gutterBottom 
               sx={{ 
-                color: '#2c3e50', 
+                color: '#f4f2f5', 
                 fontWeight: 'bold',
                 textAlign: 'center',
                 mb: 3,
-                borderBottom: '2px solid #5ec837',
+                borderBottom: '2px solid #d9d4bb',
                 paddingBottom: '10px'
               }}
             >
@@ -905,7 +984,7 @@ const TytAytNetTakibi = () => {
             
             <Grid container spacing={3}>
               {/* Deneme bilgileri kartları */}
-              <Grid item xs={12} md={4}>
+              <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
                 <Paper 
                   elevation={3} 
                   sx={{ 
@@ -916,16 +995,16 @@ const TytAytNetTakibi = () => {
                     borderLeft: '4px solid #3498db'
                   }}
                 >
-                  <Typography variant="subtitle1" sx={{ color: '#3498db', fontWeight: 'bold', mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ color: '#f4f2f5', fontWeight: 'bold', mb: 1 }}>
                     Deneme Adı
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
+                  <Typography variant="body1" sx={{ color: '#f4f2f5', fontSize: '1.1rem' }}>
                     {examName || 'Belirtilmemiş'}
                   </Typography>
                 </Paper>
               </Grid>
               
-              <Grid item xs={12} md={4}>
+              <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
                 <Paper 
                   elevation={3} 
                   sx={{ 
@@ -939,13 +1018,13 @@ const TytAytNetTakibi = () => {
                   <Typography variant="subtitle1" sx={{ color: '#e67e22', fontWeight: 'bold', mb: 1 }}>
                     Tarih
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
+                  <Typography variant="body1" sx={{ color: '#f4f2f5', fontSize: '1.1rem' }}>
                     {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
                   </Typography>
                 </Paper>
               </Grid>
               
-              <Grid item xs={12} md={4}>
+              <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
                 <Paper 
                   elevation={3} 
                   sx={{ 
@@ -959,14 +1038,14 @@ const TytAytNetTakibi = () => {
                   <Typography variant="subtitle1" sx={{ color: '#2ecc71', fontWeight: 'bold', mb: 1 }}>
                     Sınav Türü
                   </Typography>
-                  <Typography variant="body1" sx={{ color: '#2c3e50', fontSize: '1.1rem' }}>
+                  <Typography variant="body1" sx={{ color: '#f4f2f5', fontSize: '1.1rem' }}>
                     {examType}
                   </Typography>
                 </Paper>
               </Grid>
               
               {/* Dersler tablosu */}
-              <Grid item xs={12} sx={{ mt: 2 }}>
+              <Grid gridColumn="span 12" sx={{ mt: 2 }}>
                 <Paper 
                   elevation={3} 
                   sx={{ 
@@ -1067,7 +1146,7 @@ const TytAytNetTakibi = () => {
                               component="th" 
                               scope="row"
                               sx={{ 
-                                color: '#2c3e50', 
+                                color: '#f4f2f5', 
                                 fontWeight: 800,
                                 fontSize: '1rem'
                               }}
@@ -1171,7 +1250,9 @@ const TytAytNetTakibi = () => {
     if (chartData.length === 0) {
       return (
         <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body1">Seçilen derse ait veri bulunmamaktadır.</Typography>
+          <Typography variant="body1" sx={{ color: '#f4f2f5' }}>
+            Seçilen derse ait veri bulunmamaktadır.
+          </Typography>
         </Box>
       );
     }
@@ -1203,7 +1284,9 @@ const TytAytNetTakibi = () => {
     if (netRecords.length === 0) {
       return (
         <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body1">Henüz kaydedilmiş deneme sonucu bulunmamaktadır.</Typography>
+          <Typography variant="body1" sx={{ color: '#f4f2f5' }}>
+            Henüz kaydedilmiş deneme sonucu bulunmamaktadır.
+          </Typography>
         </Box>
       );
     }
@@ -1233,7 +1316,7 @@ const TytAytNetTakibi = () => {
               ...(selectedExamType === 'TYT' 
                 ? {
                     backgroundColor: '#d9d4bb',
-                    color: '#FFFFF0',
+                    color: '#f4f2f5',
                     '&:hover': {
                       backgroundColor: '#c5c0a7'
                     }
@@ -1258,7 +1341,7 @@ const TytAytNetTakibi = () => {
               ...(selectedExamType === 'AYT' 
                 ? {
                     backgroundColor: '#d9d4bb',
-                    color: '#FFFFF0',
+                    color: '#f4f2f5',
                     '&:hover': {
                       backgroundColor: '#c5c0a7'
                     }
@@ -1289,7 +1372,7 @@ const TytAytNetTakibi = () => {
               })[0] : null;
             
             return (
-              <Grid item xs={12} sm={6} md={4} key={subject}>
+              <Grid gridColumn={{xs: "span 12", sm: "span 6", md: "span 4"}} key={subject}>
                 <StyledCard 
                   sx={{ 
                     cursor: 'pointer',
@@ -1300,7 +1383,7 @@ const TytAytNetTakibi = () => {
                 >
                   <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Typography variant="h6" gutterBottom sx={{ color: '#FFFFF0' }}>{subject}</Typography>
+                      <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>{subject}</Typography>
                       {latestRecord && (
                         <IconButton 
                           size="small" 
@@ -1316,32 +1399,32 @@ const TytAytNetTakibi = () => {
                     </Box>
                     {latestRecord ? (
                       <>
-                        <Typography variant="body2" sx={{ color: 'rgba(255, 255, 240, 0.7)' }}>
+                        <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
                           Son Deneme: {latestRecord.examName}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'rgba(255, 255, 240, 0.7)' }}>
+                        <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
                           Tarih: {latestRecord.examDate?.toDate ? 
                             format(latestRecord.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale }) : ''}
                         </Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                          <Typography variant="body2" sx={{ color: '#FFFFF0' }}>
+                          <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
                             D: {latestRecord.correctCount}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#FFFFF0' }}>
+                          <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
                             Y: {latestRecord.incorrectCount}
                           </Typography>
-                          <Typography variant="body2" sx={{ color: '#FFFFF0' }}>
+                          <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
                             B: {latestRecord.emptyCount}
                           </Typography>
                         </Box>
                         <Box sx={{ mt: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#FFFFF0' }}>
+                          <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#f4f2f5' }}>
                             Net: {latestRecord.net}
                           </Typography>
                         </Box>
                       </>
                     ) : (
-                      <Typography variant="body2" sx={{ color: 'rgba(255, 255, 240, 0.7)' }}>
+                      <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
                         Henüz kayıt bulunmamaktadır.
                       </Typography>
                     )}
@@ -1404,7 +1487,7 @@ const TytAytNetTakibi = () => {
           mt: 8, // Başlığı daha aşağıya almak için margin-top arttırıldı
           pt: 3 // Üstte daha fazla boşluk için padding-top arttırıldı
         }}>
-          <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', color: '#FFFFF0' }}>
+          <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', color: '#f4f2f5' }}>
             <SchoolIcon sx={{ mr: 1, color: '#d9d4bb' }} /> TYT-AYT Net Takibi
           </Typography>
           <Button 
@@ -1412,7 +1495,7 @@ const TytAytNetTakibi = () => {
             onClick={toggleViewMode}
             sx={{
               backgroundColor: '#d9d4bb',
-              color: '#FFFFF0',
+              color: '#f4f2f5',
               fontWeight: 'bold',
               padding: '10px 20px',
               fontSize: '1.05rem',
@@ -1438,71 +1521,57 @@ const TytAytNetTakibi = () => {
                 activeStep={activeStep} 
                 alternativeLabel
                 sx={{
+                  py: 2,
                   '& .MuiStepIcon-root': {
-                    color: 'rgba(0, 0, 0, 0.3)',
-                    fontSize: '2rem',
-                    transition: 'all 0.3s ease',
-                    backgroundColor: 'transparent',
+                    color: 'rgba(255, 255, 255, 0.3)',
+                    fontSize: '2.2rem',
+                    transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
                     '&:hover': {
-                      color: '#3498db',
-                      transform: 'scale(1.1)'
+                      transform: 'scale(1.15) translateY(-2px)',
+                      filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
                     },
                     '&.Mui-active': {
-                      color: '#3498db',
-                      transform: 'scale(1.2)'
+                      color: '#4e85fd',
+                      filter: 'drop-shadow(0 4px 12px rgba(78,133,253,0.4))'
                     },
                     '&.Mui-completed': {
-                      color: '#2ecc71'
+                      color: '#38d39f',
+                      filter: 'drop-shadow(0 4px 8px rgba(56,211,159,0.3))'
+                    }
+                  },
+                  '& .MuiStepLabel-label': {
+                    color: '#f4f2f5',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    marginTop: '8px',
+                    transition: 'all 0.3s ease',
+                    '&.Mui-active': {
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      transform: 'scale(1.05)',
+                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                    },
+                    '&.Mui-completed': {
+                      color: '#d8fef0',
+                      fontWeight: 700
                     }
                   },
                   '& .MuiStepConnector-line': {
-                    borderColor: 'rgba(0, 0, 0, 0.2)',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
                     borderTopWidth: '3px',
-                    transition: 'all 0.3s ease'
+                    borderRadius: '3px',
+                    transition: 'all 0.4s ease'
                   },
-                  '& .MuiStepConnector-active .MuiStepConnector-line': {
-                    borderColor: '#3498db'
+                  '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': {
+                    borderColor: '#4e85fd',
+                    borderTopWidth: '3px',
+                    boxShadow: '0 2px 4px rgba(78,133,253,0.3)'
                   },
-                  '& .MuiStepConnector-completed .MuiStepConnector-line': {
-                    borderColor: '#2ecc71'
-                  },
-                  '& .MuiStepLabel-label': {
-                    color: '#000',
-                    fontWeight: 'normal',
-                    fontSize: '0.9rem',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      color: '#3498db',
-                      transform: 'translateY(-2px)'
-                    },
-                    '&.Mui-active': {
-                      color: '#000',
-                      fontWeight: 'bold',
-                      fontSize: '1rem'
-                    },
-                    '&.Mui-completed': {
-                      color: '#000'
-                    }
-                  },
-                  '& .MuiStepIcon-text': {
-                    fill: '#fff' // Numara rengini beyaz yapma
-                  },
-                  '& .MuiStepLabel-iconContainer': {
-                    background: 'transparent',
-                    padding: 0,
-                    '& .MuiSvgIcon-root': {
-                      background: 'transparent',
-                      borderRadius: '50%'
-                    }
-                  },
-                  // Tüm arka plan renklerini şeffaf yapma
-                  background: 'transparent',
-                  '& .MuiPaper-root': {
-                    backgroundColor: 'transparent',
-                    boxShadow: 'none'
-                  },
-                  '& .MuiStep-root': {
-                    backgroundColor: 'transparent'
+                  '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
+                    borderColor: '#38d39f',
+                    borderTopWidth: '3px',
+                    boxShadow: '0 2px 4px rgba(56,211,159,0.2)'
                   }
                 }}
               >
@@ -1511,14 +1580,15 @@ const TytAytNetTakibi = () => {
                     <StepLabel
                       StepIconProps={{
                         icon: index + 1,
-                        className: 'custom-step-icon'
-                      }}
-                      sx={{
-                        '& .custom-step-icon': {
-                          backgroundColor: 'transparent !important',
+                        sx: {
+                          '& .MuiStepIcon-text': {
+                            fill: '#ffffff',
+                            fontWeight: 'bold',
+                            fontSize: '1rem'
+                          },
                           '& circle': {
-                            fill: activeStep === index ? '#3498db' : 
-                                  activeStep > index ? '#2ecc71' : 'rgba(0, 0, 0, 0.3)'
+                            fill: activeStep === index ? '#4e85fd' : 
+                                  activeStep > index ? '#38d39f' : 'rgba(255, 255, 255, 0.3)'
                           }
                         }
                       }}
@@ -1532,17 +1602,17 @@ const TytAytNetTakibi = () => {
               <Box sx={{ mt: 3 }}>
                 {activeStep === steps.length ? (
                   <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
                       Tüm adımlar tamamlandı
                     </Typography>
                     <Button
                       variant="contained"
                       onClick={handleSubmit}
-                      startIcon={<CheckCircleIcon sx={{ color: '#FFFFF0' }} />}
+                      startIcon={<CheckCircleIcon sx={{ color: '#f4f2f5' }} />}
                       sx={{ 
                         mt: 2,
                         backgroundColor: '#5ec837',
-                        color: '#FFFFFF',
+                        color: '#f4f2f5',
                         '&:hover': {
                           backgroundColor: '#4eb02c'
                         }
@@ -1558,11 +1628,23 @@ const TytAytNetTakibi = () => {
                       <Button
                         disabled={activeStep === 0}
                         onClick={handleBack}
-                        startIcon={<NavigateBeforeIcon sx={{ color: activeStep === 0 ? 'rgba(217, 212, 187, 0.5)' : '#d9d4bb' }} />}
+                        startIcon={<NavigateBeforeIcon sx={{ color: activeStep === 0 ? 'rgba(255, 255, 255, 0.3)' : '#f4f2f5' }} />}
                         sx={{ 
                           color: '#f4f2f5',
+                          fontWeight: 600,
+                          padding: '8px 24px',
+                          borderRadius: '30px',
+                          background: activeStep === 0 ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)',
+                          boxShadow: activeStep === 0 ? 'none' : '0 4px 15px rgba(255, 126, 95, 0.4)',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: activeStep === 0 ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #ff7e5f 20%, #feb47b 100%)',
+                            transform: activeStep === 0 ? 'none' : 'translateY(-2px)',
+                            boxShadow: activeStep === 0 ? 'none' : '0 6px 20px rgba(255, 126, 95, 0.5)'
+                          },
                           '&.Mui-disabled': {
-                            color: 'rgba(217, 212, 187, 0.5)'
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            color: 'rgba(255, 255, 255, 0.3)'
                           }
                         }}
                       >
@@ -1572,16 +1654,24 @@ const TytAytNetTakibi = () => {
                       <Button
                         variant="contained"
                         onClick={handleNext}
-                        endIcon={<NavigateNextIcon sx={{ color: '#FFFFF0' }} />}
+                        endIcon={<NavigateNextIcon sx={{ color: '#f4f2f5' }} />}
                         disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
                         sx={{ 
-                          backgroundColor: '#5ec837',
-                          color: '#FFFFFF',
+                          backgroundColor: '#38d39f',
+                          color: '#f4f2f5',
+                          fontWeight: 600,
+                          padding: '8px 24px',
+                          borderRadius: '30px',
+                          background: 'linear-gradient(135deg, #38d39f 0%, #38a4d3 100%)',
+                          boxShadow: '0 4px 15px rgba(56, 211, 159, 0.4)',
+                          transition: 'all 0.3s ease',
                           '&:hover': {
-                            backgroundColor: '#4eb02c'
+                            background: 'linear-gradient(135deg, #38d39f 20%, #38a4d3 100%)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 20px rgba(56, 211, 159, 0.5)'
                           },
                           '&.Mui-disabled': {
-                            backgroundColor: 'rgba(94, 200, 55, 0.5)',
+                            background: 'linear-gradient(135deg, rgba(56, 211, 159, 0.5) 0%, rgba(56, 164, 211, 0.5) 100%)',
                             color: 'rgba(255, 255, 255, 0.5)'
                           }
                         }}
@@ -1598,7 +1688,7 @@ const TytAytNetTakibi = () => {
           /* Records view */
           <StyledCard sx={{ mt: 3 }}>
             <CardContent sx={{ pt: 3 }}>
-              <Typography variant="h5" gutterBottom sx={{ color: '#FFFFF0' }}>
+              <Typography variant="h5" gutterBottom sx={{ color: '#f4f2f5' }}>
                 Deneme Sonuçları
               </Typography>
               {renderRecordsList()}

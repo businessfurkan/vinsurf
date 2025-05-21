@@ -147,56 +147,63 @@ const FilterButton = styled(Button)(({ theme }) => ({
   }
 }));
 
-const DayHeader = styled(Box)(({ theme, isToday, dayIndex = 0 }) => {
-  // Her gün için farklı renkler
-  const dayColors = [
-    '#FF9A8B', // Pazartesi
-    '#FAD0C4', // Salı
-    '#FEE140', // Çarşamba
-    '#A0E7E5', // Perşembe
-    '#B5EAD7', // Cuma
-    '#C7CEEA', // Cumartesi
-    '#FFDAC1'  // Pazar
-  ];
-  
-  const dayColor = dayColors[dayIndex % dayColors.length];
-  
-  return {
-    padding: '16px 10px',
-    borderRadius: '16px 16px 0 0',
-    background: `linear-gradient(135deg, ${dayColor} 0%, ${alpha(dayColor, 0.7)} 100%)`,
-    color: '#333',
-    fontWeight: 700,
-    fontSize: '1.1rem',
-    textAlign: 'center',
-    position: 'relative',
-    overflow: 'hidden',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-    transition: 'all 0.3s ease',
-    border: '1px solid rgba(255,255,255,0.2)',
-    borderBottom: 'none',
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      height: '100%',
-      background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
-      pointerEvents: 'none',
-    },
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      bottom: 0,
-      left: '10%',
-      width: '80%',
-      height: '3px',
-      background: 'rgba(255,255,255,0.7)',
-      borderRadius: '3px',
-    }
-  };
-});
+// data-* özelliklerini kullanarak DOM'a geçirilen özel nitelikleri düzenliyoruz
+const DayHeader = styled(Box)(
+  ({ theme }) => {
+    // Her gün için farklı renkler
+    const dayColors = [
+      '#FF9A8B', // Pazartesi
+      '#FAD0C4', // Salı
+      '#FEE140', // Çarşamba
+      '#A0E7E5', // Perşembe
+      '#B5EAD7', // Cuma
+      '#C7CEEA', // Cumartesi
+      '#FFDAC1'  // Pazar
+    ];
+    
+    return props => {
+      // data-day-index özelliğini kullanarak gün rengini belirliyoruz
+      const dayIndex = props['data-day-index'] !== undefined ? parseInt(props['data-day-index'], 10) : 0;
+      const dayColor = dayColors[dayIndex % dayColors.length];
+      
+      return {
+        padding: '16px 10px',
+        borderRadius: '16px 16px 0 0',
+        background: `linear-gradient(135deg, ${dayColor} 0%, ${alpha(dayColor, 0.7)} 100%)`,
+        color: '#333',
+        fontWeight: 700,
+        fontSize: '1.1rem',
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        transition: 'all 0.3s ease',
+        border: '1px solid rgba(255,255,255,0.2)',
+        borderBottom: 'none',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'radial-gradient(circle at top right, rgba(255,255,255,0.3) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          bottom: 0,
+          left: '10%',
+          width: '80%',
+          height: '3px',
+          background: 'rgba(255,255,255,0.7)',
+          borderRadius: '3px',
+        }
+      };
+    };
+  }
+);
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiPaper-root': {
@@ -830,7 +837,7 @@ const DersProgrami = () => {
                   }
                 }}
               >
-                <DayHeader isToday={false} dayIndex={daysOfWeek.indexOf(day)} sx={{ mb: 0 }}>
+                <DayHeader data-is-today={false} data-day-index={daysOfWeek.indexOf(day)} sx={{ mb: 0 }}>
                   {day}
                 </DayHeader>
                 

@@ -427,7 +427,7 @@ const SoruForum = () => {
       
       {/* Action Bar */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
+        <Grid gridColumn={{xs: "span 12", md: "span 8"}}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Tabs 
               value={tabValue} 
@@ -454,7 +454,7 @@ const SoruForum = () => {
             </Tabs>
           </Box>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <TextField
               placeholder="Ara..."
