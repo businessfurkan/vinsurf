@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../firebase';
 import { motion } from 'framer-motion';
 import '../styles/tyt-ayt-modern.css';
 import { styled } from '@mui/system';
@@ -60,6 +62,7 @@ import {
   addDoc, 
   query, 
   getDocs, 
+  where,
   orderBy, 
   deleteDoc, 
   doc,
@@ -124,6 +127,8 @@ const steps = [
 ];
 
 const TytAytNetTakibi = () => {
+  // Get user from firebase auth
+  const [user] = useAuthState(auth);
   // State for the multi-step form
   const [activeStep, setActiveStep] = useState(0);
   const [examName, setExamName] = useState('');
@@ -298,86 +303,8 @@ const TytAytNetTakibi = () => {
     } catch (error) {
       console.error('Error saving records:', error);
       showNotification('Kayıt sırasında bir hata oluştu', 'error');
-    } finally {
-      setLoading(false);
     }
   };
-  
-  // Fetch existing net records
-  const fetchNetRecords = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      const q = query(
-        collection(db, 'netRecords'),
-        orderBy('createdAt', 'desc')
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const records = [];
-      
-      querySnapshot.forEach((doc) => {
-        records.push({
-          id: doc.id,
-          ...doc.data()
-        });
-      });
-      
-      setNetRecords(records);
-      
-      // Yapay zeka tavsiye sistemini çalıştır
-      analyzePerformanceAndSendRecommendations(records);
-      
-    } catch (error) {
-      console.error('Error fetching records:', error);
-      showNotification('Kayıtlar yüklenirken bir hata oluştu', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [showNotification, setLoading, setNetRecords]);
-  
-  // Yapay zeka tavsiye sistemi
-  const analyzePerformanceAndSendRecommendations = useCallback((records) => {
-    if (!records || records.length < 3) return; // En az 3 deneme olmalı
-    
-    try {
-      // TYT ve AYT derslerini birleştir
-      const allSubjects = [...tytSubjects, ...aytSubjects];
-      
-      // Her ders için son 3 denemeyi analiz et
-      allSubjects.forEach(subject => {
-        // Bu derse ait son 3 denemeyi bul
-        const subjectRecords = records
-          .filter(record => record.subject === subject)
-          .sort((a, b) => {
-            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt?.seconds * 1000 || 0);
-            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt?.seconds * 1000 || 0);
-            return dateB - dateA; // Tarihe göre azalan sıralama (en yeniden en eskiye)
-          })
-          .slice(0, 3); // Son 3 deneme
-        
-        // En az 3 deneme yoksa analiz yapma
-        if (subjectRecords.length < 3) return;
-        
-        // Net puanları al
-        const nets = subjectRecords.map(record => parseFloat(record.net) || 0);
-        
-        // Son 3 denemede düşüş var mı kontrol et
-        // En yeni deneme en eskisinden düşükse ve bir trend varsa
-        if (nets[0] < nets[2] && nets[0] < nets[1]) {
-          // Düşüş yüzdesini hesapla
-          const decreasePercentage = ((nets[2] - nets[0]) / nets[2]) * 100;
-          
-          // Eğer düşüş %10'dan fazlaysa tavsiye gönder
-          if (decreasePercentage > 10) {
-            sendRecommendation(subject, decreasePercentage);
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Performans analizi sırasında hata:', error);
-    }
-  }, []);
   
   // Tavsiye gönderme fonksiyonu
   const sendRecommendation = useCallback((subject, decreasePercentage) => {
@@ -439,6 +366,91 @@ const TytAytNetTakibi = () => {
     });
     
   }, [addNotification]);
+  
+  // Yapay zeka tavsiye sistemi
+  const analyzePerformanceAndSendRecommendations = useCallback((records) => {
+    if (!records || records.length < 3) return; // En az 3 deneme olmalı
+    
+    try {
+      // TYT ve AYT derslerini birleştir
+      const allSubjects = [...tytSubjects, ...aytSubjects];
+      
+      // Her ders için son 3 denemeyi analiz et
+      allSubjects.forEach(subject => {
+        // Bu derse ait son 3 denemeyi bul
+        const subjectRecords = records
+          .filter(record => record.subject === subject)
+          .sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt?.seconds * 1000 || 0);
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt?.seconds * 1000 || 0);
+            return dateB - dateA; // Tarihe göre azalan sıralama (en yeniden en eskiye)
+          })
+          .slice(0, 3); // Son 3 deneme
+        
+        // En az 3 deneme yoksa analiz yapma
+        if (subjectRecords.length < 3) return;
+        
+        // Net puanları al
+        const nets = subjectRecords.map(record => parseFloat(record.net) || 0);
+        
+        // Son 3 denemede düşüş var mı kontrol et
+        // En yeni deneme en eskisinden düşükse ve bir trend varsa
+        if (nets[0] < nets[2] && nets[0] < nets[1]) {
+          // Düşüş yüzdesini hesapla
+          const decreasePercentage = ((nets[2] - nets[0]) / nets[2]) * 100;
+          
+          // Eğer düşüş %10'dan fazlaysa tavsiye gönder
+          if (decreasePercentage > 10) {
+            sendRecommendation(subject, decreasePercentage);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Performans analizi sırasında hata:', error);
+    }
+  }, [sendRecommendation]);
+
+  useEffect(() => {
+    if (netRecords.length > 0) {
+      analyzePerformanceAndSendRecommendations(netRecords);
+    }
+  }, [netRecords, analyzePerformanceAndSendRecommendations]);
+
+  // Fetch all records
+  const fetchNetRecords = useCallback(async () => {
+    try {
+      setLoading(true);
+      
+      const q = query(
+        collection(db, 'netRecords'),
+        where('userId', '==', user.uid),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const records = [];
+      
+      querySnapshot.forEach((doc) => {
+        records.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      setNetRecords(records);
+      
+      // Yapay zeka tavsiye sistemini çalıştır
+      analyzePerformanceAndSendRecommendations(records);
+      
+    } catch (error) {
+      console.error('Error fetching records:', error);
+      showNotification('Kayıtlar yüklenirken bir hata oluştu', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [showNotification, setLoading, setNetRecords, analyzePerformanceAndSendRecommendations, user?.uid]);
+  
+
   
   // Delete a record
   const handleDelete = async (id) => {
@@ -569,20 +581,20 @@ const TytAytNetTakibi = () => {
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12}>
                 <FormControl fullWidth>
-                  <InputLabel sx={{ color: '#d9d4bb' }}>Ders Seçin</InputLabel>
+                  <InputLabel sx={{ color: '#f4f2f5' }}>Ders Seçin</InputLabel>
                   <Select
                     value={currentSubject}
                     label="Ders Seçin"
                     onChange={(e) => handleSubjectSelect(e.target.value)}
                     sx={{
                       '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#d9d4bb'
+                        borderColor: '#f4f2f5'
                       },
                       '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#d9d4bb'
+                        borderColor: '#f4f2f5'
                       },
                       '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#d9d4bb'
+                        borderColor: '#f4f2f5'
                       },
                       color: '#FFFFF0',
                       height: '56px',
@@ -621,19 +633,19 @@ const TytAytNetTakibi = () => {
                       helperText={errors.correctCount}
                       sx={{
                         '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '& .MuiInputLabel-root': {
-                          color: '#d9d4bb'
+                          color: '#f4f2f5'
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#d9d4bb'
+                          color: '#f4f2f5'
                         }
                       }}
                     />
@@ -653,19 +665,19 @@ const TytAytNetTakibi = () => {
                       helperText={errors.incorrectCount}
                       sx={{
                         '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '& .MuiInputLabel-root': {
-                          color: '#d9d4bb'
+                          color: '#f4f2f5'
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#d9d4bb'
+                          color: '#f4f2f5'
                         }
                       }}
                     />
@@ -685,19 +697,19 @@ const TytAytNetTakibi = () => {
                       helperText={errors.emptyCount}
                       sx={{
                         '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '&:hover .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#d9d4bb'
+                          borderColor: '#f4f2f5'
                         },
                         '& .MuiInputLabel-root': {
-                          color: '#d9d4bb'
+                          color: '#f4f2f5'
                         },
                         '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#d9d4bb'
+                          color: '#f4f2f5'
                         }
                       }}
                     />
@@ -708,7 +720,7 @@ const TytAytNetTakibi = () => {
                       onClick={handleNext}
                       startIcon={<AddIcon sx={{ color: '#FFFFF0' }} />}
                       sx={{ 
-                        backgroundColor: '#d9d4bb',
+                        backgroundColor: '#f4f2f5',
                         color: '#FFFFF0',
                         '&:hover': {
                           backgroundColor: '#c5c0a7'
@@ -1176,7 +1188,7 @@ const TytAytNetTakibi = () => {
             <Line 
               type="monotone" 
               dataKey="net" 
-              stroke="#d9d4bb" 
+              stroke="#f4f2f5" 
               activeDot={{ r: 8 }} 
               name="Net Puan"
             />
@@ -1548,7 +1560,7 @@ const TytAytNetTakibi = () => {
                         onClick={handleBack}
                         startIcon={<NavigateBeforeIcon sx={{ color: activeStep === 0 ? 'rgba(217, 212, 187, 0.5)' : '#d9d4bb' }} />}
                         sx={{ 
-                          color: '#d9d4bb',
+                          color: '#f4f2f5',
                           '&.Mui-disabled': {
                             color: 'rgba(217, 212, 187, 0.5)'
                           }

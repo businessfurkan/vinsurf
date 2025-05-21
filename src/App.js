@@ -213,7 +213,7 @@ const App = () => {
           </DialogActions>
         </Dialog>
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: '#D9D4BB', minHeight: '100vh', position: 'relative' }}>
+        <Box sx={{ display: 'flex', bgcolor: '#f4f2f5', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
@@ -221,7 +221,7 @@ const App = () => {
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
               overflow: 'auto',
-              bgcolor: '#D9D4BB',
+              bgcolor: '#f4f2f5',
               transition: theme => theme.transitions.create(['margin', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
@@ -256,7 +256,7 @@ const App = () => {
                         left: 0,
                         width: '60px', // Sidebar genişliği
                         height: '100%',
-                        backgroundColor: '#D9D4BB',
+                        backgroundColor: '#f4f2f5',
                         zIndex: 0,
                       },
                       '&::after': {
@@ -266,7 +266,7 @@ const App = () => {
                         right: 0,
                         width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
                         height: '100%',
-                        backgroundColor: '#D9D4BB',
+                        backgroundColor: '#f4f2f5',
                         zIndex: 0,
                         '@media (max-width: 1200px)': {
                           width: '0px',

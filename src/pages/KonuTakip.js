@@ -585,29 +585,73 @@ const KonuTakip = () => {
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ 
-        fontWeight: 700,
-        color: '#333',
-        mb: 4,
-        textAlign: 'center'
+      <Box sx={{ 
+        textAlign: 'center', 
+        mb: 5,
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          bottom: -10,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '80px',
+          height: '4px',
+          backgroundColor: '#5ec837',
+          borderRadius: '2px'
+        }
       }}>
-        Konu Takip Sistemi
-      </Typography>
+        <Typography variant="h4" sx={{ 
+          fontWeight: 800,
+          color: '#333',
+          mb: 1,
+          fontSize: { xs: '1.8rem', sm: '2.2rem' },
+          textShadow: '0px 1px 2px rgba(0,0,0,0.1)'
+        }}>
+          Konu Takip Sistemi
+        </Typography>
+        <Typography variant="subtitle1" sx={{ 
+          color: '#666',
+          fontWeight: 500
+        }}>
+          Çalışmalarınızı takip edin ve ilerlemenizi görün
+        </Typography>
+      </Box>
       
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-        <Box sx={{ bgcolor: '#f5f5f5', borderRadius: 2, overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        mb: 4, 
+        flexWrap: 'wrap', 
+        alignItems: 'center',
+        gap: 2,
+        px: { xs: 1, sm: 2 }
+      }}>
+        <Box sx={{ 
+          bgcolor: 'white', 
+          borderRadius: 3, 
+          overflow: 'hidden', 
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          border: '1px solid #e0e0e0'
+        }}>
           <Tabs 
             value={sinavTipi} 
             onChange={(e, newValue) => setSinavTipi(newValue)}
             sx={{ 
-              minHeight: 48,
+              minHeight: 52,
               '& .MuiTabs-indicator': {
                 backgroundColor: '#5ec837',
-                height: 3
+                height: 4,
+                borderRadius: '4px 4px 0 0'
               },
               '& .MuiTab-root': {
-                fontWeight: 'bold',
-                minWidth: 100
+                fontWeight: 700,
+                minWidth: 120,
+                fontSize: '1rem',
+                transition: 'all 0.2s ease',
+                '&.Mui-selected': {
+                  color: '#5ec837'
+                }
               }
             }}
           >
@@ -616,44 +660,72 @@ const KonuTakip = () => {
           </Tabs>
         </Box>
         
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 1.5,
+          flexWrap: 'wrap',
+          justifyContent: { xs: 'center', sm: 'flex-end' },
+          width: { xs: '100%', sm: 'auto' },
+          mt: { xs: 1, sm: 0 }
+        }}>
           <Button
             variant={filter === 'all' ? 'contained' : 'outlined'}
-            color="primary"
             onClick={() => setFilter('all')}
-            size="small"
+            size="medium"
             sx={{ 
-              bgcolor: filter === 'all' ? '#5ec837' : 'transparent',
-              fontWeight: 'bold',
-              minWidth: 80
+              bgcolor: filter === 'all' ? '#5662f6' : 'transparent',
+              color: filter === 'all' ? 'white' : '#5662f6',
+              borderColor: '#5662f6',
+              fontWeight: 600,
+              minWidth: 100,
+              borderRadius: 2,
+              px: 2,
+              '&:hover': {
+                bgcolor: filter === 'all' ? '#4a53d6' : 'rgba(86, 98, 246, 0.08)',
+                borderColor: '#4a53d6'
+              }
             }}
           >
             Tümü
           </Button>
           <Button
             variant={filter === 'completed' ? 'contained' : 'outlined'}
-            color="success"
             onClick={() => setFilter('completed')}
-            size="small"
+            size="medium"
             startIcon={<CheckCircleIcon />}
             sx={{ 
               bgcolor: filter === 'completed' ? '#4caf50' : 'transparent',
-              fontWeight: 'bold',
-              minWidth: 120
+              color: filter === 'completed' ? 'white' : '#4caf50',
+              borderColor: '#4caf50',
+              fontWeight: 600,
+              minWidth: 140,
+              borderRadius: 2,
+              px: 2,
+              '&:hover': {
+                bgcolor: filter === 'completed' ? '#43a047' : 'rgba(76, 175, 80, 0.08)',
+                borderColor: '#43a047'
+              }
             }}
           >
             Tamamlanan
           </Button>
           <Button
             variant={filter === 'inProgress' ? 'contained' : 'outlined'}
-            color="warning"
             onClick={() => setFilter('inProgress')}
-            size="small"
+            size="medium"
             startIcon={<AccessTimeIcon />}
             sx={{ 
               bgcolor: filter === 'inProgress' ? '#ff9800' : 'transparent',
-              fontWeight: 'bold',
-              minWidth: 120
+              color: filter === 'inProgress' ? 'white' : '#ff9800',
+              borderColor: '#ff9800',
+              fontWeight: 600,
+              minWidth: 140,
+              borderRadius: 2,
+              px: 2,
+              '&:hover': {
+                bgcolor: filter === 'inProgress' ? '#f57c00' : 'rgba(255, 152, 0, 0.08)',
+                borderColor: '#f57c00'
+              }
             }}
           >
             Devam Eden
@@ -676,82 +748,168 @@ const KonuTakip = () => {
             if (!durumFiltresi) return null;
             
             return (
-              <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ mb: 2 }}>
+              <Grid item xs={12} sm={6} md={3} key={ders.id} sx={{ mb: 3 }}>
                 <Card 
                   sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    transition: 'box-shadow 0.2s',
+                    transition: 'all 0.3s ease',
                     '&:hover': {
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                      boxShadow: `0 10px 30px ${ders.color}30`,
+                      transform: 'translateY(-8px) scale(1.02)',
                     },
-                    borderRadius: '8px',
+                    borderRadius: '16px',
                     overflow: 'hidden',
                     bgcolor: 'white',
-                    border: '1px solid #eaeaea',
+                    border: 'none',
                     minWidth: 250,
                     mx: 'auto',
                     width: '100%',
-                    height: '100%'
+                    height: '100%',
+                    position: 'relative',
+                    boxShadow: '0 5px 15px rgba(0,0,0,0.08)',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      background: `linear-gradient(135deg, ${ders.color}10, ${ders.color}05)`,
+                      zIndex: 0
+                    }
                   }}
                 >
-                  <CardActionArea onClick={() => handleDersClick(ders)} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch', height: '100%' }}>
-                    <Box sx={{ 
-                      bgcolor: ders.color, 
-                      py: 2, 
-                      px: 3, 
+                  <CardActionArea 
+                    onClick={() => handleDersClick(ders)} 
+                    sx={{ 
+                      flexGrow: 1, 
                       display: 'flex', 
-                      alignItems: 'center',
-                      justifyContent: 'flex-start',
-                      gap: 2
+                      flexDirection: 'column', 
+                      alignItems: 'stretch', 
+                      height: '100%',
+                      zIndex: 1,
+                      position: 'relative'
+                    }}
+                  >
+                    <Box sx={{ 
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '4px',
+                        background: `linear-gradient(90deg, transparent, ${ders.color}, transparent)`,
+                      }
                     }}>
-                      <Avatar sx={{ 
-                        bgcolor: 'white', 
-                        color: ders.color,
-                        width: 40, 
-                        height: 40,
-                        '& .MuiSvgIcon-root': { fontSize: '1.5rem' }
+                      <Box sx={{ 
+                        py: 2.5, 
+                        px: 3, 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        justifyContent: 'flex-start',
+                        gap: 2,
                       }}>
-                        {getDersIcon(ders.ad)}
-                      </Avatar>
-                      <Typography 
-                        variant="h6" 
-                        component="div" 
-                        sx={{ 
-                          fontSize: '1.2rem', 
-                          fontWeight: 700,
-                          color: 'white'
-                        }}
-                      >
-                        {ders.ad}
-                      </Typography>
+                        <Avatar sx={{ 
+                          bgcolor: ders.color, 
+                          color: 'white',
+                          width: 56, 
+                          height: 56,
+                          boxShadow: `0 4px 10px ${ders.color}70`,
+                          '& .MuiSvgIcon-root': { fontSize: '2rem' },
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'rotate(10deg)'
+                          }
+                        }}>
+                          {getDersIcon(ders.ad)}
+                        </Avatar>
+                        <Typography 
+                          variant="h6" 
+                          component="div" 
+                          sx={{ 
+                            fontSize: '1.5rem', 
+                            fontWeight: 900,
+                            color: '#b4c0d6',
+                            letterSpacing: '0.5px',
+                            position: 'relative',
+                            display: 'inline-block',
+                            '&::after': {
+                              content: '""',
+                              position: 'absolute',
+                              bottom: -2,
+                              left: 0,
+                              width: '100%',
+                              height: '2px',
+                              background: `linear-gradient(90deg, ${ders.color}80, transparent)`,
+                            }
+                          }}
+                        >
+                          {ders.ad}
+                        </Typography>
+                      </Box>
                     </Box>
                     
-                    <CardContent sx={{ p: 2, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                      <Box sx={{ mb: 2 }}>
-                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#555' }}>
-                          Toplam: {ders.konular.length} konu
+                    <CardContent sx={{ p: 3, flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center',
+                        mb: 3,
+                        mt: 1,
+                        p: 1.5,
+                        borderRadius: '12px',
+                        background: `linear-gradient(135deg, ${ders.color}15, ${ders.color}05)`,
+                        border: `1px dashed ${ders.color}40`,
+                      }}>
+                        <Typography variant="body1" sx={{ fontWeight: 800, color: ders.color, fontSize: '1.1rem' }}>
+                          {ders.konular.length} Konu
                         </Typography>
                       </Box>
                       
-                      <Box sx={{ mt: 'auto' }}>
+                      <Box sx={{ 
+                        mt: 'auto',
+                        pt: 2,
+                        borderTop: '1px solid #eee'
+                      }}>
                         <LinearProgress 
                           variant="determinate" 
                           value={ilerleme} 
                           sx={{ 
-                            height: 6, 
-                            borderRadius: 3,
-                            mb: 1.5,
+                            height: 10, 
+                            borderRadius: 5,
+                            mb: 2,
                             bgcolor: '#f0f0f0',
                             '& .MuiLinearProgress-bar': {
-                              bgcolor: ders.color
+                              background: `linear-gradient(90deg, ${ders.color}, ${ders.color}90)`,
+                              borderRadius: 5
                             }
                           }} 
                         />
                         
-                        <Typography variant="body2" sx={{ color: '#666', fontWeight: 500 }}>
-                          {Math.round(ilerleme * ders.konular.length / 100)} konu tamamlandı
-                        </Typography>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'center', 
+                          alignItems: 'center', 
+                          py: 1.5,
+                          borderRadius: '12px',
+                          background: `linear-gradient(135deg, ${ders.color}10, ${ders.color}05)`,
+                          boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.05)'
+                        }}>
+                          <Typography variant="body2" sx={{ 
+                            color: '#555', 
+                            fontWeight: 700, 
+                            fontSize: '1rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1
+                          }}>
+                            <span style={{ color: ders.color, fontWeight: 800 }}>{Math.round(ilerleme * ders.konular.length / 100)}</span> / {ders.konular.length} Konu Tamamlandı
+                          </Typography>
+                        </Box>
                       </Box>
                     </CardContent>
                   </CardActionArea>
@@ -769,45 +927,101 @@ const KonuTakip = () => {
         maxWidth="md"
         PaperProps={{
           sx: {
-            borderRadius: 2,
-            overflow: 'hidden'
+            borderRadius: 16,
+            overflow: 'hidden',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
           }
         }}
       >
         {selectedDers && (
           <>
             <DialogTitle sx={{ 
-              bgcolor: '#bbb38a',
+              bgcolor: selectedDers.color,
               display: 'flex',
               alignItems: 'center',
-              p: 2
+              p: 3,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
             }}>
-              <Avatar sx={{ bgcolor: selectedDers.color, mr: 2, width: 45, height: 45 }}>
+              <Avatar sx={{ 
+                bgcolor: 'white', 
+                color: selectedDers.color, 
+                mr: 2, 
+                width: 60, 
+                height: 60,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                '& .MuiSvgIcon-root': { fontSize: '2rem' }
+              }}>
                 {getDersIcon(selectedDers.ad)}
               </Avatar>
-              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>{selectedDers.ad} - Konular</Typography>
+              <Box>
+                <Typography variant="h5" sx={{ 
+                  fontWeight: 900, 
+                  color: '#b4c0d6',
+                  textShadow: '0px 1px 2px rgba(0,0,0,0.2)'
+                }}>
+                  {selectedDers.ad}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ 
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 500
+                }}>
+                  Toplam {selectedDers.konular.length} Konu
+                </Typography>
+              </Box>
             </DialogTitle>
-            <DialogContent dividers sx={{ bgcolor: '#f5f5f0', p: 0 }}>
+            <DialogContent dividers sx={{ bgcolor: '#f4f2f5', p: 0 }}>
+              <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.7)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#444' }}>
+                  Konu Listesi
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#e8f5e9', px: 1.5, py: 0.5, borderRadius: 2 }}>
+                    <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 18, mr: 0.5 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                      Tamamlanan: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'completed' || durum === 'completedNeedsReview').length}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fff3e0', px: 1.5, py: 0.5, borderRadius: 2 }}>
+                    <AccessTimeIcon sx={{ color: '#ff9800', fontSize: 18, mr: 0.5 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#e65100' }}>
+                      Tekrar Edilecek: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'needsReview' || durum === 'completedNeedsReview').length}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
               <List sx={{ p: 0 }}>
                 {selectedDers.konular.map((konu, index) => {
                   const konuKey = `${selectedDers.id}-${index}`;
                   const durum = konuDurumu[selectedDers.id]?.[index] || 'notStarted';
+                  
+                  const getBgColor = () => {
+                    if (durum === 'completed') return 'rgba(76, 175, 80, 0.08)';
+                    if (durum === 'completedNeedsReview') return 'rgba(255, 152, 0, 0.08)';
+                    if (durum === 'needsReview') return 'rgba(255, 152, 0, 0.05)';
+                    return 'white';
+                  };
                   
                   return (
                     <ListItem 
                       key={konuKey} 
                       divider 
                       sx={{ 
-                        p: 2,
-                        '&:hover': { bgcolor: '#e8e8e0' },
-                        transition: 'background-color 0.2s'
+                        p: 2.5,
+                        bgcolor: getBgColor(),
+                        '&:hover': { bgcolor: durum === 'completed' ? 'rgba(76, 175, 80, 0.12)' : 
+                                    durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.12)' : 
+                                    durum === 'needsReview' ? 'rgba(255, 152, 0, 0.08)' : 
+                                    'rgba(0, 0, 0, 0.02)' },
+                        transition: 'all 0.2s ease'
                       }}
                     >
                       <ListItemText 
                         primary={konu} 
                         primaryTypographyProps={{ 
-                          fontWeight: durum === 'completed' || durum === 'completedNeedsReview' ? 'bold' : 'normal',
-                          color: durum === 'completed' || durum === 'completedNeedsReview' ? 'text.primary' : 'text.secondary',
+                          fontWeight: durum === 'completed' || durum === 'completedNeedsReview' ? 700 : 500,
+                          color: durum === 'completed' ? '#2e7d32' : 
+                                durum === 'completedNeedsReview' ? '#e65100' : 
+                                durum === 'needsReview' ? '#f57c00' : '#555',
                           fontSize: '1rem'
                         }}
                       />
@@ -824,10 +1038,16 @@ const KonuTakip = () => {
                                   durum === 'needsReview' || durum === 'completedNeedsReview' ? 'needsReview' : 'notStarted'
                               )}
                               color="success"
-                              sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                              sx={{ 
+                                '& .MuiSvgIcon-root': { fontSize: 28 },
+                                color: '#4caf50',
+                                '&.Mui-checked': {
+                                  color: '#2e7d32',
+                                }
+                              }}
                             />
                           }
-                          label="Tamamlandı"
+                          label={<Typography sx={{ fontWeight: 600, color: '#444' }}>Tamamlandı</Typography>}
                           sx={{ m: 0 }}
                         />
                         <FormControlLabel
@@ -840,10 +1060,16 @@ const KonuTakip = () => {
                                 e.target.checked
                               )}
                               color="warning"
-                              sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                              sx={{ 
+                                '& .MuiSvgIcon-root': { fontSize: 28 },
+                                color: '#ff9800',
+                                '&.Mui-checked': {
+                                  color: '#e65100',
+                                }
+                              }}
                             />
                           }
-                          label="Tekrar Edilecek"
+                          label={<Typography sx={{ fontWeight: 600, color: '#444' }}>Tekrar Edilecek</Typography>}
                           sx={{ m: 0 }}
                         />
                       </Box>
@@ -852,14 +1078,18 @@ const KonuTakip = () => {
                 })}
               </List>
             </DialogContent>
-            <DialogActions sx={{ p: 2, bgcolor: '#bbb38a', justifyContent: 'space-between' }}>
+            <DialogActions sx={{ p: 3, bgcolor: '#f4f2f5', justifyContent: 'space-between', borderTop: '1px solid #e0e0e0' }}>
               <Button 
                 onClick={handleDialogClose}
                 variant="outlined"
                 sx={{ 
-                  borderColor: '#555',
-                  color: '#333',
-                  '&:hover': { borderColor: '#333', bgcolor: 'rgba(0,0,0,0.05)' }
+                  borderColor: '#bdbdbd',
+                  color: '#555',
+                  fontWeight: 600,
+                  px: 3,
+                  py: 1,
+                  borderRadius: 2,
+                  '&:hover': { borderColor: '#9e9e9e', bgcolor: 'rgba(0,0,0,0.03)' }
                 }}
               >
                 Kapat
@@ -870,12 +1100,15 @@ const KonuTakip = () => {
                   handleDialogClose();
                 }}
                 variant="contained" 
-                color="primary"
                 startIcon={<SaveIcon />}
                 sx={{ 
-                  bgcolor: '#5ec837',
-                  '&:hover': { bgcolor: '#4eb02c' },
-                  px: 3
+                  bgcolor: selectedDers.color,
+                  fontWeight: 600,
+                  px: 4,
+                  py: 1,
+                  borderRadius: 2,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  '&:hover': { bgcolor: selectedDers.color, filter: 'brightness(90%)' }
                 }}
               >
                 Kaydet

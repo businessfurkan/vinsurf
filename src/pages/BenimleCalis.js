@@ -99,7 +99,7 @@ const BenimleCalis = () => {
       minHeight: '90vh',
       position: 'relative',
       overflow: 'hidden',
-      backgroundColor: '#D9D4BB',
+      backgroundColor: '#f4f2f5',
       borderRadius: 4,
       boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
     }}>
@@ -177,7 +177,7 @@ const BenimleCalis = () => {
               overflow: 'hidden',
               boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
               height: '100%',
-              background: '#D9D4BB'
+              background: '#f4f2f5'
             }}
           >
             {loading ? (
@@ -306,9 +306,9 @@ const BenimleCalis = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       sx={{ 
-                        backgroundColor: '#D9D4BB',
+                        backgroundColor: '#f4f2f5',
                         '&:hover': {
-                          backgroundColor: '#D9D4BB',
+                          backgroundColor: '#f4f2f5',
                         }
                       }}
                     >

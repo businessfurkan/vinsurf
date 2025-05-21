@@ -23,7 +23,7 @@ import HandshakeIcon from '@mui/icons-material/Handshake';
 import LanguageIcon from '@mui/icons-material/Language';
 
 
-const drawerWidth = 60;
+const drawerWidth = 70;
 
 
 
@@ -34,7 +34,7 @@ const closedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   width: `${drawerWidth}px`,
-  background: '#D9D4BB',
+  background: '#f4f2f5',
   borderRight: 'none',
   boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
   position: 'relative',
@@ -97,7 +97,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         py: 2,
         display: 'flex', 
         justifyContent: 'center',
-        background: '#D9D4BB',
+        background: '#f4f2f5',
         mb: 1,
       }}>
         <Box sx={{ 
@@ -154,19 +154,19 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 <ListItemIcon
                   sx={{
                     color: item.color,
-                    fontSize: 22,
+                    fontSize: 28,
                     opacity: isActive ? 1 : 0.9,
                     filter: isActive ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.15))' : 'none',
-                    backgroundColor: '#d9d4bb',
+                    backgroundColor: '#f4f2f5',
                     position: 'relative',
                     zIndex: 1,
-                    padding: '6px',
+                    padding: '8px',
                     borderRadius: '50%',
                     border: activeItem === item.text ? `2px solid ${item.color}` : '2px solid transparent',
                     transition: 'all 0.2s ease',
                     minWidth: 'auto', // Minimum genişliği kaldır
                     '& .MuiSvgIcon-root': {
-                      fontSize: 22,
+                      fontSize: 28,
                     }
                   }}
                 >
@@ -178,7 +178,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 <Box
                   sx={{
                     position: 'fixed',
-                    left: `${drawerWidth + 8}px`,
+                    left: `${drawerWidth + 10}px`,
                     top: (event) => {
                       const rect = document.getElementById(`sidebar-item-${item.text}`).getBoundingClientRect();
                       return rect.top + rect.height/2 - 15;
