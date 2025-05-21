@@ -811,10 +811,10 @@ const KonuTakip = () => {
                     variant="h6"
                     sx={{ 
                       fontWeight: 900, 
-                      color: '#ffffff',
+                      color: '#f4f2f5',
                       textShadow: '0 1px 3px rgba(0,0,0,0.2)',
                       zIndex: 2,
-                      fontSize: '1.25rem',
+                      fontSize: '1.3rem',
                       letterSpacing: '0.5px'
                     }}
                   >
@@ -915,9 +915,9 @@ const KonuTakip = () => {
                     {/* Tamamlanan Konu Sayacı */}
                     <Box sx={{ 
                       display: 'flex', 
-                      justifyContent: 'center', 
+                      justifyContent: 'flex-end', 
                       alignItems: 'center',
-                      p: 2,
+                      p: 2.5,
                       borderRadius: '12px',
                       bgcolor: '#f8f9fa',
                       border: `2px solid ${ders.color}30`,
@@ -934,25 +934,32 @@ const KonuTakip = () => {
                         zIndex: 0
                       }
                     }}>
-                      <Typography sx={{ 
-                        fontWeight: 800, 
-                        color: '#495057', 
-                        fontSize: '1rem',
-                        zIndex: 1,
+                      <Box sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 1
+                        gap: 1,
+                        zIndex: 1,
+                        pr: 1
                       }}>
-                        <span style={{ 
-                          color: ders.color, 
+                        <Typography sx={{ 
                           fontWeight: 900, 
-                          fontSize: '1.2rem',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                          color: ders.color, 
+                          fontSize: '1.3rem',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.05)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          mr: 0.5
                         }}>
                           {tamamlananKonuSayisi}
-                        </span> 
-                        / {ders.konular.length} Konu Tamamlandı
-                      </Typography>
+                        </Typography>
+                        <Typography sx={{ 
+                          fontWeight: 700, 
+                          color: '#495057', 
+                          fontSize: '1rem',
+                        }}>
+                          / {ders.konular.length} Konu Tamamlandı
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
                 </Box>
