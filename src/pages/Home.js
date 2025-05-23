@@ -1,10 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { 
   Box, 
   Container,
   Paper,
-  Typography
+  Typography,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import { ThemeContext } from '../context/ThemeContext';
 import RankingGoals from '../components/RankingGoals';
 import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -15,6 +20,7 @@ import { useNotifications } from '../context/NotificationContext';
 const Home = () => {
   const [user] = useAuthState(auth);
   const { addNotification } = useNotifications() || { addNotification: () => {} };
+  const { darkMode, toggleTheme } = useContext(ThemeContext);
   
   // Kullanıcı 3 gün veya daha uzun süre giriş yapmadıysa bildirim gönder
   useEffect(() => {
@@ -69,9 +75,30 @@ const Home = () => {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        backgroundColor: '#f4f2f5',
+        backgroundColor: 'var(--background-color)',
       }}
     >
+      {/* Tema Değiştirme Butonu */}
+      <Box sx={{ position: 'fixed', top: 20, right: 20, zIndex: 1000 }}>
+        <Tooltip title={darkMode ? "Aydınlık Moda Geç" : "Koyu Moda Geç"}>
+          <IconButton 
+            onClick={toggleTheme} 
+            sx={{ 
+              bgcolor: darkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)', 
+              color: darkMode ? '#fff' : '#333',
+              '&:hover': {
+                bgcolor: darkMode ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+              },
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              width: 48,
+              height: 48
+            }}
+          >
+            {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
+        </Tooltip>
+      </Box>
+
       <Container 
         maxWidth={false}
         sx={{ 
@@ -88,7 +115,7 @@ const Home = () => {
             borderRadius: '16px', 
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
-            background: '#f4f2f5',
+            background: 'var(--background-color)',
             boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,
@@ -166,7 +193,7 @@ const Home = () => {
             borderRadius: '16px', 
             overflow: 'hidden',
             mb: { xs: 4, sm: 5, md: 6 },
-            background: '#f4f2f5',
+            background: 'var(--background-color)',
             boxShadow: '0 8px 32px rgba(77, 77, 0, 0.08), 0 2px 8px rgba(77, 77, 0, 0.05)',
             position: 'relative',
             minHeight: 220,

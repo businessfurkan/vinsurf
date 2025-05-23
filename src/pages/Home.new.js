@@ -4,7 +4,6 @@ import {
   Typography, 
   Paper, 
   Grid, 
-  Button,
   useTheme,
   useMediaQuery
 } from '@mui/material';
@@ -14,7 +13,6 @@ import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   return (
     <Box 
@@ -75,7 +73,7 @@ const Home = () => {
                   lineHeight: 1.6
                 }}
               >
-                Çalışmaya başladığınız her gün "Sisteme Giriş Yaptım" butonuna tıklayarak giriş kaydınızı oluşturun.
+                Çalışmaya başladığınız her gün &quot;Sisteme Giriş Yaptım&quot; butonuna tıklayarak giriş kaydınızı oluşturun.
                 Bu sayede hangi günlerde çalıştığınızı takip edebilir ve düzenli çalışma alışkanlığı geliştirebilirsiniz.
               </Typography>
               

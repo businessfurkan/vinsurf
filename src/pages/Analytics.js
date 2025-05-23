@@ -916,7 +916,7 @@ const Analytics = () => {
             PaperProps={{
               sx: {
                 borderRadius: 2,
-                bgcolor: '#FFFFF0',
+                bgcolor: 'var(--background-color)',
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)'
               }
             }}

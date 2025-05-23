@@ -1,16 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Box, 
   Typography, 
-  Button, 
-  Grid,
+  Button,
+  Paper,
   CircularProgress,
+  Divider,
   Container,
-  Paper
+  Grid
 } from '@mui/material';
 import { styled, keyframes } from '@mui/material/styles';
+import { motion } from 'framer-motion';
 import GoogleIcon from '@mui/icons-material/Google';
 import SchoolIcon from '@mui/icons-material/School';
+
 import MenuBookIcon from '@mui/icons-material/MenuBook';
 import ForumIcon from '@mui/icons-material/Forum';
 import GroupsIcon from '@mui/icons-material/Groups';
@@ -18,18 +21,18 @@ import TimelineIcon from '@mui/icons-material/Timeline';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import BookIcon from '@mui/icons-material/Book';
-
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
 
 
-// Animations
-const float = keyframes`
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
+// Enhanced animations
+
+const gradientShift = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 `;
 
 // Styled components
@@ -40,7 +43,20 @@ const LoginContainer = styled(Box)(({ theme }) => ({
   flexDirection: 'column',
   overflow: 'hidden',
   position: 'relative',
-  background: '#FFF8E1',
+  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+}));
+
+const AnimatedBackground = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: 'linear-gradient(45deg, #8e2de2, #4a00e0, #6a3093, #a044ff)',
+  backgroundSize: '400% 400%',
+  animation: `${gradientShift} 15s ease infinite`,
+  opacity: 0.8,
+  zIndex: -1,
 }));
 
 const Header = styled(Box)(({ theme }) => ({
@@ -49,58 +65,27 @@ const Header = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   padding: '16px 24px',
   width: '100%',
+  position: 'relative',
+  zIndex: 5,
 }));
 
 const Logo = styled(Box)(({ theme }) => ({
   fontSize: '24px',
   fontWeight: 'bold',
-  color: '#333',
+  color: 'white',
   display: 'flex',
   alignItems: 'center',
   '& svg': {
     marginRight: '8px',
-    color: '#FF6B6B',
+    color: 'white',
   }
 }));
 
-const HeroSection = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: { xs: 'column', md: 'column' },
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: { xs: '20px', md: '40px 20px' },
-  position: 'relative',
-  overflow: 'visible',
-  flex: 1,
-  minHeight: '60vh',
-}));
 
 
 
-const HeroImageContainer = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: '50%',
-  right: '0',
-  transform: 'translateY(-50%)',
-  zIndex: 0,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  opacity: 0.7,
-  pointerEvents: 'none',
-}));
 
-const BigLetterA = styled(Box)(({ theme }) => ({
-  fontSize: '400px',
-  fontWeight: 'bold',
-  color: '#FF6B6B',
-  opacity: 0.9,
-  position: 'relative',
-  lineHeight: 0.8,
-  fontFamily: '"Arial", sans-serif',
-}));
-
-const FloatingElement = styled(Box)(({ top, left, right, bottom, rotate, size }) => ({
+const FloatingElement = styled(motion.div)(({ top, left, right, bottom, size }) => ({
   position: 'absolute',
   top,
   left,
@@ -108,22 +93,58 @@ const FloatingElement = styled(Box)(({ top, left, right, bottom, rotate, size })
   bottom,
   width: size || '80px',
   height: size || '80px',
-  transform: rotate ? `rotate(${rotate}deg)` : 'none',
-  animation: `${float} 6s ease-in-out infinite`,
   zIndex: 0,
+  filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.15))',
 }));
 
-const GreenBlob = styled(Box)(({ theme }) => ({
+const FloatingIcon = styled(Box)(({ color }) => ({
+  width: '100%',
+  height: '100%',
+  borderRadius: '20%',
+  background: `linear-gradient(135deg, ${color}80, ${color})`,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: 'white',
+  boxShadow: `0 10px 20px ${color}50`,
+  '& svg': {
+    fontSize: '40px',
+  }
+}));
+
+// 3D Card Components
+const Card3D = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  transformStyle: 'preserve-3d',
+  transition: 'transform 0.6s ease',
+  width: '100%',
+  height: '100%',
+}));
+
+const CardFace = styled(Box)(({ theme, position }) => ({
   position: 'absolute',
-  width: '300px',
-  height: '300px',
-  borderRadius: '50%',
-  background: '#4ECDC4',
-  opacity: 0.3,
-  top: '50%',
-  right: '50%',
-  transform: 'translate(50%, -50%)',
-  zIndex: 0,
+  width: '100%',
+  height: '100%',
+  backfaceVisibility: 'hidden',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  borderRadius: '20px',
+  padding: '30px',
+  transform: position === 'back' ? 'rotateY(180deg)' : 'rotateY(0)',
+}));
+
+const CardFront = styled(CardFace)(({ theme }) => ({
+  background: 'rgba(255, 255, 255, 0.7)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+}));
+
+const CardBack = styled(CardFace)(({ theme }) => ({
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  color: 'white',
 }));
 
 
@@ -132,22 +153,45 @@ const GreenBlob = styled(Box)(({ theme }) => ({
 
 
 
-const LoginButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(45deg, #4776E6, #8E54E9)',
+const LoginButton = styled(Button)(({ theme, color }) => ({
+  background: color === 'google' 
+    ? 'linear-gradient(45deg, #4285F4, #34A853, #FBBC05, #EA4335)' 
+    : 'linear-gradient(45deg, #6a11cb, #2575fc)',
+  backgroundSize: color === 'google' ? '300% 300%' : '200% 200%',
+  animation: `${gradientShift} 3s ease infinite`,
   color: '#fff',
   fontWeight: 'bold',
   padding: '12px 30px',
   borderRadius: '30px',
   textTransform: 'none',
   fontSize: '16px',
-  boxShadow: '0 8px 20px rgba(142, 84, 233, 0.3)',
+  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
   transition: 'all 0.3s ease',
   border: '2px solid transparent',
-  '&:hover': {
-    background: 'linear-gradient(45deg, #3A66D6, #7B46D9)',
-    boxShadow: '0 10px 25px rgba(142, 84, 233, 0.4)',
-    transform: 'translateY(-3px)',
+  position: 'relative',
+  overflow: 'hidden',
+  '&:before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+    transition: 'all 0.5s ease',
   },
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
+    '&:before': {
+      left: '100%',
+      transition: 'all 0.5s ease',
+    }
+  },
+  '&:active': {
+    transform: 'translateY(0)',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+  }
 }));
 
 
@@ -159,51 +203,51 @@ const FeatureCard = styled(Paper)(({ theme, color, index }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   textAlign: 'center',
-  width: '180px',
-  height: '180px',
+  width: '100%',
+  height: '100%',
   transition: 'all 0.3s ease',
-  background: 'rgba(255, 255, 255, 0.9)',
+  background: 'rgba(255, 255, 255, 0.1)',
   backdropFilter: 'blur(10px)',
   position: 'relative',
   cursor: 'pointer',
   margin: '0 auto',
-  border: `3px solid ${color}15`,
-  boxShadow: `0 10px 25px ${color}25`,
+  border: `1px solid rgba(255, 255, 255, 0.18)`,
+  boxShadow: `0 8px 32px rgba(0, 0, 0, 0.15)`,
   '&:hover': {
     transform: 'translateY(-8px) scale(1.03)',
-    boxShadow: `0 15px 30px ${color}40`,
-    background: `linear-gradient(135deg, white, ${color}10)`,
+    boxShadow: `0 15px 30px rgba(0, 0, 0, 0.25)`,
+    background: `rgba(255, 255, 255, 0.2)`,
   },
 }));
 
 const FeatureIcon = styled(Box)(({ color }) => ({
-  width: '70px',
-  height: '70px',
+  width: '60px',
+  height: '60px',
   borderRadius: '50%',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   background: `linear-gradient(135deg, ${color}, ${color}CC)`,
-  color: '#fff',
+  color: 'white',
   marginBottom: '16px',
-  boxShadow: `0 8px 20px ${color}50`,
-  border: '4px solid white',
+  boxShadow: `0 10px 20px ${color}40`,
   transition: 'all 0.3s ease',
-  '& .MuiSvgIcon-root': {
-    fontSize: '32px',
-    filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.2))',
+  '& svg': {
+    fontSize: '30px',
+    transition: 'all 0.3s ease',
   },
   '.feature-card:hover &': {
-    transform: 'scale(1.1) rotate(5deg)',
+    transform: 'scale(1.1) rotate(10deg)',
   }
 }));
 
-const FeatureTitle = styled(Typography)(({ theme, color }) => ({
-  fontSize: '18px',
-  fontWeight: '800',
-  color: '#333',
-  marginTop: '10px',
+const FeatureTitle = styled(Typography)(({ color }) => ({
+  fontSize: '16px',
+  fontWeight: 600,
+  color: 'white',
   position: 'relative',
+  paddingBottom: '12px',
+  transition: 'all 0.3s ease',
   '&::after': {
     content: '""',
     position: 'absolute',
@@ -212,8 +256,15 @@ const FeatureTitle = styled(Typography)(({ theme, color }) => ({
     transform: 'translateX(-50%)',
     width: '40px',
     height: '3px',
-    background: color || '#333',
+    background: color || 'white',
     borderRadius: '2px',
+    transition: 'all 0.3s ease',
+  },
+  '.feature-card:hover &': {
+    letterSpacing: '0.5px',
+  },
+  '.feature-card:hover &::after': {
+    width: '60px',
   }
 }));
 
@@ -226,31 +277,32 @@ const FeatureDescription = styled(Typography)(({ theme }) => ({
   left: '50%',
   transform: 'translateX(-50%)',
   width: '220px',
-  background: 'linear-gradient(135deg, rgba(66, 99, 235, 0.95), rgba(87, 66, 235, 0.95))',
-  padding: '14px',
-  borderRadius: '12px',
-  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-  zIndex: 10,
+  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  padding: '10px 15px',
+  borderRadius: '8px',
+  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
   opacity: 0,
   visibility: 'hidden',
   transition: 'all 0.3s ease',
-  pointerEvents: 'none',
-  fontWeight: '500',
-  textAlign: 'center',
+  zIndex: 10,
+  backdropFilter: 'blur(5px)',
   '&::after': {
     content: '""',
     position: 'absolute',
     top: '100%',
     left: '50%',
     transform: 'translateX(-50%)',
-    border: '8px solid transparent',
-    borderTopColor: 'rgba(87, 66, 235, 0.95)',
-  }
+    borderWidth: '8px',
+    borderStyle: 'solid',
+    borderColor: 'rgba(0, 0, 0, 0.8) transparent transparent transparent',
+  },
 }));
 
-const TooltipContainer = styled(Box)(({ isOpen }) => ({
+const TooltipContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
-  '&:hover .feature-description, &.active .feature-description': {
+  width: '100%',
+  height: '100%',
+  '&:hover .feature-description': {
     opacity: 1,
     visibility: 'visible',
     bottom: 'calc(100% + 15px)',
@@ -258,12 +310,16 @@ const TooltipContainer = styled(Box)(({ isOpen }) => ({
 }));
 
 const FeatureCardsContainer = styled(Box)(({ theme }) => ({
-  background: '#FFF8E1',
+  background: 'rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(10px)',
   padding: '40px 0 60px',
   borderRadius: '40px 40px 0 0',
   marginTop: '-20px',
   position: 'relative',
   zIndex: 1,
+  boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  borderBottom: 'none',
 }));
 
 
@@ -271,6 +327,32 @@ const FeatureCardsContainer = styled(Box)(({ theme }) => ({
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [flipped, setFlipped] = useState(false);
+  const card3DRef = useRef(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  // Handle 3D effect on mouse move
+  const handleMouseMove = (e) => {
+    if (!card3DRef.current || !isHovering) return;
+    
+    const rect = card3DRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = (y - centerY) / 20;
+    const rotateY = (centerX - x) / 20;
+    
+    card3DRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  };
+
+  const resetCardRotation = () => {
+    if (!card3DRef.current) return;
+    card3DRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
+    setIsHovering(false);
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -283,49 +365,72 @@ const Login = () => {
     }
   };
 
-  // Feature cards data
+  // Feature cards data with enhanced descriptions
   const features = [
     {
       title: "RekaNET Sıralama",
-      description: "RekaNET ile şehrinde hangi sıralamadasın öğren",
+      description: "Şehrindeki ve ülke genelindeki sıralamalarını anlık olarak takip et, hedeflerine ne kadar yaklaştığını gör.",
       icon: <TimelineIcon />,
       color: "#FF6B6B"
     },
     {
       title: "Benimle Çalış",
-      description: "Benimle Çalış sistemi ile her gün canlı yayında beraber çalışıyoruz",
+      description: "Canlı çalışma oturumlarına katıl, motivasyonunu artır ve disiplinli çalışma alışkanlığı kazan.",
       icon: <GroupsIcon />,
       color: "#4ECDC4"
     },
     {
       title: "SoruForum",
-      description: "Takıldığın soru mu oldu? SoruForum sayesinde soru sorabilirsin",
+      description: "Zorlandığın soruları paylaş, uzman öğretmenlerden ve arkadaşlarından anında yardım al.",
       icon: <ForumIcon />,
       color: "#FF9F1C"
     },
     {
       title: "Deneme Takibi",
-      description: "Deneme netlerini grafiklerle kontrol edebilirsin",
+      description: "Deneme sınavı sonuçlarını grafiklerle analiz et, gelişim alanlarını belirle ve ilerleme kaydedilecek konuları tespit et.",
       icon: <BarChartIcon />,
       color: "#845EC2"
     },
     {
       title: "Konu Analizi",
-      description: "Hangi konuya ne kadar çalıştığını görebilirsin",
+      description: "Hangi konuya ne kadar çalıştığını görsel grafiklerle takip et, zaman yönetimini optimize et.",
       icon: <PieChartIcon />,
       color: "#00B8A9"
     }
   ];
 
-  // Decorative elements
-  const decorativeElements = [
-    { component: <BookIcon />, size: '80px', top: '15%', left: '5%', rotate: '15' },
-    { component: <MenuBookIcon />, size: '60px', top: '20%', right: '10%', rotate: '-10' },
-    { component: <AssignmentIcon />, size: '70px', bottom: '30%', left: '8%', rotate: '20' },
+  // Animated floating elements
+  const floatingElements = [
+    { 
+      component: <FloatingIcon color="#FF6B6B"><BookIcon /></FloatingIcon>, 
+      top: '15%', left: '10%', 
+      animate: { y: [0, -30, 0], rotate: [0, 5, 0] },
+      transition: { duration: 5, repeat: Infinity, ease: "easeInOut" }
+    },
+    { 
+      component: <FloatingIcon color="#4ECDC4"><MenuBookIcon /></FloatingIcon>, 
+      top: '25%', right: '15%',
+      animate: { y: [0, -20, 0], rotate: [0, -5, 0] },
+      transition: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
+    },
+    { 
+      component: <FloatingIcon color="#FF9F1C"><AssignmentIcon /></FloatingIcon>, 
+      bottom: '20%', left: '15%',
+      animate: { y: [0, -25, 0], rotate: [0, 3, 0] },
+      transition: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }
+    },
+    { 
+      component: <FloatingIcon color="#845EC2"><BarChartIcon /></FloatingIcon>, 
+      bottom: '25%', right: '10%',
+      animate: { y: [0, -15, 0], rotate: [0, -3, 0] },
+      transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }
+    },
   ];
 
   return (
     <LoginContainer>
+      <AnimatedBackground />
+      
       <Header>
         <Logo>
           <SchoolIcon />
@@ -333,117 +438,246 @@ const Login = () => {
         </Logo>
       </Header>
       
-      <HeroSection>
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textAlign: 'center',
-          maxWidth: '800px',
-          margin: '0 auto',
-          padding: '40px 20px',
-          position: 'relative',
-          zIndex: 5
-        }}>
-          <Typography 
-            variant="h3" 
-            component="h1"
-            sx={{ 
-              fontWeight: 800, 
-              color: '#333',
-              mb: 3,
-              textAlign: 'center',
-              position: 'relative',
-              background: 'linear-gradient(90deg, #FF6B6B, #4ECDC4)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textShadow: '0 2px 10px rgba(0,0,0,0.05)',
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                bottom: '-15px',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: '100px',
-                height: '6px',
-                background: 'linear-gradient(90deg, #FF6B6B, #4ECDC4)',
-                borderRadius: '3px',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-              }
-            }}
+      <Box sx={{ 
+        position: 'relative', 
+        minHeight: '80vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: { xs: '20px', md: '40px' },
+        overflow: 'hidden'
+      }}>
+        {/* Floating Elements */}
+        {floatingElements.map((element, index) => (
+          <FloatingElement
+            key={index}
+            top={element.top}
+            left={element.left}
+            right={element.right}
+            bottom={element.bottom}
+            animate={element.animate}
+            transition={element.transition}
           >
-            YKS Çalışma Takip
-          </Typography>
-          
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 500,
-              color: '#444',
-              mb: 5,
-              maxWidth: '650px',
-              lineHeight: 1.7,
-              fontSize: { xs: '1.1rem', md: '1.3rem' },
-              textAlign: 'center',
-              padding: '15px 25px',
-            }}
-          >
-            <Box component="span" sx={{ color: '#FF6B6B', fontWeight: 700, fontSize: '1.15em' }}>Pomodoro tekniği</Box> ve 
-            <Box component="span" sx={{ color: '#4ECDC4', fontWeight: 700, fontSize: '1.15em' }}>analitik çalışma takibi</Box> ile 
-            sınav başarınızı artırın. Düzenli çalışma ve detaylı istatistiklerle 
-            performansınızı maksimum seviyeye çıkarın.
-          </Typography>
-          
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            width: '100%',
-            mb: 4
-          }}>
-            {loading ? (
-              <CircularProgress size={36} sx={{ color: '#FF6B6B' }} />
-            ) : (
-              <LoginButton
-                variant="contained"
-                startIcon={<GoogleIcon />}
-                onClick={handleGoogleLogin}
-                size="large"
-                sx={{ 
-                  py: 1.5, 
-                  px: 4,
-                  fontSize: '1.1rem',
-                  boxShadow: '0 8px 20px rgba(255, 107, 107, 0.3)'
-                }}
-              >
-                Google ile Giriş Yap
-              </LoginButton>
-            )}
-          </Box>
-        </Box>
+            {element.component}
+          </FloatingElement>
+        ))}
         
-        <HeroImageContainer>
-          <GreenBlob />
-          <BigLetterA>A</BigLetterA>
-          
-          {decorativeElements.map((element, index) => (
-            <FloatingElement
-              key={index}
-              top={element.top}
-              left={element.left}
-              right={element.right}
-              bottom={element.bottom}
-              rotate={element.rotate}
-              size={element.size}
-            >
-              {element.component}
-            </FloatingElement>
-          ))}
-        </HeroImageContainer>
-      </HeroSection>
+        {/* 3D Login Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          style={{ width: '100%', maxWidth: '500px', perspective: '1000px' }}
+        >
+          <Card3D
+            ref={card3DRef}
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={resetCardRotation}
+            sx={{ transform: flipped ? 'rotateY(180deg)' : 'rotateY(0)' }}
+          >
+            <CardFront position="front">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  mb: 4
+                }}>
+                  <SchoolIcon sx={{ fontSize: 40, color: '#6a11cb', mr: 1 }} />
+                  <Typography variant="h4" component="h1" sx={{ 
+                    fontWeight: 800,
+                    background: 'linear-gradient(90deg, #6a11cb, #2575fc)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                  }}>
+                    YKS Çalışma Takip
+                  </Typography>
+                </Box>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+              >
+                <Typography variant="h6" sx={{ 
+                  textAlign: 'center', 
+                  mb: 4,
+                  color: '#555',
+                  lineHeight: 1.6
+                }}>
+                  Sınav başarınızı artırmak için <Box component="span" sx={{ 
+                    fontWeight: 700, 
+                    color: '#6a11cb'
+                  }}>yapay zeka destekli</Box> çalışma platformu
+                </Typography>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.9, duration: 0.5 }}
+                style={{ width: '100%' }}
+              >
+                {loading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                    <CircularProgress sx={{ 
+                      color: '#6a11cb',
+                      '& .MuiCircularProgress-circle': {
+                        strokeLinecap: 'round',
+                      }
+                    }} />
+                  </Box>
+                ) : (
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+                    <LoginButton
+                      variant="contained"
+                      startIcon={<GoogleIcon />}
+                      onClick={handleGoogleLogin}
+                      color="google"
+                      fullWidth
+                      sx={{ py: 1.5 }}
+                    >
+                      Google ile Giriş Yap
+                    </LoginButton>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      width: '100%', 
+                      my: 2 
+                    }}>
+                      <Divider sx={{ flex: 1, borderColor: 'rgba(0,0,0,0.1)' }} />
+                      <Typography sx={{ px: 2, color: '#666', fontSize: '0.9rem' }}>
+                        veya
+                      </Typography>
+                      <Divider sx={{ flex: 1, borderColor: 'rgba(0,0,0,0.1)' }} />
+                    </Box>
+                    
+                    <Button
+                      variant="outlined"
+                      onClick={() => setFlipped(true)}
+                      sx={{
+                        borderColor: '#6a11cb',
+                        color: '#6a11cb',
+                        borderRadius: '30px',
+                        py: 1.5,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        '&:hover': {
+                          borderColor: '#2575fc',
+                          background: 'rgba(106, 17, 203, 0.05)',
+                        }
+                      }}
+                    >
+                      Özelliklerimizi Keşfedin
+                    </Button>
+                  </Box>
+                )}
+              </motion.div>
+            </CardFront>
+            
+            <CardBack position="back">
+              <Box sx={{ width: '100%' }}>
+                <Typography variant="h5" sx={{ 
+                  fontWeight: 700, 
+                  mb: 3, 
+                  textAlign: 'center',
+                  color: 'white',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                }}>
+                  Platformumuzun Özellikleri
+                </Typography>
+                
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: 2,
+                  mb: 3 
+                }}>
+                  {features.map((feature, index) => (
+                    <Box key={index} sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      p: 1.5,
+                      borderRadius: '10px',
+                      background: 'rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(5px)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'rgba(255,255,255,0.2)',
+                        transform: 'translateX(5px)'
+                      }
+                    }}>
+                      <Box sx={{ 
+                        width: 40, 
+                        height: 40, 
+                        borderRadius: '10px',
+                        background: feature.color,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        boxShadow: `0 5px 15px ${feature.color}80`
+                      }}>
+                        {feature.icon}
+                      </Box>
+                      <Box>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'white' }}>
+                          {feature.title}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem' }}>
+                          {feature.description}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  ))}
+                </Box>
+                
+                <Button
+                  variant="contained"
+                  onClick={() => setFlipped(false)}
+                  sx={{
+                    background: 'rgba(255,255,255,0.2)',
+                    backdropFilter: 'blur(5px)',
+                    color: 'white',
+                    borderRadius: '30px',
+                    py: 1.5,
+                    width: '100%',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    '&:hover': {
+                      background: 'rgba(255,255,255,0.3)',
+                    }
+                  }}
+                >
+                  Giriş Ekranına Dön
+                </Button>
+              </Box>
+            </CardBack>
+          </Card3D>
+        </motion.div>
+      </Box>
       
       <FeatureCardsContainer>
         <Container maxWidth="lg">
+          <Typography variant="h4" sx={{ 
+            textAlign: 'center', 
+            mb: 4, 
+            color: 'white',
+            fontWeight: 700,
+            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
+          }}>
+            Neler Sunuyoruz?
+          </Typography>
+          
           <Grid container spacing={4} justifyContent="center">
             {features.map((feature, index) => (
               <Grid item xs={12} sm={6} md={2.4} key={feature.title}>
@@ -452,11 +686,6 @@ const Login = () => {
                     elevation={0} 
                     color={feature.color} 
                     index={index}
-                    onClick={() => {
-                      // Tıklama işlevi burada eklenebilir
-                      const card = document.getElementById(`feature-card-${index}`);
-                      card.classList.toggle('active');
-                    }}
                     id={`feature-card-${index}`}
                     className="feature-card"
                   >

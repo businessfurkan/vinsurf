@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Box, 
   Typography, 
@@ -15,36 +15,22 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Snackbar,
   Alert,
   IconButton,
   Grid,
   Card,
-  CardContent,
-  Divider,
-  LinearProgress,
-  Chip
+  CardContent
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { auth, db } from '../firebase';
 import { collection, doc, setDoc, getDoc, onSnapshot } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontWeight: 'medium',
-  padding: '12px 16px',
-  fontSize: '0.875rem',
-}));
+// Removed unused StyledTableCell component
 
 const HeaderTableCell = styled(TableCell)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -87,9 +73,13 @@ const Performans = () => {
     message: '',
     severity: 'success'
   });
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState(null);
+  // Auto-save functionality removed as it's not being used
+  const [autoSaveTimeout] = useState(null);
 
-  const daysOfWeek = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+  // Use useMemo to prevent the array from being recreated on every render
+  const daysOfWeek = useMemo(() => [
+    'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'
+  ], []);
 
   useEffect(() => {
     if (user) {
@@ -174,7 +164,7 @@ const Performans = () => {
       
       return () => unsubscribe();
     }
-  }, [user]);
+  }, [user, daysOfWeek]);
 
   const handleCellClick = (day) => {
     setCurrentDay(day);

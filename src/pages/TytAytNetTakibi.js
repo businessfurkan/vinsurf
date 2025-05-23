@@ -1,73 +1,66 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../firebase';
-import { motion } from 'framer-motion';
-import '../styles/tyt-ayt-modern.css';
-import { styled } from '@mui/system';
-import { useNotifications } from '../context/NotificationContext';
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
-import { 
-  Box, 
-  Typography, 
-  TextField, 
-  Button,
-  FormControl,
-  Select,
-  MenuItem,
-  InputLabel,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  IconButton,
-  Card,
-  CardContent,
-  Stepper,
-  Step,
-  StepLabel,
-  Snackbar,
-  Alert,
-  CircularProgress
-} from '@mui/material';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import trLocale from 'date-fns/locale/tr';
-import { format } from 'date-fns';
-import {
-  School as SchoolIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  NavigateNext as NavigateNextIcon,
-  NavigateBefore as NavigateBeforeIcon,
-  CheckCircle as CheckCircleIcon
-} from '@mui/icons-material';
-
-import { db } from '../firebase';
+import { auth, db } from '../firebase';
 import { 
   collection, 
   addDoc, 
-  query, 
   getDocs, 
+  deleteDoc, 
+  doc, 
+  query, 
   where,
   orderBy, 
-  deleteDoc, 
-  doc,
-  serverTimestamp
+  serverTimestamp 
 } from 'firebase/firestore';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { format } from 'date-fns';
+import { tr as trLocale } from 'date-fns/locale';
+import { motion } from 'framer-motion';
+import { styled } from '@mui/material/styles';
+import { useMediaQuery, useTheme } from '@mui/material';
+
+// Import ModernStepper component
+import ModernStepper from '../components/ModernStepper';
+
+// Import CSS
+import '../styles/tyt-ayt-modern.css';
+
+// Material UI components
+import {
+  Container, Box, Typography, Button, TextField, Grid, Paper,
+  Select, MenuItem, FormControl, InputLabel, Card, IconButton,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Tabs, Tab, Chip, Snackbar, Alert
+} from '@mui/material';
+
+// Recharts components
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+
+// Material UI icons
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  ViewList as ViewListIcon,
+  BarChart as BarChartIcon,
+  NavigateBefore as NavigateBeforeIcon,
+  NavigateNext as NavigateNextIcon,
+  CheckCircle as CheckCircleIcon,
+  Assignment as AssignmentIcon,
+  Close as CloseIcon,
+  TrendingUp as TrendingUpIcon,
+  TrendingDown as TrendingDownIcon,
+  TrendingFlat as TrendingFlatIcon,
+  CalendarToday as CalendarTodayIcon,
+  ShowChart as ShowChartIcon
+} from '@mui/icons-material';
+
+// Date picker components
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 // Define TYT ve AYT subjects
 const tytSubjects = [
@@ -87,43 +80,53 @@ const aytSubjects = [
   'AYT Coğrafya'
 ];
 
+// Steps are defined below
+
 // Styled components
-// Stepper için özel StyledCard bileşeni
-const StepperCard = styled(Card)(({ theme }) => ({
-  borderRadius: 16,
-  background: 'linear-gradient(135deg, #2c3e50 0%, #4a6491 100%)',
-  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15), 0 6px 12px rgba(0, 0, 0, 0.1)',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
-  transition: 'all 0.3s ease-in-out',
-  overflow: 'hidden',
-  position: 'relative',
-  width: '100%',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    height: '100%',
-    background: 'radial-gradient(circle at top right, rgba(78, 133, 253, 0.15), transparent 70%)',
-    pointerEvents: 'none'
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '12px',
+    transition: 'var(--transition)',
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'var(--primary-color)'
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'var(--primary-color)',
+      borderWidth: '2px'
+    }
+  },
+  '& .MuiInputLabel-outlined.Mui-focused': {
+    color: 'var(--primary-color)'
   }
 }));
 
-// Normal kartlar için StyledCard bileşeni
-const StyledCard = styled(Card)(({ theme }) => ({
-  borderRadius: 16,
-  background: 'linear-gradient(145deg, #ffffff 0%, #f0efe9 100%)',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(217, 212, 187, 0.15)',
-  border: '1px solid rgba(217, 212, 187, 0.1)',
-  transition: 'all 0.3s ease-in-out',
-  overflow: 'hidden',
+const StyledButton = styled(Button)(({ theme, variant }) => ({
+  borderRadius: '30px',
+  padding: '10px 24px',
+  fontWeight: 600,
+  textTransform: 'none',
+  letterSpacing: '0.5px',
+  transition: 'all 0.3s ease',
   position: 'relative',
-  width: '100%',
-  '&:hover': {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12), 0 6px 12px rgba(217, 212, 187, 0.2)'
-  }
+  overflow: 'hidden',
+  ...(variant === 'contained' && {
+    background: 'linear-gradient(45deg, var(--primary-color), var(--primary-light))',
+    color: 'white',
+    border: 'none',
+    '&:hover': {
+      background: 'linear-gradient(45deg, var(--primary-dark), var(--primary-color))',
+      boxShadow: '0 4px 15px rgba(74, 108, 247, 0.4)'
+    }
+  }),
+  ...(variant === 'outlined' && {
+    background: 'transparent',
+    color: 'var(--primary-color)',
+    border: '2px solid var(--primary-color)',
+    '&:hover': {
+      background: 'rgba(74, 108, 247, 0.1)'
+    }
+  })
 }));
 
 // Steps for the form
@@ -136,8 +139,12 @@ const steps = [
 ];
 
 const TytAytNetTakibi = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   // Get user from firebase auth
   const [user] = useAuthState(auth);
+  
   // State for the multi-step form
   const [activeStep, setActiveStep] = useState(0);
   const [examName, setExamName] = useState('');
@@ -152,16 +159,12 @@ const TytAytNetTakibi = () => {
   
   // State for the application
   const [netRecords, setNetRecords] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
-  
-  // State for records view
-  const [viewMode, setViewMode] = useState('form'); // 'form' or 'records'
+  const [tabValue, setTabValue] = useState(0); // 0: form, 1: records, 2: statistics
   const [selectedExamType, setSelectedExamType] = useState('TYT');
   const [selectedSubject, setSelectedSubject] = useState('');
   
-  // Bildirim sistemi için context
-  const { addNotification } = useNotifications();
+  // Bildirim sistemi kullanımı
   
   // Helper functions
   const calculateNet = (correct, incorrect) => {
@@ -172,9 +175,9 @@ const TytAytNetTakibi = () => {
 
   // Close notification
   const handleCloseNotification = () => {
-    setNotification({...notification, open: false});
+    setNotification(prev => ({ ...prev, open: false }));
   };
-
+  
   // Show notification
   const showNotification = useCallback((message, severity = 'success') => {
     setNotification({
@@ -182,7 +185,7 @@ const TytAytNetTakibi = () => {
       message,
       severity
     });
-  }, [setNotification]);
+  }, []);
   
   // Handle next step in the form
   const handleNext = () => {
@@ -192,48 +195,49 @@ const TytAytNetTakibi = () => {
     // Validate current step
     if (activeStep === 0) {
       if (!examName.trim()) {
-        newErrors.examName = 'Lütfen deneme adını girin';
+        newErrors.examName = 'Deneme adı gereklidir';
         isValid = false;
       }
     } else if (activeStep === 1) {
-      if (!examDate) {
-        newErrors.examDate = 'Lütfen tarih seçin';
-        isValid = false;
-      }
+      // Date validation is handled by the DatePicker component
+    } else if (activeStep === 2) {
+      // Exam type validation is handled by the Select component
     } else if (activeStep === 3) {
-      if (currentSubject) {
-        if (!correctCount && correctCount !== '0') {
-          newErrors.correctCount = 'Doğru sayısını girin';
-          isValid = false;
-        }
-        if (!incorrectCount && incorrectCount !== '0') {
-          newErrors.incorrectCount = 'Yanlış sayısını girin';
-          isValid = false;
-        }
-        if (!emptyCount && emptyCount !== '0') {
-          newErrors.emptyCount = 'Boş sayısını girin';
-          isValid = false;
-        }
+      if (Object.keys(subjectData).length === 0) {
+        setNotification({
+          open: true,
+          message: 'En az bir ders eklemelisiniz',
+          severity: 'error'
+        });
+        isValid = false;
       }
     }
     
     setErrors(newErrors);
     
-    if (!isValid) return;
+    if (!isValid) {
+      return;
+    }
     
     // If we're on the subject selection step and a subject is selected
     if (activeStep === 3 && currentSubject) {
       // Save current subject data
-      const updatedSubjectData = {
-        ...subjectData,
-        [currentSubject]: {
-          correctCount: parseInt(correctCount) || 0,
-          incorrectCount: parseInt(incorrectCount) || 0,
-          emptyCount: parseInt(emptyCount) || 0,
-          net: calculateNet(correctCount, incorrectCount)
-        }
-      };
-      setSubjectData(updatedSubjectData);
+      if (correctCount || incorrectCount || emptyCount) {
+        const correct = correctCount || '0';
+        const incorrect = incorrectCount || '0';
+        const empty = emptyCount || '0';
+        const net = calculateNet(correct, incorrect);
+        
+        setSubjectData(prev => ({
+          ...prev,
+          [currentSubject]: {
+            correctCount: correct,
+            incorrectCount: incorrect,
+            emptyCount: empty,
+            net
+          }
+        }));
+      }
       
       // Clear form for next subject
       setCurrentSubject('');
@@ -243,13 +247,61 @@ const TytAytNetTakibi = () => {
       return;
     }
     
-    // Move to next step
-    setActiveStep((prevStep) => prevStep + 1);
+    // If we're on the last step, submit the form
+    if (activeStep === steps.length - 1) {
+      // Prepare data for submission
+      const examData = {
+        userId: user.uid,
+        examName,
+        examDate,
+        examType,
+        subjects: subjectData,
+        createdAt: serverTimestamp()
+      };
+      
+      // Add to Firestore
+      addDoc(collection(db, 'netRecords'), examData)
+        .then(() => {
+          // Success
+          setNotification({
+            open: true,
+            message: 'Deneme sonuçları başarıyla kaydedildi',
+            severity: 'success'
+          });
+          
+          // Reset form
+          setExamName('');
+          setExamDate(new Date());
+          setExamType('TYT');
+          setSubjectData({});
+          setCurrentSubject('');
+          setCorrectCount('');
+          setIncorrectCount('');
+          setEmptyCount('');
+          
+          // Fetch updated records
+          fetchRecords();
+          
+          // Move to next step (completion)
+          setActiveStep(activeStep + 1);
+        })
+        .catch((error) => {
+          console.error('Error saving record:', error);
+          setNotification({
+            open: true,
+            message: 'Kaydetme sırasında bir hata oluştu',
+            severity: 'error'
+          });
+        });
+    } else {
+      // Move to the next step
+      setActiveStep(activeStep + 1);
+    }
   };
   
   // Handle back step in the form
   const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
+    setActiveStep(prevStep => prevStep - 1);
   };
   
   // Handle selecting a subject
@@ -270,111 +322,41 @@ const TytAytNetTakibi = () => {
     }
   };
   
-  // Submit the form data
-  const handleSubmit = async () => {
-    try {
-      setLoading(true);
-      
-      // Create record for each subject
-      const records = [];
-      
-      Object.entries(subjectData).forEach(([subject, data]) => {
-        records.push({
-          examName,
-          examDate,
-          examType,
-          subject,
-          correctCount: data.correctCount,
-          incorrectCount: data.incorrectCount,
-          emptyCount: data.emptyCount,
-          net: data.net,
-          createdAt: serverTimestamp()
-        });
-      });
-      
-      // Save records to Firestore
-      for (const record of records) {
-        await addDoc(collection(db, 'netRecords'), record);
-      }
-      
-      // Show success notification
-      showNotification('Deneme sonuçları başarıyla kaydedildi', 'success');
-      
-      // Reset form
-      setActiveStep(0);
-      setExamName('');
-      setExamDate(new Date());
-      setExamType('TYT');
-      setSubjectData({});
-      
-      // Refresh records
-      fetchNetRecords();
-    } catch (error) {
-      console.error('Error saving records:', error);
-      showNotification('Kayıt sırasında bir hata oluştu', 'error');
-    }
-  };
-  
   // Tavsiye gönderme fonksiyonu
   const sendRecommendation = useCallback((subject, decreasePercentage) => {
     // Ders adından konu tahmini yap
     let topic = '';
-    let resources = [];
     
-    // Derse göre konu ve kaynak önerileri
     if (subject.includes('Matematik')) {
-      topic = 'problemler';
-      resources = ['Matematik Problemi Çözme Teknikleri', 'Problem Çözüm Stratejileri', 'Matematik Problem Bankası'];
-    } else if (subject.includes('Türkçe')) {
-      topic = 'paragraf soruları';
-      resources = ['Paragraf Çözüm Teknikleri', 'TYT Türkçe Soru Bankası', 'Dil Bilgisi Konu Anlatımı'];
+      topic = 'fonksiyonlar';
     } else if (subject.includes('Fizik')) {
-      topic = 'hareket problemleri';
-      resources = ['Fizik Formül Kartları', 'Fizik Soru Bankası', 'Konu Anlatımlı Fizik'];
+      topic = 'mekanik';
     } else if (subject.includes('Kimya')) {
-      topic = 'kimyasal tepkimeler';
-      resources = ['Kimya Reaksiyon Kartları', 'Kimya Soru Bankası', 'Organik Kimya Konu Anlatımı'];
+      topic = 'organik kimya';
     } else if (subject.includes('Biyoloji')) {
-      topic = 'hücre konusu';
-      resources = ['Biyoloji Hücre Atlası', 'Biyoloji Soru Bankası', 'Genetik Konu Anlatımı'];
-    } else if (subject.includes('Tarih')) {
-      topic = 'tarih kronolojisi';
-      resources = ['Tarih Kronoloji Kartları', 'Tarih Soru Bankası', 'Osmanlı Tarihi Konu Anlatımı'];
-    } else if (subject.includes('Coğrafya')) {
-      topic = 'harita bilgisi';
-      resources = ['Coğrafya Atlas Çalışması', 'Coğrafya Soru Bankası', 'Türkiye Coğrafyası Konu Anlatımı'];
+      topic = 'hücre';
+    } else if (subject.includes('Türkçe')) {
+      topic = 'paragraf';
     } else if (subject.includes('Edebiyat')) {
       topic = 'edebi akımlar';
-      resources = ['Edebiyat Akımları Özeti', 'Edebiyat Soru Bankası', 'Divan Edebiyatı Konu Anlatımı'];
     } else if (subject.includes('Sosyal')) {
-      topic = 'vatandaşlık konuları';
-      resources = ['Vatandaşlık Konu Özeti', 'TYT Sosyal Bilimler Soru Bankası', 'Güncel Bilgiler'];
-    } else if (subject.includes('Fen')) {
-      topic = 'deney soruları';
-      resources = ['Fen Bilimleri Deney Kitabı', 'TYT Fen Bilimleri Soru Bankası', 'Fen Konu Anlatımı'];
-    } else {
-      topic = 'genel konular';
-      resources = ['Konu Tekrar Kitabı', 'Soru Bankası', 'Online Eğitim Platformları'];
+      topic = 'tarih';
+    } else if (subject.includes('Tarih')) {
+      topic = 'osmanlı tarihi';
     }
     
-    // Düşüş yüzdesine göre mesaj şiddetini ayarla
-    let severity = 'info';
-    if (decreasePercentage > 30) {
-      severity = 'warning';
-    }
-    
-    // Tavsiye mesajını oluştur
-    const message = `Son 3 denemeye göre ${subject} dersinde ${topic} kısmında zorlanıyorsun. Sana şu kaynakları öneriyorum: ${resources.join(', ')}.`;
+    // Mesajı oluştur
+    const severity = decreasePercentage > 30 ? 'error' : 'warning';
+    const message = `${subject} dersinde son denemelerinizde %${decreasePercentage.toFixed(1)} oranında düşüş tespit edildi. ${topic.charAt(0).toUpperCase() + topic.slice(1)} konusuna özellikle çalışmanızı öneririz.`;
     
     // Bildirim gönder
-    addNotification(message, severity, {
-      title: 'Yapay Zeka Tavsiye Sistemi',
-      subject: subject,
-      resources: resources,
-      decreasePercentage: decreasePercentage.toFixed(1)
+    setNotification({
+      open: true,
+      message: message,
+      severity: severity
     });
     
-  }, [addNotification]);
+  }, []);
   
   // Yapay zeka tavsiye sistemi
   const analyzePerformanceAndSendRecommendations = useCallback((records) => {
@@ -388,25 +370,30 @@ const TytAytNetTakibi = () => {
       allSubjects.forEach(subject => {
         // Bu derse ait son 3 denemeyi bul
         const subjectRecords = records
-          .filter(record => record.subject === subject)
-          .sort((a, b) => {
-            const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt?.seconds * 1000 || 0);
-            const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt?.seconds * 1000 || 0);
-            return dateB - dateA; // Tarihe göre azalan sıralama (en yeniden en eskiye)
-          })
-          .slice(0, 3); // Son 3 deneme
+          .filter(record => record.subjects && record.subjects[subject])
+          .slice(0, 3);
         
-        // En az 3 deneme yoksa analiz yapma
-        if (subjectRecords.length < 3) return;
-        
-        // Net puanları al
-        const nets = subjectRecords.map(record => parseFloat(record.net) || 0);
-        
-        // Son 3 denemede düşüş var mı kontrol et
-        // En yeni deneme en eskisinden düşükse ve bir trend varsa
-        if (nets[0] < nets[2] && nets[0] < nets[1]) {
-          // Düşüş yüzdesini hesapla
-          const decreasePercentage = ((nets[2] - nets[0]) / nets[2]) * 100;
+        // Eğer en az 3 deneme varsa analiz et
+        if (subjectRecords.length === 3) {
+          // Son deneme
+          const lastExam = subjectRecords[0];
+          // Önceki deneme
+          const previousExam = subjectRecords[1];
+          // Daha önceki deneme
+          const olderExam = subjectRecords[2];
+          
+          // Son denemenin neti
+          const lastNet = parseFloat(lastExam.subjects[subject].net);
+          // Önceki denemenin neti
+          const previousNet = parseFloat(previousExam.subjects[subject].net);
+          // Daha önceki denemenin neti
+          const olderNet = parseFloat(olderExam.subjects[subject].net);
+          
+          // Net ortalaması
+          const avgNet = (previousNet + olderNet) / 2;
+          
+          // Düşüş yüzdesi
+          const decreasePercentage = ((avgNet - lastNet) / avgNet) * 100;
           
           // Eğer düşüş %10'dan fazlaysa tavsiye gönder
           if (decreasePercentage > 10) {
@@ -419,23 +406,11 @@ const TytAytNetTakibi = () => {
     }
   }, [sendRecommendation]);
 
-  useEffect(() => {
-    if (netRecords.length > 0) {
-      analyzePerformanceAndSendRecommendations(netRecords);
-    }
-  }, [netRecords, analyzePerformanceAndSendRecommendations]);
-
-  // Fetch all records
-  const fetchNetRecords = useCallback(async () => {
+  // Fetch records from Firestore
+  const fetchRecords = useCallback(async () => {
+    if (!user) return;
+    
     try {
-      setLoading(true);
-      
-      // Kullanıcı oturum açmamışsa işlemi durdur
-      if (!user || !user.uid) {
-        console.log('Kullanıcı oturum açmamış, veriler yüklenemiyor');
-        return;
-      }
-      
       const q = query(
         collection(db, 'netRecords'),
         where('userId', '==', user.uid),
@@ -458,21 +433,16 @@ const TytAytNetTakibi = () => {
       if (records.length > 0) {
         analyzePerformanceAndSendRecommendations(records);
       }
-      
     } catch (error) {
       console.error('Error fetching records:', error);
       showNotification('Kayıtlar yüklenirken bir hata oluştu', 'error');
-    } finally {
-      setLoading(false);
     }
-  }, [showNotification, setLoading, setNetRecords, analyzePerformanceAndSendRecommendations, user]);
-  
-
+  }, [user, analyzePerformanceAndSendRecommendations, showNotification]);
   
   // Delete a record
   const handleDelete = async (id) => {
     try {
-      setLoading(true);
+      // setLoading kaldırıldı
       
       await deleteDoc(doc(db, 'netRecords', id));
       
@@ -483,1168 +453,896 @@ const TytAytNetTakibi = () => {
     } catch (error) {
       console.error('Error deleting record:', error);
       showNotification('Silme işlemi sırasında bir hata oluştu', 'error');
-    } finally {
-      setLoading(false);
     }
   };
-  
-  // Load records on component mount
+
+  // Fetch records on component mount
   useEffect(() => {
-    fetchNetRecords();
-  }, [fetchNetRecords]);
-  
-  // Render form step content
+    if (user) {
+      fetchRecords();
+    }
+  }, [user, fetchRecords]);
+
+  // Handle tab change
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  // Render step content based on active step
   const getStepContent = (step) => {
     switch (step) {
-      case 0:
+      case 0: // Deneme Adı
         return (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
-              Deneme Adını Girin
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+              Deneme Adı
             </Typography>
-            <TextField
+            <StyledTextField
               fullWidth
               label="Deneme Adı"
-              variant="outlined"
               value={examName}
               onChange={(e) => setExamName(e.target.value)}
               error={!!errors.examName}
               helperText={errors.examName}
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                  color: '#ffffff',
-                  '& fieldset': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)'
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#ffffff'
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#ffffff'
-                  }
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#ffffff'
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: '#ffffff'
-                },
-                '& .MuiInputBase-input': {
-                  color: '#ffffff'
-                },
-                '& .MuiFormHelperText-root': {
-                  color: '#ffffff'
-                }
+              placeholder="Örn: TYT Deneme 1"
+              InputProps={{
+                startAdornment: (
+                  <AssignmentIcon sx={{ color: 'var(--primary-color)', mr: 1 }} />
+                ),
               }}
             />
           </Box>
         );
-      case 1:
+      case 1: // Tarih
         return (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
-              Deneme Tarihini Seçin
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+              Deneme Tarihi
             </Typography>
             <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={trLocale}>
               <DatePicker
                 label="Deneme Tarihi"
                 value={examDate}
-                onChange={(newDate) => setExamDate(newDate)}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    error: !!errors.examDate,
-                    helperText: errors.examDate,
-                    sx: { 
-                      mt: 2,
-                      '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                        color: '#ffffff',
-                        '& fieldset': {
-                          borderColor: 'rgba(255, 255, 255, 0.5)'
-                        },
-                        '&:hover fieldset': {
-                          borderColor: '#ffffff'
-                        },
-                        '&.Mui-focused fieldset': {
-                          borderColor: '#ffffff'
-                        }
-                      },
-                      '& .MuiInputLabel-root': {
-                        color: '#ffffff'
-                      },
-                      '& .MuiInputBase-input': {
-                        color: '#ffffff'
-                      },
-                      '& .MuiFormHelperText-root': {
-                        color: '#ffffff'
-                      }
-                    }
-                  }
-                }}
+                onChange={(newValue) => setExamDate(newValue)}
+                renderInput={(params) => <StyledTextField {...params} fullWidth />}
               />
             </LocalizationProvider>
           </Box>
         );
-      case 2:
+      case 2: // Sınav Türü
         return (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
-              Sınav Türünü Seçin
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+              Sınav Türü
             </Typography>
-            <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel sx={{ color: '#f4f2f5' }}>Sınav Türü</InputLabel>
+            <FormControl fullWidth>
+              <InputLabel>Sınav Türü</InputLabel>
               <Select
                 value={examType}
-                label="Sınav Türü"
                 onChange={(e) => setExamType(e.target.value)}
-                sx={{
-                  backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                  color: '#ffffff',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: 'rgba(255, 255, 255, 0.5)'
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#ffffff'
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#ffffff'
-                  }
-                }}
+                label="Sınav Türü"
               >
-                <MenuItem value="TYT" sx={{ backgroundColor: 'rgba(44, 62, 80, 0.8)', color: '#ffffff', '&:hover': { backgroundColor: 'rgba(44, 62, 80, 0.9)' }, '&.Mui-selected': { backgroundColor: 'rgba(44, 62, 80, 0.9)' } }}>TYT</MenuItem>
-                <MenuItem value="AYT" sx={{ backgroundColor: 'rgba(44, 62, 80, 0.8)', color: '#ffffff', '&:hover': { backgroundColor: 'rgba(44, 62, 80, 0.9)' }, '&.Mui-selected': { backgroundColor: 'rgba(44, 62, 80, 0.9)' } }}>AYT</MenuItem>
+                <MenuItem value="TYT">TYT</MenuItem>
+                <MenuItem value="AYT">AYT</MenuItem>
               </Select>
             </FormControl>
           </Box>
         );
-      case 3:
+      case 3: // Ders Bilgileri
         return (
-          <Box sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
-              Ders Bilgilerini Girin
-            </Typography>
-            
-            <Grid container spacing={2} sx={{ mt: 1 }}>
-              <Grid item xs={12} md={6}>
-                <FormControl fullWidth>
-                  <InputLabel sx={{ color: '#f4f2f5' }}>Ders Seçin</InputLabel>
-                  <Select
-                    value={currentSubject}
-                    label="Ders Seçin"
-                    onChange={(e) => handleSubjectSelect(e.target.value)}
-                    sx={{
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: 'rgba(255, 255, 255, 0.5)'
-                      },
-                      '&:hover .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#ffffff'
-                      },
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: '#ffffff'
-                      },
-                      color: '#ffffff',
-                      height: '56px',
-                      fontSize: '1.1rem',
-                      backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                      minWidth: '300px',
-                      '& .MuiSelect-select': {
-                        paddingTop: '12px',
-                        paddingBottom: '12px',
-                        width: '100%'
-                      }
-                    }}
-                  >
-                    {(examType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
-                      <MenuItem key={subject} value={subject}>
-                        {subject}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              
-              {currentSubject && (
-                <>
-                  <Grid gridColumn={{xs: "span 12", sm: "span 4"}}>
-                    <TextField
-                      fullWidth
-                      label="Doğru"
-                      type="number"
-                      InputProps={{ 
-                        inputProps: { min: 0 },
-                        sx: { color: '#f4f2f5' }
-                      }}
-                      value={correctCount}
-                      onChange={(e) => setCorrectCount(e.target.value)}
-                      error={!!errors.correctCount}
-                      helperText={errors.correctCount}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                          color: '#ffffff',
-                          '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)'
-                          },
-                          '&:hover fieldset': {
-                            borderColor: '#ffffff'
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#ffffff'
-                          }
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiInputBase-input': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiFormHelperText-root': {
-                          color: '#ffffff'
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid gridColumn={{xs: "span 12", sm: "span 4"}}>
-                    <TextField
-                      fullWidth
-                      label="Yanlış"
-                      type="number"
-                      InputProps={{ 
-                        inputProps: { min: 0 },
-                        sx: { color: '#f4f2f5' }
-                      }}
-                      value={incorrectCount}
-                      onChange={(e) => setIncorrectCount(e.target.value)}
-                      error={!!errors.incorrectCount}
-                      helperText={errors.incorrectCount}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                          color: '#ffffff',
-                          '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)'
-                          },
-                          '&:hover fieldset': {
-                            borderColor: '#ffffff'
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#ffffff'
-                          }
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiInputBase-input': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiFormHelperText-root': {
-                          color: '#ffffff'
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid gridColumn={{xs: "span 12", sm: "span 4"}}>
-                    <TextField
-                      fullWidth
-                      label="Boş"
-                      type="number"
-                      InputProps={{ 
-                        inputProps: { min: 0 },
-                        sx: { color: '#f4f2f5' }
-                      }}
-                      value={emptyCount}
-                      onChange={(e) => setEmptyCount(e.target.value)}
-                      error={!!errors.emptyCount}
-                      helperText={errors.emptyCount}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          backgroundColor: 'rgba(44, 62, 80, 0.6)',
-                          color: '#ffffff',
-                          '& fieldset': {
-                            borderColor: 'rgba(255, 255, 255, 0.5)'
-                          },
-                          '&:hover fieldset': {
-                            borderColor: '#ffffff'
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#ffffff'
-                          }
-                        },
-                        '& .MuiInputLabel-root': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiInputLabel-root.Mui-focused': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiInputBase-input': {
-                          color: '#ffffff'
-                        },
-                        '& .MuiFormHelperText-root': {
-                          color: '#ffffff'
-                        }
-                      }}
-                    />
-                  </Grid>
-                  <Grid gridColumn="span 12">
-                    <Button
-                      variant="contained"
-                      onClick={handleNext}
-                      startIcon={<AddIcon sx={{ color: '#f4f2f5' }} />}
-                      sx={{ 
-                        backgroundColor: '#f4f2f5',
-                        color: '#2e5559',
-                        '&:hover': {
-                          backgroundColor: '#c5c0a7'
-                        }
-                      }}
-                    >
-                      Dersi Ekle
-                    </Button>
-                  </Grid>
-                </>
-              )}
-            </Grid>
-            
-            {Object.keys(subjectData).length > 0 && (
-              <Box sx={{ mt: 4 }}>
-                <Typography 
-                  variant="h6" 
-                  gutterBottom 
-                  sx={{ 
-                    color: '#f4f2f5', 
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    mb: 2
-                  }}
-                >
-                  <SchoolIcon sx={{ mr: 1, color: '#f4f2f5' }} /> Eklenen Dersler
-                </Typography>
-                <TableContainer component={Paper} sx={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell 
-                          sx={{ 
-                            backgroundColor: '#333333', 
-                            color: '#ffffff', 
-                            fontWeight: 'bold', 
-                            fontSize: '1rem',
-                            padding: '12px 16px'
-                          }}
-                        >
-                          Ders
-                        </TableCell>
-                        <TableCell 
-                          align="center" 
-                          sx={{ 
-                            backgroundColor: '#2ecc71', 
-                            color: '#000000', 
-                            fontWeight: 'bold', 
-                            fontSize: '1rem',
-                            padding: '12px 16px'
-                          }}
-                        >
-                          Doğru
-                        </TableCell>
-                        <TableCell 
-                          align="center" 
-                          sx={{ 
-                            backgroundColor: '#e74c3c', 
-                            color: '#000000', 
-                            fontWeight: 'bold', 
-                            fontSize: '1rem',
-                            padding: '12px 16px'
-                          }}
-                        >
-                          Yanlış
-                        </TableCell>
-                        <TableCell 
-                          align="center" 
-                          sx={{ 
-                            backgroundColor: '#95a5a6', 
-                            color: '#000000', 
-                            fontWeight: 'bold', 
-                            fontSize: '1rem',
-                            padding: '12px 16px'
-                          }}
-                        >
-                          Boş
-                        </TableCell>
-                        <TableCell 
-                          align="center" 
-                          sx={{ 
-                            backgroundColor: '#3498db', 
-                            color: '#000000', 
-                            fontWeight: 'bold', 
-                            fontSize: '1rem',
-                            padding: '12px 16px'
-                          }}
-                        >
-                          Net
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {Object.entries(subjectData).map(([subject, data], index) => (
-                        <TableRow 
-                          key={subject}
-                          sx={{ 
-                            backgroundColor: index % 2 === 0 ? '#f9f4ff' : 'white',
-                            '&:hover': { backgroundColor: '#f0e6ff' }
-                          }}
-                        >
-                          <TableCell 
-                            component="th" 
-                            scope="row"
-                            sx={{ 
-                              color: '#f4f2f5', 
-                              fontWeight: 800,
-                              fontSize: '1rem'
-                            }}
-                          >
-                            {subject}
-                          </TableCell>
-                          <TableCell 
-                            align="center"
-                            sx={{ 
-                              color: '#2ecc71', 
-                              fontWeight: 'bold',
-                              fontSize: '0.95rem'
-                            }}
-                          >
-                            {data.correctCount}
-                          </TableCell>
-                          <TableCell 
-                            align="center"
-                            sx={{ 
-                              color: '#e74c3c', 
-                              fontWeight: 'bold',
-                              fontSize: '0.95rem'
-                            }}
-                          >
-                            {data.incorrectCount}
-                          </TableCell>
-                          <TableCell 
-                            align="center"
-                            sx={{ 
-                              color: '#7f8c8d', 
-                              fontWeight: 'bold',
-                              fontSize: '0.95rem'
-                            }}
-                          >
-                            {data.emptyCount}
-                          </TableCell>
-                          <TableCell 
-                            align="center"
-                            sx={{ 
-                              color: '#f4f2f5', 
-                              fontWeight: 'bold',
-                              fontSize: '1rem',
-                              backgroundColor: 'rgba(44, 62, 80, 0.8)',
-                              borderRadius: '4px'
-                            }}
-                          >
-                            {data.net}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Box>
-            )}
-          </Box>
-        );
-      case 4:
-        return (
-          <Box sx={{ p: 3 }}>
-            <Typography 
-              variant="h5" 
-              gutterBottom 
-              sx={{ 
-                color: '#f4f2f5', 
-                fontWeight: 'bold',
-                textAlign: 'center',
-                mb: 3,
-                borderBottom: '2px solid #d9d4bb',
-                paddingBottom: '10px'
-              }}
-            >
-              Deneme Bilgileri Özeti
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+              Ders Bilgileri
             </Typography>
             
             <Grid container spacing={3}>
-              {/* Deneme bilgileri kartları */}
-              <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
-                <Paper 
-                  elevation={3} 
-                  sx={{ 
-                    p: 2, 
-                    borderRadius: '12px',
-                    backgroundColor: '#f0f8ff',
-                    height: '100%',
-                    borderLeft: '4px solid #3498db'
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ color: '#f4f2f5', fontWeight: 'bold', mb: 1 }}>
-                    Deneme Adı
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: '#f4f2f5', fontSize: '1.1rem' }}>
-                    {examName || 'Belirtilmemiş'}
-                  </Typography>
-                </Paper>
+              <Grid item xs={12} md={4}>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                  Dersler
+                </Typography>
+                <Box sx={{ maxHeight: 400, overflow: 'auto', pr: 1 }}>
+                  {(examType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
+                    <Card 
+                      key={subject}
+                      className={`subject-card ${examType === 'TYT' ? 'tyt' : 'ayt'} ${currentSubject === subject ? 'active' : ''}`}
+                      onClick={() => handleSubjectSelect(subject)}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                          {subject}
+                        </Typography>
+                        {subjectData[subject] && (
+                          <Chip 
+                            label={`Net: ${subjectData[subject].net}`}
+                            size="small"
+                            sx={{ 
+                              bgcolor: 'rgba(255, 255, 255, 0.2)', 
+                              color: 'white',
+                              fontWeight: 600
+                            }} 
+                          />
+                        )}
+                      </Box>
+                    </Card>
+                  ))}
+                </Box>
               </Grid>
               
-              <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
-                <Paper 
-                  elevation={3} 
-                  sx={{ 
-                    p: 2, 
-                    borderRadius: '12px',
-                    backgroundColor: '#fff8f0',
-                    height: '100%',
-                    borderLeft: '4px solid #e67e22'
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ color: '#e67e22', fontWeight: 'bold', mb: 1 }}>
-                    Tarih
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: '#f4f2f5', fontSize: '1.1rem' }}>
-                    {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
-                  </Typography>
-                </Paper>
-              </Grid>
-              
-              <Grid gridColumn={{xs: "span 12", md: "span 4"}}>
-                <Paper 
-                  elevation={3} 
-                  sx={{ 
-                    p: 2, 
-                    borderRadius: '12px',
-                    backgroundColor: '#f0fff8',
-                    height: '100%',
-                    borderLeft: '4px solid #2ecc71'
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ color: '#2ecc71', fontWeight: 'bold', mb: 1 }}>
-                    Sınav Türü
-                  </Typography>
-                  <Typography variant="body1" sx={{ color: '#f4f2f5', fontSize: '1.1rem' }}>
-                    {examType}
-                  </Typography>
-                </Paper>
-              </Grid>
-              
-              {/* Dersler tablosu */}
-              <Grid gridColumn="span 12" sx={{ mt: 2 }}>
-                <Paper 
-                  elevation={3} 
-                  sx={{ 
-                    p: 2, 
-                    borderRadius: '12px',
-                    backgroundColor: '#ffffff',
-                    borderTop: '4px solid #9b59b6'
-                  }}
-                >
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: '#9b59b6', 
-                      fontWeight: 'bold', 
-                      mb: 2,
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                  >
-                    <SchoolIcon sx={{ mr: 1 }} /> Dersler ve Sonuçlar
-                  </Typography>
-                  
-                  <TableContainer sx={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #ddd' }}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell 
-                            sx={{ 
-                              backgroundColor: '#333333', 
-                              color: '#ffffff', 
-                              fontWeight: 'bold', 
-                              fontSize: '1rem',
-                              padding: '12px 16px'
-                            }}
+              <Grid item xs={12} md={8}>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                  {currentSubject ? `${currentSubject} Bilgileri` : 'Ders Seçin'}
+                </Typography>
+                
+                {currentSubject ? (
+                  <Box className="modern-card" sx={{ p: 3 }}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12} sm={4}>
+                        <StyledTextField
+                          fullWidth
+                          label="Doğru Sayısı"
+                          type="number"
+                          value={correctCount}
+                          onChange={(e) => setCorrectCount(e.target.value)}
+                          InputProps={{
+                            inputProps: { min: 0 }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <StyledTextField
+                          fullWidth
+                          label="Yanlış Sayısı"
+                          type="number"
+                          value={incorrectCount}
+                          onChange={(e) => setIncorrectCount(e.target.value)}
+                          InputProps={{
+                            inputProps: { min: 0 }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={4}>
+                        <StyledTextField
+                          fullWidth
+                          label="Boş Sayısı"
+                          type="number"
+                          value={emptyCount}
+                          onChange={(e) => setEmptyCount(e.target.value)}
+                          InputProps={{
+                            inputProps: { min: 0 }
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                            Net: {calculateNet(correctCount, incorrectCount)}
+                          </Typography>
+                          <StyledButton 
+                            variant="contained" 
+                            onClick={handleNext}
+                            startIcon={<AddIcon />}
                           >
-                            Ders
-                          </TableCell>
-                          <TableCell 
-                            align="center" 
-                            sx={{ 
-                              backgroundColor: '#2ecc71', 
-                              color: '#000000', 
-                              fontWeight: 'bold', 
-                              fontSize: '1rem',
-                              padding: '12px 16px'
-                            }}
-                          >
-                            Doğru
-                          </TableCell>
-                          <TableCell 
-                            align="center" 
-                            sx={{ 
-                              backgroundColor: '#e74c3c', 
-                              color: '#000000', 
-                              fontWeight: 'bold', 
-                              fontSize: '1rem',
-                              padding: '12px 16px'
-                            }}
-                          >
-                            Yanlış
-                          </TableCell>
-                          <TableCell 
-                            align="center" 
-                            sx={{ 
-                              backgroundColor: '#95a5a6', 
-                              color: '#000000', 
-                              fontWeight: 'bold', 
-                              fontSize: '1rem',
-                              padding: '12px 16px'
-                            }}
-                          >
-                            Boş
-                          </TableCell>
-                          <TableCell 
-                            align="center" 
-                            sx={{ 
-                              backgroundColor: '#3498db', 
-                              color: '#000000', 
-                              fontWeight: 'bold', 
-                              fontSize: '1rem',
-                              padding: '12px 16px'
-                            }}
-                          >
-                            Net
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {Object.entries(subjectData).map(([subject, data], index) => (
-                          <TableRow 
-                            key={subject}
-                            sx={{ 
-                              backgroundColor: index % 2 === 0 ? '#f9f4ff' : 'white',
-                              '&:hover': { backgroundColor: '#f0e6ff' }
-                            }}
-                          >
-                            <TableCell 
-                              component="th" 
-                              scope="row"
-                              sx={{ 
-                                color: '#f4f2f5', 
-                                fontWeight: 800,
-                                fontSize: '1rem'
-                              }}
-                            >
-                              {subject}
-                            </TableCell>
-                            <TableCell 
-                              align="center"
-                              sx={{ 
-                                color: '#2ecc71', 
-                                fontWeight: 'bold',
-                                fontSize: '0.95rem'
-                              }}
-                            >
-                              {data.correctCount}
-                            </TableCell>
-                            <TableCell 
-                              align="center"
-                              sx={{ 
-                                color: '#e74c3c', 
-                                fontWeight: 'bold',
-                                fontSize: '0.95rem'
-                              }}
-                            >
-                              {data.incorrectCount}
-                            </TableCell>
-                            <TableCell 
-                              align="center"
-                              sx={{ 
-                                color: '#7f8c8d', 
-                                fontWeight: 'bold',
-                                fontSize: '0.95rem'
-                              }}
-                            >
-                              {data.emptyCount}
-                            </TableCell>
-                            <TableCell 
-                              align="center"
-                              sx={{ 
-                                color: '#3498db', 
-                                fontWeight: 'bold',
-                                fontSize: '1rem',
-                                backgroundColor: '#ebf5fb',
-                                borderRadius: '4px'
-                              }}
-                            >
-                              {data.net}
-                            </TableCell>
+                            Dersi Ekle
+                          </StyledButton>
+                        </Box>
+                      </Grid>
+                    </Grid>
+                  </Box>
+                ) : (
+                  <Box className="modern-card" sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography variant="body1" color="text.secondary">
+                      Lütfen sol taraftan bir ders seçin.
+                    </Typography>
+                  </Box>
+                )}
+                
+                {Object.keys(subjectData).length > 0 && (
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
+                      Eklenen Dersler
+                    </Typography>
+                    <TableContainer component={Paper} className="modern-card">
+                      <Table className="modern-table">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Ders</TableCell>
+                            <TableCell align="center">Doğru</TableCell>
+                            <TableCell align="center">Yanlış</TableCell>
+                            <TableCell align="center">Boş</TableCell>
+                            <TableCell align="center">Net</TableCell>
+                            <TableCell align="right">İşlemler</TableCell>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Paper>
+                        </TableHead>
+                        <TableBody>
+                          {Object.entries(subjectData).map(([subject, data]) => (
+                            <TableRow key={subject}>
+                              <TableCell component="th" scope="row" sx={{ fontWeight: 800, fontSize: '1rem' }}>
+                                {subject}
+                              </TableCell>
+                              <TableCell align="center">{data.correctCount}</TableCell>
+                              <TableCell align="center">{data.incorrectCount}</TableCell>
+                              <TableCell align="center">{data.emptyCount}</TableCell>
+                              <TableCell align="center" sx={{ fontWeight: 600 }}>{data.net}</TableCell>
+                              <TableCell align="right">
+                                <IconButton 
+                                  size="small" 
+                                  color="primary"
+                                  onClick={() => handleSubjectSelect(subject)}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                                <IconButton 
+                                  size="small" 
+                                  color="error"
+                                  onClick={() => {
+                                    const newData = { ...subjectData };
+                                    delete newData[subject];
+                                    setSubjectData(newData);
+                                  }}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+                )}
               </Grid>
             </Grid>
           </Box>
         );
-      default:
-        return 'Unknown step';
-    }
-  };
-  
-  // Prepare data for progress chart
-  const prepareChartData = useCallback((subject) => {
-    if (!subject || netRecords.length === 0) return [];
-    
-    // Filter records for the selected subject
-    const subjectRecords = netRecords.filter(record => record.subject === subject);
-    
-    // Sort by date
-    subjectRecords.sort((a, b) => {
-      const dateA = a.examDate?.toDate?.() || new Date(0);
-      const dateB = b.examDate?.toDate?.() || new Date(0);
-      return dateA - dateB;
-    });
-    
-    // Create chart data
-    return subjectRecords.map(record => ({
-      name: record.examName,
-      date: record.examDate?.toDate ? format(record.examDate.toDate(), 'dd/MM/yyyy') : '',
-      net: parseFloat(record.net) || 0
-    }));
-  }, [netRecords]);
-  
-  // Handle exam type change
-  const handleExamTypeChange = (type) => {
-    setSelectedExamType(type);
-    setSelectedSubject('');
-  };
-  
-  // Handle subject selection
-  const handleSubjectSelection = (subject) => {
-    setSelectedSubject(subject);
-  };
-  
-  // Render progress chart
-  const renderProgressChart = () => {
-    const chartData = prepareChartData(selectedSubject);
-    
-    if (chartData.length === 0) {
-      return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body1" sx={{ color: '#f4f2f5' }}>
-            Seçilen derse ait veri bulunmamaktadır.
-          </Typography>
-        </Box>
-      );
-    }
-    
-    return (
-      <Box sx={{ width: '100%', height: 300, mt: 3 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="net" 
-              stroke="#f4f2f5" 
-              activeDot={{ r: 8 }} 
-              name="Net Puan"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </Box>
-    );
-  };
-  
-  // Render the list of saved records
-  const renderRecordsList = () => {
-    if (netRecords.length === 0) {
-      return (
-        <Box sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body1" sx={{ color: '#f4f2f5' }}>
-            Henüz kaydedilmiş deneme sonucu bulunmamaktadır.
-          </Typography>
-        </Box>
-      );
-    }
-    
-    // Get subjects based on selected exam type
-    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
-    
-    // Filter records by exam type
-    const filteredRecords = netRecords.filter(record => {
-      return record.subject.startsWith(selectedExamType);
-    });
-    
-    // Group records by subject
-    const subjectRecords = {};
-    subjects.forEach(subject => {
-      subjectRecords[subject] = filteredRecords.filter(record => record.subject === subject);
-    });
-    
-    return (
-      <Box sx={{ mt: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-          <Button 
-            variant={selectedExamType === 'TYT' ? 'contained' : 'outlined'}
-            onClick={() => handleExamTypeChange('TYT')}
-            sx={{ 
-              mr: 2,
-              ...(selectedExamType === 'TYT' 
-                ? {
-                    backgroundColor: '#d9d4bb',
-                    color: '#f4f2f5',
-                    '&:hover': {
-                      backgroundColor: '#c5c0a7'
-                    }
-                  } 
-                : {
-                    color: '#d9d4bb',
-                    borderColor: '#d9d4bb',
-                    '&:hover': {
-                      borderColor: '#c5c0a7',
-                      backgroundColor: 'rgba(217, 212, 187, 0.04)'
-                    }
-                  }
-              )
-            }}
-          >
-            TYT
-          </Button>
-          <Button 
-            variant={selectedExamType === 'AYT' ? 'contained' : 'outlined'}
-            onClick={() => handleExamTypeChange('AYT')}
-            sx={{ 
-              ...(selectedExamType === 'AYT' 
-                ? {
-                    backgroundColor: '#d9d4bb',
-                    color: '#f4f2f5',
-                    '&:hover': {
-                      backgroundColor: '#c5c0a7'
-                    }
-                  } 
-                : {
-                    color: '#d9d4bb',
-                    borderColor: '#d9d4bb',
-                    '&:hover': {
-                      borderColor: '#c5c0a7',
-                      backgroundColor: 'rgba(217, 212, 187, 0.04)'
-                    }
-                  }
-              )
-            }}
-          >
-            AYT
-          </Button>
-        </Box>
-        
-        <Grid container spacing={2}>
-          {subjects.map(subject => {
-            const records = subjectRecords[subject] || [];
-            const latestRecord = records.length > 0 ? 
-              records.sort((a, b) => {
-                const dateA = a.examDate?.toDate?.() || new Date(0);
-                const dateB = b.examDate?.toDate?.() || new Date(0);
-                return dateB - dateA; // Descending order
-              })[0] : null;
+      case 4: // Özet
+        return (
+          <Box>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+              Deneme Özeti
+            </Typography>
             
-            return (
-              <Grid gridColumn={{xs: "span 12", sm: "span 6", md: "span 4"}} key={subject}>
-                <StyledCard 
-                  sx={{ 
-                    cursor: 'pointer',
-                    border: selectedSubject === subject ? '2px solid #d9d4bb' : 'none',
-                    transform: selectedSubject === subject ? 'scale(1.02)' : 'none'
-                  }}
-                  onClick={() => handleSubjectSelection(subject)}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                      <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>{subject}</Typography>
-                      {latestRecord && (
-                        <IconButton 
-                          size="small" 
-                          color="error"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRecordDelete(latestRecord.id);
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      )}
-                    </Box>
-                    {latestRecord ? (
-                      <>
-                        <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
-                          Son Deneme: {latestRecord.examName}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
-                          Tarih: {latestRecord.examDate?.toDate ? 
-                            format(latestRecord.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale }) : ''}
-                        </Typography>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-                          <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
-                            D: {latestRecord.correctCount}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
-                            Y: {latestRecord.incorrectCount}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
-                            B: {latestRecord.emptyCount}
-                          </Typography>
-                        </Box>
-                        <Box sx={{ mt: 1 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#f4f2f5' }}>
-                            Net: {latestRecord.net}
-                          </Typography>
-                        </Box>
-                      </>
-                    ) : (
-                      <Typography variant="body2" sx={{ color: '#f4f2f5' }}>
-                        Henüz kayıt bulunmamaktadır.
-                      </Typography>
-                    )}
-                  </CardContent>
-                </StyledCard>
-              </Grid>
-            );
-          })}
-        </Grid>
+            <Box className="summary-info">
+              <Box className="summary-item name">
+                <Typography variant="subtitle2">Deneme Adı</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{examName}</Typography>
+              </Box>
+              
+              <Box className="summary-item date">
+                <Typography variant="subtitle2">Tarih</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
+                </Typography>
+              </Box>
+              
+              <Box className="summary-item type">
+                <Typography variant="subtitle2">Sınav Türü</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{examType}</Typography>
+              </Box>
+            </Box>
+            
+            <Box className="summary-card">
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+                Dersler
+              </Typography>
+              
+              <TableContainer>
+                <Table className="modern-table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 800, fontSize: '1rem' }}>Ders</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Doğru</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Yanlış</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Boş</TableCell>
+                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Net</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {Object.entries(subjectData).map(([subject, data]) => (
+                      <TableRow key={subject}>
+                        <TableCell component="th" scope="row" sx={{ fontWeight: 800, fontSize: '1rem' }}>
+                          {subject}
+                        </TableCell>
+                        <TableCell align="center">{data.correctCount}</TableCell>
+                        <TableCell align="center">{data.incorrectCount}</TableCell>
+                        <TableCell align="center">{data.emptyCount}</TableCell>
+                        <TableCell align="center" sx={{ fontWeight: 600 }}>{data.net}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+          </Box>
+        );
+      default:
+        return null;
+    }
+  };
+
+  // Not: renderRecordsList fonksiyonu artık kullanılmıyor, yeni tasarım için kaldırıldı
+
+  // İstatistik yardımcı fonksiyonları
+  // En yüksek net yapılan dersi hesapla
+  const calculateHighestNetSubject = () => {
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+    
+    if (filteredRecords.length === 0) return 'Veri yok';
+    
+    let highestSubject = '';
+    let highestNet = 0;
+    
+    subjects.forEach(subject => {
+      const subjectNets = filteredRecords
+        .filter(record => record.subjects && record.subjects[subject])
+        .map(record => parseFloat(record.subjects[subject].net));
+      
+      if (subjectNets.length > 0) {
+        const maxNet = Math.max(...subjectNets);
+        if (maxNet > highestNet) {
+          highestNet = maxNet;
+          highestSubject = subject;
+        }
+      }
+    });
+    
+    return highestSubject ? `${highestSubject}: ${highestNet.toFixed(2)}` : 'Veri yok';
+  };
+  
+  // Gelişim durumunu hesapla
+  const calculateGrowthStatus = () => {
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+    
+    if (filteredRecords.length < 2) {
+      return (
+        <Typography variant="h5" sx={{ fontWeight: 800 }}>
+          Yetersiz veri
+        </Typography>
+      );
+    }
+    
+    // Tüm dersler için ortalama net değişimini hesapla
+    let totalGrowth = 0;
+    let validSubjectCount = 0;
+    
+    subjects.forEach(subject => {
+      const subjectRecords = filteredRecords.filter(record => 
+        record.subjects && record.subjects[subject]
+      );
+      
+      if (subjectRecords.length >= 2) {
+        // Tarihe göre sırala
+        const sortedRecords = [...subjectRecords].sort((a, b) => {
+          try {
+            if (a.examDate && a.examDate.toDate && b.examDate && b.examDate.toDate) {
+              return b.examDate.toDate() - a.examDate.toDate();
+            }
+            return 0;
+          } catch (error) {
+            return 0;
+          }
+        });
         
-        {selectedSubject && renderProgressChart()}
-      </Box>
-    );
-  };
-  
-  // Toggle between form and records view
-  const toggleViewMode = () => {
-    setViewMode(viewMode === 'form' ? 'records' : 'form');
-  };
-  
-  // Handle record deletion with confirmation
-  const handleRecordDelete = (id) => {
-    if (window.confirm('Bu kaydı silmek istediğinize emin misiniz?')) {
-      handleDelete(id);
+        // Son iki denemenin netlerini al
+        const lastNet = parseFloat(sortedRecords[0].subjects[subject].net);
+        const prevNet = parseFloat(sortedRecords[1].subjects[subject].net);
+        
+        // Değişim yüzdesini hesapla
+        const change = lastNet - prevNet;
+        const changePercent = prevNet !== 0 ? (change / prevNet) * 100 : 0;
+        
+        totalGrowth += changePercent;
+        validSubjectCount++;
+      }
+    });
+    
+    // Ortalama gelişim yüzdesi
+    const avgGrowth = validSubjectCount > 0 ? totalGrowth / validSubjectCount : 0;
+    
+    // Gelişim durumunu görsel olarak göster
+    if (avgGrowth > 0) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TrendingUpIcon sx={{ color: '#2ecc71', mr: 1, fontSize: 28 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#2ecc71' }}>
+            Yükseliyor ({avgGrowth.toFixed(2)}%)
+          </Typography>
+        </Box>
+      );
+    } else if (avgGrowth < 0) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TrendingDownIcon sx={{ color: '#e74c3c', mr: 1, fontSize: 28 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#e74c3c' }}>
+            Düşüş ({Math.abs(avgGrowth).toFixed(2)}%)
+          </Typography>
+        </Box>
+      );
+    } else {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TrendingFlatIcon sx={{ color: '#f39c12', mr: 1, fontSize: 28 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#f39c12' }}>
+            Stabil (0.00%)
+          </Typography>
+        </Box>
+      );
     }
   };
   
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Box sx={{ maxWidth: 1200, mx: 'auto', p: 2, position: 'relative' }}>
-        {loading && (
-          <Box
-            sx={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              zIndex: 1000,
-            }}
-          >
-            <CircularProgress />
+  // Belirli bir dersin gelişim durumunu hesapla
+  const calculateSubjectGrowthStatus = (subject) => {
+    const filteredRecords = netRecords.filter(record => 
+      record.examType === selectedExamType && 
+      record.subjects && 
+      record.subjects[subject]
+    );
+    
+    if (filteredRecords.length < 2) {
+      return (
+        <Typography variant="h5" sx={{ fontWeight: 800 }}>
+          Veri yok
+        </Typography>
+      );
+    }
+    
+    // Tarihe göre sırala (en yeniden en eskiye)
+    const sortedRecords = [...filteredRecords].sort((a, b) => {
+      try {
+        if (a.examDate && a.examDate.toDate && b.examDate && b.examDate.toDate) {
+          return b.examDate.toDate() - a.examDate.toDate();
+        }
+        return 0;
+      } catch (error) {
+        console.error('Date sorting error:', error);
+        return 0;
+      }
+    });
+    
+    // Son iki denemenin netlerini al
+    const lastNet = parseFloat(sortedRecords[0].subjects[subject].net);
+    const prevNet = parseFloat(sortedRecords[1].subjects[subject].net);
+    
+    // Değişim yüzdesini hesapla
+    const change = lastNet - prevNet;
+    const changePercent = prevNet !== 0 ? (change / prevNet) * 100 : 0;
+    
+    // Gelişim durumunu görsel olarak göster
+    if (change > 0) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TrendingUpIcon sx={{ color: '#2ecc71', mr: 1, fontSize: 28 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#2ecc71' }}>
+            Yükseliyor ({changePercent.toFixed(2)}%)
+          </Typography>
+        </Box>
+      );
+    } else if (change < 0) {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TrendingDownIcon sx={{ color: '#e74c3c', mr: 1, fontSize: 28 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#e74c3c' }}>
+            Düşüş ({Math.abs(changePercent).toFixed(2)}%)
+          </Typography>
+        </Box>
+      );
+    } else {
+      return (
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <TrendingFlatIcon sx={{ color: '#f39c12', mr: 1, fontSize: 28 }} />
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#f39c12' }}>
+            Stabil (0.00%)
+          </Typography>
+        </Box>
+      );
+    }
+  };
+  
+  // Ders bazlı ortalama netleri hesapla
+  const calculateSubjectAverages = () => {
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+    
+    if (filteredRecords.length === 0) return [];
+    
+    const result = [];
+    
+    subjects.forEach(subject => {
+      const subjectNets = filteredRecords
+        .filter(record => record.subjects && record.subjects[subject])
+        .map(record => parseFloat(record.subjects[subject].net));
+      
+      if (subjectNets.length > 0) {
+        const average = subjectNets.reduce((a, b) => a + b, 0) / subjectNets.length;
+        result.push({
+          subject,
+          average
+        });
+      }
+    });
+    
+    return result;
+  };
+  
+  // Zaman içinde gelişim verilerini hesapla
+  const calculateTimeProgress = () => {
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+    
+    if (filteredRecords.length === 0) return [];
+    
+    // Tarihe göre sırala - Güvenli bir şekilde toDate() kullanımı
+    const sortedRecords = [...filteredRecords].sort((a, b) => {
+      // Eğer examDate tanımlı değilse veya toDate metodu yoksa, karşılaştırma yapma
+      if (!a.examDate || !a.examDate.toDate || !b.examDate || !b.examDate.toDate) {
+        return 0; // Sıralamayı değiştirme
+      }
+      try {
+        return a.examDate.toDate() - b.examDate.toDate();
+      } catch (error) {
+        console.error('Date sorting error:', error);
+        return 0; // Hata durumunda sıralamayı değiştirme
+      }
+    });
+    
+    return sortedRecords.map(record => {
+      const dataPoint = {
+        name: record.examName,
+        date: ''
+      };
+      
+      // Güvenli bir şekilde tarih formatı
+      try {
+        if (record.examDate && typeof record.examDate.toDate === 'function') {
+          dataPoint.date = format(record.examDate.toDate(), 'dd/MM', { locale: trLocale });
+        } else if (record.examDate instanceof Date) {
+          dataPoint.date = format(record.examDate, 'dd/MM', { locale: trLocale });
+        } else {
+          dataPoint.date = 'Tarih yok';
+        }
+      } catch (error) {
+        console.error('Date formatting error:', error);
+        dataPoint.date = 'Tarih hatası';
+      }
+      
+      subjects.forEach(subject => {
+        if (record.subjects && record.subjects[subject]) {
+          dataPoint[subject] = parseFloat(record.subjects[subject].net);
+        }
+      });
+      
+      return dataPoint;
+    });
+  };
+  
+  // Ders için renk döndür
+  const getSubjectColor = (index) => {
+    const colors = [
+      '#4a6cf7', '#9b59b6', '#e74c3c', '#f39c12', '#27ae60', 
+      '#16a085', '#2980b9', '#8e44ad', '#c0392b', '#d35400'
+    ];
+    return colors[index % colors.length];
+  };
+  
+  // Tavsiyeler oluştur
+  const generateRecommendations = () => {
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+    
+    if (filteredRecords.length < 2) return [];
+    
+    const recommendations = [];
+    
+    subjects.forEach((subject, index) => {
+      const subjectRecords = filteredRecords
+        .filter(record => record.subjects && record.subjects[subject])
+        .sort((a, b) => a.examDate.toDate() - b.examDate.toDate());
+      
+      if (subjectRecords.length >= 2) {
+        const firstNet = parseFloat(subjectRecords[0].subjects[subject].net);
+        const lastNet = parseFloat(subjectRecords[subjectRecords.length - 1].subjects[subject].net);
+        const growth = lastNet - firstNet;
+        
+        let message = '';
+        let icon = null;
+        let color = '';
+        
+        if (growth > 2) {
+          message = `${subject} dersinde güzel bir ilerleme kaydettiniz. Bu tempoyu koruyun!`;
+          icon = <TrendingUpIcon sx={{ color: '#4caf50' }} />;
+          color = '#4caf50';
+        } else if (growth < -2) {
+          message = `${subject} dersinde düşüş görülüyor. Daha fazla pratik yapmanızı öneririz.`;
+          icon = <TrendingDownIcon sx={{ color: '#f44336' }} />;
+          color = '#f44336';
+        } else {
+          message = `${subject} dersinde performansınız stabil. Geliştirmek için farklı soru tipleri deneyin.`;
+          icon = <TrendingFlatIcon sx={{ color: '#ff9800' }} />;
+          color = '#ff9800';
+        }
+        
+        recommendations.push({
+          subject,
+          message,
+          icon,
+          color
+        });
+      }
+    });
+    
+    return recommendations;
+  };
+  
+  // Not: renderStatistics fonksiyonu artık kullanılmıyor, yeni tasarım için kaldırıldı
+  
+  // Render statistics function - commented out as it's not used anymore
+  /*
+  const renderStatistics = () => {
+    // These variables would need to be defined if this function were used
+    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+    const chartData = calculateTimeProgress();
+    
+    // Generate random colors for chart
+    const COLORS = ['#4a6cf7', '#ff6b6b', '#2ecc71', '#f39c12', '#3498db', '#9b59b6', '#1abc9c', '#e74c3c'];
+    
+    return (
+      <Box>
+        <Box sx={{ mb: 3 }}>
+          <FormControl sx={{ minWidth: 200 }}>
+            <InputLabel>Sınav Türü</InputLabel>
+            <Select
+              value={selectedExamType}
+              onChange={(e) => setSelectedExamType(e.target.value)}
+              label="Sınav Türü"
+            >
+              <MenuItem value="TYT">TYT</MenuItem>
+              <MenuItem value="AYT">AYT</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+        
+        <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+            Net Değişim Grafiği
+          </Typography>
+          
+          <Box sx={{ width: '100%', height: 400 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={chartData}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                {subjects.map((subject, index) => (
+                  <Line 
+                    key={subject}
+                    type="monotone"
+                    dataKey={subject}
+                    stroke={COLORS[index % COLORS.length]}
+                    activeDot={{ r: 8 }}
+                    strokeWidth={2}
+                  />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </Box>
+        </Box>
+        
+        {selectedSubject ? (
+          <Box className="modern-card" sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+                {selectedSubject} Detaylı Analiz
+              </Typography>
+              <IconButton size="small" onClick={() => setSelectedSubject('')}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            
+            <Box sx={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey={selectedSubject} fill="#4a6cf7" />
+                </BarChart>
+              </ResponsiveContainer>
+            </Box>
+          </Box>
+        ) : (
+          <Box className="modern-card" sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+              Ders Bazlı Performans
+            </Typography>
+            
+            <Grid container spacing={2}>
+              {subjects.map((subject, index) => {
+                // Calculate average net for this subject
+                const subjectData = filteredRecords
+                  .filter(record => record.subjects && record.subjects[subject])
+                  .map(record => parseFloat(record.subjects[subject].net));
+                
+                const avgNet = subjectData.length > 0 
+                  ? (subjectData.reduce((a, b) => a + b, 0) / subjectData.length).toFixed(2)
+                  : 0;
+                
+                // Calculate trend (up or down)
+                let trend = 'stable';
+                if (subjectData.length >= 2) {
+                  const lastNet = subjectData[0];
+                  const prevNet = subjectData[1];
+                  trend = lastNet > prevNet ? 'up' : lastNet < prevNet ? 'down' : 'stable';
+                }
+                
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={subject}>
+                    <Card 
+                      className="subject-card"
+                      sx={{ 
+                        cursor: 'pointer',
+                        bgcolor: COLORS[index % COLORS.length],
+                        color: 'white'
+                      }}
+                      onClick={() => setSelectedSubject(subject)}
+                    >
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                          {subject}
+                        </Typography>
+                        {trend === 'up' ? (
+                          <TrendingUpIcon sx={{ color: '#2ecc71' }} />
+                        ) : trend === 'down' ? (
+                          <TrendingDownIcon sx={{ color: '#e74c3c' }} />
+                        ) : (
+                          <TrendingFlatIcon />
+                        )}
+                      </Box>
+                      <Typography variant="h4" sx={{ fontWeight: 700, mt: 2 }}>
+                        {avgNet}
+                      </Typography>
+                      <Typography variant="body2">
+                        Ortalama Net
+                      </Typography>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
           </Box>
         )}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          borderBottom: '2px solid #d9d4bb',
-          pb: 2,
-          mb: 4,
-          mt: 8, // Başlığı daha aşağıya almak için margin-top arttırıldı
-          pt: 3 // Üstte daha fazla boşluk için padding-top arttırıldı
-        }}>
-          <Typography variant="h4" sx={{ display: 'flex', alignItems: 'center', color: '#f4f2f5' }}>
-            <SchoolIcon sx={{ mr: 1, color: '#d9d4bb' }} /> TYT-AYT Net Takibi
+      </Box>
+    );
+  };
+  */
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 700, color: 'var(--primary-color)' }}>
+            TYT-AYT Net Takibi
           </Typography>
-          <Button 
-            variant="contained" 
-            onClick={toggleViewMode}
+          <Typography variant="body1" color="text.secondary">
+            Deneme sınavlarınızın sonuçlarını kaydedin ve performansınızı takip edin.
+          </Typography>
+        </Box>
+        
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange}
+            variant={isMobile ? 'fullWidth' : 'standard'}
             sx={{
-              backgroundColor: '#d9d4bb',
-              color: '#f4f2f5',
-              fontWeight: 'bold',
-              padding: '10px 20px',
-              fontSize: '1.05rem',
-              borderRadius: '8px',
-              boxShadow: '0 6px 10px rgba(217, 212, 187, 0.4)',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                backgroundColor: '#c5c0a7',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 15px rgba(217, 212, 187, 0.5)'
+              '& .MuiTab-root': {
+                fontWeight: 600,
+                textTransform: 'none',
+                minWidth: 0,
+                px: 3
               }
             }}
           >
-            {viewMode === 'form' ? 'Kayıtları Görüntüle' : 'Yeni Deneme Ekle'}
-          </Button>
+            <Tab 
+              label="Yeni Deneme Ekle" 
+              icon={<AddIcon />} 
+              iconPosition="start"
+            />
+            <Tab 
+              label="Kayıtlı Denemeler" 
+              icon={<ViewListIcon />} 
+              iconPosition="start"
+            />
+            <Tab 
+              label="İstatistikler" 
+              icon={<BarChartIcon />} 
+              iconPosition="start"
+            />
+          </Tabs>
         </Box>
         
-        {viewMode === 'form' ? (
-          /* Multi-step form */
-          <StepperCard sx={{ mb: 4, mt: 3 }}>
-            <CardContent sx={{ pt: 3, backgroundColor: 'transparent' }}>
-              <Stepper 
-                activeStep={activeStep} 
-                alternativeLabel
-                sx={{
-                  py: 2,
-                  '& .MuiStepIcon-root': {
-                    color: 'rgba(255, 255, 255, 0.3)',
-                    fontSize: '2.2rem',
-                    transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
-                    '&:hover': {
-                      transform: 'scale(1.15) translateY(-2px)',
-                      filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.15))'
-                    },
-                    '&.Mui-active': {
-                      color: '#4e85fd',
-                      filter: 'drop-shadow(0 4px 12px rgba(78,133,253,0.4))'
-                    },
-                    '&.Mui-completed': {
-                      color: '#38d39f',
-                      filter: 'drop-shadow(0 4px 8px rgba(56,211,159,0.3))'
-                    }
-                  },
-                  '& .MuiStepLabel-label': {
-                    color: '#f4f2f5',
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    marginTop: '8px',
-                    transition: 'all 0.3s ease',
-                    '&.Mui-active': {
-                      color: '#ffffff',
-                      fontWeight: 800,
-                      transform: 'scale(1.05)',
-                      textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                    },
-                    '&.Mui-completed': {
-                      color: '#d8fef0',
-                      fontWeight: 700
-                    }
-                  },
-                  '& .MuiStepConnector-line': {
-                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                    borderTopWidth: '3px',
-                    borderRadius: '3px',
-                    transition: 'all 0.4s ease'
-                  },
-                  '& .MuiStepConnector-root.Mui-active .MuiStepConnector-line': {
-                    borderColor: '#4e85fd',
-                    borderTopWidth: '3px',
-                    boxShadow: '0 2px 4px rgba(78,133,253,0.3)'
-                  },
-                  '& .MuiStepConnector-root.Mui-completed .MuiStepConnector-line': {
-                    borderColor: '#38d39f',
-                    borderTopWidth: '3px',
-                    boxShadow: '0 2px 4px rgba(56,211,159,0.2)'
-                  }
-                }}
-              >
-                {steps.map((label, index) => (
-                  <Step key={label}>
-                    <StepLabel
-                      StepIconProps={{
-                        icon: index + 1,
-                        sx: {
-                          '& .MuiStepIcon-text': {
-                            fill: '#ffffff',
-                            fontWeight: 'bold',
-                            fontSize: '1rem'
-                          },
-                          '& circle': {
-                            fill: activeStep === index ? '#4e85fd' : 
-                                  activeStep > index ? '#38d39f' : 'rgba(255, 255, 255, 0.3)'
-                          }
-                        }
-                      }}
-                    >
-                      {label}
-                    </StepLabel>
-                  </Step>
-                ))}
-              </Stepper>
+        {/* Tab panels */}
+        <Box sx={{ mt: 2 }}>
+          {tabValue === 0 && (
+            <Box>
+              <ModernStepper activeStep={activeStep} />
               
-              <Box sx={{ mt: 3 }}>
+              <Box sx={{ mt: 4 }}>
                 {activeStep === steps.length ? (
-                  <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="h6" gutterBottom sx={{ color: '#f4f2f5' }}>
-                      Tüm adımlar tamamlandı
+                  /* Form submitted successfully */
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <CheckCircleIcon sx={{ fontSize: 60, color: 'var(--success-color)', mb: 2 }} />
+                    <Typography variant="h5" gutterBottom sx={{ color: 'var(--text-primary)', fontWeight: 600 }}>
+                      Deneme sonuçlarınız başarıyla kaydedildi!
                     </Typography>
                     <Button
-                      variant="contained"
-                      onClick={handleSubmit}
-                      startIcon={<CheckCircleIcon sx={{ color: '#f4f2f5' }} />}
+                      onClick={() => setActiveStep(0)}
                       sx={{ 
-                        mt: 2,
-                        backgroundColor: '#5ec837',
-                        color: '#f4f2f5',
+                        mt: 3,
+                        background: 'linear-gradient(135deg, #5db6d9, #4a9cc7)',
+                        color: 'white',
+                        fontWeight: 600,
+                        padding: '10px 24px',
+                        borderRadius: '12px',
+                        boxShadow: '0 4px 8px rgba(93, 182, 217, 0.25)',
+                        transition: 'all 0.3s ease',
                         '&:hover': {
-                          backgroundColor: '#4eb02c'
+                          background: 'linear-gradient(135deg, #72c5e4, #5db6d9)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 12px rgba(93, 182, 217, 0.3)'
                         }
                       }}
                     >
-                      Kaydet
+                      Yeni Deneme Ekle
                     </Button>
                   </Box>
                 ) : (
+                  /* Form steps */
                   <>
-                    {getStepContent(activeStep)}
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 3 }}>
+                    <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
+                      {getStepContent(activeStep)}
+                    </Box>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      mt: 4,
+                      flexDirection: isMobile ? 'column' : 'row',
+                      gap: isMobile ? 2 : 0
+                    }}>
                       <Button
                         disabled={activeStep === 0}
                         onClick={handleBack}
-                        startIcon={<NavigateBeforeIcon sx={{ color: activeStep === 0 ? 'rgba(255, 255, 255, 0.3)' : '#f4f2f5' }} />}
+                        startIcon={<NavigateBeforeIcon />}
                         sx={{ 
-                          color: '#f4f2f5',
+                          opacity: activeStep === 0 ? 0.5 : 1,
+                          order: isMobile ? 2 : 1,
+                          width: isMobile ? '100%' : 'auto',
+                          background: 'linear-gradient(135deg, #55b3d9, #3498db)',
+                          color: 'white',
                           fontWeight: 600,
-                          padding: '8px 24px',
-                          borderRadius: '30px',
-                          background: activeStep === 0 ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)',
-                          boxShadow: activeStep === 0 ? 'none' : '0 4px 15px rgba(255, 126, 95, 0.4)',
+                          padding: '10px 24px',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 8px rgba(53, 152, 219, 0.25)',
                           transition: 'all 0.3s ease',
                           '&:hover': {
-                            background: activeStep === 0 ? 'rgba(255, 255, 255, 0.1)' : 'linear-gradient(135deg, #ff7e5f 20%, #feb47b 100%)',
-                            transform: activeStep === 0 ? 'none' : 'translateY(-2px)',
-                            boxShadow: activeStep === 0 ? 'none' : '0 6px 20px rgba(255, 126, 95, 0.5)'
-                          },
-                          '&.Mui-disabled': {
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            color: 'rgba(255, 255, 255, 0.3)'
+                            background: 'linear-gradient(135deg, #6bc1e1, #55b3d9)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 12px rgba(53, 152, 219, 0.3)'
                           }
                         }}
                       >
@@ -1652,27 +1350,28 @@ const TytAytNetTakibi = () => {
                       </Button>
                       
                       <Button
-                        variant="contained"
                         onClick={handleNext}
-                        endIcon={<NavigateNextIcon sx={{ color: '#f4f2f5' }} />}
+                        endIcon={<NavigateNextIcon />}
                         disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
                         sx={{ 
-                          backgroundColor: '#38d39f',
-                          color: '#f4f2f5',
+                          order: isMobile ? 1 : 2,
+                          width: isMobile ? '100%' : 'auto',
+                          background: 'linear-gradient(135deg, #5db6d9, #4a9cc7)',
+                          color: 'white',
                           fontWeight: 600,
-                          padding: '8px 24px',
-                          borderRadius: '30px',
-                          background: 'linear-gradient(135deg, #38d39f 0%, #38a4d3 100%)',
-                          boxShadow: '0 4px 15px rgba(56, 211, 159, 0.4)',
+                          padding: '10px 24px',
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 8px rgba(93, 182, 217, 0.25)',
                           transition: 'all 0.3s ease',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #38d39f 20%, #38a4d3 100%)',
+                            background: 'linear-gradient(135deg, #72c5e4, #5db6d9)',
                             transform: 'translateY(-2px)',
-                            boxShadow: '0 6px 20px rgba(56, 211, 159, 0.5)'
+                            boxShadow: '0 6px 12px rgba(93, 182, 217, 0.3)'
                           },
-                          '&.Mui-disabled': {
-                            background: 'linear-gradient(135deg, rgba(56, 211, 159, 0.5) 0%, rgba(56, 164, 211, 0.5) 100%)',
-                            color: 'rgba(255, 255, 255, 0.5)'
+                          '&:disabled': {
+                            background: 'linear-gradient(135deg, #a8d4e5, #8abfd0)',
+                            color: '#e0e0e0',
+                            boxShadow: 'none'
                           }
                         }}
                       >
@@ -1682,36 +1381,842 @@ const TytAytNetTakibi = () => {
                   </>
                 )}
               </Box>
-            </CardContent>
-          </StepperCard>
-        ) : (
-          /* Records view */
-          <StyledCard sx={{ mt: 3 }}>
-            <CardContent sx={{ pt: 3 }}>
-              <Typography variant="h5" gutterBottom sx={{ color: '#f4f2f5' }}>
-                Deneme Sonuçları
-              </Typography>
-              {renderRecordsList()}
-            </CardContent>
-          </StyledCard>
-        )}
-        
-        {/* Notification */}
-        <Snackbar 
-          open={notification.open} 
-          autoHideDuration={6000} 
-          onClose={handleCloseNotification}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert 
-            onClose={handleCloseNotification} 
-            severity={notification.severity} 
-            sx={{ width: '100%' }}
+            </Box>
+          )}
+          
+          {tabValue === 1 && (
+            <Box>
+              <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h5" sx={{ color: 'var(--primary-color)', fontWeight: 600 }}>
+                    Deneme Sonuçları
+                  </Typography>
+                </Box>
+                
+                {/* TYT/AYT Seçim Butonları */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 3, 
+                  mb: 4,
+                  flexDirection: isMobile ? 'column' : 'row' 
+                }}>
+                  <Button
+                    onClick={() => setSelectedExamType('TYT')}
+                    sx={{
+                      flex: 1,
+                      py: 3,
+                      background: selectedExamType === 'TYT' 
+                        ? 'linear-gradient(135deg, #5db6d9, #4a9cc7)' 
+                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
+                      color: selectedExamType === 'TYT' ? 'white' : 'var(--text-primary)',
+                      fontWeight: 700,
+                      fontSize: '1.2rem',
+                      borderRadius: '16px',
+                      boxShadow: selectedExamType === 'TYT' 
+                        ? '0 8px 16px rgba(93, 182, 217, 0.25)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 10px 20px rgba(93, 182, 217, 0.3)'
+                      }
+                    }}
+                  >
+                    TYT Denemeleri
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setSelectedExamType('AYT')}
+                    sx={{
+                      flex: 1,
+                      py: 3,
+                      background: selectedExamType === 'AYT' 
+                        ? 'linear-gradient(135deg, #55b3d9, #3498db)' 
+                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
+                      color: selectedExamType === 'AYT' ? 'white' : 'var(--text-primary)',
+                      fontWeight: 700,
+                      fontSize: '1.2rem',
+                      borderRadius: '16px',
+                      boxShadow: selectedExamType === 'AYT' 
+                        ? '0 8px 16px rgba(53, 152, 219, 0.25)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 10px 20px rgba(53, 152, 219, 0.3)'
+                      }
+                    }}
+                  >
+                    AYT Denemeleri
+                  </Button>
+                </Box>
+                
+                {/* Seçilen Sınav Türüne Göre Dersler */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
+                    {selectedExamType} Dersleri
+                  </Typography>
+                  
+                  <Grid container spacing={2}>
+                    {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
+                      <Grid item xs={12} sm={6} md={4} key={subject}>
+                        <Card 
+                          sx={{
+                            p: 2,
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                            background: selectedSubject === subject
+                              ? selectedExamType === 'TYT'
+                                ? 'linear-gradient(135deg, #4a6cf7, #3a56d4)'
+                                : 'linear-gradient(135deg, #9b59b6, #8e44ad)'
+                              : 'white',
+                            color: selectedSubject === subject ? 'white' : 'var(--text-primary)',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer',
+                            '&:hover': {
+                              transform: 'translateY(-5px)',
+                              boxShadow: '0 10px 20px rgba(0, 0, 0, 0.1)'
+                            }
+                          }}
+                          onClick={() => setSelectedSubject(subject)}
+                        >
+                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                            {subject}
+                          </Typography>
+                        </Card>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </Box>
+                
+                {/* Seçilen Derse Göre Sonuçlar */}
+                {selectedSubject && (
+                  <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
+                        {selectedSubject} Sonuçları
+                      </Typography>
+                      <IconButton size="small" onClick={() => setSelectedSubject('')}>
+                        <CloseIcon />
+                      </IconButton>
+                    </Box>
+                    
+                    <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
+                      <Table>
+                        <TableHead sx={{ 
+                          background: selectedExamType === 'TYT' 
+                            ? 'linear-gradient(135deg, #4a6cf7, #3a56d4)' 
+                            : 'linear-gradient(135deg, #9b59b6, #8e44ad)' 
+                        }}>
+                          <TableRow>
+                            <TableCell sx={{ color: 'white', fontWeight: 700 }}>Deneme Adı</TableCell>
+                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Tarih</TableCell>
+                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Doğru</TableCell>
+                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Yanlış</TableCell>
+                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Boş</TableCell>
+                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Net</TableCell>
+                            <TableCell align="right" sx={{ color: 'white', fontWeight: 700 }}>İşlemler</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {netRecords
+                            .filter(record => record.examType === selectedExamType && record.subjects && record.subjects[selectedSubject])
+                            .map((record) => (
+                              <TableRow key={record.id}>
+                                <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
+                                  {record.examName}
+                                </TableCell>
+                                <TableCell align="center">
+                                  {record.examDate && format(record.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale })}
+                                </TableCell>
+                                <TableCell align="center">{record.subjects[selectedSubject].correctCount}</TableCell>
+                                <TableCell align="center">{record.subjects[selectedSubject].incorrectCount}</TableCell>
+                                <TableCell align="center">{record.subjects[selectedSubject].emptyCount}</TableCell>
+                                <TableCell align="center" sx={{ fontWeight: 700, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
+                                  {record.subjects[selectedSubject].net}
+                                </TableCell>
+                                <TableCell align="right">
+                                  <IconButton 
+                                    size="small" 
+                                    sx={{ color: '#4a6cf7' }}
+                                    onClick={() => {
+                                      // Düzenleme işlemi için gerekli state'leri ayarla
+                                      setExamName(record.examName);
+                                      setExamDate(record.examDate.toDate());
+                                      setExamType(record.examType);
+                                      setSubjectData(record.subjects);
+                                      setActiveStep(0);
+                                      setTabValue(0);
+                                      
+                                      // Bildirim göster
+                                      setNotification({
+                                        open: true,
+                                        message: 'Deneme düzenleme moduna geçildi',
+                                        severity: 'info'
+                                      });
+                                    }}
+                                  >
+                                    <EditIcon fontSize="small" />
+                                  </IconButton>
+                                  <IconButton 
+                                    size="small" 
+                                    sx={{ color: '#e74c3c' }}
+                                    onClick={() => handleDelete(record.id)}
+                                  >
+                                    <DeleteIcon fontSize="small" />
+                                  </IconButton>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    
+                    {/* Grafik Gösterimi */}
+                    <Box sx={{ mt: 4 }}>
+                      <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
+                        {selectedSubject} Performans Grafiği
+                      </Typography>
+                      
+                      <Box sx={{ width: '100%', height: 300 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart
+                            data={netRecords
+                              .filter(record => record.examType === selectedExamType && record.subjects && record.subjects[selectedSubject])
+                              .map(record => ({
+                                name: record.examName,
+                                date: record.examDate ? format(record.examDate.toDate(), 'dd/MM', { locale: trLocale }) : '',
+                                net: parseFloat(record.subjects[selectedSubject].net)
+                              }))}
+                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Line 
+                              type="monotone" 
+                              dataKey="net" 
+                              name="Net"
+                              stroke={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
+                              activeDot={{ r: 8 }} 
+                              strokeWidth={2}
+                            />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </Box>
+                    </Box>
+                  </Box>
+                )}
+                
+                {/* Deneme yoksa veya ders seçilmediyse */}
+                {(!selectedSubject && netRecords.length > 0) && (
+                  <Box sx={{ textAlign: 'center', p: 4 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      Lütfen incelemek istediğiniz dersi seçin.
+                    </Typography>
+                  </Box>
+                )}
+                
+                {netRecords.length === 0 && (
+                  <Box sx={{ textAlign: 'center', p: 4 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      Henüz kaydedilmiş deneme sonucu bulunmamaktadır.
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          )}
+          
+          {tabValue === 2 && (
+            <Box>
+              <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h5" sx={{ color: 'var(--primary-color)', fontWeight: 600 }}>
+                    İstatistikler
+                  </Typography>
+                </Box>
+                
+                {/* Ders Seçim Bölümü */}
+                <Box sx={{ mb: 4 }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+                    Hangi dersin istatistiklerini görmek istersiniz?
+                  </Typography>
+                  
+                  <Grid container spacing={2} sx={{ mt: 2 }}>
+                    {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
+                      <Grid item xs={12} sm={6} md={3} key={subject}>
+                        <Card 
+                          sx={{
+                            p: 2,
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                            background: selectedSubject === subject
+                              ? 'linear-gradient(135deg, #5db6d9, #4a9cc7)'
+                              : 'white',
+                            color: selectedSubject === subject ? 'white' : 'var(--text-primary)',
+                            transition: 'all 0.3s ease',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            minHeight: '80px',
+                            '&:hover': {
+                              transform: 'translateY(-3px)',
+                              boxShadow: '0 8px 16px rgba(93, 182, 217, 0.25)'
+                            }
+                          }}
+                          onClick={() => setSelectedSubject(subject)}
+                        >
+                          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
+                            {subject}
+                          </Typography>
+                        </Card>
+                      </Grid>
+                    ))}
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Card 
+                        sx={{
+                          p: 2,
+                          borderRadius: '12px',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                          background: selectedSubject === '' 
+                            ? 'linear-gradient(135deg, #5db6d9, #4a9cc7)' 
+                            : 'white',
+                          color: selectedSubject === '' ? 'white' : 'var(--text-primary)',
+                          transition: 'all 0.3s ease',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          minHeight: '80px',
+                          '&:hover': {
+                            transform: 'translateY(-3px)',
+                            boxShadow: '0 8px 16px rgba(93, 182, 217, 0.25)'
+                          }
+                        }}
+                        onClick={() => setSelectedSubject('')}
+                      >
+                        <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
+                          Tüm Dersler
+                        </Typography>
+                      </Card>
+                    </Grid>
+                  </Grid>
+                </Box>
+                
+                {/* TYT/AYT Seçim Butonları */}
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 3, 
+                  mb: 4,
+                  flexDirection: isMobile ? 'column' : 'row' 
+                }}>
+                  <Button
+                    onClick={() => setSelectedExamType('TYT')}
+                    sx={{
+                      flex: 1,
+                      py: 3,
+                      background: selectedExamType === 'TYT' 
+                        ? 'linear-gradient(135deg, #4a6cf7, #3a56d4)' 
+                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
+                      color: selectedExamType === 'TYT' ? 'white' : 'var(--text-primary)',
+                      fontWeight: 700,
+                      fontSize: '1.2rem',
+                      borderRadius: '16px',
+                      boxShadow: selectedExamType === 'TYT' 
+                        ? '0 10px 20px rgba(74, 108, 247, 0.3)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 15px 30px rgba(74, 108, 247, 0.2)'
+                      }
+                    }}
+                  >
+                    TYT İstatistikleri
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setSelectedExamType('AYT')}
+                    sx={{
+                      flex: 1,
+                      py: 3,
+                      background: selectedExamType === 'AYT' 
+                        ? 'linear-gradient(135deg, #9b59b6, #8e44ad)' 
+                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
+                      color: selectedExamType === 'AYT' ? 'white' : 'var(--text-primary)',
+                      fontWeight: 700,
+                      fontSize: '1.2rem',
+                      borderRadius: '16px',
+                      boxShadow: selectedExamType === 'AYT' 
+                        ? '0 10px 20px rgba(155, 89, 182, 0.3)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 15px 30px rgba(155, 89, 182, 0.2)'
+                      }
+                    }}
+                  >
+                    AYT İstatistikleri
+                  </Button>
+                </Box>
+                
+                {/* İstatistik Kartları */}
+                {netRecords.filter(record => record.examType === selectedExamType).length > 0 ? (
+                  <>
+                    {/* Özet Bilgiler */}
+                    <Box sx={{ mb: 4 }}>
+                      <Typography variant="h6" gutterBottom sx={{ 
+                        fontWeight: 600, 
+                        color: '#5db6d9',
+                        borderBottom: `2px solid #5db6d9`,
+                        pb: 1,
+                        mb: 3
+                      }}>
+                        Genel Performans Özeti
+                      </Typography>
+                      
+                      <Box sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: 3,
+                        justifyContent: 'center'
+                      }}>
+                        {/* Toplam Deneme Kartı */}
+                        <Box sx={{
+                          width: { xs: '100%', sm: '45%', md: '22%' },
+                          p: 3,
+                          borderRadius: '16px',
+                          background: 'linear-gradient(135deg, #FFD3A5, #FD6585)',
+                          color: 'white',
+                          boxShadow: '0 8px 16px rgba(253, 101, 133, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'translateY(-5px)',
+                            boxShadow: '0 12px 20px rgba(253, 101, 133, 0.3)'
+                          }
+                        }}>
+                          <Box sx={{ 
+                            width: 60, 
+                            height: 60, 
+                            borderRadius: '50%', 
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mb: 2
+                          }}>
+                            <AssignmentIcon sx={{ fontSize: 30 }} />
+                          </Box>
+                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
+                            Toplam Deneme
+                          </Typography>
+                          <Typography variant="h3" sx={{ fontWeight: 800 }}>
+                            {(() => {
+                              // Tüm Dersler seçiliyse
+                              if (selectedSubject === '') {
+                                return netRecords.filter(record => record.examType === selectedExamType).length;
+                              }
+                              // Belirli bir ders seçiliyse
+                              else {
+                                return netRecords.filter(record => 
+                                  record.examType === selectedExamType && 
+                                  record.subjects && 
+                                  record.subjects[selectedSubject]
+                                ).length;
+                              }
+                            })()}
+                          </Typography>
+                        </Box>
+                        
+                        {/* Son Deneme Tarihi Kartı */}
+                        <Box sx={{
+                          width: { xs: '100%', sm: '45%', md: '22%' },
+                          p: 3,
+                          borderRadius: '16px',
+                          background: 'linear-gradient(135deg, #90F7EC, #32CCBC)',
+                          color: 'white',
+                          boxShadow: '0 8px 16px rgba(50, 204, 188, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'translateY(-5px)',
+                            boxShadow: '0 12px 20px rgba(50, 204, 188, 0.3)'
+                          }
+                        }}>
+                          <Box sx={{ 
+                            width: 60, 
+                            height: 60, 
+                            borderRadius: '50%', 
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mb: 2
+                          }}>
+                            <CalendarTodayIcon sx={{ fontSize: 30 }} />
+                          </Box>
+                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
+                            Son Deneme Tarihi
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                            {(() => {
+                              try {
+                                // Önce sınav türüne göre filtrele
+                                let filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+                                
+                                // Eğer belirli bir ders seçilmişse, sadece o derse ait kayıtları filtrele
+                                if (selectedSubject && selectedSubject !== '') {
+                                  filteredRecords = filteredRecords.filter(record => 
+                                    record.subjects && record.subjects[selectedSubject]
+                                  );
+                                }
+                                
+                                if (filteredRecords.length === 0) return 'Tarih yok';
+                                
+                                // Güvenli sıralama fonksiyonu
+                                const sortedRecords = [...filteredRecords].sort((a, b) => {
+                                  // Eğer examDate tanımlı değilse veya toDate metodu yoksa, karşılaştırma yapma
+                                  if (!a.examDate || !a.examDate.toDate || !b.examDate || !b.examDate.toDate) {
+                                    return 0; // Sıralamayı değiştirme
+                                  }
+                                  try {
+                                    return b.examDate.toDate() - a.examDate.toDate();
+                                  } catch (error) {
+                                    console.error('Date sorting error:', error);
+                                    return 0; // Hata durumunda sıralamayı değiştirme
+                                  }
+                                });
+                                
+                                // İlk kaydın tarihini güvenli bir şekilde al
+                                const latestRecord = sortedRecords[0];
+                                if (!latestRecord || !latestRecord.examDate) return 'Tarih yok';
+                                
+                                try {
+                                  if (typeof latestRecord.examDate.toDate === 'function') {
+                                    return format(latestRecord.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale });
+                                  } else if (latestRecord.examDate instanceof Date) {
+                                    return format(latestRecord.examDate, 'dd MMMM yyyy', { locale: trLocale });
+                                  } else {
+                                    return 'Tarih yok';
+                                  }
+                                } catch (error) {
+                                  console.error('Date formatting error:', error);
+                                  return 'Tarih yok';
+                                }
+                              } catch (error) {
+                                console.error('General error in date processing:', error);
+                                return 'Tarih yok';
+                              }
+                            })()}
+                          </Typography>
+                        </Box>
+                        
+                        {/* En Yüksek Net Kartı */}
+                        <Box sx={{
+                          width: { xs: '100%', sm: '45%', md: '22%' },
+                          p: 3,
+                          borderRadius: '16px',
+                          background: 'linear-gradient(135deg, #ABDCFF, #0396FF)',
+                          color: 'white',
+                          boxShadow: '0 8px 16px rgba(3, 150, 255, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'translateY(-5px)',
+                            boxShadow: '0 12px 20px rgba(3, 150, 255, 0.3)'
+                          }
+                        }}>
+                          <Box sx={{ 
+                            width: 60, 
+                            height: 60, 
+                            borderRadius: '50%', 
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mb: 2
+                          }}>
+                            <TrendingUpIcon sx={{ fontSize: 30 }} />
+                          </Box>
+                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
+                            En Yüksek Net
+                          </Typography>
+                          <Typography variant="h5" sx={{ fontWeight: 800 }}>
+                            {(() => {
+                              // Belirli bir ders seçiliyse
+                              if (selectedSubject && selectedSubject !== '') {
+                                const filteredRecords = netRecords
+                                  .filter(record => 
+                                    record.examType === selectedExamType && 
+                                    record.subjects && 
+                                    record.subjects[selectedSubject]
+                                  )
+                                  .map(record => parseFloat(record.subjects[selectedSubject].net));
+                                
+                                if (filteredRecords.length === 0) return 'Veri yok';
+                                
+                                const maxNet = Math.max(...filteredRecords);
+                                return `${maxNet.toFixed(2)}`;
+                              } 
+                              // Tüm dersler seçiliyse
+                              else {
+                                return calculateHighestNetSubject();
+                              }
+                            })()}
+                          </Typography>
+                        </Box>
+                        
+                        {/* Gelişim Durumu Kartı */}
+                        <Box sx={{
+                          width: { xs: '100%', sm: '45%', md: '22%' },
+                          p: 3,
+                          borderRadius: '16px',
+                          background: 'linear-gradient(135deg, #FFF6B7, #F6416C)',
+                          color: 'white',
+                          boxShadow: '0 8px 16px rgba(246, 65, 108, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          textAlign: 'center',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            transform: 'translateY(-5px)',
+                            boxShadow: '0 12px 20px rgba(246, 65, 108, 0.3)'
+                          }
+                        }}>
+                          <Box sx={{ 
+                            width: 60, 
+                            height: 60, 
+                            borderRadius: '50%', 
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            mb: 2
+                          }}>
+                            <ShowChartIcon sx={{ fontSize: 30 }} />
+                          </Box>
+                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
+                            Gelişim Durumu
+                          </Typography>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {(() => {
+                              // Belirli bir ders seçiliyse
+                              if (selectedSubject && selectedSubject !== '') {
+                                return calculateSubjectGrowthStatus(selectedSubject);
+                              }
+                              // Tüm dersler seçiliyse
+                              else {
+                                return calculateGrowthStatus();
+                              }
+                            })()}
+                          </Box>
+                        </Box>
+                      </Box>
+                    </Box>
+                    
+                    {/* Ders Bazlı Performans */}
+                    <Box sx={{ mb: 4 }}>
+                      <Typography variant="h6" gutterBottom sx={{ 
+                        fontWeight: 600, 
+                        color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6',
+                        borderBottom: `2px solid ${selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'}`,
+                        pb: 1
+                      }}>
+                        Ders Bazlı Performans
+                      </Typography>
+                      
+                      {/* Belirli bir ders seçilmişse ve Tüm Dersler değilse, o derse özel grafik göster */}
+                      {selectedSubject && selectedSubject !== '' ? (
+                        <Box sx={{ width: '100%', height: 400, mt: 3 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart
+                              data={netRecords
+                                .filter(record => 
+                                  record.examType === selectedExamType && 
+                                  record.subjects && 
+                                  record.subjects[selectedSubject]
+                                )
+                                .map(record => ({
+                                  name: record.examName,
+                                  date: record.examDate ? format(record.examDate.toDate(), 'dd/MM', { locale: trLocale }) : '',
+                                  net: parseFloat(record.subjects[selectedSubject].net)
+                                }))}
+                              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="date" />
+                              <YAxis />
+                              <Tooltip />
+                              <Legend />
+                              <Line 
+                                type="monotone" 
+                                dataKey="net" 
+                                name={`${selectedSubject} Net`}
+                                stroke={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
+                                activeDot={{ r: 8 }} 
+                                strokeWidth={2}
+                              />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </Box>
+                      ) : (
+                        <Box sx={{ width: '100%', height: 400, mt: 3 }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={calculateSubjectAverages()}
+                              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="subject" />
+                              <YAxis />
+                              <Tooltip />
+                              <Legend />
+                              <Bar 
+                                dataKey="average" 
+                                name="Ortalama Net" 
+                                fill={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
+                                radius={[8, 8, 0, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </Box>
+                      )}
+                    </Box>
+                    
+                    {/* Zaman İçinde Gelişim */}
+                    <Box sx={{ mb: 4 }}>
+                      <Typography variant="h6" gutterBottom sx={{ 
+                        fontWeight: 600, 
+                        color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6',
+                        borderBottom: `2px solid ${selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'}`,
+                        pb: 1
+                      }}>
+                        Zaman İçinde Gelişim
+                      </Typography>
+                      
+                      <Box sx={{ width: '100%', height: 400, mt: 3 }}>
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart
+                            data={calculateTimeProgress()}
+                            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="date" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            {/* Belirli bir ders seçilmişse ve Tüm Dersler değilse, sadece o dersi göster */}
+                            {selectedSubject && selectedSubject !== '' ? (
+                              <Line 
+                                key={selectedSubject}
+                                type="monotone" 
+                                dataKey={selectedSubject} 
+                                stroke={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
+                                strokeWidth={3}
+                                dot={{ r: 6 }}
+                                activeDot={{ r: 9 }}
+                              />
+                            ) : (
+                              /* Tüm dersler seçilmişse, tüm dersleri göster */
+                              (selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject, index) => (
+                                <Line 
+                                  key={subject}
+                                  type="monotone" 
+                                  dataKey={subject} 
+                                  stroke={getSubjectColor(index)} 
+                                  strokeWidth={2}
+                                  dot={{ r: 5 }}
+                                  activeDot={{ r: 8 }}
+                                />
+                              ))
+                            )}
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </Box>
+                    </Box>
+                    
+                    {/* Tavsiyeler */}
+                    <Box sx={{ mb: 4 }}>
+                      <Typography variant="h6" gutterBottom sx={{ 
+                        fontWeight: 600, 
+                        color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6',
+                        borderBottom: `2px solid ${selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'}`,
+                        pb: 1
+                      }}>
+                        Gelişim Tavsiyeleri
+                      </Typography>
+                      
+                      <Box sx={{ mt: 2 }}>
+                        {generateRecommendations().map((recommendation, index) => (
+                          <Card key={index} sx={{ 
+                            p: 2, 
+                            mb: 2, 
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
+                            borderLeft: `4px solid ${recommendation.color}`
+                          }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              {recommendation.icon}
+                              <Typography variant="subtitle1" sx={{ ml: 1, fontWeight: 600 }}>
+                                {recommendation.subject}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                              {recommendation.message}
+                            </Typography>
+                          </Card>
+                        ))}
+                      </Box>
+                    </Box>
+                  </>
+                ) : (
+                  <Box sx={{ textAlign: 'center', p: 4 }}>
+                    <Typography variant="body1" color="text.secondary">
+                      İstatistikler için yeterli veri bulunmamaktadır.
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          )}
+          
+          {/* Notification */}
+          <Snackbar 
+            open={notification.open} 
+            autoHideDuration={6000} 
+            onClose={handleCloseNotification}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
           >
-            {notification.message}
-          </Alert>
-        </Snackbar>
-      </Box>
+            <Alert 
+              onClose={handleCloseNotification} 
+              severity={notification.severity} 
+              sx={{ width: '100%' }}
+            >
+              {notification.message}
+            </Alert>
+          </Snackbar>
+        </Box>
+      </Container>
     </motion.div>
   );
 };

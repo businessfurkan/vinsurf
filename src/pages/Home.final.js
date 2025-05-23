@@ -4,7 +4,6 @@ import {
   Typography, 
   Paper, 
   Grid, 
-  Button,
   useTheme,
   useMediaQuery
 } from '@mui/material';
@@ -15,7 +14,6 @@ import AnalyticalStopwatch from '../components/AnalyticalStopwatch';
 const Home = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   return (
     <Box 

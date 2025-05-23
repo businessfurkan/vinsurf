@@ -99,7 +99,7 @@ const BenimleCalis = () => {
       minHeight: '90vh',
       position: 'relative',
       overflow: 'hidden',
-      backgroundColor: '#f4f2f5',
+      backgroundColor: 'var(--background-color)',
       borderRadius: 4,
       boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
     }}>
@@ -133,7 +133,7 @@ const BenimleCalis = () => {
             width: '100%', 
             boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
             borderRadius: 2,
-            backgroundColor: '#FFFFF0',
+            backgroundColor: 'var(--background-color)',
             color: '#333',
             fontWeight: 600,
             '& .MuiAlert-icon': {
@@ -177,7 +177,7 @@ const BenimleCalis = () => {
               overflow: 'hidden',
               boxShadow: '0 15px 35px rgba(0,0,0,0.1)',
               height: '100%',
-              background: '#f4f2f5'
+              background: 'var(--background-color)'
             }}
           >
             {loading ? (
@@ -244,7 +244,7 @@ const BenimleCalis = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderRadius: '50%',
-                  background: '#FFFFF0',
+                  background: 'var(--background-color)',
                   mb: 2,
                   animation: 'pulse 2s infinite ease-in-out'
                 }}>
@@ -272,7 +272,7 @@ const BenimleCalis = () => {
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between',
-                  background: '#FFFFF0',
+                  background: 'var(--background-color)',
                   borderBottom: '1px solid rgba(0,0,0,0.05)'
                 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -306,9 +306,9 @@ const BenimleCalis = () => {
                       target="_blank" 
                       rel="noopener noreferrer"
                       sx={{ 
-                        backgroundColor: '#f4f2f5',
+                        backgroundColor: 'var(--background-color)',
                         '&:hover': {
-                          backgroundColor: '#f4f2f5',
+                          backgroundColor: 'var(--background-color)',
                         }
                       }}
                     >
@@ -348,7 +348,7 @@ const BenimleCalis = () => {
               height: '100%',
               display: 'flex',
               flexDirection: 'column',
-              background: '#FFFFF0',
+              background: 'var(--background-color)',
               backdropFilter: 'blur(10px)',
               transition: 'transform 0.3s ease, box-shadow 0.3s ease',
               '&:hover': {
@@ -394,7 +394,7 @@ const BenimleCalis = () => {
               mb: 3, 
               p: 3, 
               borderRadius: 3, 
-              background: '#FFFFF0',
+              background: 'var(--background-color)',
               border: '1px solid rgba(0,0,0,0.05)',
               boxShadow: '0 5px 15px rgba(0,0,0,0.05)',
               position: 'relative',

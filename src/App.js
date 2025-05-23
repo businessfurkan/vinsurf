@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { NotificationProvider } from './context/NotificationContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -152,9 +153,10 @@ const App = () => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <NotificationProvider>
+    <ThemeProvider>
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <NotificationProvider>
         {/* Mobil cihaz uyarı diyaloğu */}
         <Dialog
           open={mobileWarningOpen}
@@ -213,7 +215,7 @@ const App = () => {
           </DialogActions>
         </Dialog>
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: '#f4f2f5', minHeight: '100vh', position: 'relative' }}>
+        <Box sx={{ display: 'flex', bgcolor: 'var(--background-color)', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
@@ -221,7 +223,7 @@ const App = () => {
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
               overflow: 'auto',
-              bgcolor: '#f4f2f5',
+              bgcolor: 'var(--background-color)',
               transition: theme => theme.transitions.create(['margin', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
@@ -251,28 +253,29 @@ const App = () => {
                       height: '100%',
                       '&::before': {
                         content: '""',
-                        position: 'fixed',
+                        position: 'absolute',
                         top: 0,
                         left: 0,
                         width: '60px', // Sidebar genişliği
                         height: '100%',
-                        backgroundColor: '#f4f2f5',
-                        zIndex: 0,
+                        backgroundColor: 'var(--background-color)',
+                        zIndex: 1,
                       },
                       '&::after': {
                         content: '""',
-                        position: 'fixed',
+                        position: 'absolute',
                         top: 0,
                         right: 0,
                         width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
                         height: '100%',
-                        backgroundColor: '#f4f2f5',
-                        zIndex: 0,
+                        backgroundColor: 'var(--background-color)',
+                        zIndex: 1,
                         '@media (max-width: 1200px)': {
                           width: '0px',
                         },
                       },
                     }}>
+
                       <BenimleCalis />
                     </Box>
                   </ProtectedRoute>
@@ -292,7 +295,8 @@ const App = () => {
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       )}
-      </NotificationProvider>
+        </NotificationProvider>
+      </MuiThemeProvider>
     </ThemeProvider>
   );
 };

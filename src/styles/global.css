@@ -7,10 +7,14 @@
   font-weight: 450; /* Slightly increase the default font weight */
 }
 
+:root {
+  --background-color: #f4f2f5;
+}
+
 body {
   font-family: 'Poppins', 'Montserrat', 'Roboto', sans-serif;
-  background-color: #f4f2f5;
-  color: #FFFFF0;
+  background-color: var(--background-color);
+  color: var(--background-color);
   line-height: 1.6;
   font-weight: 450; /* Slightly increase the default font weight */
   letter-spacing: 0.15px;
@@ -207,7 +211,7 @@ a {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #FFFFF0;
+  color: #f4f2f5;
 }
 
 /* Home page specific styles */
