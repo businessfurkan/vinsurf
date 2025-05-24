@@ -1017,12 +1017,22 @@ const TytAytNetTakibi = () => {
   };
   
   // Ders için renk döndür
-  const getSubjectColor = (index) => {
-    const colors = [
-      '#4a6cf7', '#9b59b6', '#e74c3c', '#f39c12', '#27ae60', 
-      '#16a085', '#2980b9', '#8e44ad', '#c0392b', '#d35400'
-    ];
-    return colors[index % colors.length];
+  const getSubjectColor = (subject) => {
+    const subjectColors = {
+      'TYT Türkçe': 'var(--turkce-color)',
+      'TYT Sosyal': 'var(--sosyal-color)',
+      'TYT Matematik': 'var(--matematik-color)',
+      'TYT Fen Bilimleri': 'var(--fen-color)',
+      'AYT Matematik': 'var(--matematik-color)',
+      'AYT Fizik': 'var(--fizik-color)',
+      'AYT Kimya': 'var(--kimya-color)',
+      'AYT Biyoloji': 'var(--biyoloji-color)',
+      'AYT Edebiyat': 'var(--edebiyat-color)',
+      'AYT Tarih': 'var(--tarih-color)',
+      'AYT Coğrafya': 'var(--cografya-color)'
+    };
+    
+    return subjectColors[subject] || '#4a6cf7';
   };
   
   // Tavsiyeler oluştur
@@ -2126,27 +2136,27 @@ const TytAytNetTakibi = () => {
                             <Tooltip />
                             <Legend />
                             {/* Belirli bir ders seçilmişse ve Tüm Dersler değilse, sadece o dersi göster */}
-                            {selectedSubject && selectedSubject !== '' ? (
+                            {selectedSubject ? (
                               <Line 
                                 key={selectedSubject}
                                 type="monotone" 
                                 dataKey={selectedSubject} 
-                                stroke={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
+                                stroke={getSubjectColor(selectedSubject)} 
                                 strokeWidth={3}
-                                dot={{ r: 6 }}
-                                activeDot={{ r: 9 }}
+                                dot={{ r: 6, fill: getSubjectColor(selectedSubject), strokeWidth: 2, stroke: '#fff' }}
+                                activeDot={{ r: 9, fill: getSubjectColor(selectedSubject), strokeWidth: 3, stroke: '#fff' }}
                               />
                             ) : (
                               /* Tüm dersler seçilmişse, tüm dersleri göster */
-                              (selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject, index) => (
+                              (selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
                                 <Line 
                                   key={subject}
                                   type="monotone" 
                                   dataKey={subject} 
-                                  stroke={getSubjectColor(index)} 
+                                  stroke={getSubjectColor(subject)} 
                                   strokeWidth={2}
-                                  dot={{ r: 5 }}
-                                  activeDot={{ r: 8 }}
+                                  dot={{ r: 5, fill: getSubjectColor(subject), strokeWidth: 1, stroke: '#fff' }}
+                                  activeDot={{ r: 8, fill: getSubjectColor(subject), strokeWidth: 2, stroke: '#fff' }}
                                 />
                               ))
                             )}
@@ -2166,22 +2176,50 @@ const TytAytNetTakibi = () => {
                         Gelişim Tavsiyeleri
                       </Typography>
                       
-                      <Box sx={{ mt: 2 }}>
+                      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
                         {generateRecommendations().map((recommendation, index) => (
                           <Card key={index} sx={{ 
-                            p: 2, 
-                            mb: 2, 
-                            borderRadius: '12px',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                            borderLeft: `4px solid ${recommendation.color}`
+                            p: 2.5, 
+                            mb: 2.5, 
+                            borderRadius: 'var(--card-border-radius)',
+                            boxShadow: 'var(--card-shadow)',
+                            borderLeft: `4px solid ${recommendation.color}`,
+                            transition: 'var(--card-transition)',
+                            background: `linear-gradient(to right, ${recommendation.color}10, transparent)`,
+                            '&:hover': {
+                              boxShadow: 'var(--card-hover-shadow)',
+                              transform: 'translateY(-3px)'
+                            }
                           }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              {recommendation.icon}
-                              <Typography variant="subtitle1" sx={{ ml: 1, fontWeight: 600 }}>
+                              <Box sx={{ 
+                                width: 40, 
+                                height: 40, 
+                                borderRadius: '50%', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                background: `linear-gradient(135deg, ${recommendation.color}, ${recommendation.color}cc)`,
+                                color: 'white',
+                                boxShadow: `0 4px 12px ${recommendation.color}40`,
+                                mr: 2
+                              }}>
+                                {recommendation.icon}
+                              </Box>
+                              <Typography variant="subtitle1" sx={{ 
+                                fontWeight: 700, 
+                                color: recommendation.color,
+                                fontSize: '1.1rem'
+                              }}>
                                 {recommendation.subject}
                               </Typography>
                             </Box>
-                            <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>
+                            <Typography variant="body1" sx={{ 
+                              mt: 1.5, 
+                              color: 'text.secondary',
+                              lineHeight: 1.6,
+                              pl: 7
+                            }}>
                               {recommendation.message}
                             </Typography>
                           </Card>

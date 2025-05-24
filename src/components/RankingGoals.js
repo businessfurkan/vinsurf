@@ -1,9 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, TextField, Button, Chip, Stack, Paper, Fade, Alert } from '@mui/material';
+import React, { useState, useEffect, useContext } from 'react';
+import { 
+  Box, 
+  Typography, 
+  TextField, 
+  Button, 
+  Chip, 
+  Stack, 
+  Paper, 
+  Fade, 
+  Alert,
+  Grid
+} from '@mui/material';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { ThemeContext } from '../context/ThemeContext';
 
 const goalColors = {
   EA: '#4285F4',
@@ -19,9 +31,8 @@ const initialSchools = [
 ];
 
 const RankingGoals = () => {
-  // Bağımsız state'ler ve fonksiyonlar burada kalacak
-  // ... (state ve fonksiyonlar zaten doğru tanımlanmış)
-
+  const { darkMode } = useContext(ThemeContext);
+  
   const [user] = useAuthState(auth);
   const [goals, setGoals] = useState(initialGoals);
   const [schools, setSchools] = useState(initialSchools);
@@ -105,17 +116,36 @@ const RankingGoals = () => {
 
 
   return (
-    <Box sx={{
-      display: 'flex',
-      flexDirection: { xs: 'column', md: 'row' },
-      gap: { xs: 2, md: 4 },
-      justifyContent: 'center',
-      alignItems: { xs: 'stretch', md: 'flex-start' },
-      width: '100%',
-      mt: 2,
-    }}>
+    <Grid container spacing={3} sx={{ width: '100%', mt: 1 }}>
       {/* Sıralama Hedefleri Kartı */}
-      <Paper elevation={3} sx={{ flex: 1, minWidth: 260, maxWidth: 400, p: { xs: 2, md: 3 }, borderRadius: 4, background: '#fff', mr: { md: 2 } }}>
+      <Grid item xs={12} md={6}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: { xs: 3, md: 4 }, 
+            borderRadius: 4, 
+            background: darkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.7)', 
+            backdropFilter: 'blur(10px)',
+            border: darkMode ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(255, 255, 255, 0.6)',
+            boxShadow: darkMode ? 
+              '0 8px 32px rgba(0, 0, 0, 0.2)' : 
+              '0 8px 32px rgba(85, 179, 217, 0.1)',
+            height: '100%',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '6px',
+              height: '100%',
+              background: 'linear-gradient(to bottom, #55b3d9, #abe7ff)',
+              borderTopLeftRadius: '4px',
+              borderBottomLeftRadius: '4px'
+            }
+          }}
+        >
         <Stack direction="row" alignItems="center" spacing={1} mb={1}>
           <EmojiEventsIcon sx={{ color: '#F4B400', fontSize: 28 }} />
           <Typography fontWeight={700} color="#2e3856" fontSize={18}>
@@ -283,9 +313,10 @@ const RankingGoals = () => {
             )}
           </>
         )}
-      </Paper>
-    </Box>
-  );
+          </Paper>
+        </Grid>
+      </Grid>
+    );
 }
 
 export default RankingGoals;

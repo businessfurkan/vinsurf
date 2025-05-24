@@ -1,21 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, Button, Card, CardContent, 
-  Accordion, AccordionSummary, AccordionDetails,
   DialogTitle, DialogContent, DialogActions,
-  useTheme, CircularProgress, IconButton,
-  Tooltip
+  CircularProgress, Avatar, Chip
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import StopIcon from '@mui/icons-material/Stop';
-import SaveIcon from '@mui/icons-material/Save';
 
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
+// Icons
+import SaveIcon from '@mui/icons-material/Save';
+import TimerIcon from '@mui/icons-material/Timer';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+
 import Dialog from '@mui/material/Dialog';
 import { auth, db } from '../firebase';
-import { collection, addDoc, query, where, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 import yksData from '../utils/yksData';
@@ -30,9 +27,40 @@ const AnalyticalStopwatch = () => {
   const [expandedSubject, setExpandedSubject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  const theme = useTheme();
+  // Ders renklerini tanımlayalım
+  const subjectColors = {
+    'Türkçe': '#FF5722',
+    'Matematik': '#2196F3',
+    'Fizik': '#F44336',
+    'Kimya': '#FF9800',
+    'Biyoloji': '#4CAF50',
+    'Tarih': '#9C27B0',
+    'Coğrafya': '#795548',
+    'Felsefe': '#607D8B',
+    'Din Kültürü': '#009688',
+    'Yabancı Dil': '#3F51B5',
+    'Geometri': '#00BCD4'
+  };
+  
+  // Seçilen dersin rengini alalım
+  const selectedColor = selectedSubject ? subjectColors[selectedSubject] || '#2196F3' : '#2196F3';
 
-  // Fetch study records from Firestore
+  // Zamanlayıcı için useEffect
+  useEffect(() => {
+    let interval = null;
+    
+    if (isRunning) {
+      interval = setInterval(() => {
+        setTime(prevTime => prevTime + 1);
+      }, 1000);
+    } else if (!isRunning && time !== 0) {
+      clearInterval(interval);
+    }
+    
+    return () => clearInterval(interval);
+  }, [isRunning, time]);
+
+  // Firestore'dan çalışma kayıtlarını getir
   const fetchStudyRecords = useCallback(async () => {
     if (!user) return;
     
@@ -49,598 +77,625 @@ const AnalyticalStopwatch = () => {
         records.push(doc.data());
       });
       
-
     } catch (error) {
       console.error('Error fetching study records:', error);
     }
   }, [user]);
 
-  const loadActiveTimer = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      const timerDocRef = doc(db, 'activeTimers', user.uid);
-      const timerDoc = await getDoc(timerDocRef);
-      
-      if (timerDoc.exists()) {
-        const timerData = timerDoc.data();
-        
-        // Check if timer is still valid (not expired after 1 month)
-        const timerStartTime = timerData.startTime.toDate();
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        
-        if (timerStartTime > oneMonthAgo) {
-          // Timer is still valid
-          
-          if (timerData.isRunning) {
-            // Sadece timer çalışıyorsa ders ve konu seçimini geri yükle
-            setSelectedSubject(timerData.subject);
-            setSelectedTopic(timerData.topic);
-            setExpandedSubject(timerData.subject);
-            
-            // Calculate elapsed time if timer was running
-            const elapsedSeconds = Math.floor((new Date() - timerStartTime) / 1000);
-            setTime(timerData.elapsedTime + elapsedSeconds);
-            // TODO: Define setStartTime with useState or remove its usage.
-// setStartTime(timerStartTime);
-            setIsRunning(true);
-          } else {
-            // Timer was paused but we don't want to automatically select subject/topic
-            // Just preserve the elapsed time
-            setTime(timerData.elapsedTime);
-            setIsRunning(false);
-            // Reset selection when timer is not running
-            setSelectedSubject('');
-            setSelectedTopic('');
-            setExpandedSubject(null);
-          }
-        } else {
-          // Timer expired, delete it
-          await deleteDoc(timerDocRef);
-        }
-      }
-    } catch (error) {
-      console.error('Error loading active timer:', error);
-    }
-  }, [user]);
-
-  // Load study records and active timer state from Firestore
+  // Sayfa yüklendiğinde verileri getir
   useEffect(() => {
     const loadData = async () => {
-      if (user) {
-        await fetchStudyRecords();
-        await loadActiveTimer();
-        setIsLoading(false);
-      }
+      setIsLoading(true);
+      await fetchStudyRecords();
+      setIsLoading(false);
     };
     
     loadData();
-  }, [user, fetchStudyRecords, loadActiveTimer]);
+  }, [fetchStudyRecords]);
 
-  // Timer effect
-  useEffect(() => {
-    let interval = null;
-    
-    if (isRunning) {
-      interval = setInterval(() => {
-        setTime(prevTime => prevTime + 1);
-      }, 1000);
-    } else {
-      clearInterval(interval);
-    }
-    
-    return () => clearInterval(interval);
-  }, [isRunning]);
-
-  const handlePause = () => {
-    setIsRunning(false);
+  // Kaydet butonuna tıklandığında
+  const handleSaveStudy = () => {
+    setShowSaveDialog(true);
   };
 
-  const handleStop = () => {
-    if (time > 0) {
-      setShowSaveDialog(true);
-    } else {
-      resetTimer();
-    }
-  };
-
-  const handleConfirmSave = async () => {
-    await saveStudyRecord();
-    resetTimer();
+  // Kaydetmeyi onayla
+  const handleConfirmSave = () => {
+    saveStudyRecord();
     setShowSaveDialog(false);
   };
 
+  // Kaydetmeyi iptal et
   const handleCancelSave = () => {
-    resetTimer();
     setShowSaveDialog(false);
   };
 
-  const resetTimer = async () => {
-    setIsRunning(false);
-    setTime(0);
-    setSelectedSubject('');
-    setSelectedTopic('');
-    // TODO: Define setStartTime with useState or remove its usage.
-// setStartTime(null);
-    setExpandedSubject(null); // Accordion'u da kapat
-    
-    // Delete active timer from Firebase
-    if (user) {
-      try {
-        const timerDocRef = doc(db, 'activeTimers', user.uid);
-        await deleteDoc(timerDocRef);
-      } catch (error) {
-        console.error('Error deleting timer state:', error);
-      }
-    }
-  };
+  // Not: Sıfırlama işlemi butonlar içinde inline olarak kullanılıyor
 
+  // Çalışma kaydını Firestore'a kaydet
   const saveStudyRecord = async () => {
-    if (!user || !selectedSubject || !selectedTopic || time === 0) return;
-    
+    if (!user) {
+      alert('Kaydedebilmek için giriş yapmalısınız.');
+      return;
+    }
+
+    if (time <= 0) {
+      alert('Kaydedilecek bir çalışma süresi yok.');
+      return;
+    }
+
     try {
-      // Add a new study record
-      await addDoc(collection(db, 'studyRecords'), {
+      // Çalışma kaydı verileri
+      const studyData = {
         userId: user.uid,
         subject: selectedSubject,
         topic: selectedTopic,
-        duration: time, // Store the full time in seconds
+        duration: time, // milisaniye cinsinden süre
         timestamp: new Date(),
-        createdAt: new Date(),
-        expiresAt: new Date(new Date().setMonth(new Date().getMonth() + 24))
-      });
+        date: new Date().toISOString().split('T')[0], // YYYY-MM-DD formatında tarih
+        formattedDuration: formatTime(time, false) // Okunabilir süre formatı
+      };
+
+      // Çalışma kaydını Firestore'a ekle
+      await addDoc(collection(db, 'studyRecords'), studyData);
       
-      // Clear the active timer
-      const timerDocRef = doc(db, 'activeTimers', user.uid);
-      await deleteDoc(timerDocRef);
+      // Kullanıcının toplam çalışma istatistiklerini güncelle
+      // Önce mevcut istatistikleri kontrol et
+      const statsQuery = query(
+        collection(db, 'studyStats'), 
+        where('userId', '==', user.uid),
+        where('subject', '==', selectedSubject)
+      );
       
-      // Refresh study records
-      await fetchStudyRecords();
+      const statsSnapshot = await getDocs(statsQuery);
       
-      // Show success message
-      alert('Çalışma kaydedildi!');
+      if (statsSnapshot.empty) {
+        // Yeni istatistik oluştur
+        await addDoc(collection(db, 'studyStats'), {
+          userId: user.uid,
+          subject: selectedSubject,
+          totalDuration: time,
+          sessionCount: 1,
+          lastUpdated: new Date()
+        });
+      } else {
+        // Mevcut istatistiği güncelle
+        const statsDoc = statsSnapshot.docs[0];
+        const currentStats = statsDoc.data();
+        
+        await updateDoc(statsDoc.ref, {
+          totalDuration: currentStats.totalDuration + time,
+          sessionCount: currentStats.sessionCount + 1,
+          lastUpdated: new Date()
+        });
+      }
+      
+      // Arayüzü sıfırla
+      setShowSaveDialog(false);
+      setTime(0);
+      setIsRunning(false);
+      alert('Çalışmanız başarıyla kaydedildi!');
     } catch (error) {
-      console.error('Error saving study record:', error);
-      alert('Çalışma kaydedilirken bir hata oluştu.');
+      console.error('Kaydetme hatası:', error);
+      alert('Bir hata oluştu. Lütfen tekrar deneyin.');
     }
   };
 
+  // Zamanı formatla
   const formatTime = (seconds, isForDisplay = false) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+    const remainingSeconds = seconds % 60;
     
-    // For the timer display, keep the HH:MM:SS format
-    if (!isForDisplay) {
-      return [
-        hours.toString().padStart(2, '0'),
-        minutes.toString().padStart(2, '0'),
-        secs.toString().padStart(2, '0')
-      ].join(':');
+    if (isForDisplay) {
+      // Kronometre gösterimi için format
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    } else {
+      // Diğer yerler için daha okunabilir format
+      let formattedTime = '';
+      
+      if (hours > 0) {
+        formattedTime += `${hours} saat `;
+      }
+      
+      if (minutes > 0 || hours > 0) {
+        formattedTime += `${minutes} dakika `;
+      }
+      
+      formattedTime += `${remainingSeconds} saniye`;
+      
+      return formattedTime;
     }
-    
-    // For analytics display, use a more human-readable format (hours and minutes only)
-    let timeString = '';
-    if (hours > 0) {
-      timeString += `${hours} saat`;
-    }
-    if (minutes > 0) {
-      if (hours > 0) timeString += ' ';
-      timeString += `${minutes} dakika`;
-    }
-    
-    // If both hours and minutes are 0, show as 0 dakika
-    if (hours === 0 && minutes === 0) {
-      timeString = '0 dakika';
-    }
-    
-    return timeString;
   };
 
-  // Konu başlığına tıklandığında
+  // Not: Konu seçimi işlemi butonlar içinde inline olarak kullanılıyor
+
+  // Ders tıklandığında konuları göster/gizle
   const handleSubjectClick = (subject) => {
-    // Ders seçimi sadece Çalışmaya Başla butonları ile yapılacak
-    if (isRunning) return;
+    setExpandedSubject(expandedSubject === subject ? null : subject);
+  };
+
+  // Çalışmaya başla butonuna tıklandığında
+  const handleStartStudy = (subject, topic) => {
+    // Çalışma zaten devam ediyorsa, kullanıcıya uyarı ver
+    if (isRunning) {
+      // Burada bir uyarı gösterilebilir (ileride eklenebilir)
+      return;
+    }
+    
+    // Önceki çalışma kaydedilmemişse, sıfırla
+    if (time > 0) {
+      setTime(0);
+    }
+    
     setSelectedSubject(subject);
-    setExpandedSubject(subject); // Accordion'u açık tut
-  };
-
-  // Alt konu tıklandığında
-  const handleTopicClick = (topic) => {
-    // Konu seçimi sadece Çalışmaya Başla butonları ile yapılacak
-    if (isRunning) return;
     setSelectedTopic(topic);
+    setIsRunning(true); // Çalışmaya başla butonuna basınca hemen çalışmaya başla
   };
 
-
-  const handleReset = () => {
-    setTime(0);
-    setIsRunning(false);
-    // TODO: Define setStartTime with useState or remove its usage.
-// setStartTime(null);
-  };
-
+  // Yükleme durumunda gösterilecek içerik
   if (isLoading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
+      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress sx={{ color: '#55b3d9' }} />
       </Box>
     );
   }
 
+  // Ana içerik
   return (
-    <Box>
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-        {/* Subject and Topic Selection */}
+    <Box sx={{
+      width: '100%',
+      p: { xs: 2, sm: 3 },
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 3,
+      maxHeight: '100vh',
+      overflow: 'hidden'
+    }}>
+      <Typography variant="h4" component="h1" sx={{ 
+        fontWeight: 700, 
+        mb: 1,
+        color: '#1a1a1a',
+        fontSize: { xs: '1.8rem', md: '2.2rem' }
+      }}>
+        Analizli Kronometre
+      </Typography>
+      
+      <Typography variant="body1" sx={{ 
+        color: '#555', 
+        mb: 1,
+        maxWidth: '800px'
+      }}>
+        Analizli kronometre ile ders ve konu bazlı çalışmalarını kaydedin. İlerlerinizi
+        takip edin ve her derste ne kadar zaman harcadığınızı görün.
+      </Typography>
+      
+      <Box sx={{
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: 3,
+        width: '100%',
+        flex: 1,
+        overflow: 'hidden'
+      }}>
+        {/* Ders ve konu seçimi */}
         <Card sx={{ 
-          flex: 1, 
-          borderRadius: 2, 
-          boxShadow: '0 6px 18px rgba(0,0,0,0.08)',
-          overflow: 'visible'
+          flex: { xs: '1 1 100%', md: '1 1 50%' },
+          borderRadius: '20px', 
+          boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+          background: '#f4f2f5',
+          height: { xs: 'auto', md: '600px' },
+          display: 'flex',
+          flexDirection: 'column'
         }}>
-          <CardContent sx={{ p: 3 }}>
-            <Typography 
-              variant="h6" 
-              gutterBottom 
-              sx={{ 
-                fontSize: '1.1rem', 
-                fontWeight: 600, 
-                mb: 2,
-                display: 'flex',
-                alignItems: 'center',
-                '&::before': {
-                  content: '""',
-                  display: 'block',
-                  width: 4,
-                  height: 20,
-                  backgroundColor: 'primary.main',
-                  borderRadius: 4,
-                  marginRight: 1.5
-                }
-              }}>
-              YKS 2024 Dersleri
-            </Typography>
+          <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Box sx={{ 
+              p: 2,
+              borderBottom: '1px solid rgba(0,0,0,0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontSize: '1.2rem', 
+                  fontWeight: 700,
+                  color: '#333'
+                }}
+              >
+                Ders ve Konu Seçimi
+              </Typography>
+              
+              <ChevronRightIcon sx={{ color: '#999' }} />
+            </Box>
             
-            <Box sx={{ maxHeight: 'calc(100vh - 320px)', overflow: 'auto', pr: 1 }}>
-              {Object.keys(yksData).map((subject) => (
-                <Accordion 
-                  key={subject}
-                  expanded={expandedSubject === subject}
-                  onChange={() => {
-                    // Eğer zaten bu ders açıksa, kapat; değilse aç
-                    setExpandedSubject(expandedSubject === subject ? null : subject);
-                  }}
-                  disabled={isRunning}
-                  sx={{
-                    mb: 1,
-                    borderRadius: '8px !important',
-                    overflow: 'hidden',
-                    backgroundColor: yksData[subject].color + '10',
-                    border: '1px solid ' + yksData[subject].color + '20',
-                    '&:before': {
-                      display: 'none', // Removing default divider
-                    },
-                    '&.Mui-expanded': {
-                      margin: '0 0 8px 0',
-                      boxShadow: '0 4px 15px rgba(0,0,0,0.07)',
-                      backgroundColor: yksData[subject].color + '15',
-                    },
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    sx={{ 
-                      padding: '4px 16px',
-                      minHeight: '48px',
-                      '& .MuiAccordionSummary-content': {
-                        margin: '10px 0',
-                      },
-                      '&.Mui-expanded': {
-                        borderBottom: `1px solid ${yksData[subject].color}30`
-                      },
-                      transition: 'all 0.2s ease',
-                      '&:hover': {
-                        backgroundColor: yksData[subject].color + '25',
-                      }
-                    }}
-                  >
-                    <Typography sx={{ 
-                      fontWeight: 500,
-                      fontSize: '0.95rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: expandedSubject === subject ? yksData[subject].color : 'text.primary',
-                      '&::before': {
-                        content: '""',
-                        display: 'inline-block',
-                        width: 10,
-                        height: 10,
-                        backgroundColor: yksData[subject].color,
-                        borderRadius: '50%',
-                        marginRight: 1,
-                        boxShadow: `0 0 0 3px ${yksData[subject].color}30`
-                      }
-                    }}>
-                      {subject}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ p: 1.5 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                      {yksData[subject].topics.map((topic) => (
-                        <Box 
-                          key={topic}
+            {/* Ders listesi */}
+            <Box sx={{ 
+              flex: 1,
+              overflowY: 'auto',
+              p: 2
+            }}>
+              {isLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
+                  <CircularProgress size={40} />
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  {Object.keys(yksData).map((subject) => (
+                    <Box key={subject} sx={{ mb: 1 }}>
+                      <Box 
+                        onClick={() => handleSubjectClick(subject)}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          p: 1.5,
+                          borderRadius: '10px',
+                          cursor: 'pointer',
+                          background: '#f4f2f5',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            background: 'rgba(0,0,0,0.03)'
+                          }
+                        }}
+                      >
+                        <Avatar 
                           sx={{ 
-                            p: 1.5, 
-                            borderRadius: 1.5,
-                            bgcolor: selectedTopic === topic ? `${yksData[subject].color}20` : 'background.paper',
-                            '&:hover': { bgcolor: `${yksData[subject].color}15` },
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            border: '1px solid',
-                            borderColor: selectedTopic === topic 
-                              ? `${yksData[subject].color}50` 
-                              : 'rgba(0,0,0,0.05)',
-                            boxShadow: selectedTopic === topic 
-                              ? `0 3px 10px ${yksData[subject].color}20` 
-                              : '0 1px 5px rgba(0,0,0,0.02)',
-                            transition: 'all 0.2s ease'
+                            bgcolor: yksData[subject].color || '#9c27b0',
+                            width: 32,
+                            height: 32,
+                            mr: 1.5,
+                            fontSize: '0.9rem'
                           }}
                         >
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              fontWeight: selectedTopic === topic ? 500 : 400,
-                              fontSize: '0.875rem',
-                              color: selectedTopic === topic ? yksData[subject].color : 'text.primary' 
-                            }}
-                          >
-                            {topic}
-                          </Typography>
-                          <Button 
-                            size="small" 
-                            variant="contained" 
-                            color="primary"
-                            sx={{ 
-                              borderRadius: 4,
-                              fontWeight: 600,
-                              py: 0.6,
-                              px: 1.8,
-                              fontSize: '0.75rem',
-                              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-                              bgcolor: yksData[subject].color,
-                              '&:hover': {
-                                bgcolor: theme.palette.mode === 'dark' 
-                                  ? `${yksData[subject].color}e0` 
-                                  : `${yksData[subject].color}d0`,
-                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-                                transform: 'translateY(-1px)'
-                              },
-                              transition: 'transform 0.2s ease-in-out'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation(); // Tıklamanın kutuya yayılmasını engelle
-                              handleSubjectClick(subject);
-                              handleTopicClick(topic);
-                              setIsRunning(true);
-                              // TODO: Define setStartTime with useState or remove its usage.
-// setStartTime(new Date());
-                            }}
-                          >
-                            Çalışmaya Başla
-                          </Button>
+                          {subject.charAt(0)}
+                        </Avatar>
+                        <Typography 
+                          variant="subtitle1"
+                          sx={{ 
+                            flex: 1,
+                            fontWeight: 600,
+                            fontSize: '0.95rem'
+                          }}
+                        >
+                          {subject}
+                        </Typography>
+                        <ChevronRightIcon 
+                          sx={{ 
+                            transform: expandedSubject === subject ? 'rotate(90deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.3s ease'
+                          }} 
+                        />
+                      </Box>
+                      
+                      {/* Konu listesi */}
+                      {expandedSubject === subject && (
+                        <Box 
+                          sx={{
+                            mt: 0.5,
+                            ml: 2,
+                            borderLeft: '1px dashed rgba(0,0,0,0.1)',
+                            pl: 1.5,
+                            maxHeight: '300px',
+                            overflowY: 'auto'
+                          }}
+                        >
+                          {yksData[subject].topics.map((topic) => (
+                            <Box 
+                              key={topic}
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                p: 1,
+                                borderRadius: '8px',
+                                mt: 0.5,
+                                background: '#f4f2f5',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                  background: 'rgba(0,0,0,0.03)'
+                                }
+                              }}
+                            >
+                              <Typography 
+                                variant="body2"
+                                sx={{ 
+                                  flex: 1,
+                                  fontWeight: 500,
+                                  fontSize: '0.85rem'
+                                }}
+                              >
+                                {topic}
+                              </Typography>
+                              
+                              <Button
+                                variant="contained"
+                                size="small"
+                                onClick={() => handleStartStudy(subject, topic)}
+                                sx={{
+                                  bgcolor: yksData[subject].color || '#9c27b0',
+                                  color: '#fff',
+                                  fontSize: '0.7rem',
+                                  py: 0.5,
+                                  minWidth: 'auto',
+                                  '&:hover': {
+                                    bgcolor: yksData[subject].color ? `${yksData[subject].color}dd` : '#7b1fa2'
+                                  }
+                                }}
+                              >
+                                Çalışmaya Başla
+                              </Button>
+                            </Box>
+                          ))}
                         </Box>
-                      ))}
+                      )}
                     </Box>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+                  ))}
+                </Box>
+              )}
             </Box>
           </CardContent>
         </Card>
-        
-        {/* Analytical Stopwatch Section */}
-        <Card sx={{ 
-          flex: 1, 
-          borderRadius: 2,
-          boxShadow: '0 6px 18px rgba(0,0,0,0.08)'
+
+        {/* Kronometre Kartı */}
+        <Card id="timer-section" sx={{ 
+          flex: { xs: '1 1 100%', md: '1 1 50%' },
+          borderRadius: '20px', 
+          boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+          background: '#f4f2f5',
+          display: 'flex',
+          flexDirection: 'column',
+          height: { xs: 'auto', md: '600px' }
         }}>
-          <CardContent sx={{ p: 3 }}>
-            {/* Kronometre Bölümü */}
-            <Typography 
-              variant="h6" 
-              gutterBottom 
-              sx={{ 
-                fontSize: '1.1rem', 
-                fontWeight: 600, 
-                mb: 2,
+          <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ 
+              p: 2,
+              borderBottom: '1px solid rgba(0,0,0,0.06)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  fontSize: '1.2rem', 
+                  fontWeight: 700,
+                  color: '#333'
+                }}
+              >
+                Analizli Kronometre
+              </Typography>
+              
+              <Chip 
+                label={isRunning ? "ÇALIŞIYOR" : "HAZIR"}
+                size="small"
+                color={isRunning ? "success" : "warning"}
+                sx={{ 
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                  height: '24px'
+                }}
+              />
+            </Box>
+            
+            {/* Kronometre Gösterimi */}
+            <Box sx={{ 
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: 4
+            }}>
+              {/* Daire içinde zaman gösterimi */}
+              <Box sx={{ 
+                width: { xs: '220px', sm: '280px' },
+                height: { xs: '220px', sm: '280px' },
+                borderRadius: '50%',
+                border: '2px solid rgba(33, 150, 243, 0.1)',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+                mb: 4,
+                background: 'rgba(255, 255, 255, 0.5)',
+                boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
+                backdropFilter: 'blur(4px)',
                 '&::before': {
                   content: '""',
-                  display: 'block',
-                  width: 4,
-                  height: 20,
-                  backgroundColor: 'primary.main',
-                  borderRadius: 4,
-                  marginRight: 1.5
+                  position: 'absolute',
+                  top: '-4px',
+                  left: '-4px',
+                  width: 'calc(100% + 8px)',
+                  height: 'calc(100% + 8px)',
+                  borderRadius: '50%',
+                  border: '4px solid transparent',
+                  borderTopColor: selectedColor || '#2196F3',
+                  borderRightColor: 'rgba(33, 150, 243, 0.3)',
+                  animation: isRunning ? 'spin 2s linear infinite' : 'none',
+                  '@keyframes spin': {
+                    '0%': {
+                      transform: 'rotate(0deg)'
+                    },
+                    '100%': {
+                      transform: 'rotate(360deg)'
+                    }
+                  }
                 }
               }}>
-              Analizli Kronometre
-            </Typography>
-
-            {/* Timer Card */}
-            <Box sx={{
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  mb: 3,
-  p: { xs: 2.5, sm: 3.5 },
-  borderRadius: 4,
-  background: 'rgba(255,255,255,0.6)',
-  boxShadow: '0 8px 32px 0 rgba(31,38,135,0.13)',
-  backdropFilter: 'blur(12px)',
-  border: '1px solid rgba(255,255,255,0.18)',
-  minWidth: { xs: 'auto', sm: 340 },
-  maxWidth: 420,
-  mx: 'auto',
-  position: 'relative',
-}}>
-              <Typography
-  variant="h2"
-  sx={{
-    fontFamily: 'Montserrat, monospace',
-    fontWeight: 800,
-    mb: 1.5,
-    fontSize: { xs: '2.6rem', sm: '3.7rem', md: '4.2rem' },
-    color: isRunning ? 'primary.main' : 'secondary.main',
-    textShadow: '0 4px 16px #43C6AC55, 0 1px 0 #fff',
-    letterSpacing: 2,
-    transition: 'color 0.3s',
-    lineHeight: 1.1,
-    userSelect: 'none',
-  }}
->
-  {formatTime(time)}
-</Typography>
+                <Box sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <TimerIcon sx={{ 
+                    color: '#2196F3',
+                    fontSize: '2rem',
+                    mb: 2,
+                    opacity: 0.8
+                  }} />
+                  
+                  <Typography variant="h1" sx={{ 
+                    fontSize: { xs: '2.5rem', sm: '3.5rem' },
+                    fontWeight: 700,
+                    fontFamily: 'monospace',
+                    color: '#333',
+                    letterSpacing: '2px'
+                  }}>
+                    {formatTime(time, true)}
+                  </Typography>
+                </Box>
+              </Box>
               
-              {selectedSubject && selectedTopic ? (
-  <Box sx={{
-    mb: 2,
-    px: 2.5,
-    py: 0.7,
-    borderRadius: 99,
-    background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)',
-    color: '#2e3856',
-    fontWeight: 600,
-    fontSize: '1rem',
-    boxShadow: '0 2px 8px #43C6AC22',
-    display: 'inline-block',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  }}>
-    <span style={{ fontWeight: 700 }}>{selectedSubject}</span> - {selectedTopic}
-  </Box>
-) : (
-  <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary', fontWeight: 500 }}>
-    Lütfen bir ders ve konu seçin
-  </Typography>
-)}
-              
-              <Box sx={{ display: 'flex', gap: 2.5, mt: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
-  {!isRunning ? (
-    <Button
-      variant="contained"
-      startIcon={<PlayArrowIcon sx={{ fontSize: 28 }} />}
-      onClick={() => {
-        if (!selectedSubject || !selectedTopic) {
-          alert('Lütfen önce bir ders ve konu seçin!');
-          return;
-        }
-        setIsRunning(true);
-        // TODO: Define setStartTime with useState or remove its usage.
-// setStartTime(new Date());
-      }}
-      disabled={!selectedSubject || !selectedTopic}
-      sx={{
-        borderRadius: 99,
-        px: 4,
-        py: 1.5,
-        fontWeight: 700,
-        fontSize: '1.1rem',
-        background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 100%)',
-        color: '#2e3856',
-        boxShadow: '0 2px 12px #43C6AC33',
-        '&:hover': {
-          background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 80%)',
-          color: '#222',
-        },
-        transition: 'all 0.2s',
-      }}
-    >
-      Başlat
-    </Button>
-  ) : (
-    <Tooltip title="Duraklat" arrow>
-      <IconButton
-        color="warning"
-        onClick={handlePause}
-        sx={{
-          borderRadius: 99,
-          p: 1.3,
-          background: 'linear-gradient(90deg, #F8FFAE 0%, #43C6AC 100%)',
-          color: '#2e3856',
-          boxShadow: '0 2px 10px #43C6AC22',
-          '&:hover': {
-            background: 'linear-gradient(90deg, #43C6AC 0%, #F8FFAE 80%)',
-            color: '#222',
-          },
-          transition: 'all 0.2s',
-        }}
-      >
-        <PauseIcon sx={{ fontSize: 28 }} />
-      </IconButton>
-    </Tooltip>
-  )}
-  <Tooltip title="Durdur" arrow>
-    <span>
-      <IconButton
-        color="error"
-        onClick={handleStop}
-        disabled={time === 0}
-        sx={{
-          borderRadius: 99,
-          p: 1.3,
-          background: 'linear-gradient(90deg, #ffb6b9 0%, #fae3d9 100%)',
-          color: '#a10000',
-          boxShadow: '0 2px 10px #fae3d955',
-          '&:hover': {
-            background: 'linear-gradient(90deg, #fae3d9 0%, #ffb6b9 80%)',
-            color: '#fff',
-          },
-          transition: 'all 0.2s',
-        }}
-      >
-        <StopIcon sx={{ fontSize: 28 }} />
-      </IconButton>
-    </span>
-  </Tooltip>
-  <Tooltip title="Sıfırla" arrow>
-    <span>
-      <IconButton
-        color="info"
-        onClick={handleReset}
-        disabled={time === 0}
-        sx={{
-          borderRadius: 99,
-          p: 1.3,
-          background: 'linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%)',
-          color: '#22577a',
-          boxShadow: '0 2px 10px #a1c4fd33',
-          '&:hover': {
-            background: 'linear-gradient(90deg, #c2e9fb 0%, #a1c4fd 80%)',
-            color: '#222',
-          },
-          transition: 'all 0.2s',
-        }}
-      >
-        <RestartAltIcon sx={{ fontSize: 26 }} />
-      </IconButton>
-    </span>
-  </Tooltip>
-</Box>
+              {/* Butonlar */}
+              <Box sx={{ 
+                display: 'flex',
+                flexDirection: isRunning ? 'row' : 'column',
+                gap: 2,
+                mt: 2,
+                width: '100%',
+                maxWidth: '400px'
+              }}>
+                {selectedSubject && selectedTopic ? (
+                  !isRunning ? (
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
+                      onClick={() => setIsRunning(true)}
+                      sx={{
+                        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                        color: '#fff',
+                        py: 1.5,
+                        borderRadius: '10px',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        textTransform: 'none',
+                        boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 10px 2px rgba(33, 150, 243, .3)'
+                        }
+                      }}
+                    >
+                      Çalışmaya Başla
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        onClick={() => setIsRunning(false)}
+                        sx={{
+                          background: 'linear-gradient(45deg, #FF5722 30%, #FF9800 90%)',
+                          color: '#fff',
+                          py: 1.5,
+                          borderRadius: '10px',
+                          fontWeight: 600,
+                          fontSize: '1rem',
+                          textTransform: 'none',
+                          boxShadow: '0 3px 5px 2px rgba(255, 87, 34, .3)',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #FF9800 30%, #FF5722 90%)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 10px 2px rgba(255, 87, 34, .3)'
+                          }
+                        }}
+                      >
+                        Duraklat
+                      </Button>
+                      
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        onClick={() => {
+                          setTime(0);
+                          setIsRunning(false);
+                        }}
+                        sx={{
+                          background: 'linear-gradient(45deg, #9C27B0 30%, #E040FB 90%)',
+                          color: '#fff',
+                          py: 1.5,
+                          borderRadius: '10px',
+                          fontWeight: 600,
+                          fontSize: '1rem',
+                          textTransform: 'none',
+                          boxShadow: '0 3px 5px 2px rgba(156, 39, 176, .3)',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #E040FB 30%, #9C27B0 90%)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 10px 2px rgba(156, 39, 176, .3)'
+                          }
+                        }}
+                      >
+                        Sıfırla
+                      </Button>
+                      
+                      <Button
+                        variant="contained"
+                        fullWidth
+                        size="large"
+                        onClick={handleSaveStudy}
+                        sx={{
+                          background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
+                          color: '#fff',
+                          py: 1.5,
+                          borderRadius: '10px',
+                          fontWeight: 600,
+                          fontSize: '1rem',
+                          textTransform: 'none',
+                          boxShadow: '0 3px 5px 2px rgba(76, 175, 80, .3)',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'linear-gradient(45deg, #8BC34A 30%, #4CAF50 90%)',
+                            transform: 'translateY(-2px)',
+                            boxShadow: '0 6px 10px 2px rgba(76, 175, 80, .3)'
+                          }
+                        }}
+                      >
+                        Kaydet
+                      </Button>
+                    </>
+                  )
+                ) : (
+                  <Typography 
+                    variant="body1" 
+                    sx={{ 
+                      textAlign: 'center', 
+                      color: '#666',
+                      fontStyle: 'italic',
+                      p: 2
+                    }}
+                  >
+                    Lütfen sol taraftan bir ders ve konu seçiniz
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </CardContent>
         </Card>
       </Box>
       
-      {/* Save Dialog */}
+      {/* Kaydetme Dialog'u */}
       <Dialog
         open={showSaveDialog}
         onClose={() => setShowSaveDialog(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+            p: 1,
+            background: '#f4f2f5'
+          }
+        }}
       >
         <DialogTitle>Çalışma Kaydı</DialogTitle>
         <DialogContent>

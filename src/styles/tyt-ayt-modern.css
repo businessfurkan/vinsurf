@@ -1,11 +1,11 @@
 /* TYT-AYT Net Takibi Modern Stiller */
 :root {
   --primary-color: #4a6cf7;
-  --primary-light: #6384ff;
-  --primary-dark: #3a56d4;
-  --secondary-color: #ff6b6b;
-  --secondary-light: #ff8e8e;
-  --secondary-dark: #e55e5e;
+  --primary-light: #6a8bff;
+  --primary-dark: #3a4cd7;
+  --secondary-color: #9b59b6;
+  --secondary-light: #b07cc6;
+  --secondary-dark: #8e44ad;
   --success-color: #2ecc71;
   --warning-color: #f39c12;
   --danger-color: #e74c3c;
@@ -30,6 +30,24 @@
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
   --transition-slow: 0.5s ease;
+  
+  /* Ders renkleri */
+  --turkce-color: #FF5722;
+  --sosyal-color: #9C27B0;
+  --matematik-color: #2196F3;
+  --fen-color: #4CAF50;
+  --fizik-color: #F44336;
+  --kimya-color: #FF9800;
+  --biyoloji-color: #4CAF50;
+  --edebiyat-color: #673AB7;
+  --tarih-color: #9C27B0;
+  --cografya-color: #795548;
+  
+  /* Kart stilleri */
+  --card-border-radius: 16px;
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --card-hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  --card-transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .net-takibi-container {

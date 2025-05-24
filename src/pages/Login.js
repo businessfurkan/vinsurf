@@ -1,176 +1,148 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
   Button,
-  Paper,
   CircularProgress,
   Divider,
-  Container,
-  Grid
+  TextField,
+  InputAdornment,
+  IconButton,
+  Link
 } from '@mui/material';
-import { styled, keyframes } from '@mui/material/styles';
+import { styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
 import GoogleIcon from '@mui/icons-material/Google';
 import SchoolIcon from '@mui/icons-material/School';
-
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import ForumIcon from '@mui/icons-material/Forum';
-import GroupsIcon from '@mui/icons-material/Groups';
-import TimelineIcon from '@mui/icons-material/Timeline';
-import PieChartIcon from '@mui/icons-material/PieChart';
+import EmailIcon from '@mui/icons-material/Email';
+import LockIcon from '@mui/icons-material/Lock';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import BookIcon from '@mui/icons-material/Book';
-import AssignmentIcon from '@mui/icons-material/Assignment';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import ListAltIcon from '@mui/icons-material/ListAlt';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup } from 'firebase/auth';
+import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
-
-
-// Enhanced animations
-
-const gradientShift = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
 
 // Styled components
 const LoginContainer = styled(Box)(({ theme }) => ({
+  display: 'flex',
   minHeight: '100vh',
   width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  overflow: 'hidden',
   position: 'relative',
-  background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+  overflow: 'hidden',
+  backgroundColor: 'var(--background-color, #f5f7ff)',
+  flexDirection: 'row', // Yatay düzen
+  [theme.breakpoints.down('md')]: {
+    flexDirection: 'column', // Mobil cihazlarda dikey düzen
+  },
 }));
 
-const AnimatedBackground = styled(Box)(({ theme }) => ({
+// Arka plan için animasyonlu gradient
+const AnimatedBackground = styled(Box)({
   position: 'absolute',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  background: 'linear-gradient(45deg, #8e2de2, #4a00e0, #6a3093, #a044ff)',
   backgroundSize: '400% 400%',
-  animation: `${gradientShift} 15s ease infinite`,
+  animation: 'gradient 15s ease infinite',
   opacity: 0.8,
   zIndex: -1,
-}));
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'var(--overlay-color, rgba(255, 255, 255, 0.85))',
+    backdropFilter: 'blur(4px)',
+    zIndex: -1,
+  },
+  '@keyframes gradient': {
+    '0%': {
+      backgroundPosition: '0% 50%',
+    },
+    '50%': {
+      backgroundPosition: '100% 50%',
+    },
+    '100%': {
+      backgroundPosition: '0% 50%',
+    },
+  },
+});
 
-const Header = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '16px 24px',
-  width: '100%',
-  position: 'relative',
-  zIndex: 5,
-}));
-
-const Logo = styled(Box)(({ theme }) => ({
-  fontSize: '24px',
-  fontWeight: 'bold',
-  color: 'white',
-  display: 'flex',
-  alignItems: 'center',
-  '& svg': {
-    marginRight: '8px',
-    color: 'white',
-  }
-}));
-
-
-
-
-
-const FloatingElement = styled(motion.div)(({ top, left, right, bottom, size }) => ({
-  position: 'absolute',
-  top,
-  left,
-  right,
-  bottom,
-  width: size || '80px',
-  height: size || '80px',
-  zIndex: 0,
-  filter: 'drop-shadow(0 10px 10px rgba(0,0,0,0.15))',
-}));
-
-const FloatingIcon = styled(Box)(({ color }) => ({
-  width: '100%',
-  height: '100%',
-  borderRadius: '20%',
-  background: `linear-gradient(135deg, ${color}80, ${color})`,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'white',
-  boxShadow: `0 10px 20px ${color}50`,
-  '& svg': {
-    fontSize: '40px',
-  }
-}));
-
-// 3D Card Components
-const Card3D = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  transformStyle: 'preserve-3d',
-  transition: 'transform 0.6s ease',
-  width: '100%',
-  height: '100%',
-}));
-
-const CardFace = styled(Box)(({ theme, position }) => ({
-  position: 'absolute',
-  width: '100%',
-  height: '100%',
-  backfaceVisibility: 'hidden',
+const LoginSection = styled(Box)(({ theme }) => ({
+  flex: '0 0 50%',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
-  alignItems: 'center',
-  borderRadius: '20px',
-  padding: '30px',
-  transform: position === 'back' ? 'rotateY(180deg)' : 'rotateY(0)',
+  padding: theme.spacing(4),
+  [theme.breakpoints.down('md')]: {
+    flex: '0 0 100%',
+    padding: theme.spacing(2),
+  },
 }));
 
-const CardFront = styled(CardFace)(({ theme }) => ({
-  background: 'rgba(255, 255, 255, 0.7)',
-  backdropFilter: 'blur(10px)',
-  border: '1px solid rgba(255, 255, 255, 0.18)',
-  boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+const FeatureSection = styled(Box)(({ theme }) => ({
+  flex: '0 0 50%',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  padding: theme.spacing(4),
+  [theme.breakpoints.down('md')]: {
+    flex: '0 0 100%',
+    padding: theme.spacing(2),
+  },
 }));
 
-const CardBack = styled(CardFace)(({ theme }) => ({
-  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+// Giriş formu için bileşen - Daha modern ve interaktif
+const StyledTextField = styled(TextField)({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '16px',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+    '&:hover': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#4747e1',
+    },
+    '&.Mui-focused': {
+      transform: 'translateY(-2px)',
+      boxShadow: '0 8px 20px rgba(71, 71, 225, 0.15)',
+    },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#4747e1',
+      borderWidth: '2px',
+    },
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: '#e0e0e0',
+  },
+});
+
+// Giriş butonu için bileşen - Daha modern ve interaktif
+const LoginButton = styled(Button)({
+  borderRadius: '16px',
+  padding: '14px',
+  background: 'linear-gradient(45deg, #4747e1, #6b6bf9)',
   color: 'white',
-}));
-
-
-
-
-
-
-
-const LoginButton = styled(Button)(({ theme, color }) => ({
-  background: color === 'google' 
-    ? 'linear-gradient(45deg, #4285F4, #34A853, #FBBC05, #EA4335)' 
-    : 'linear-gradient(45deg, #6a11cb, #2575fc)',
-  backgroundSize: color === 'google' ? '300% 300%' : '200% 200%',
-  animation: `${gradientShift} 3s ease infinite`,
-  color: '#fff',
-  fontWeight: 'bold',
-  padding: '12px 30px',
-  borderRadius: '30px',
+  fontWeight: 600,
   textTransform: 'none',
-  fontSize: '16px',
-  boxShadow: '0 10px 20px rgba(0, 0, 0, 0.2)',
+  boxShadow: '0 8px 16px rgba(71, 71, 225, 0.25)',
   transition: 'all 0.3s ease',
-  border: '2px solid transparent',
   position: 'relative',
   overflow: 'hidden',
-  '&:before': {
+  '&::before': {
     content: '""',
     position: 'absolute',
     top: 0,
@@ -182,525 +154,538 @@ const LoginButton = styled(Button)(({ theme, color }) => ({
   },
   '&:hover': {
     transform: 'translateY(-3px)',
-    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)',
-    '&:before': {
+    boxShadow: '0 12px 20px rgba(71, 71, 225, 0.35)',
+    '&::before': {
       left: '100%',
-      transition: 'all 0.5s ease',
-    }
+    },
   },
   '&:active': {
     transform: 'translateY(0)',
-    boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
-  }
-}));
-
-
-
-const FeatureCard = styled(Paper)(({ theme, color, index }) => ({
-  borderRadius: '20px',
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  textAlign: 'center',
-  width: '100%',
-  height: '100%',
-  transition: 'all 0.3s ease',
-  background: 'rgba(255, 255, 255, 0.1)',
-  backdropFilter: 'blur(10px)',
-  position: 'relative',
-  cursor: 'pointer',
-  margin: '0 auto',
-  border: `1px solid rgba(255, 255, 255, 0.18)`,
-  boxShadow: `0 8px 32px rgba(0, 0, 0, 0.15)`,
-  '&:hover': {
-    transform: 'translateY(-8px) scale(1.03)',
-    boxShadow: `0 15px 30px rgba(0, 0, 0, 0.25)`,
-    background: `rgba(255, 255, 255, 0.2)`,
   },
-}));
+});
 
-const FeatureIcon = styled(Box)(({ color }) => ({
-  width: '60px',
-  height: '60px',
-  borderRadius: '50%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: `linear-gradient(135deg, ${color}, ${color}CC)`,
-  color: 'white',
-  marginBottom: '16px',
-  boxShadow: `0 10px 20px ${color}40`,
-  transition: 'all 0.3s ease',
-  '& svg': {
-    fontSize: '30px',
-    transition: 'all 0.3s ease',
-  },
-  '.feature-card:hover &': {
-    transform: 'scale(1.1) rotate(10deg)',
-  }
-}));
-
-const FeatureTitle = styled(Typography)(({ color }) => ({
-  fontSize: '16px',
+// Google giriş butonu için bileşen - Daha modern ve interaktif
+const GoogleButton = styled(Button)({
+  backgroundColor: '#ffffff',
+  color: '#333',
+  border: '1px solid #e0e0e0',
+  borderRadius: '16px',
+  padding: '14px',
   fontWeight: 600,
-  color: 'white',
-  position: 'relative',
-  paddingBottom: '12px',
+  textTransform: 'none',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
   transition: 'all 0.3s ease',
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: '-8px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: '40px',
-    height: '3px',
-    background: color || 'white',
-    borderRadius: '2px',
+  '&:hover': {
+    backgroundColor: '#f8f9ff',
+    borderColor: '#4747e1',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
+  },
+  '&:active': {
+    transform: 'translateY(0)',
+  },
+});
+
+// Özellik kartları için bileşen - Daha modern ve interaktif
+const InfoCard = styled(Box)(({ theme }) => ({
+  borderRadius: '20px',
+  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08)',
+  width: '90px',
+  height: '90px',
+  background: 'var(--card-bg-color, rgba(255, 255, 255, 0.9))',
+  backdropFilter: 'blur(8px)',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+  position: 'relative',
+  zIndex: 10,
+  '&:hover': {
+    transform: 'translateY(-8px) scale(1.05)',
+    boxShadow: '0 15px 30px rgba(71, 71, 225, 0.2)',
+    '& .feature-popup': {
+      opacity: 1,
+      visibility: 'visible',
+      transform: 'translateX(-50%) translateY(15px) scale(1)',
+    },
+    '& svg': {
+      transform: 'scale(1.1)',
+      color: '#6b6bf9',
+    }
+  },
+  '& svg': {
+    fontSize: '40px',
+    color: '#4747e1',
     transition: 'all 0.3s ease',
-  },
-  '.feature-card:hover &': {
-    letterSpacing: '0.5px',
-  },
-  '.feature-card:hover &::after': {
-    width: '60px',
   }
 }));
 
-const FeatureDescription = styled(Typography)(({ theme }) => ({
-  fontSize: '14px',
-  color: '#fff',
-  lineHeight: 1.5,
+// Özellik bilgilerini gösteren bileşen - Alt kısımda açılır kartlık
+const FeaturePopup = styled(Box)(({ theme }) => ({
   position: 'absolute',
-  bottom: '100%',
+  top: '100%',
   left: '50%',
-  transform: 'translateX(-50%)',
+  transform: 'translateX(-50%) translateY(15px) scale(0.9)',
+  background: 'linear-gradient(135deg, #4747e1 0%, #6b6bf9 100%)',
+  color: '#ffffff',
+  padding: theme.spacing(2),
+  borderRadius: '16px',
   width: '220px',
-  backgroundColor: 'rgba(0, 0, 0, 0.8)',
-  padding: '10px 15px',
-  borderRadius: '8px',
-  boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+  textAlign: 'center',
+  boxShadow: '0 15px 30px rgba(71, 71, 225, 0.3)',
   opacity: 0,
   visibility: 'hidden',
-  transition: 'all 0.3s ease',
-  zIndex: 10,
-  backdropFilter: 'blur(5px)',
+  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+  zIndex: 100,
   '&::after': {
     content: '""',
     position: 'absolute',
-    top: '100%',
+    bottom: '100%',
     left: '50%',
     transform: 'translateX(-50%)',
-    borderWidth: '8px',
+    borderWidth: '10px',
     borderStyle: 'solid',
-    borderColor: 'rgba(0, 0, 0, 0.8) transparent transparent transparent',
+    borderColor: 'transparent transparent #4747e1 transparent',
+  },
+  '& .popup-title': {
+    fontWeight: 700,
+    fontSize: '1.1rem',
+    marginBottom: '8px',
+    position: 'relative',
+    color: '#ffffff !important',
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: '-6px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '50px',
+      height: '2px',
+      background: 'rgba(255, 255, 255, 0.5)',
+      borderRadius: '2px',
+    }
+  },
+  '& .popup-description': {
+    fontSize: '0.9rem',
+    opacity: 0.9,
+    marginTop: '12px',
+    color: '#ffffff !important',
+  }
+}));
+
+// Arka plan için akademik desen
+const AcademicPattern = styled(Box)(({ theme }) => ({
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  width: '50%',
+  backgroundImage: `url('https://www.transparenttextures.com/patterns/notebook-dark.png')`,
+  backgroundRepeat: 'repeat',
+  opacity: 0.03,
+  zIndex: 0,
+  [theme.breakpoints.down('md')]: {
+    width: '100%',
   },
 }));
 
-const TooltipContainer = styled(Box)(({ theme }) => ({
-  position: 'relative',
-  width: '100%',
-  height: '100%',
-  '&:hover .feature-description': {
-    opacity: 1,
-    visibility: 'visible',
-    bottom: 'calc(100% + 15px)',
+// Gece modu butonu için stil
+const DarkModeButton = styled(IconButton)({
+  position: 'absolute',
+  top: '20px',
+  right: '20px',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  backdropFilter: 'blur(4px)',
+  color: '#4747e1',
+  padding: '8px',
+  zIndex: 1000,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    transform: 'rotate(20deg)',
   },
-}));
-
-const FeatureCardsContainer = styled(Box)(({ theme }) => ({
-  background: 'rgba(255, 255, 255, 0.1)',
-  backdropFilter: 'blur(10px)',
-  padding: '40px 0 60px',
-  borderRadius: '40px 40px 0 0',
-  marginTop: '-20px',
-  position: 'relative',
-  zIndex: 1,
-  boxShadow: '0 -10px 30px rgba(0, 0, 0, 0.1)',
-  border: '1px solid rgba(255, 255, 255, 0.18)',
-  borderBottom: 'none',
-}));
-
-
+});
 
 const Login = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [flipped, setFlipped] = useState(false);
-  const card3DRef = useRef(null);
-  const [isHovering, setIsHovering] = useState(false);
-
-  // Handle 3D effect on mouse move
-  const handleMouseMove = (e) => {
-    if (!card3DRef.current || !isHovering) return;
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  
+  // Sayfa yüklenirken localStorage'dan tema tercihini al
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('darkMode');
+    if (savedTheme) {
+      setDarkMode(savedTheme === 'true');
+    }
+  }, []);
+  
+  // Tema değiştiğinde CSS değişkenlerini güncelle
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--background-color', 
+      darkMode ? '#15254f' : '#f4f2f5'
+    );
     
-    const rect = card3DRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    document.documentElement.style.setProperty(
+      '--overlay-color', 
+      darkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.85)'
+    );
     
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
+    document.documentElement.style.setProperty(
+      '--text-color', 
+      darkMode ? '#ffffff' : '#333333'
+    );
     
-    const rotateX = (y - centerY) / 20;
-    const rotateY = (centerX - x) / 20;
+    document.documentElement.style.setProperty(
+      '--card-bg-color', 
+      darkMode ? 'rgba(30, 40, 70, 0.9)' : 'rgba(255, 255, 255, 0.9)'
+    );
     
-    card3DRef.current.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-  };
-
-  const resetCardRotation = () => {
-    if (!card3DRef.current) return;
-    card3DRef.current.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
-    setIsHovering(false);
+    // Tema tercihini localStorage'a kaydet
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
+  
+  // Tema değiştirme fonksiyonu
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
   };
 
   const handleGoogleLogin = async () => {
     try {
       setLoading(true);
       await signInWithPopup(auth, googleProvider);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Google login error:", error);
+    } finally {
       setLoading(false);
     }
-  };
+  }
 
-  // Feature cards data with enhanced descriptions
-  const features = [
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate('/dashboard');
+    } catch (error) {
+      console.error("Email login error:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Özellik listesi - Platform özellikleri
+  const featureItems = [
     {
-      title: "RekaNET Sıralama",
-      description: "Şehrindeki ve ülke genelindeki sıralamalarını anlık olarak takip et, hedeflerine ne kadar yaklaştığını gör.",
-      icon: <TimelineIcon />,
-      color: "#FF6B6B"
-    },
-    {
-      title: "Benimle Çalış",
-      description: "Canlı çalışma oturumlarına katıl, motivasyonunu artır ve disiplinli çalışma alışkanlığı kazan.",
-      icon: <GroupsIcon />,
-      color: "#4ECDC4"
-    },
-    {
-      title: "SoruForum",
-      description: "Zorlandığın soruları paylaş, uzman öğretmenlerden ve arkadaşlarından anında yardım al.",
-      icon: <ForumIcon />,
-      color: "#FF9F1C"
-    },
-    {
-      title: "Deneme Takibi",
-      description: "Deneme sınavı sonuçlarını grafiklerle analiz et, gelişim alanlarını belirle ve ilerleme kaydedilecek konuları tespit et.",
+      title: "TYT-AYT Net Takibi",
       icon: <BarChartIcon />,
-      color: "#845EC2"
+      description: "Sınav netlerinizi takip edin"
     },
     {
-      title: "Konu Analizi",
-      description: "Hangi konuya ne kadar çalıştığını görsel grafiklerle takip et, zaman yönetimini optimize et.",
-      icon: <PieChartIcon />,
-      color: "#00B8A9"
+      title: "Ders Programı",
+      icon: <CalendarMonthIcon />,
+      description: "Günlük ders programınızı görüntüleyin"
+    },
+    {
+      title: "Çalışma Analizi",
+      icon: <AssessmentIcon />,
+      description: "Çalışma performansınızı analiz edin"
+    },
+    {
+      title: "Konu Takibi",
+      icon: <ListAltIcon />,
+      description: "Çalıştığınız konuları takip edin"
+    },
+    {
+      title: "RekaNet",
+      icon: <LeaderboardIcon />,
+      description: "Arkadaşlarınızla rekabet edin"
     }
   ];
 
-  // Animated floating elements
-  const floatingElements = [
-    { 
-      component: <FloatingIcon color="#FF6B6B"><BookIcon /></FloatingIcon>, 
-      top: '15%', left: '10%', 
-      animate: { y: [0, -30, 0], rotate: [0, 5, 0] },
-      transition: { duration: 5, repeat: Infinity, ease: "easeInOut" }
-    },
-    { 
-      component: <FloatingIcon color="#4ECDC4"><MenuBookIcon /></FloatingIcon>, 
-      top: '25%', right: '15%',
-      animate: { y: [0, -20, 0], rotate: [0, -5, 0] },
-      transition: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
-    },
-    { 
-      component: <FloatingIcon color="#FF9F1C"><AssignmentIcon /></FloatingIcon>, 
-      bottom: '20%', left: '15%',
-      animate: { y: [0, -25, 0], rotate: [0, 3, 0] },
-      transition: { duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }
-    },
-    { 
-      component: <FloatingIcon color="#845EC2"><BarChartIcon /></FloatingIcon>, 
-      bottom: '25%', right: '10%',
-      animate: { y: [0, -15, 0], rotate: [0, -3, 0] },
-      transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }
-    },
+  // Çizim öğeleri
+  const illustrations = [
+    { top: '15%', right: '10%', size: '80px', delay: 0 },
+    { bottom: '20%', left: '12%', size: '60px', delay: 0.5 },
   ];
 
   return (
     <LoginContainer>
-      <AnimatedBackground />
+      <AnimatedBackground sx={{
+        background: darkMode ? 
+          'linear-gradient(-45deg, #0a1128, #1a2a4a, #2a3a6a, #1a2a4a)' : 
+          'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
+      }} />
       
-      <Header>
-        <Logo>
-          <SchoolIcon />
-          YKS Çalışma Takip
-        </Logo>
-      </Header>
+      <DarkModeButton onClick={toggleDarkMode}>
+        {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
+      </DarkModeButton>
       
-      <Box sx={{ 
-        position: 'relative', 
-        minHeight: '80vh',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: { xs: '20px', md: '40px' },
-        overflow: 'hidden'
+      {/* Animasyonlu Partiküller */}
+      <Box sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        overflow: 'hidden',
+        zIndex: 0,
+        pointerEvents: 'none'
       }}>
-        {/* Floating Elements */}
-        {floatingElements.map((element, index) => (
-          <FloatingElement
+        {[...Array(15)].map((_, index) => (
+          <Box
             key={index}
-            top={element.top}
-            left={element.left}
-            right={element.right}
-            bottom={element.bottom}
-            animate={element.animate}
-            transition={element.transition}
-          >
-            {element.component}
-          </FloatingElement>
+            component={motion.div}
+            sx={{
+              position: 'absolute',
+              width: Math.random() * 20 + 10,
+              height: Math.random() * 20 + 10,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(71, 71, 225, 0.4), rgba(107, 107, 249, 0.2))',
+              boxShadow: '0 0 10px rgba(71, 71, 225, 0.3)',
+              filter: 'blur(1px)'
+            }}
+            animate={{
+              x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
+              y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
+              opacity: [0.2, 0.8, 0.2],
+              scale: [1, 1.5, 1]
+            }}
+            transition={{
+              duration: Math.random() * 20 + 10,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }}
+          />
         ))}
-        
-        {/* 3D Login Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          style={{ width: '100%', maxWidth: '500px', perspective: '1000px' }}
-        >
-          <Card3D
-            ref={card3DRef}
-            onMouseMove={handleMouseMove}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={resetCardRotation}
-            sx={{ transform: flipped ? 'rotateY(180deg)' : 'rotateY(0)' }}
-          >
-            <CardFront position="front">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-              >
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  mb: 4
-                }}>
-                  <SchoolIcon sx={{ fontSize: 40, color: '#6a11cb', mr: 1 }} />
-                  <Typography variant="h4" component="h1" sx={{ 
-                    fontWeight: 800,
-                    background: 'linear-gradient(90deg, #6a11cb, #2575fc)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                  }}>
-                    YKS Çalışma Takip
-                  </Typography>
-                </Box>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-              >
-                <Typography variant="h6" sx={{ 
-                  textAlign: 'center', 
-                  mb: 4,
-                  color: '#555',
-                  lineHeight: 1.6
-                }}>
-                  Sınav başarınızı artırmak için <Box component="span" sx={{ 
-                    fontWeight: 700, 
-                    color: '#6a11cb'
-                  }}>yapay zeka destekli</Box> çalışma platformu
-                </Typography>
-              </motion.div>
-              
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.9, duration: 0.5 }}
-                style={{ width: '100%' }}
-              >
-                {loading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                    <CircularProgress sx={{ 
-                      color: '#6a11cb',
-                      '& .MuiCircularProgress-circle': {
-                        strokeLinecap: 'round',
-                      }
-                    }} />
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-                    <LoginButton
-                      variant="contained"
-                      startIcon={<GoogleIcon />}
-                      onClick={handleGoogleLogin}
-                      color="google"
-                      fullWidth
-                      sx={{ py: 1.5 }}
-                    >
-                      Google ile Giriş Yap
-                    </LoginButton>
-                    
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      width: '100%', 
-                      my: 2 
-                    }}>
-                      <Divider sx={{ flex: 1, borderColor: 'rgba(0,0,0,0.1)' }} />
-                      <Typography sx={{ px: 2, color: '#666', fontSize: '0.9rem' }}>
-                        veya
-                      </Typography>
-                      <Divider sx={{ flex: 1, borderColor: 'rgba(0,0,0,0.1)' }} />
-                    </Box>
-                    
-                    <Button
-                      variant="outlined"
-                      onClick={() => setFlipped(true)}
-                      sx={{
-                        borderColor: '#6a11cb',
-                        color: '#6a11cb',
-                        borderRadius: '30px',
-                        py: 1.5,
-                        textTransform: 'none',
-                        fontWeight: 600,
-                        '&:hover': {
-                          borderColor: '#2575fc',
-                          background: 'rgba(106, 17, 203, 0.05)',
-                        }
-                      }}
-                    >
-                      Özelliklerimizi Keşfedin
-                    </Button>
-                  </Box>
-                )}
-              </motion.div>
-            </CardFront>
-            
-            <CardBack position="back">
-              <Box sx={{ width: '100%' }}>
-                <Typography variant="h5" sx={{ 
-                  fontWeight: 700, 
-                  mb: 3, 
-                  textAlign: 'center',
-                  color: 'white',
-                  textShadow: '0 2px 10px rgba(0,0,0,0.2)'
-                }}>
-                  Platformumuzun Özellikleri
-                </Typography>
-                
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  gap: 2,
-                  mb: 3 
-                }}>
-                  {features.map((feature, index) => (
-                    <Box key={index} sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      p: 1.5,
-                      borderRadius: '10px',
-                      background: 'rgba(255,255,255,0.1)',
-                      backdropFilter: 'blur(5px)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        background: 'rgba(255,255,255,0.2)',
-                        transform: 'translateX(5px)'
-                      }
-                    }}>
-                      <Box sx={{ 
-                        width: 40, 
-                        height: 40, 
-                        borderRadius: '10px',
-                        background: feature.color,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mr: 2,
-                        boxShadow: `0 5px 15px ${feature.color}80`
-                      }}>
-                        {feature.icon}
-                      </Box>
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'white' }}>
-                          {feature.title}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem' }}>
-                          {feature.description}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-                
-                <Button
-                  variant="contained"
-                  onClick={() => setFlipped(false)}
-                  sx={{
-                    background: 'rgba(255,255,255,0.2)',
-                    backdropFilter: 'blur(5px)',
-                    color: 'white',
-                    borderRadius: '30px',
-                    py: 1.5,
-                    width: '100%',
-                    textTransform: 'none',
-                    fontWeight: 600,
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    '&:hover': {
-                      background: 'rgba(255,255,255,0.3)',
-                    }
-                  }}
-                >
-                  Giriş Ekranına Dön
-                </Button>
-              </Box>
-            </CardBack>
-          </Card3D>
-        </motion.div>
       </Box>
       
-      <FeatureCardsContainer>
-        <Container maxWidth="lg">
-          <Typography variant="h4" sx={{ 
-            textAlign: 'center', 
-            mb: 4, 
-            color: 'white',
-            fontWeight: 700,
-            textShadow: '0 2px 10px rgba(0,0,0,0.2)'
-          }}>
-            Neler Sunuyoruz?
+      {/* Logo ve Başlık - Sabit pozisyonda */}
+      <Box sx={{ position: 'absolute', top: 0, left: 0, p: 3, zIndex: 10 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <SchoolIcon sx={{ color: '#4747e1', fontSize: 28, mr: 1 }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#4747e1' }}>
+            Online YKS Takip
           </Typography>
+        </Box>
+      </Box>
+
+      {/* Sol Taraf - Giriş Formu */}
+      <LoginSection>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Box sx={{ maxWidth: 450, mx: 'auto', p: 3 }}>
+            <Typography variant="h4" sx={{ 
+              fontWeight: 700, 
+              color: '#333',
+              mb: 1
+            }}>
+              Hoş Geldiniz!
+            </Typography>
+            <Typography variant="body2" sx={{ 
+              color: '#666',
+              mb: 4
+            }}>
+              Lütfen giriş bilgilerinizi aşağıya girin
+            </Typography>
+            
+            <form onSubmit={handleEmailLogin}>
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  E-posta
+                </Typography>
+                <StyledTextField
+                  fullWidth
+                  placeholder="E-posta adresinizi girin"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon sx={{ color: '#4747e1' }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ mb: 1 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                  Şifre
+                </Typography>
+                <StyledTextField
+                  fullWidth
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Şifrenizi girin"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon sx={{ color: '#4747e1' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+              
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
+                <Link 
+                  component="button" 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#4747e1',
+                    textDecoration: 'none',
+                    '&:hover': { textDecoration: 'underline' }
+                  }}
+                >
+                  Şifremi unuttum?
+                </Link>
+              </Box>
+              
+              <LoginButton 
+                fullWidth 
+                type="submit"
+                disabled={loading}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Giriş Yap'}
+              </LoginButton>
+            </form>
+            
+            <Box sx={{ 
+              my: 3, 
+              display: 'flex', 
+              alignItems: 'center',
+              color: '#666'
+            }}>
+              <Divider sx={{ flexGrow: 1 }} />
+              <Typography variant="body2" sx={{ mx: 2 }}>veya</Typography>
+              <Divider sx={{ flexGrow: 1 }} />
+            </Box>
+            
+            <GoogleButton
+              fullWidth
+              startIcon={<GoogleIcon />}
+              onClick={handleGoogleLogin}
+              disabled={loading}
+            >
+              Google ile giriş yap
+            </GoogleButton>
+            
+            <Box sx={{ 
+              mt: 3,
+              textAlign: 'center'
+            }}>
+              <Typography variant="body2" sx={{ color: '#666' }}>
+                Hesabınız yok mu? <Link component="button" sx={{ color: '#4747e1', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Kayıt Ol</Link>
+              </Typography>
+            </Box>
+          </Box>
+        </motion.div>
+      </LoginSection>
+      
+      {/* Sağ Taraf - Özellik Kartları */}
+      <FeatureSection>
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8 }}
+          style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
+        >
+          {/* Akademik desen */}
+          <AcademicPattern />
           
-          <Grid container spacing={4} justifyContent="center">
-            {features.map((feature, index) => (
-              <Grid item xs={12} sm={6} md={2.4} key={feature.title}>
-                <TooltipContainer>
-                  <FeatureCard 
-                    elevation={0} 
-                    color={feature.color} 
-                    index={index}
-                    id={`feature-card-${index}`}
-                    className="feature-card"
-                  >
-                    <FeatureIcon color={feature.color}>
-                      {feature.icon}
-                    </FeatureIcon>
-                    <FeatureTitle color={feature.color}>{feature.title}</FeatureTitle>
-                  </FeatureCard>
-                  <FeatureDescription className="feature-description">{feature.description}</FeatureDescription>
-                </TooltipContainer>
-              </Grid>
+
+          
+          {/* Başlık */}
+          <Box sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--text-color, #333)', textAlign: 'center' }}>
+              Platform Özellikleri
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'var(--text-color, #666)', opacity: 0.7, textAlign: 'center', mt: 1 }}>
+              Eğitim hayatınızı kolaylaştıracak araçlar
+            </Typography>
+          </Box>
+          
+          {/* Özellik Kartları */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            flexWrap: 'wrap',
+            gap: 4,
+            mt: 3,
+            position: 'relative',
+            zIndex: 1
+          }}>
+            {featureItems.map((feature, index) => (
+              <InfoCard key={index}>
+                {feature.icon}
+                <FeaturePopup className="feature-popup">
+                  <Typography className="popup-title" sx={{ fontWeight: 700 }}>
+                    {feature.title}
+                  </Typography>
+                  <Typography className="popup-description">
+                    {feature.description}
+                  </Typography>
+                </FeaturePopup>
+              </InfoCard>
             ))}
-          </Grid>
-        </Container>
-      </FeatureCardsContainer>
+          </Box>
+        </motion.div>
+      </FeatureSection>
+      
+      {/* Arka plan dekoratif elementleri */}
+      {illustrations.map((item, index) => (
+        <motion.div
+          key={index}
+          style={{
+            position: 'absolute',
+            top: item.top || 'auto',
+            left: item.left || 'auto',
+            right: item.right || 'auto',
+            bottom: item.bottom || 'auto',
+            zIndex: 0
+          }}
+          animate={{ 
+            y: [0, -15, 0],
+            rotate: [0, item.left ? -5 : 5, 0]
+          }}
+          transition={{ 
+            duration: 4, 
+            repeat: Infinity, 
+            ease: "easeInOut",
+            delay: item.delay
+          }}
+        >
+          <Box sx={{
+            width: item.size,
+            height: item.size,
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #6b6bf9, #4747e1)',
+            opacity: 0.2,
+            filter: 'blur(10px)'
+          }} />
+        </motion.div>
+      ))}
     </LoginContainer>
   );
 };

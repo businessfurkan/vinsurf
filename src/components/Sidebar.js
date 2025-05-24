@@ -33,9 +33,9 @@ const closedMixin = (theme) => ({
   }),
   overflowX: 'hidden',
   width: `${drawerWidth}px`,
-  background: '#f4f2f5',
+  background: 'var(--sidebar-bg-color, #f4f2f5)',
   borderRight: 'none',
-  boxShadow: '2px 0 15px 0 rgba(0,0,0,0.1)',
+  boxShadow: '2px 0 15px 0 var(--shadow-color, rgba(0,0,0,0.1))',
   position: 'relative',
 });
 
@@ -60,10 +60,10 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'ope
 );
 
 const Sidebar = ({ open, handleDrawerToggle }) => {
+
   const location = useLocation();
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState(null);
-  const [activeItem, setActiveItem] = useState('');
   
   // Menü öğeleri - Canlı ve modern renkler
   const menuItems = React.useMemo(() => [
@@ -81,10 +81,8 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
   
   // Sayfa yüklendiğinde veya rota değiştiğinde aktif öğeyi güncelle
   useEffect(() => {
-    const currentItem = menuItems.find(item => item.path === location.pathname);
-    if (currentItem) {
-      setActiveItem(currentItem.text);
-    }
+    // Not: Aktif öğe durumu artık isActive değişkeni ile kontrol ediliyor
+    // location.pathname ve menuItems değişikliklerini takip ediyoruz
   }, [location.pathname, menuItems]);
 
   return (
@@ -96,7 +94,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         py: 2,
         display: 'flex', 
         justifyContent: 'center',
-        background: '#f4f2f5',
+        background: 'var(--background-color)',
         mb: 1,
       }}>
         <Box sx={{ 
@@ -116,36 +114,56 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         gap: 2,
         px: 1,
         py: 1,
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          left: '50%',
+          top: 0,
+          bottom: 0,
+          width: '2px',
+          background: 'linear-gradient(to bottom, transparent, rgba(0,0,0,0.05) 20%, rgba(0,0,0,0.05) 80%, transparent)',
+          transform: 'translateX(-50%)',
+          zIndex: 0,
+        }
       }}>
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Box
-              key={item.text}
-              component="li"
-              sx={{
-                display: 'block',
-                padding: 0,
-                position: 'relative',
-                mb: 1.5, // Dikey boşluğu artır
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              onMouseEnter={() => setHoveredItem(item.text)}
-              onMouseLeave={() => setHoveredItem(null)}
+            <Box 
+              key={item.text} 
+              id={`sidebar-item-${item.text}`}
             >
               <ListItemButton
                 id={`sidebar-item-${item.text}`}
-                onClick={() => {
-                setActiveItem(item.text);
-                navigate(item.path);
-              }}
+                onClick={() => navigate(item.path)}
+                onMouseEnter={() => setHoveredItem(item.text)}
+                onMouseLeave={() => setHoveredItem(null)}
                 sx={{
                   minHeight: 42,
                   justifyContent: 'center',
                   p: 0.5,
                   borderRadius: '10px',
+                  position: 'relative',
+                  zIndex: 1,
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: `linear-gradient(135deg, ${item.color}10, ${item.color}20)`,
+                    opacity: 0,
+                    transition: 'opacity 0.3s ease',
+                    zIndex: -1,
+                    borderRadius: '14px',
+                  },
                   '&:hover': {
+                    '&::before': {
+                      opacity: 1,
+                    },
                     backgroundColor: 'rgba(0,0,0,0.03)',
                   },
                 }}
@@ -161,7 +179,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                     zIndex: 1,
                     padding: '8px',
                     borderRadius: '50%',
-                    border: activeItem === item.text ? `2px solid ${item.color}` : '2px solid transparent',
+                    border: isActive ? `1px solid ${item.color}40` : '1px solid rgba(255,255,255,0.2)',
                     transition: 'all 0.2s ease',
                     minWidth: 'auto', // Minimum genişliği kaldır
                     '& .MuiSvgIcon-root': {
@@ -192,7 +210,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                     boxShadow: `0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.12)`,
                     border: `1px solid ${item.color}40`,
                     backdropFilter: 'blur(8px)',
-                    borderRadius: '12px',
+                    borderRadius: '14px',
                     padding: '10px 18px',
                     zIndex: 9999,
                     whiteSpace: 'nowrap',
@@ -216,6 +234,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                       height: 0,
                       borderTop: '8px solid transparent',
                       borderBottom: '8px solid transparent',
+                      boxShadow: isActive ? `0 4px 12px ${item.color}30` : '0 2px 8px rgba(0,0,0,0.03)',
                       borderRight: `8px solid ${item.color}40`,
                       zIndex: 2
                     },
@@ -244,7 +263,7 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                         height: '2px',
                         bottom: '-2px',
                         left: 0,
-                        background: item.color,
+                        background: isActive ? `${item.color}30` : 'rgba(255,255,255,0.1)',
                         transform: 'scaleX(0)',
                         transformOrigin: 'bottom right',
                         transition: 'transform 0.3s ease-out',
