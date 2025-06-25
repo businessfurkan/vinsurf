@@ -10,6 +10,16 @@ import SaveIcon from '@mui/icons-material/Save';
 import TimerIcon from '@mui/icons-material/Timer';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
+// Ders logoları için ikonlar
+import MenuBookIcon from '@mui/icons-material/MenuBook'; // Türkçe, Edebiyat
+import PublicIcon from '@mui/icons-material/Public'; // Sosyal Bilimler, Coğrafya
+import CalculateIcon from '@mui/icons-material/Calculate'; // Matematik, Temel Matematik
+import ScienceIcon from '@mui/icons-material/Science'; // Fen Bilimleri, Fizik, Kimya
+import BioIcon from '@mui/icons-material/Biotech'; // Biyoloji
+import HistoryIcon from '@mui/icons-material/History'; // Tarih
+import PsychologyIcon from '@mui/icons-material/Psychology'; // Felsefe
+import TempleBuddhistIcon from '@mui/icons-material/TempleHindu'; // Din Kültürü
+
 import Dialog from '@mui/material/Dialog';
 import { auth, db } from '../firebase';
 import { collection, addDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
@@ -21,6 +31,7 @@ const AnalyticalStopwatch = () => {
   const [user] = useAuthState(auth);
   const [time, setTime] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
+  const [selectedExamType, setSelectedExamType] = useState(''); // TYT veya AYT
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -29,21 +40,44 @@ const AnalyticalStopwatch = () => {
   
   // Ders renklerini tanımlayalım
   const subjectColors = {
-    'Türkçe': '#FF5722',
-    'Matematik': '#2196F3',
-    'Fizik': '#F44336',
-    'Kimya': '#FF9800',
-    'Biyoloji': '#4CAF50',
-    'Tarih': '#9C27B0',
+    // TYT Dersleri
+    'Türkçe': '#4285f4',
+    'Sosyal Bilimler': '#9c27b0',
+    'Temel Matematik': '#34a853',
+    'Fen Bilimleri': '#ea4335',
+    // AYT Dersleri
+    'Matematik': '#34a853',
+    'Edebiyat': '#ff5722',
+    'Fizik': '#ea4335',
+    'Biyoloji': '#0f9d58',
+    'Kimya': '#fbbc05',
+    'Tarih': '#9c27b0',
     'Coğrafya': '#795548',
-    'Felsefe': '#607D8B',
-    'Din Kültürü': '#009688',
-    'Yabancı Dil': '#3F51B5',
-    'Geometri': '#00BCD4'
+    'Felsefe': '#607d8b',
+    'Din Kültürü': '#00bcd4'
   };
   
   // Seçilen dersin rengini alalım
   const selectedColor = selectedSubject ? subjectColors[selectedSubject] || '#2196F3' : '#2196F3';
+
+  // Ders logolarını tanımlayalım
+  const subjectIcons = {
+    // TYT Dersleri
+    'Türkçe': <MenuBookIcon />,
+    'Sosyal Bilimler': <PublicIcon />,
+    'Temel Matematik': <CalculateIcon />,
+    'Fen Bilimleri': <ScienceIcon />,
+    // AYT Dersleri
+    'Matematik': <CalculateIcon />,
+    'Edebiyat': <MenuBookIcon />,
+    'Fizik': <ScienceIcon />,
+    'Biyoloji': <BioIcon />,
+    'Kimya': <ScienceIcon />,
+    'Tarih': <HistoryIcon />,
+    'Coğrafya': <PublicIcon />,
+    'Felsefe': <PsychologyIcon />,
+    'Din Kültürü': <TempleBuddhistIcon />
+  };
 
   // Zamanlayıcı için useEffect
   useEffect(() => {
@@ -127,6 +161,7 @@ const AnalyticalStopwatch = () => {
       // Çalışma kaydı verileri
       const studyData = {
         userId: user.uid,
+        examType: selectedExamType,
         subject: selectedSubject,
         topic: selectedTopic,
         duration: time, // milisaniye cinsinden süre
@@ -143,6 +178,7 @@ const AnalyticalStopwatch = () => {
       const statsQuery = query(
         collection(db, 'studyStats'), 
         where('userId', '==', user.uid),
+        where('examType', '==', selectedExamType),
         where('subject', '==', selectedSubject)
       );
       
@@ -152,6 +188,7 @@ const AnalyticalStopwatch = () => {
         // Yeni istatistik oluştur
         await addDoc(collection(db, 'studyStats'), {
           userId: user.uid,
+          examType: selectedExamType,
           subject: selectedSubject,
           totalDuration: time,
           sessionCount: 1,
@@ -232,458 +269,561 @@ const AnalyticalStopwatch = () => {
     setIsRunning(true); // Çalışmaya başla butonuna basınca hemen çalışmaya başla
   };
 
+  // Sınav türü seçimi
+  const handleExamTypeSelect = (examType) => {
+    setSelectedExamType(examType);
+    setSelectedSubject('');
+    setSelectedTopic('');
+    setExpandedSubject(null);
+  };
+
   // Yükleme durumunda gösterilecek içerik
   if (isLoading) {
     return (
-      <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress sx={{ color: '#55b3d9' }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+        <CircularProgress />
       </Box>
     );
   }
 
   // Ana içerik
   return (
-    <Box sx={{
-      width: '100%',
-      p: { xs: 2, sm: 3 },
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 3,
-      maxHeight: '100vh',
-      overflow: 'hidden'
-    }}>
-      <Typography variant="h4" component="h1" sx={{ 
-        fontWeight: 700, 
-        mb: 1,
-        color: '#1a1a1a',
-        fontSize: { xs: '1.8rem', md: '2.2rem' }
-      }}>
-        Analizli Kronometre
-      </Typography>
-      
-      <Typography variant="body1" sx={{ 
-        color: '#555', 
-        mb: 1,
-        maxWidth: '800px'
-      }}>
-        Analizli kronometre ile ders ve konu bazlı çalışmalarını kaydedin. İlerlerinizi
-        takip edin ve her derste ne kadar zaman harcadığınızı görün.
-      </Typography>
-      
-      <Box sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        gap: 3,
-        width: '100%',
-        flex: 1,
-        overflow: 'hidden'
-      }}>
-        {/* Ders ve konu seçimi */}
+    <Box sx={{ display: 'flex', gap: 3, height: '100%', p: 2 }}>
+      {/* Sol Panel - Ders ve Konu Seçimi */}
+      <Box sx={{ flex: 2, maxWidth: '500px' }}>
         <Card sx={{ 
-          flex: { xs: '1 1 100%', md: '1 1 50%' },
+          height: { xs: 'auto', md: '600px' }, 
           borderRadius: '20px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          background: '#f4f2f5',
-          height: { xs: 'auto', md: '600px' },
+          background: '#1b293d',
           display: 'flex',
           flexDirection: 'column'
         }}>
-          <CardContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ 
-              p: 2,
+              background: `linear-gradient(135deg, ${selectedColor}15 0%, ${selectedColor}25 100%)`,
+              p: 3,
               borderBottom: '1px solid rgba(0,0,0,0.06)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
+              flexShrink: 0
             }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontSize: '1.2rem', 
-                  fontWeight: 700,
-                  color: '#333'
-                }}
-              >
+              <Typography variant="h6" sx={{ 
+                fontWeight: 700, 
+                color: '#ffffff',
+                mb: 1,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1
+              }}>
+                <TimerIcon sx={{ color: selectedColor }} />
                 Ders ve Konu Seçimi
               </Typography>
-              
-              <ChevronRightIcon sx={{ color: '#999' }} />
+              <Typography variant="body2" sx={{ color: '#ffffff', opacity: 0.8 }}>
+                Çalışmak istediğiniz sınav türü, ders ve konuyu seçin
+              </Typography>
             </Box>
             
-            {/* Ders listesi */}
             <Box sx={{ 
-              flex: 1,
+              p: 2, 
+              flex: 1, 
               overflowY: 'auto',
-              p: 2
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: 'rgba(255,255,255,0.3)',
+                borderRadius: '3px',
+                '&:hover': {
+                  background: 'rgba(255,255,255,0.5)',
+                }
+              }
             }}>
-              {isLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                  <CircularProgress size={40} />
+              {!selectedExamType ? (
+                // Sınav türü seçimi
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="h6" sx={{ color: '#ffffff', mb: 2, textAlign: 'center' }}>
+                    Sınav Türü Seçin
+                  </Typography>
+                  
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={() => handleExamTypeSelect('TYT')}
+                    sx={{
+                      background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                      color: '#fff',
+                      py: 2,
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      fontSize: '1.1rem',
+                      textTransform: 'none',
+                      boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 10px 2px rgba(33, 150, 243, .3)'
+                      }
+                    }}
+                  >
+                    TYT (Temel Yeterlilik Testi)
+                  </Button>
+                  
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="large"
+                    onClick={() => handleExamTypeSelect('AYT')}
+                    sx={{
+                      background: 'linear-gradient(45deg, #FF6B6B 30%, #FF8E53 90%)',
+                      color: '#fff',
+                      py: 2,
+                      borderRadius: '12px',
+                      fontWeight: 600,
+                      fontSize: '1.1rem',
+                      textTransform: 'none',
+                      boxShadow: '0 3px 5px 2px rgba(255, 107, 107, .3)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #FF8E53 30%, #FF6B6B 90%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 10px 2px rgba(255, 107, 107, .3)'
+                      }
+                    }}
+                  >
+                    AYT (Alan Yeterlilik Testi)
+                  </Button>
                 </Box>
               ) : (
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {Object.keys(yksData).map((subject) => (
-                    <Box key={subject} sx={{ mb: 1 }}>
-                      <Box 
-                        onClick={() => handleSubjectClick(subject)}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          p: 1.5,
-                          borderRadius: '10px',
-                          cursor: 'pointer',
-                          background: '#f4f2f5',
-                          transition: 'all 0.2s ease',
-                          '&:hover': {
-                            background: 'rgba(0,0,0,0.03)'
-                          }
-                        }}
-                      >
-                        <Avatar 
-                          sx={{ 
-                            bgcolor: yksData[subject].color || '#9c27b0',
-                            width: 32,
-                            height: 32,
-                            mr: 1.5,
-                            fontSize: '0.9rem'
-                          }}
-                        >
-                          {subject.charAt(0)}
-                        </Avatar>
-                        <Typography 
-                          variant="subtitle1"
-                          sx={{ 
-                            flex: 1,
-                            fontWeight: 600,
-                            fontSize: '0.95rem'
-                          }}
-                        >
-                          {subject}
-                        </Typography>
-                        <ChevronRightIcon 
-                          sx={{ 
-                            transform: expandedSubject === subject ? 'rotate(90deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.3s ease'
-                          }} 
-                        />
-                      </Box>
-                      
-                      {/* Konu listesi */}
-                      {expandedSubject === subject && (
-                        <Box 
+                // Ders ve konu seçimi
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexShrink: 0 }}>
+                    <Button
+                      onClick={() => setSelectedExamType('')}
+                      sx={{ color: '#ffffff', minWidth: 'auto', p: 0.5, mr: 1 }}
+                    >
+                      ←
+                    </Button>
+                    <Chip 
+                      label={selectedExamType} 
+                      sx={{ 
+                        backgroundColor: selectedExamType === 'TYT' ? '#2196F3' : '#FF6B6B',
+                        color: '#fff',
+                        fontWeight: 600
+                      }} 
+                    />
+                  </Box>
+                  
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: 1,
+                    maxHeight: 'calc(100% - 60px)',
+                    overflowY: 'auto',
+                    pr: 1,
+                    '&::-webkit-scrollbar': {
+                      width: '4px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: 'rgba(255,255,255,0.1)',
+                      borderRadius: '2px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: 'rgba(255,255,255,0.3)',
+                      borderRadius: '2px',
+                      '&:hover': {
+                        background: 'rgba(255,255,255,0.5)',
+                      }
+                    }
+                  }}>
+                    {Object.entries(yksData[selectedExamType]).map(([subject, data]) => (
+                      <Box key={subject} sx={{ mb: 1 }}>
+                        <Box
+                          onClick={() => handleSubjectClick(subject)}
                           sx={{
-                            mt: 0.5,
-                            ml: 2,
-                            borderLeft: '1px dashed rgba(0,0,0,0.1)',
-                            pl: 1.5,
-                            maxHeight: '300px',
-                            overflowY: 'auto'
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            p: 2,
+                            borderRadius: '12px',
+                            cursor: 'pointer',
+                            background: 'rgba(255,255,255,0.1)',
+                            transition: 'all 0.2s ease',
+                            '&:hover': {
+                              background: 'rgba(255,255,255,0.15)',
+                              transform: 'translateX(4px)'
+                            }
                           }}
                         >
-                          {yksData[subject].topics.map((topic) => (
-                            <Box 
-                              key={topic}
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                p: 1,
-                                borderRadius: '8px',
-                                mt: 0.5,
-                                background: '#f4f2f5',
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                  background: 'rgba(0,0,0,0.03)'
-                                }
-                              }}
-                            >
-                              <Typography 
-                                variant="body2"
-                                sx={{ 
-                                  flex: 1,
-                                  fontWeight: 500,
-                                  fontSize: '0.85rem'
-                                }}
-                              >
-                                {topic}
-                              </Typography>
-                              
-                              <Button
-                                variant="contained"
-                                size="small"
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                            <Avatar sx={{ 
+                              width: 36, 
+                              height: 36, 
+                              bgcolor: data.color,
+                              fontSize: '0.9rem',
+                              fontWeight: 600
+                            }}>
+                              {subjectIcons[subject]}
+                            </Avatar>
+                            <Typography sx={{ 
+                              fontWeight: 600, 
+                              color: '#ffffff',
+                              fontSize: '1rem'
+                            }}>
+                              {subject}
+                            </Typography>
+                          </Box>
+                          <ChevronRightIcon sx={{ 
+                            color: '#ffffff',
+                            transform: expandedSubject === subject ? 'rotate(90deg)' : 'rotate(0deg)',
+                            transition: 'transform 0.2s ease'
+                          }} />
+                        </Box>
+                        
+                        {expandedSubject === subject && (
+                          <Box sx={{ 
+                            ml: 3, 
+                            mt: 1,
+                            maxHeight: '200px',
+                            overflowY: 'auto',
+                            background: 'rgba(0,0,0,0.1)',
+                            borderRadius: '8px',
+                            p: 1,
+                            '&::-webkit-scrollbar': {
+                              width: '4px',
+                            },
+                            '&::-webkit-scrollbar-track': {
+                              background: 'rgba(255,255,255,0.05)',
+                              borderRadius: '2px',
+                            },
+                            '&::-webkit-scrollbar-thumb': {
+                              background: 'rgba(255,255,255,0.2)',
+                              borderRadius: '2px',
+                              '&:hover': {
+                                background: 'rgba(255,255,255,0.3)',
+                              }
+                            }
+                          }}>
+                            {data.topics.map((topic, index) => (
+                              <Box
+                                key={index}
                                 onClick={() => handleStartStudy(subject, topic)}
                                 sx={{
-                                  bgcolor: yksData[subject].color || '#9c27b0',
-                                  color: '#fff',
-                                  fontSize: '0.7rem',
-                                  py: 0.5,
-                                  minWidth: 'auto',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  p: 1.5,
+                                  borderRadius: '8px',
+                                  mt: 0.5,
+                                  background: 'rgba(255,255,255,0.05)',
+                                  transition: 'all 0.2s ease',
                                   '&:hover': {
-                                    bgcolor: yksData[subject].color ? `${yksData[subject].color}dd` : '#7b1fa2'
-                                  }
+                                    background: 'rgba(255,255,255,0.1)',
+                                    transform: 'translateX(4px)'
+                                  },
+                                  cursor: 'pointer'
                                 }}
                               >
-                                Çalışmaya Başla
-                              </Button>
-                            </Box>
-                          ))}
-                        </Box>
-                      )}
-                    </Box>
-                  ))}
+                                <Typography sx={{ 
+                                  fontSize: '0.9rem', 
+                                  color: '#ffffff',
+                                  fontWeight: 500,
+                                  flex: 1
+                                }}>
+                                  {topic}
+                                </Typography>
+                                <Button
+                                  size="medium"
+                                  variant="contained"
+                                  sx={{
+                                    minWidth: '70px',
+                                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                                    color: '#ffffff',
+                                    fontWeight: 600,
+                                    fontSize: '0.85rem',
+                                    py: 1,
+                                    px: 2,
+                                    ml: 1,
+                                    borderRadius: '8px',
+                                    boxShadow: '0 2px 4px rgba(33, 150, 243, 0.3)',
+                                    textTransform: 'none',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                      background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
+                                      transform: 'translateY(-2px)',
+                                      boxShadow: '0 4px 8px rgba(33, 150, 243, 0.4)'
+                                    }
+                                  }}
+                                >
+                                  Başla
+                                </Button>
+                              </Box>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    ))}
+                  </Box>
                 </Box>
               )}
             </Box>
           </CardContent>
         </Card>
+      </Box>
 
-        {/* Kronometre Kartı */}
-        <Card id="timer-section" sx={{ 
-          flex: { xs: '1 1 100%', md: '1 1 50%' },
-          borderRadius: '20px', 
-          boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-          overflow: 'hidden',
-          background: '#f4f2f5',
-          display: 'flex',
-          flexDirection: 'column',
-          height: { xs: 'auto', md: '600px' }
-        }}>
-          <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <Box sx={{ 
-              p: 2,
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  fontSize: '1.2rem', 
-                  fontWeight: 700,
-                  color: '#333'
-                }}
-              >
-                Analizli Kronometre
-              </Typography>
-              
-              <Chip 
-                label={isRunning ? "ÇALIŞIYOR" : "HAZIR"}
-                size="small"
-                color={isRunning ? "success" : "warning"}
-                sx={{ 
-                  fontWeight: 600,
-                  fontSize: '0.7rem',
-                  height: '24px'
-                }}
-              />
-            </Box>
+      {/* Kronometre Kartı */}
+      <Card id="timer-section" sx={{ 
+        flex: 1,
+        borderRadius: '20px', 
+        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+        background: '#1b293d',
+        display: 'flex',
+        flexDirection: 'column',
+        height: { xs: 'auto', md: '600px' }
+      }}>
+        <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ 
+            p: 2,
+            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0
+          }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                fontSize: '1.1rem', 
+                fontWeight: 700,
+                color: '#ffffff'
+              }}
+            >
+              Analizli Kronometre
+            </Typography>
             
-            {/* Kronometre Gösterimi */}
+            <Chip 
+              label={isRunning ? "ÇALIŞIYOR" : "HAZIR"}
+              size="small"
+              color={isRunning ? "success" : "warning"}
+              sx={{ 
+                fontWeight: 600,
+                fontSize: '0.7rem',
+                height: '24px'
+              }}
+            />
+          </Box>
+          
+          {/* Kronometre Gösterimi */}
+          <Box sx={{ 
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            p: 3
+          }}>
+            {/* Daire içinde zaman gösterimi */}
             <Box sx={{ 
-              flex: 1,
+              width: { xs: '180px', sm: '220px' },
+              height: { xs: '180px', sm: '220px' },
+              borderRadius: '50%',
+              border: '2px solid rgba(33, 150, 243, 0.1)',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              p: 4
-            }}>
-              {/* Daire içinde zaman gösterimi */}
-              <Box sx={{ 
-                width: { xs: '220px', sm: '280px' },
-                height: { xs: '220px', sm: '280px' },
+              position: 'relative',
+              mb: 3,
+              background: 'rgba(255, 255, 255, 0.5)',
+              boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
+              backdropFilter: 'blur(4px)',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: '-4px',
+                left: '-4px',
+                width: 'calc(100% + 8px)',
+                height: 'calc(100% + 8px)',
                 borderRadius: '50%',
-                border: '2px solid rgba(33, 150, 243, 0.1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                mb: 4,
-                background: 'rgba(255, 255, 255, 0.5)',
-                boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
-                backdropFilter: 'blur(4px)',
-                '&::before': {
-                  content: '""',
-                  position: 'absolute',
-                  top: '-4px',
-                  left: '-4px',
-                  width: 'calc(100% + 8px)',
-                  height: 'calc(100% + 8px)',
-                  borderRadius: '50%',
-                  border: '4px solid transparent',
-                  borderTopColor: selectedColor || '#2196F3',
-                  borderRightColor: 'rgba(33, 150, 243, 0.3)',
-                  animation: isRunning ? 'spin 2s linear infinite' : 'none',
-                  '@keyframes spin': {
-                    '0%': {
-                      transform: 'rotate(0deg)'
-                    },
-                    '100%': {
-                      transform: 'rotate(360deg)'
-                    }
+                border: '4px solid transparent',
+                borderTopColor: selectedColor || '#2196F3',
+                borderRightColor: 'rgba(33, 150, 243, 0.3)',
+                animation: isRunning ? 'spin 2s linear infinite' : 'none',
+                '@keyframes spin': {
+                  '0%': {
+                    transform: 'rotate(0deg)'
+                  },
+                  '100%': {
+                    transform: 'rotate(360deg)'
                   }
                 }
-              }}>
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <TimerIcon sx={{ 
-                    color: '#2196F3',
-                    fontSize: '2rem',
-                    mb: 2,
-                    opacity: 0.8
-                  }} />
-                  
-                  <Typography variant="h1" sx={{ 
-                    fontSize: { xs: '2.5rem', sm: '3.5rem' },
-                    fontWeight: 700,
-                    fontFamily: 'monospace',
-                    color: '#333',
-                    letterSpacing: '2px'
-                  }}>
-                    {formatTime(time, true)}
-                  </Typography>
-                </Box>
-              </Box>
-              
-              {/* Butonlar */}
-              <Box sx={{ 
+              }
+            }}>
+              <Box sx={{
                 display: 'flex',
-                flexDirection: isRunning ? 'row' : 'column',
-                gap: 2,
-                mt: 2,
-                width: '100%',
-                maxWidth: '400px'
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}>
-                {selectedSubject && selectedTopic ? (
-                  !isRunning ? (
+                <TimerIcon sx={{ 
+                  color: '#2196F3',
+                  fontSize: '1.5rem',
+                  mb: 1,
+                  opacity: 0.8
+                }} />
+                
+                <Typography variant="h1" sx={{ 
+                  fontSize: { xs: '1.8rem', sm: '2.2rem' },
+                  fontWeight: 700,
+                  fontFamily: 'monospace',
+                  color: '#333',
+                  letterSpacing: '1px'
+                }}>
+                  {formatTime(time, true)}
+                </Typography>
+              </Box>
+            </Box>
+            
+            {/* Butonlar */}
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: isRunning ? 'row' : 'column',
+              gap: 1.5,
+              mt: 2,
+              width: '100%',
+              maxWidth: '300px'
+            }}>
+              {selectedSubject && selectedTopic ? (
+                !isRunning ? (
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    size="medium"
+                    onClick={() => setIsRunning(true)}
+                    sx={{
+                      background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                      color: '#fff',
+                      py: 1.2,
+                      borderRadius: '10px',
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      textTransform: 'none',
+                      boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 10px 2px rgba(33, 150, 243, .3)'
+                      }
+                    }}
+                  >
+                    Çalışmaya Başla
+                  </Button>
+                ) : (
+                  <>
                     <Button
                       variant="contained"
                       fullWidth
-                      size="large"
-                      onClick={() => setIsRunning(true)}
+                      size="small"
+                      onClick={() => setIsRunning(false)}
                       sx={{
-                        background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                        background: 'linear-gradient(45deg, #FF5722 30%, #FF9800 90%)',
                         color: '#fff',
-                        py: 1.5,
-                        borderRadius: '10px',
+                        py: 1,
+                        borderRadius: '8px',
                         fontWeight: 600,
-                        fontSize: '1rem',
+                        fontSize: '0.8rem',
                         textTransform: 'none',
-                        boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
+                        boxShadow: '0 2px 4px 1px rgba(255, 87, 34, .3)',
                         transition: 'all 0.3s ease',
                         '&:hover': {
-                          background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 10px 2px rgba(33, 150, 243, .3)'
+                          background: 'linear-gradient(45deg, #FF9800 30%, #FF5722 90%)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 8px 1px rgba(255, 87, 34, .3)'
                         }
                       }}
                     >
-                      Çalışmaya Başla
+                      Duraklat
                     </Button>
-                  ) : (
-                    <>
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        size="large"
-                        onClick={() => setIsRunning(false)}
-                        sx={{
-                          background: 'linear-gradient(45deg, #FF5722 30%, #FF9800 90%)',
-                          color: '#fff',
-                          py: 1.5,
-                          borderRadius: '10px',
-                          fontWeight: 600,
-                          fontSize: '1rem',
-                          textTransform: 'none',
-                          boxShadow: '0 3px 5px 2px rgba(255, 87, 34, .3)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #FF9800 30%, #FF5722 90%)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 6px 10px 2px rgba(255, 87, 34, .3)'
-                          }
-                        }}
-                      >
-                        Duraklat
-                      </Button>
-                      
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        size="large"
-                        onClick={() => {
-                          setTime(0);
-                          setIsRunning(false);
-                        }}
-                        sx={{
-                          background: 'linear-gradient(45deg, #9C27B0 30%, #E040FB 90%)',
-                          color: '#fff',
-                          py: 1.5,
-                          borderRadius: '10px',
-                          fontWeight: 600,
-                          fontSize: '1rem',
-                          textTransform: 'none',
-                          boxShadow: '0 3px 5px 2px rgba(156, 39, 176, .3)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #E040FB 30%, #9C27B0 90%)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 6px 10px 2px rgba(156, 39, 176, .3)'
-                          }
-                        }}
-                      >
-                        Sıfırla
-                      </Button>
-                      
-                      <Button
-                        variant="contained"
-                        fullWidth
-                        size="large"
-                        onClick={handleSaveStudy}
-                        sx={{
-                          background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
-                          color: '#fff',
-                          py: 1.5,
-                          borderRadius: '10px',
-                          fontWeight: 600,
-                          fontSize: '1rem',
-                          textTransform: 'none',
-                          boxShadow: '0 3px 5px 2px rgba(76, 175, 80, .3)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            background: 'linear-gradient(45deg, #8BC34A 30%, #4CAF50 90%)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 6px 10px 2px rgba(76, 175, 80, .3)'
-                          }
-                        }}
-                      >
-                        Kaydet
-                      </Button>
-                    </>
-                  )
-                ) : (
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
-                      textAlign: 'center', 
-                      color: '#666',
-                      fontStyle: 'italic',
-                      p: 2
-                    }}
-                  >
-                    Lütfen sol taraftan bir ders ve konu seçiniz
-                  </Typography>
-                )}
-              </Box>
+                    
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="small"
+                      onClick={() => {
+                        setTime(0);
+                        setIsRunning(false);
+                      }}
+                      sx={{
+                        background: 'linear-gradient(45deg, #9C27B0 30%, #E040FB 90%)',
+                        color: '#fff',
+                        py: 1,
+                        borderRadius: '8px',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        textTransform: 'none',
+                        boxShadow: '0 2px 4px 1px rgba(156, 39, 176, .3)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #E040FB 30%, #9C27B0 90%)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 8px 1px rgba(156, 39, 176, .3)'
+                        }
+                      }}
+                    >
+                      Sıfırla
+                    </Button>
+                    
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="small"
+                      onClick={handleSaveStudy}
+                      sx={{
+                        background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
+                        color: '#fff',
+                        py: 1,
+                        borderRadius: '8px',
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        textTransform: 'none',
+                        boxShadow: '0 2px 4px 1px rgba(76, 175, 80, .3)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'linear-gradient(45deg, #8BC34A 30%, #4CAF50 90%)',
+                          transform: 'translateY(-1px)',
+                          boxShadow: '0 4px 8px 1px rgba(76, 175, 80, .3)'
+                        }
+                      }}
+                    >
+                      Kaydet
+                    </Button>
+                  </>
+                )
+              ) : (
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    textAlign: 'center', 
+                    color: '#ffffff',
+                    fontStyle: 'italic',
+                    p: 2,
+                    opacity: 0.8
+                  }}
+                >
+                  Lütfen soldan bir ders ve konu seçiniz
+                </Typography>
+              )}
             </Box>
-          </CardContent>
-        </Card>
-      </Box>
-      
+          </Box>
+        </CardContent>
+      </Card>
+
       {/* Kaydetme Dialog'u */}
       <Dialog
         open={showSaveDialog}
@@ -693,14 +833,14 @@ const AnalyticalStopwatch = () => {
             borderRadius: '16px',
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
             p: 1,
-            background: '#f4f2f5'
+            background: '#1b293d'
           }
         }}
       >
         <DialogTitle>Çalışma Kaydı</DialogTitle>
         <DialogContent>
           <Typography>
-            {selectedSubject} - {selectedTopic} için {formatTime(time, false)} süresince çalıştınız. 
+            {selectedExamType} - {selectedSubject} - {selectedTopic} için {formatTime(time, false)} süresince çalıştınız. 
             Bu çalışmayı kaydetmek istiyor musunuz?
           </Typography>
         </DialogContent>

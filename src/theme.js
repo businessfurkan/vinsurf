@@ -3,24 +3,24 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#55b3d9',
-      light: '#7CA6C8',
-      dark: '#3D6F94',
+      main: '#1b293d',
+      light: '#2d4870',
+      dark: '#1b293d',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#B8C0FF',
+      main: '#2d4870',
       light: '#D1D6FF',
       dark: '#9A9FD8',
-      contrastText: '#333333',
+      contrastText: '#FFFFFF',
     },
     background: {
-      default: '#f4f2f5',
-      paper: '#f4f2f5',
+      default: '#1b293d',
+      paper: '#15202b',
     },
     text: {
-      primary: '#2a5956',
-      secondary: '#2a5956',
+      primary: '#ffffff',
+      secondary: '#b8c7e0',
     },
     typography: {
       fontFamily: '"Poppins", "Montserrat", "Roboto", "Helvetica", "Arial", sans-serif',
@@ -69,7 +69,7 @@ const theme = createTheme({
       main: '#FFD166',
     },
     info: {
-      main: '#55b3d9',
+      main: '#1b293d',
     },
     success: {
       main: '#06D6A0',
@@ -119,13 +119,13 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#2d4870',
           borderRadius: 16,
-          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.12)',
-          border: '1px solid rgba(85, 179, 217, 0.15)',
+          boxShadow: '0 6px 16px rgba(0, 0, 0, 0.3)',
+          border: '1px solid rgba(45, 72, 112, 0.15)',
           transition: 'box-shadow 0.3s ease, transform 0.3s ease',
           '&:hover': {
-            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.4)',
           },
         },
       },
@@ -143,16 +143,16 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          backgroundColor: '#55b3d9',
+          backgroundColor: '#2d4870',
           '&:hover': {
-            backgroundColor: '#3D6F94',
+            backgroundColor: '#2d4870',
           },
         },
         containedSecondary: {
-          backgroundColor: '#B8C0FF',
-          color: '#333333',
+          backgroundColor: '#15202b',
+          color: '#ffffff',
           '&:hover': {
-            backgroundColor: '#9A9FD8',
+            backgroundColor: '#1b293d',
           },
         },
         outlined: {
@@ -162,16 +162,16 @@ const theme = createTheme({
           },
         },
         outlinedPrimary: {
-          borderColor: '#55b3d9',
-          color: '#55b3d9',
+          borderColor: '#2d4870',
+          color: '#2d4870',
           '&:hover': {
-            borderColor: '#3D6F94',
-            backgroundColor: 'rgba(85, 179, 217, 0.04)',
+            borderColor: '#2d4870',
+            backgroundColor: 'rgba(45, 72, 112, 0.04)',
           },
         },
         text: {
           '&:hover': {
-            backgroundColor: 'rgba(85, 179, 217, 0.04)',
+            backgroundColor: 'rgba(45, 72, 112, 0.04)',
           },
         },
       },
@@ -179,24 +179,24 @@ const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#FFFFFF',
-          borderRight: '1px solid rgba(0, 0, 0, 0.05)',
+          backgroundColor: '#1b293d',
+          borderRight: '1px solid rgba(255, 255, 255, 0.1)',
         },
       },
     },
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#FFFFFF',
-          color: '#303545',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+          backgroundColor: '#1b293d',
+          color: '#ffffff',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#1b293d',
           borderRadius: 16,
         },
       },
@@ -212,7 +212,7 @@ const theme = createTheme({
       styleOverrides: {
         head: {
           fontWeight: 600,
-          backgroundColor: '#F5F7FA',
+          backgroundColor: '#1b293d',
         },
       },
     },

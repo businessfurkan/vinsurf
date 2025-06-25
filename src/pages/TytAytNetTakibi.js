@@ -29,7 +29,7 @@ import {
   Container, Box, Typography, Button, TextField, Grid, Paper,
   Select, MenuItem, FormControl, InputLabel, Card, IconButton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Tabs, Tab, Chip, Snackbar, Alert
+  Chip, Snackbar, Alert
 } from '@mui/material';
 
 // Recharts components
@@ -462,11 +462,6 @@ const TytAytNetTakibi = () => {
       fetchRecords();
     }
   }, [user, fetchRecords]);
-
-  // Handle tab change
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-  };
 
   // Render step content based on active step
   const getStepContent = (step) => {
@@ -1238,156 +1233,339 @@ const TytAytNetTakibi = () => {
   */
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 700, color: 'var(--primary-color)' }}>
-            TYT-AYT Net Takibi
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            Deneme sınavlarınızın sonuçlarını kaydedin ve performansınızı takip edin.
-          </Typography>
-        </Box>
-        
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 4 }}>
-          <Tabs 
-            value={tabValue} 
-            onChange={handleTabChange}
-            variant={isMobile ? 'fullWidth' : 'standard'}
-            sx={{
-              '& .MuiTab-root': {
-                fontWeight: 600,
-                textTransform: 'none',
-                minWidth: 0,
-                px: 3
-              }
-            }}
+    <Box sx={{ 
+      minHeight: '100vh',
+      backgroundColor: '#1e293d',
+      position: 'relative'
+    }}>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        style={{ position: 'relative', zIndex: 1 }}
+      >
+        <Container maxWidth="xl" sx={{ py: { xs: 4, md: 8 } }}>
+          {/* Modern Header */}
+          <Box sx={{ 
+            textAlign: 'center', 
+            mb: { xs: 6, md: 8 },
+            pt: { xs: 4, md: 6 }
+          }}>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.6 }}
+            >
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                sx={{ 
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  mb: 2,
+                  fontSize: { xs: '2rem', md: '3rem' }
+                }}
+              >
+                TYT-AYT Net Takibi
+              </Typography>
+              <Typography 
+                variant="h6" 
+                sx={{ 
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  maxWidth: '600px',
+                  mx: 'auto',
+                  lineHeight: 1.6,
+                  fontSize: { xs: '1rem', md: '1.2rem' }
+                }}
+              >
+                Deneme sınavlarınızın sonuçlarını kaydedin ve performansınızı takip edin.
+              </Typography>
+            </motion.div>
+          </Box>
+
+          {/* Modern Tab Navigation */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
           >
-            <Tab 
-              label="Yeni Deneme Ekle" 
-              icon={<AddIcon />} 
-              iconPosition="start"
-            />
-            <Tab 
-              label="Kayıtlı Denemeler" 
-              icon={<ViewListIcon />} 
-              iconPosition="start"
-            />
-            <Tab 
-              label="İstatistikler" 
-              icon={<BarChartIcon />} 
-              iconPosition="start"
-            />
-          </Tabs>
-        </Box>
-        
-        {/* Tab panels */}
-        <Box sx={{ mt: 2 }}>
-          {tabValue === 0 && (
-            <Box>
-              <ModernStepper activeStep={activeStep} />
+            <Box sx={{ 
+              mb: 6,
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 3,
+              flexWrap: 'wrap'
+            }}>
+              <Button
+                onClick={() => setTabValue(0)}
+                startIcon={<AddIcon />}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: '12px',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: { xs: '0.8rem', md: '0.9rem' },
+                  background: tabValue === 0 
+                    ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
+                    : 'rgba(255, 255, 255, 0.08)',
+                  color: 'white',
+                  border: `1px solid ${tabValue === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: tabValue === 0 
+                    ? '0 4px 12px rgba(85, 179, 217, 0.3)' 
+                    : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: tabValue === 0 
+                      ? 'linear-gradient(135deg, #6bc1e1, #55b3d9)' 
+                      : 'rgba(255, 255, 255, 0.12)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 16px rgba(85, 179, 217, 0.25)'
+                  }
+                }}
+              >
+                Yeni Deneme Ekle
+              </Button>
               
-              <Box sx={{ mt: 4 }}>
-                {activeStep === steps.length ? (
-                  /* Form submitted successfully */
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <CheckCircleIcon sx={{ fontSize: 60, color: 'var(--success-color)', mb: 2 }} />
-                    <Typography variant="h5" gutterBottom sx={{ color: 'var(--text-primary)', fontWeight: 600 }}>
-                      Deneme sonuçlarınız başarıyla kaydedildi!
-                    </Typography>
-                    <Button
-                      onClick={() => setActiveStep(0)}
+              <Button
+                onClick={() => setTabValue(1)}
+                startIcon={<ViewListIcon />}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: '12px',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: { xs: '0.8rem', md: '0.9rem' },
+                  background: tabValue === 1 
+                    ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
+                    : 'rgba(255, 255, 255, 0.08)',
+                  color: 'white',
+                  border: `1px solid ${tabValue === 1 ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: tabValue === 1 
+                    ? '0 4px 12px rgba(85, 179, 217, 0.3)' 
+                    : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: tabValue === 1 
+                      ? 'linear-gradient(135deg, #6bc1e1, #55b3d9)' 
+                      : 'rgba(255, 255, 255, 0.12)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 16px rgba(85, 179, 217, 0.25)'
+                  }
+                }}
+              >
+                Kayıtlı Denemeler
+              </Button>
+              
+              <Button
+                onClick={() => setTabValue(2)}
+                startIcon={<BarChartIcon />}
+                sx={{
+                  px: 3,
+                  py: 1.5,
+                  borderRadius: '12px',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: { xs: '0.8rem', md: '0.9rem' },
+                  background: tabValue === 2 
+                    ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
+                    : 'rgba(255, 255, 255, 0.08)',
+                  color: 'white',
+                  border: `1px solid ${tabValue === 2 ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: tabValue === 2 
+                    ? '0 4px 12px rgba(85, 179, 217, 0.3)' 
+                    : '0 2px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    background: tabValue === 2 
+                      ? 'linear-gradient(135deg, #6bc1e1, #55b3d9)' 
+                      : 'rgba(255, 255, 255, 0.12)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 16px rgba(85, 179, 217, 0.25)'
+                  }
+                }}
+              >
+                İstatistikler
+              </Button>
+            </Box>
+          </motion.div>
+        
+          {/* Tab panels */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+          >
+            {tabValue === 0 && (
+              <Box>
+                {/* Modern Stepper Container */}
+                <Paper 
+                  elevation={0}
+                  sx={{ 
+                    mb: 4,
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    p: 3
+                  }}
+                >
+                  <ModernStepper activeStep={activeStep} />
+                </Paper>
+                
+                <Box sx={{ mt: 4 }}>
+                  {activeStep === steps.length ? (
+                    /* Form submitted successfully */
+                    <Paper 
+                      elevation={0}
                       sx={{ 
-                        mt: 3,
-                        background: 'linear-gradient(135deg, #5db6d9, #4a9cc7)',
-                        color: 'white',
-                        fontWeight: 600,
-                        padding: '10px 24px',
-                        borderRadius: '12px',
-                        boxShadow: '0 4px 8px rgba(93, 182, 217, 0.25)',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #72c5e4, #5db6d9)',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 6px 12px rgba(93, 182, 217, 0.3)'
-                        }
+                        textAlign: 'center', 
+                        py: 6,
+                        borderRadius: '16px',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
                     >
-                      Yeni Deneme Ekle
-                    </Button>
-                  </Box>
-                ) : (
-                  /* Form steps */
-                  <>
-                    <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
-                      {getStepContent(activeStep)}
-                    </Box>
-                    
-                    <Box sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      mt: 4,
-                      flexDirection: isMobile ? 'column' : 'row',
-                      gap: isMobile ? 2 : 0
-                    }}>
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                      >
+                        <CheckCircleIcon sx={{ 
+                          fontSize: 80, 
+                          color: '#4CAF50', 
+                          mb: 3,
+                          filter: 'drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3))'
+                        }} />
+                      </motion.div>
+                      <Typography variant="h4" gutterBottom sx={{ 
+                        color: '#fff', 
+                        fontWeight: 700,
+                        mb: 2
+                      }}>
+                        Başarılı!
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        mb: 4,
+                        maxWidth: '400px',
+                        mx: 'auto'
+                      }}>
+                        Deneme sonuçlarınız başarıyla kaydedildi!
+                      </Typography>
                       <Button
-                        disabled={activeStep === 0}
-                        onClick={handleBack}
-                        startIcon={<NavigateBeforeIcon />}
+                        onClick={() => setActiveStep(0)}
                         sx={{ 
-                          opacity: activeStep === 0 ? 0.5 : 1,
-                          order: isMobile ? 2 : 1,
-                          width: isMobile ? '100%' : 'auto',
-                          background: 'linear-gradient(135deg, #55b3d9, #3498db)',
+                          mt: 2,
+                          background: 'linear-gradient(135deg, #55b3d9, #4a9cc7)',
                           color: 'white',
-                          fontWeight: 600,
-                          padding: '10px 24px',
-                          borderRadius: '12px',
-                          boxShadow: '0 4px 8px rgba(53, 152, 219, 0.25)',
+                          fontWeight: 700,
+                          padding: '12px 32px',
+                          borderRadius: '50px',
+                          fontSize: '1.1rem',
+                          boxShadow: '0 8px 16px rgba(85, 179, 217, 0.3)',
                           transition: 'all 0.3s ease',
                           '&:hover': {
                             background: 'linear-gradient(135deg, #6bc1e1, #55b3d9)',
                             transform: 'translateY(-2px)',
-                            boxShadow: '0 6px 12px rgba(53, 152, 219, 0.3)'
+                            boxShadow: '0 12px 24px rgba(85, 179, 217, 0.4)'
                           }
                         }}
                       >
-                        Geri
+                        Yeni Deneme Ekle
                       </Button>
-                      
-                      <Button
-                        onClick={handleNext}
-                        endIcon={<NavigateNextIcon />}
-                        disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
+                    </Paper>
+                  ) : (
+                    /* Form steps */
+                    <>
+                      <Paper 
+                        elevation={0}
                         sx={{ 
-                          order: isMobile ? 1 : 2,
-                          width: isMobile ? '100%' : 'auto',
-                          background: 'linear-gradient(135deg, #5db6d9, #4a9cc7)',
-                          color: 'white',
-                          fontWeight: 600,
-                          padding: '10px 24px',
-                          borderRadius: '12px',
-                          boxShadow: '0 4px 8px rgba(93, 182, 217, 0.25)',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            background: 'linear-gradient(135deg, #72c5e4, #5db6d9)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 6px 12px rgba(93, 182, 217, 0.3)'
-                          },
-                          '&:disabled': {
-                            background: 'linear-gradient(135deg, #a8d4e5, #8abfd0)',
-                            color: '#e0e0e0',
-                            boxShadow: 'none'
-                          }
+                          p: { xs: 3, md: 4 }, 
+                          mb: 4,
+                          borderRadius: '16px',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          minHeight: '400px'
                         }}
                       >
-                        {activeStep === steps.length - 1 ? 'Bitir' : 'İleri'}
-                      </Button>
-                    </Box>
+                        {getStepContent(activeStep)}
+                      </Paper>
+                    
+                      <Box sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        mt: 4,
+                        flexDirection: isMobile ? 'column' : 'row',
+                        gap: isMobile ? 3 : 0
+                      }}>
+                        <Button
+                          disabled={activeStep === 0}
+                          onClick={handleBack}
+                          startIcon={<NavigateBeforeIcon />}
+                          sx={{ 
+                            opacity: activeStep === 0 ? 0.3 : 1,
+                            order: isMobile ? 2 : 1,
+                            width: isMobile ? '100%' : 'auto',
+                            background: activeStep === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.3)',
+                            color: 'white',
+                            fontWeight: 700,
+                            padding: '12px 24px',
+                            borderRadius: '50px',
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              background: 'rgba(255, 255, 255, 0.25)',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)'
+                            },
+                            '&:disabled': {
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              color: 'rgba(255, 255, 255, 0.3)'
+                            }
+                          }}
+                        >
+                          Geri
+                        </Button>
+                        
+                        <Button
+                          onClick={handleNext}
+                          endIcon={<NavigateNextIcon />}
+                          disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
+                          sx={{ 
+                            order: isMobile ? 1 : 2,
+                            width: isMobile ? '100%' : 'auto',
+                            background: 'linear-gradient(135deg, #55b3d9, #4a9cc7)',
+                            color: 'white',
+                            fontWeight: 700,
+                            padding: '12px 32px',
+                            borderRadius: '50px',
+                            fontSize: '1rem',
+                            boxShadow: '0 8px 16px rgba(85, 179, 217, 0.3)',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #6bc1e1, #55b3d9)',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 12px 24px rgba(85, 179, 217, 0.4)'
+                            },
+                            '&:disabled': {
+                              background: 'rgba(255, 255, 255, 0.1)',
+                              color: 'rgba(255, 255, 255, 0.3)',
+                              boxShadow: 'none'
+                            }
+                          }}
+                        >
+                          {activeStep === steps.length - 1 ? 'Bitir' : 'İleri'}
+                        </Button>
+                      </Box>
                   </>
                 )}
               </Box>
@@ -1396,9 +1574,30 @@ const TytAytNetTakibi = () => {
           
           {tabValue === 1 && (
             <Box>
-              <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" sx={{ color: 'var(--primary-color)', fontWeight: 600 }}>
+              <Paper 
+                elevation={0}
+                sx={{ 
+                  p: { xs: 3, md: 4 }, 
+                  mb: 4,
+                  borderRadius: '16px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  mb: 4,
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? 2 : 0
+                }}>
+                  <Typography variant="h4" sx={{ 
+                    color: '#fff', 
+                    fontWeight: 700,
+                    textAlign: isMobile ? 'center' : 'left'
+                  }}>
                     Deneme Sonuçları
                   </Typography>
                 </Box>
@@ -1407,7 +1606,7 @@ const TytAytNetTakibi = () => {
                 <Box sx={{ 
                   display: 'flex', 
                   gap: 3, 
-                  mb: 4,
+                  mb: 5,
                   flexDirection: isMobile ? 'column' : 'row' 
                 }}>
                   <Button
@@ -1416,19 +1615,24 @@ const TytAytNetTakibi = () => {
                       flex: 1,
                       py: 3,
                       background: selectedExamType === 'TYT' 
-                        ? 'linear-gradient(135deg, #5db6d9, #4a9cc7)' 
-                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
-                      color: selectedExamType === 'TYT' ? 'white' : 'var(--text-primary)',
+                        ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
+                        : 'rgba(255, 255, 255, 0.08)',
+                      backdropFilter: 'blur(10px)',
+                      border: `2px solid ${selectedExamType === 'TYT' ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
+                      color: 'white',
                       fontWeight: 700,
                       fontSize: '1.2rem',
                       borderRadius: '16px',
                       boxShadow: selectedExamType === 'TYT' 
-                        ? '0 8px 16px rgba(93, 182, 217, 0.25)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
+                        ? '0 8px 16px rgba(102, 126, 234, 0.3)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.1)',
                       transition: 'all 0.3s ease',
                       '&:hover': {
                         transform: 'translateY(-3px)',
-                        boxShadow: '0 10px 20px rgba(93, 182, 217, 0.3)'
+                        boxShadow: '0 10px 20px rgba(102, 126, 234, 0.4)',
+                        background: selectedExamType === 'TYT' 
+                          ? 'linear-gradient(135deg, #6bc1e1, #55b3d9)' 
+                          : 'rgba(255, 255, 255, 0.12)'
                       }
                     }}
                   >
@@ -1441,9 +1645,11 @@ const TytAytNetTakibi = () => {
                       flex: 1,
                       py: 3,
                       background: selectedExamType === 'AYT' 
-                        ? 'linear-gradient(135deg, #55b3d9, #3498db)' 
-                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
-                      color: selectedExamType === 'AYT' ? 'white' : 'var(--text-primary)',
+                        ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
+                        : 'rgba(255, 255, 255, 0.08)',
+                      backdropFilter: 'blur(10px)',
+                      border: `2px solid ${selectedExamType === 'AYT' ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
+                      color: 'white',
                       fontWeight: 700,
                       fontSize: '1.2rem',
                       borderRadius: '16px',
@@ -1463,7 +1669,11 @@ const TytAytNetTakibi = () => {
                 
                 {/* Seçilen Sınav Türüne Göre Dersler */}
                 <Box sx={{ mb: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
+                  <Typography variant="h6" gutterBottom sx={{ 
+                    fontWeight: 600, 
+                    color: '#fff',
+                    mb: 3
+                  }}>
                     {selectedExamType} Dersleri
                   </Typography>
                   
@@ -1631,21 +1841,42 @@ const TytAytNetTakibi = () => {
                 
                 {netRecords.length === 0 && (
                   <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <Typography variant="body1" color="text.secondary">
+                    <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       Henüz kaydedilmiş deneme sonucu bulunmamaktadır.
                     </Typography>
                   </Box>
                 )}
+                </Paper>
               </Box>
-            </Box>
-          )}
+            )}
           
           {tabValue === 2 && (
             <Box>
-              <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                  <Typography variant="h5" sx={{ color: 'var(--primary-color)', fontWeight: 600 }}>
-                    İstatistikler
+              <Paper 
+                elevation={0}
+                sx={{ 
+                  p: { xs: 3, md: 4 }, 
+                  mb: 4,
+                  borderRadius: '16px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  mb: 4,
+                  flexDirection: isMobile ? 'column' : 'row',
+                  gap: isMobile ? 2 : 0
+                }}>
+                  <Typography variant="h4" sx={{ 
+                    color: '#fff', 
+                    fontWeight: 700,
+                    textAlign: isMobile ? 'center' : 'left'
+                  }}>
+                    İstatistikler ve Analizler
                   </Typography>
                 </Box>
                 
@@ -2229,14 +2460,14 @@ const TytAytNetTakibi = () => {
                   </>
                 ) : (
                   <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <Typography variant="body1" color="text.secondary">
+                    <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
                       İstatistikler için yeterli veri bulunmamaktadır.
                     </Typography>
                   </Box>
                 )}
+                </Paper>
               </Box>
-            </Box>
-          )}
+            )}
           
           {/* Notification */}
           <Snackbar 
@@ -2253,9 +2484,10 @@ const TytAytNetTakibi = () => {
               {notification.message}
             </Alert>
           </Snackbar>
-        </Box>
-      </Container>
-    </motion.div>
+          </motion.div>
+        </Container>
+      </motion.div>
+    </Box>
   );
 };
 

@@ -8,13 +8,32 @@
 }
 
 :root {
-  --background-color: #f4f2f5;
+  --background-color: #1b293d;
+  --button-bg-color: #2d4870;
+  --button-text-color: #1b293d;
+  --button-hover-color: #3a5a8a;
+}
+
+/* Login sayfası için koyu tema */
+body.login-page {
+  background-color: #1b293d !important;
+  color: #ffffff !important;
+}
+
+html.login-page {
+  background-color: #1b293d !important;
+}
+
+/* Login sayfası root container */
+#root.login-page {
+  background-color: #1b293d !important;
+  min-height: 100vh;
 }
 
 body {
   font-family: 'Poppins', 'Montserrat', 'Roboto', sans-serif;
   background-color: var(--background-color);
-  color: var(--background-color);
+  color: #ffffff;
   line-height: 1.6;
   font-weight: 450; /* Slightly increase the default font weight */
   letter-spacing: 0.15px;
@@ -32,17 +51,17 @@ a {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #1b293d;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #55b3d9;
+  background: #2d4870;
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3D6F94;
+  background: #3a5a8a;
 }
 
 /* Make sure app takes full screen */
@@ -66,22 +85,22 @@ a {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-radius: 16px !important;
   overflow: hidden;
-  background-color: #f4f2f5 !important;
-  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
-  border: 4px solid #b4c0d6 !important;
+  background-color: #2d4870 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border: 4px solid #2d4870 !important;
 }
 
 .card-hover:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Make all cards elegant */
 .MuiCard-root, .MuiPaper-root {
   border-radius: 16px !important;
-  background-color: #f4f2f5 !important;
-  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
-  border: 4px solid #b4c0d6 !important;
+  background-color: #2d4870 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  border: 4px solid #2d4870 !important;
 }
 
 /* Analytics page styles */
@@ -90,26 +109,26 @@ a {
 }
 
 .analytics-card {
-  background-color: #f4f2f5 !important;
+  background-color: #2d4870 !important;
   border-radius: 16px !important;
-  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 4px solid #b4c0d6 !important;
+  border: 4px solid #2d4870 !important;
 }
 
 .analytics-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .chart-container {
   padding: 16px;
   border-radius: 16px;
-  background-color: #f4f2f5;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  background-color: #2d4870;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   margin-bottom: 24px;
-  border: 4px solid #b4c0d6 !important;
+  border: 4px solid #2d4870 !important;
 }
 
 /* Sidebar styles */
@@ -122,8 +141,8 @@ a {
   left: 0;
   z-index: 1200;
   transition: transform 0.3s ease;
-  background-color: #f4f2f5 !important;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.08) !important;
+  background-color: #1b293d !important;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 .sidebar-closed {
@@ -135,7 +154,7 @@ a {
 }
 
 .sidebar-item:hover {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-item.active {
@@ -153,15 +172,49 @@ a {
 .heading-font {
   font-family: 'Poppins', 'Montserrat', sans-serif !important;
   font-weight: 650 !important; /* Increased from 600 */
-  color: #2a5956 !important;
+  color: #ffffff !important;
   letter-spacing: -0.5px !important;
 }
 
 .body-font {
   font-family: 'Poppins', 'Montserrat', sans-serif !important;
-  color: #2a5956 !important;
+  color: #ffffff !important;
   font-weight: 500 !important; /* Added weight specification */
   letter-spacing: 0.15px !important;
+}
+
+/* Global buton stilleri */
+.MuiButton-root, button {
+  background-color: var(--button-bg-color, #2d4870) !important;
+  color: var(--button-text-color, #1b293d) !important;
+  border-radius: 12px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.MuiButton-root:hover, button:hover {
+  background-color: var(--button-hover-color, #3a5a8a) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Özel buton türleri için override */
+.MuiButton-contained {
+  background-color: var(--button-bg-color, #2d4870) !important;
+  color: var(--button-text-color, #1b293d) !important;
+}
+
+.MuiButton-outlined {
+  background-color: transparent !important;
+  color: var(--button-bg-color, #2d4870) !important;
+  border: 2px solid var(--button-bg-color, #2d4870) !important;
+}
+
+.MuiButton-outlined:hover {
+  background-color: var(--button-bg-color, #2d4870) !important;
+  color: var(--button-text-color, #1b293d) !important;
 }
 
 /* Custom button styles */
@@ -173,22 +226,13 @@ a {
   transition: all 0.3s ease;
   padding: 8px 16px;
   box-shadow: none !important;
-  color: #2a5956 !important;
-}
-
-.custom-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08) !important;
+  color: #ffffff !important;
 }
 
 /* High contrast buttons */
-.MuiButton-contained {
-  box-shadow: none !important;
-}
-
 .MuiButton-containedPrimary {
   background-color: #55b3d9 !important;
-  color: white !important;
+  color: #ffffff !important;
 }
 
 .MuiButton-containedPrimary:hover {
@@ -211,39 +255,39 @@ a {
   font-family: 'Montserrat', sans-serif;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #f4f2f5;
+  color: #ffffff;
 }
 
 /* Home page specific styles */
 .home-card {
   border-radius: 16px !important;
-  background-color: #f4f2f5 !important;
+  background-color: #2d4870 !important;
   margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(77, 77, 0, 0.08) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 4px solid #b4c0d6 !important;
+  border: 4px solid #2d4870 !important;
 }
 
 .home-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Table container styles */
 .MuiTableContainer-root {
   border-radius: 16px !important;
   overflow: hidden;
-  background-color: #FFFFFF !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+  background-color: #2d4870 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 
 .MuiTableHead-root {
-  background-color: #F5F7FA !important;
+  background-color: #2d4870 !important;
 }
 
 .MuiTableCell-head {
   font-weight: 600 !important;
-  color: #303545 !important;
+  color: #ffffff !important;
 }
 
 /* Form elements */
@@ -330,7 +374,6 @@ a {
   }
 }
 
-
 @media (max-width: 1200px) {
   .container {
     width: 100%;
@@ -341,7 +384,6 @@ a {
     margin-right: 0 !important;
   }
 }
-
 
 @media (max-width: 960px) {
   .sidebar {
@@ -357,7 +399,6 @@ a {
     height: 170px;
   }
 }
-
 
 @media (max-width: 768px) {
   .mobile-hidden {
@@ -380,7 +421,6 @@ a {
   }
 }
 
-
 @media (max-width: 480px) {
   h1, .MuiTypography-h3 {
     font-size: 1.2rem !important;
@@ -398,7 +438,6 @@ a {
     height: 80px;
   }
 }
-
 
 /* Login page specific styling */
 .login-container {
@@ -438,7 +477,7 @@ a {
 
 /* Shadows */
 .shadow-sm {
-  box-shadow: 0 2px 4px rgba(77, 77, 0, 0.05) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
 .shadow-md {
@@ -446,7 +485,7 @@ a {
 }
 
 .shadow-lg {
-  box-shadow: 0 8px 16px rgba(77, 77, 0, 0.12) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Dividers */
@@ -457,7 +496,7 @@ a {
 /* Badges */
 .MuiBadge-badge {
   background-color: #55b3d9 !important;
-  color: white !important;
+  color: #ffffff !important;
 }
 
 /* Chips */
@@ -473,7 +512,7 @@ a {
 
 /* TYT-AYT Net Takibi sayfası için özel stiller */
 .MuiPaper-root {
-  background-color: #f4f2f5 !important;
+  background-color: #1b293d !important;
 }
 
 /* Not Defterim sayfası için özel stiller */
@@ -481,54 +520,54 @@ a {
 .MuiPaper-root[elevation="3"],
 div[role="search"],
 .MuiPaper-root.MuiPaper-elevation3 {
-  background-color: #f4f2f5 !important;
+  background-color: #1b293d !important;
 }
 
 /* Not kartları */
 .MuiListItem-root,
 .MuiPaper-root.MuiListItem-root,
 .MuiListItem-root.MuiListItem-gutters {
-  background-color: #f4f2f5 !important;
+  background-color: #1b293d !important;
 }
 
 /* MUI overrides for better visibility */
 .MuiTypography-root {
   font-weight: 450 !important; /* Baseline for all Typography components */
   font-family: 'Poppins', 'Montserrat', sans-serif !important;
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiTypography-body1, .MuiTypography-body2 {
   font-weight: 500 !important; /* Make body text slightly bolder */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiInputBase-input {
   font-weight: 500 !important; /* Bolder input text */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiInputLabel-root {
   font-weight: 500 !important; /* Bolder input labels */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiButton-root {
   font-weight: 550 !important; /* Bolder button text */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiLink-root {
   font-weight: 500 !important; /* Bolder links */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiTableCell-root {
   font-weight: 500 !important; /* Bolder table cell text */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }
 
 .MuiListItemText-primary, .MuiListItemText-secondary {
   font-weight: 500 !important; /* Bolder list item text */
-  color: #2a5956 !important;
+  color: #ffffff !important;
 }

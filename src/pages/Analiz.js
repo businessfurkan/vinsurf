@@ -44,6 +44,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import TranslateIcon from '@mui/icons-material/Translate';
+import WarningIcon from '@mui/icons-material/Warning';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -282,7 +283,7 @@ const Analiz = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#f4f2f5' }}>
+    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#1b293d' }}>
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' }} />
       <Typography
         variant="h5"
@@ -297,7 +298,7 @@ const Analiz = () => {
           const subjectData = analytics[subject] || { totalTime: 0 };
           const progress = calculateProgress(subjectData.totalTime, subject);
           const hasTarget = studyTargets[subject] > 0;
-          
+
           return (
             <Card
               key={subject}
@@ -305,22 +306,45 @@ const Analiz = () => {
               onClick={() => handleOpenTopicDialog(subject)}
               sx={{
                 cursor: 'pointer',
-                borderRadius: '20px',
-                background: `linear-gradient(145deg, #ffffff 0%, ${getSubjectColor(subject)}10 100%)`,
-                boxShadow: `0 10px 25px 0 rgba(0,0,0,0.08), 0 5px 15px 0 ${getSubjectColor(subject)}25`,
+                borderRadius: '24px',
+                background: '#15393d',
+                backdropFilter: 'blur(20px)',
+                boxShadow: `
+                  0 8px 32px rgba(0, 0, 0, 0.12),
+                  0 2px 8px rgba(0, 0, 0, 0.08),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                  0 4px 16px ${getSubjectColor(subject)}20
+                `,
                 minHeight: 200,
                 display: 'flex',
                 flexDirection: 'column',
                 padding: 2.5,
-                border: `2px solid ${getSubjectColor(subject)}40`,
-                transition: 'all 0.3s ease',
+                border: `1px solid rgba(255, 255, 255, 0.12)`,
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                 '&:hover': { 
-                  boxShadow: `0 15px 35px 0 rgba(0,0,0,0.12), 0 8px 20px 0 ${getSubjectColor(subject)}50`, 
-                  borderColor: getSubjectColor(subject),
+                  background: '#15393d',
+                  boxShadow: `
+                    0 12px 40px rgba(0, 0, 0, 0.16),
+                    0 4px 12px rgba(0, 0, 0, 0.12),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                    0 8px 24px ${getSubjectColor(subject)}30
+                  `,
+                  borderColor: `rgba(255, 255, 255, 0.2)`,
                   transform: 'translateY(-8px) scale(1.02)'
                 },
                 position: 'relative',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'transparent',
+                  pointerEvents: 'none',
+                  zIndex: 0,
+                }
               }}
             >
               <Box 
@@ -329,25 +353,37 @@ const Analiz = () => {
                   top: 0,
                   left: 0,
                   width: '100%',
-                  height: '6px',
-                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`,
-                  borderTopLeftRadius: '18px',
-                  borderTopRightRadius: '18px'
+                  height: '4px',
+                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}80 100%)`,
+                  borderTopLeftRadius: '24px',
+                  borderTopRightRadius: '24px',
+                  boxShadow: `0 0 12px ${getSubjectColor(subject)}60`,
                 }}
               />
               
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5, position: 'relative', zIndex: 1 }}>
                 <Avatar
                   sx={{
-                    bgcolor: getSubjectColor(subject),
+                    bgcolor: `linear-gradient(135deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}CC 100%)`,
                     color: '#ffffff',
                     width: 56,
                     height: 56,
-                    boxShadow: `0 6px 16px ${getSubjectColor(subject)}50`,
+                    boxShadow: `
+                      0 8px 24px ${getSubjectColor(subject)}40,
+                      0 4px 12px rgba(0, 0, 0, 0.15),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                    `,
                     mr: 2,
-                    transition: 'all 0.3s ease',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    border: `2px solid rgba(255, 255, 255, 0.15)`,
+                    backdropFilter: 'blur(10px)',
                     '&:hover': {
-                      transform: 'scale(1.1) rotate(5deg)'
+                      transform: 'scale(1.1) rotate(5deg)',
+                      boxShadow: `
+                        0 12px 32px ${getSubjectColor(subject)}50,
+                        0 6px 16px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.3)
+                      `,
                     }
                   }}
                 >
@@ -357,11 +393,12 @@ const Analiz = () => {
                   sx={{ 
                     fontSize: 20, 
                     fontWeight: 800, 
-                    color: getSubjectColor(subject), 
+                    color: '#ffffff', 
                     fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
                     lineHeight: 1.2,
                     letterSpacing: '-0.5px',
-                    textShadow: '0 1px 2px rgba(0,0,0,0.05)'
+                    textShadow: `0 2px 8px ${getSubjectColor(subject)}60, 0 1px 2px rgba(0,0,0,0.3)`,
+                    filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
                   }}
                 >
                   {subject}
@@ -369,25 +406,72 @@ const Analiz = () => {
               </Box>
               
               {/* Study time display */}
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 0.5, backgroundColor: `${getSubjectColor(subject)}15`, p: 1.5, borderRadius: 2 }}>
-                <AccessTimeIcon sx={{ fontSize: 20, color: getSubjectColor(subject), mr: 1 }} />
-                <Typography variant="body1" color="text.primary" fontWeight={700} fontSize="1rem">
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                mb: 2, 
+                mt: 0.5, 
+                background: `linear-gradient(135deg, 
+                  rgba(255, 255, 255, 0.1) 0%, 
+                  rgba(255, 255, 255, 0.05) 100%)`,
+                backdropFilter: 'blur(10px)',
+                p: 1.5, 
+                borderRadius: '16px',
+                border: `1px solid rgba(255, 255, 255, 0.1)`,
+                boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.1)`,
+                position: 'relative',
+                zIndex: 1
+              }}>
+                <AccessTimeIcon sx={{ 
+                  fontSize: 20, 
+                  color: getSubjectColor(subject), 
+                  mr: 1,
+                  filter: `drop-shadow(0 1px 2px ${getSubjectColor(subject)}40)`
+                }} />
+                <Typography 
+                  variant="body1" 
+                  sx={{
+                    color: '#ffffff',
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                  }}
+                >
                   {formatTime(subjectData.totalTime || 0)}
                 </Typography>
               </Box>
               
               {/* Progress bar section */}
-              <Box sx={{ mt: 'auto', width: '100%', pt: 1 }}>
+              <Box sx={{ mt: 'auto', width: '100%', pt: 1, position: 'relative', zIndex: 1 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                  <Typography variant="body2" fontWeight={700} color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Typography 
+                    variant="body2" 
+                    fontWeight={700} 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                    }}
+                  >
                     {hasTarget ? (
                       <>
-                        <FlagIcon sx={{ mr: 0.5, fontSize: 18, color: getSubjectColor(subject) }} />
+                        <FlagIcon sx={{ 
+                          mr: 0.5, 
+                          fontSize: 18, 
+                          color: getSubjectColor(subject),
+                          filter: `drop-shadow(0 1px 2px ${getSubjectColor(subject)}40)`
+                        }} />
                         İlerleme
                       </>
                     ) : (
                       <>
-                        <HelpOutlineIcon sx={{ mr: 0.5, fontSize: 18, color: 'warning.main' }} />
+                        <HelpOutlineIcon sx={{ 
+                          mr: 0.5, 
+                          fontSize: 18, 
+                          color: '#ffa726',
+                          filter: 'drop-shadow(0 1px 2px rgba(255, 167, 38, 0.4))'
+                        }} />
                         Hedef Yok
                       </>
                     )}
@@ -399,10 +483,13 @@ const Analiz = () => {
                         size="small" 
                         sx={{ 
                           fontWeight: 800, 
-                          bgcolor: getSubjectColor(subject), 
+                          background: `linear-gradient(135deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}CC 100%)`,
                           color: '#ffffff',
                           fontSize: '0.8rem',
-                          height: 24
+                          height: 24,
+                          boxShadow: `0 2px 8px ${getSubjectColor(subject)}40`,
+                          border: `1px solid rgba(255, 255, 255, 0.2)`,
+                          backdropFilter: 'blur(10px)'
                         }}
                       />
                     </Tooltip>
@@ -415,12 +502,27 @@ const Analiz = () => {
                   sx={{
                     height: 10,
                     borderRadius: 5,
-                    bgcolor: 'rgba(0,0,0,0.06)',
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
                     '& .MuiLinearProgress-bar': {
-                      bgcolor: getSubjectColor(subject),
-                      backgroundImage: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`,
+                      background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}CC 100%)`,
                       borderRadius: 5,
-                      boxShadow: `0 2px 6px ${getSubjectColor(subject)}40`
+                      boxShadow: `
+                        0 0 12px ${getSubjectColor(subject)}60,
+                        inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                      `,
+                      position: 'relative',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%)`,
+                        borderRadius: 5,
+                      }
                     },
                   }}
                 />
@@ -829,7 +931,7 @@ const Analiz = () => {
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                             borderLeft: `5px solid ${getSubjectColor(subject)}`,
                             transition: 'all 0.3s ease',
                             backgroundColor: '#ede8ce',
@@ -865,9 +967,12 @@ const Analiz = () => {
                             sx={{ 
                               color: 'text.secondary', 
                               bgcolor: 'rgba(244, 67, 54, 0.1)',
+                              borderRadius: 2,
+                              transition: 'all 0.3s ease',
                               '&:hover': { 
                                 color: 'white', 
-                                bgcolor: 'error.main'
+                                bgcolor: 'error.main',
+                                transform: 'scale(1.1)'
                               } 
                             }}
                           >
@@ -885,14 +990,15 @@ const Analiz = () => {
                 alignItems: 'center',
                 p: 1.5,
                 borderRadius: 2,
-                backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                border: '1px dashed rgba(255, 193, 7, 0.5)'
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 193, 7, 0.3)'
               }}>
-                <LightbulbIcon sx={{ color: 'warning.main', mr: 1.5, fontSize: 24 }} />
+                <LightbulbIcon sx={{ color: '#ffc107', mr: 1.5, fontSize: 24 }} />
                 <Typography 
                   variant="body2" 
                   sx={{ 
-                    color: '#F57F17', 
+                    color: 'rgba(255, 255, 255, 0.9)', 
                     fontWeight: 600,
                     lineHeight: 1.5
                   }}
@@ -904,135 +1010,771 @@ const Analiz = () => {
           </Grid>
         </Grid>
       </Box>
-      <Dialog open={topicDialog} onClose={handleCloseTopicDialog} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 2, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)' } }}>
-        <DialogTitle sx={{ p: 0, position: 'relative' }}>
-          <Box sx={{ p: 2, background: selectedSubject ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getLighterColor(getSubjectColor(selectedSubject))} 100%)` : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <SchoolIcon sx={{ mr: 1.5, fontSize: 24 }} />
-              <Typography variant="h6" fontWeight={600}>{selectedSubject || 'Ders'} - Konu Detayları</Typography>
+      <Dialog 
+        open={topicDialog} 
+        onClose={handleCloseTopicDialog} 
+        fullWidth 
+        maxWidth="md" 
+        PaperProps={{ 
+          sx: { 
+            borderRadius: '24px', 
+            overflow: 'hidden', 
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+            backdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: `
+              0 20px 60px rgba(0, 0, 0, 0.3),
+              0 8px 32px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2)
+            `,
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `radial-gradient(circle at 30% 20%, ${selectedSubject ? getSubjectColor(selectedSubject) : '#3f51b5'}20 0%, transparent 60%)`,
+              pointerEvents: 'none',
+              zIndex: 0,
+            }
+          } 
+        }}
+      >
+        <DialogTitle sx={{ p: 0, position: 'relative', zIndex: 1 }}>
+          <Box sx={{ 
+            p: 3, 
+            background: selectedSubject 
+              ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 60%, ${getSubjectColor(selectedSubject)}99 100%)` 
+              : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 60%, #7986cb 100%)', 
+            color: 'white', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%)',
+              pointerEvents: 'none',
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '2px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)',
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+              <Box sx={{
+                p: 1.5,
+                borderRadius: '12px',
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                mr: 2,
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+              }}>
+                <SchoolIcon sx={{ fontSize: 28, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+              </Box>
+              <Box>
+                <Typography 
+                  variant="h5" 
+                  sx={{
+                    fontWeight: 800, 
+                    fontSize: '1.5rem',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                    filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))',
+                    letterSpacing: '-0.5px'
+                  }}
+                >
+                  {selectedSubject || 'Ders'} - Konu Detayları
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{
+                    opacity: 0.9,
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                    mt: 0.5
+                  }}
+                >
+                  Detaylı çalışma analizi
+                </Typography>
+              </Box>
             </Box>
-            <IconButton color="inherit" size="small" onClick={handleCloseTopicDialog} sx={{ bgcolor: 'rgba(255, 255, 255, 0.15)', '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.25)' } }}>
+            <IconButton 
+              color="inherit" 
+              size="small" 
+              onClick={handleCloseTopicDialog} 
+              sx={{ 
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                position: 'relative',
+                zIndex: 1,
+                '&:hover': { 
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  transform: 'scale(1.05)'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
               <CloseIcon fontSize="small" />
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ p: 0 }}>
+        <DialogContent sx={{ p: 0, position: 'relative', zIndex: 1 }}>
           {selectedSubject && analytics[selectedSubject] ? (
-            <Box sx={{ p: 3 }}>
-              <Paper elevation={0} sx={{ mb: 3, p: 2.5, borderRadius: 2, bgcolor: 'rgba(245, 247, 250, 0.95)', border: '1px solid rgba(0, 0, 0, 0.06)', boxShadow: '0 2px 12px rgba(0, 0, 0, 0.05)' }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
+            <Box sx={{ p: 4 }}>
+              <Box sx={{ 
+                mb: 4, 
+                p: 3, 
+                borderRadius: '20px',
+                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                boxShadow: `
+                  0 8px 32px rgba(0, 0, 0, 0.15),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                `,
+                position: 'relative',
+                overflow: 'hidden',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '3px',
+                  background: selectedSubject 
+                    ? `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}80 100%)`
+                    : 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%)',
+                  boxShadow: selectedSubject 
+                    ? `0 0 12px ${getSubjectColor(selectedSubject)}60`
+                    : '0 0 12px rgba(63, 81, 181, 0.6)',
+                }
+              }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Box>
-                    <Typography variant="subtitle1" fontWeight="700" color="primary.dark" gutterBottom>Toplam Çalışma Süresi</Typography>
-                    <Typography variant="h5" fontWeight="800" color={getSubjectColor(selectedSubject)}>{formatTime(analytics[selectedSubject].totalTime)}</Typography>
+                    <Typography 
+                      variant="subtitle1" 
+                      sx={{
+                        fontWeight: 700, 
+                        color: 'rgba(255, 255, 255, 0.9)', 
+                        mb: 1,
+                        textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      Toplam Çalışma Süresi
+                    </Typography>
+                    <Typography 
+                      variant="h4" 
+                      sx={{
+                        fontWeight: 800, 
+                        color: '#ffffff',
+                        textShadow: selectedSubject 
+                          ? `0 2px 8px ${getSubjectColor(selectedSubject)}60, 0 1px 2px rgba(0,0,0,0.3)`
+                          : '0 2px 8px rgba(63, 81, 181, 0.6), 0 1px 2px rgba(0,0,0,0.3)',
+                        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+                      }}
+                    >
+                      {formatTime(analytics[selectedSubject].totalTime)}
+                    </Typography>
                   </Box>
                   {studyTargets[selectedSubject] > 0 && (
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="subtitle2" fontWeight="600" color="text.secondary" gutterBottom>Hedef</Typography>
-                      <Typography variant="h6" fontWeight="700" color="text.secondary">{Math.round(studyTargets[selectedSubject] / 3600)} saat</Typography>
+                    <Box sx={{ 
+                      textAlign: 'right',
+                      p: 2,
+                      borderRadius: '16px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)'
+                    }}>
+                      <Typography 
+                        variant="subtitle2" 
+                        sx={{
+                          fontWeight: 600, 
+                          color: 'rgba(255, 255, 255, 0.8)', 
+                          mb: 0.5,
+                          textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        Hedef
+                      </Typography>
+                      <Typography 
+                        variant="h6" 
+                        sx={{
+                          fontWeight: 700, 
+                          color: '#ffffff',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                        }}
+                      >
+                        {Math.round(studyTargets[selectedSubject] / 3600)} saat
+                      </Typography>
                     </Box>
                   )}
                 </Box>
-                <Box sx={{ mt: 2, mb: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                    <Typography variant="caption" fontWeight="600" color="text.secondary">İlerleme</Typography>
-                    <Typography variant="caption" fontWeight="700" color={getSubjectColor(selectedSubject)}>{calculateProgress(analytics[selectedSubject].totalTime, selectedSubject)}%</Typography>
+                <Box sx={{ mt: 3 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{
+                        fontWeight: 600, 
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      İlerleme
+                    </Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{
+                        fontWeight: 700, 
+                        color: '#ffffff',
+                        textShadow: selectedSubject 
+                          ? `0 1px 2px ${getSubjectColor(selectedSubject)}60`
+                          : '0 1px 2px rgba(63, 81, 181, 0.6)'
+                      }}
+                    >
+                      {calculateProgress(analytics[selectedSubject].totalTime, selectedSubject)}%
+                    </Typography>
                   </Box>
                   <LinearProgress
                     variant="determinate"
                     value={calculateProgress(analytics[selectedSubject].totalTime, selectedSubject)}
                     sx={{
-                      height: 10,
+                      height: 12,
                       borderRadius: 6,
-                      bgcolor: 'rgba(255,255,255,0.32)',
-                      boxShadow: '0 1px 4px rgba(31,38,135,0.10)',
+                      bgcolor: 'rgba(255, 255, 255, 0.15)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
                       '& .MuiLinearProgress-bar': {
-                        bgcolor: getSubjectColor(selectedSubject),
-                        backgroundImage: `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getLighterColor(getSubjectColor(selectedSubject))} 100%)`,
+                        background: selectedSubject 
+                          ? `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 100%)`
+                          : 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%)',
                         borderRadius: 6,
-                        boxShadow: '0 1px 6px rgba(31,38,135,0.08)',
+                        boxShadow: selectedSubject 
+                          ? `0 0 16px ${getSubjectColor(selectedSubject)}60, inset 0 1px 0 rgba(255, 255, 255, 0.3)`
+                          : '0 0 16px rgba(63, 81, 181, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                        position: 'relative',
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.3) 50%, transparent 100%)',
+                          borderRadius: 6,
+                        }
                       },
                     }}
                   />
                 </Box>
-              </Paper>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, pb: 1.5, borderBottom: '1px solid rgba(0, 0, 0, 0.08)' }}>
-                <FormatListBulletedIcon sx={{ mr: 1, color: getSubjectColor(selectedSubject) }} />
-                <Typography variant="subtitle1" fontWeight="700" color="text.primary">Konu Bazlı Çalışma Süreleri</Typography>
+              </Box>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                mb: 3, 
+                pb: 2, 
+                borderBottom: '1px solid rgba(255, 255, 255, 0.15)'
+              }}>
+                <Box sx={{
+                  p: 1.5,
+                  borderRadius: '12px',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  mr: 2
+                }}>
+                  <FormatListBulletedIcon sx={{ 
+                    color: selectedSubject ? getSubjectColor(selectedSubject) : '#3f51b5',
+                    filter: selectedSubject 
+                      ? `drop-shadow(0 1px 2px ${getSubjectColor(selectedSubject)}40)`
+                      : 'drop-shadow(0 1px 2px rgba(63, 81, 181, 0.4))'
+                  }} />
+                </Box>
+                <Typography 
+                  variant="h6" 
+                  sx={{
+                    fontWeight: 700, 
+                    color: '#ffffff',
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                  }}
+                >
+                  Konu Bazlı Çalışma Süreleri
+                </Typography>
               </Box>
               {sortedTopics.length > 0 ? (
-                <Box sx={{ maxHeight: '300px', overflowY: 'auto', pr: 1 }}>
-                  {sortedTopics.map(topic => (
-                    <Paper
+                <Box sx={{ 
+                  maxHeight: '400px', 
+                  overflowY: 'auto', 
+                  pr: 1,
+                  '&::-webkit-scrollbar': {
+                    width: '8px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: selectedSubject 
+                      ? `linear-gradient(180deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 100%)`
+                      : 'linear-gradient(180deg, #3f51b5 0%, #5c6bc0 100%)',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: selectedSubject 
+                      ? `linear-gradient(180deg, ${getSubjectColor(selectedSubject)}DD 0%, ${getSubjectColor(selectedSubject)}AA 100%)`
+                      : 'linear-gradient(180deg, #5c6bc0 0%, #7986cb 100%)',
+                  }
+                }}>
+                  {sortedTopics.map((topic, index) => (
+                    <Box
                       key={topic}
-                      elevation={0}
                       sx={{
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        p: 2,
-                        borderRadius: 2,
-                        mb: 1.5,
-                        bgcolor: 'white',
-                        border: '1px solid rgba(0, 0, 0, 0.06)',
-                        boxShadow: '0 1px 4px rgba(0, 0, 0, 0.03)',
-                        transition: 'all 0.2s ease',
-                        '&:hover': { boxShadow: '0 3px 8px rgba(0, 0, 0, 0.08)', borderColor: 'rgba(0, 0, 0, 0.12)', transform: 'translateY(-2px)' },
+                        p: 2.5,
+                        borderRadius: '16px',
+                        mb: 2,
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&:hover': { 
+                          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                          borderColor: 'rgba(255, 255, 255, 0.2)',
+                          transform: 'translateY(-2px) scale(1.01)'
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '4px',
+                          height: '100%',
+                          background: selectedSubject 
+                            ? `linear-gradient(180deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}80 100%)`
+                            : 'linear-gradient(180deg, #3f51b5 0%, #5c6bc0 100%)',
+                          boxShadow: selectedSubject 
+                            ? `0 0 8px ${getSubjectColor(selectedSubject)}60`
+                            : '0 0 8px rgba(63, 81, 181, 0.6)',
+                        }
                       }}
                     >
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: getSubjectColor(selectedSubject), mr: 1.5 }} />
-                        <Typography fontWeight={600} fontSize="0.95rem">{topic}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', pl: 1 }}>
+                        <Box sx={{ 
+                          width: 12, 
+                          height: 12, 
+                          borderRadius: '50%', 
+                          background: selectedSubject 
+                            ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 100%)`
+                            : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
+                          mr: 2,
+                          boxShadow: selectedSubject 
+                            ? `0 2px 8px ${getSubjectColor(selectedSubject)}40`
+                            : '0 2px 8px rgba(63, 81, 181, 0.4)',
+                          border: '2px solid rgba(255, 255, 255, 0.3)'
+                        }} />
+                        <Typography 
+                          sx={{
+                            fontWeight: 600, 
+                            fontSize: '1rem',
+                            color: '#ffffff',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                          }}
+                        >
+                          {topic}
+                        </Typography>
                       </Box>
                       <Chip
                         label={formatTime(analytics[selectedSubject].topics[topic])}
-                        size="small"
-                        sx={{ fontWeight: 700, bgcolor: `${getSubjectColor(selectedSubject)}15`, color: getSubjectColor(selectedSubject), border: `1px solid ${getSubjectColor(selectedSubject)}30` }}
+                        size="medium"
+                        sx={{ 
+                          fontWeight: 700, 
+                          background: selectedSubject 
+                            ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 100%)`
+                            : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
+                          color: '#ffffff',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          backdropFilter: 'blur(10px)',
+                          boxShadow: selectedSubject 
+                            ? `0 2px 8px ${getSubjectColor(selectedSubject)}40`
+                            : '0 2px 8px rgba(63, 81, 181, 0.4)',
+                          textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                          '&:hover': {
+                            transform: 'scale(1.05)',
+                            boxShadow: selectedSubject 
+                              ? `0 4px 12px ${getSubjectColor(selectedSubject)}50`
+                              : '0 4px 12px rgba(63, 81, 181, 0.5)',
+                          }
+                        }}
                       />
-                    </Paper>
+                    </Box>
                   ))}
                 </Box>
               ) : (
-                <Paper elevation={0} sx={{ p: 3, borderRadius: 3, textAlign: 'center' }}>
-                  <Typography color="text.secondary">Bu derse ait konu bazlı analiz bulunamadı.</Typography>
-                </Paper>
+                <Box sx={{ 
+                  p: 4, 
+                  borderRadius: '20px', 
+                  textAlign: 'center',
+                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(255, 255, 255, 0.12)'
+                }}>
+                  <Typography 
+                    sx={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    Bu derse ait konu bazlı analiz bulunamadı.
+                  </Typography>
+                </Box>
               )}
             </Box>
           ) : (
-            <Box sx={{ p: 3, textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">Lütfen bir ders seçin.</Typography>
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography 
+                variant="body2" 
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)'
+                }}
+              >
+                Lütfen bir ders seçin.
+              </Typography>
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2, justifyContent: 'center' }}>
-          <Button variant="contained" onClick={handleCloseTopicDialog} sx={{ fontWeight: 600, px: 4, borderRadius: 2 }}>Kapat</Button>
+        <DialogActions sx={{ 
+          p: 3, 
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 1,
+          borderTop: '1px solid rgba(255, 255, 255, 0.15)'
+        }}>
+          <Button 
+            variant="contained" 
+            onClick={handleCloseTopicDialog} 
+            sx={{ 
+              fontWeight: 700, 
+              px: 6, 
+              py: 1.5,
+              borderRadius: '16px',
+              fontSize: '1rem',
+              background: selectedSubject 
+                ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 100%)`
+                : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: selectedSubject 
+                ? `0 4px 16px ${getSubjectColor(selectedSubject)}40`
+                : '0 4px 16px rgba(63, 81, 181, 0.4)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              '&:hover': {
+                background: selectedSubject 
+                  ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)}DD 0%, ${getSubjectColor(selectedSubject)}AA 100%)`
+                  : 'linear-gradient(135deg, #5c6bc0 0%, #7986cb 100%)',
+                transform: 'translateY(-2px) scale(1.05)',
+                boxShadow: selectedSubject 
+                  ? `0 8px 24px ${getSubjectColor(selectedSubject)}50`
+                  : '0 8px 24px rgba(63, 81, 181, 0.5)',
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            Kapat
+          </Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={lowHoursDialog} onClose={() => setLowHoursDialog(false)} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ bgcolor: '#ffb300', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.5 }}>
-          <Typography variant="h6" fontWeight={700}>Hedef Süre Uyarısı</Typography>
-          <Button color="inherit" size="small" onClick={() => setLowHoursDialog(false)} sx={{ minWidth: 'auto', p: 0.5 }}>
-            <CloseIcon />
-          </Button>
-        </DialogTitle>
-        <DialogContent dividers sx={{ p: 3, background: 'linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%)', borderRadius: 3, boxShadow: '0 2px 12px rgba(31,38,135,0.10)' }}>
-          <Box sx={{ textAlign: 'center' }}>
-            <Box sx={{ mb: 2 }}>
-              <Typography variant="h6" color="error.main" gutterBottom fontWeight="bold">Üzgünüm :(</Typography>
+      <Dialog 
+        open={lowHoursDialog} 
+        onClose={() => setLowHoursDialog(false)} 
+        fullWidth 
+        maxWidth="sm"
+        PaperProps={{ 
+          sx: { 
+            borderRadius: '24px', 
+            overflow: 'hidden', 
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+            backdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: `
+              0 20px 60px rgba(0, 0, 0, 0.3),
+              0 8px 32px rgba(0, 0, 0, 0.2),
+              inset 0 1px 0 rgba(255, 255, 255, 0.2)
+            `,
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(circle at 30% 20%, #ff930020 0%, transparent 60%)',
+              pointerEvents: 'none',
+              zIndex: 0,
+            }
+          } 
+        }}
+      >
+        <DialogTitle sx={{ p: 0, position: 'relative', zIndex: 1 }}>
+          <Box sx={{ 
+            p: 3, 
+            background: 'linear-gradient(135deg, #ff9300 0%, #ffb300 60%, #ffc107 100%)', 
+            color: 'white', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%)',
+              pointerEvents: 'none',
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '2px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)',
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+              <Box sx={{
+                p: 1.5,
+                borderRadius: '16px',
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                mr: 2,
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+              }}>
+                <WarningIcon sx={{ fontSize: 28, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+              </Box>
+              <Box>
+                <Typography 
+                  variant="h5" 
+                  sx={{
+                    fontWeight: 800, 
+                    fontSize: '1.5rem',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                    filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))',
+                    letterSpacing: '-0.5px'
+                  }}
+                >
+                  Hedef Süre Uyarısı
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  sx={{
+                    opacity: 0.9,
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                    mt: 0.5
+                  }}
+                >
+                  Çalışma hedefi kontrolü
+                </Typography>
+              </Box>
             </Box>
-            <Typography variant="body1" color="text.primary" paragraph>
-              Herhangi bir derse 1 ay içinde 10 saatten az çalışma hedefi belirlemeni kabul edemiyorum. Bu sadece seni sıralamada geriye atar.
-            </Typography>
-            <Typography variant="body1" color="text.primary" paragraph fontWeight="medium">
-              Biz tamamen ileriye yönelik akıllıca program yapmalıyız.
-            </Typography>
-            <Typography variant="body1" color="primary.main" paragraph fontWeight="bold" sx={{ mt: 2 }}>
-              Unutma! Ne kadar ileriye gidebileceğini sadece ileriye giderek görebilirsin.
-            </Typography>
-            <Typography variant="body1" color="success.main" fontWeight="bold">Sana güveniyorum.</Typography>
+            <IconButton 
+              color="inherit" 
+              size="small" 
+              onClick={() => setLowHoursDialog(false)} 
+              sx={{ 
+                background: 'rgba(255, 255, 255, 0.15)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                position: 'relative',
+                zIndex: 1,
+                '&:hover': { 
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  transform: 'scale(1.05)'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, position: 'relative', zIndex: 1 }}>
+          <Box sx={{ 
+            p: 4,
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            borderRadius: '20px',
+            m: 3,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            position: 'relative',
+            overflow: 'hidden',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '3px',
+              background: 'linear-gradient(90deg, #ff9300 0%, #ffb300 100%)',
+              boxShadow: '0 0 12px rgba(255, 147, 0, 0.6)',
+            }
+          }}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Box sx={{ 
+                mb: 3,
+                p: 2,
+                borderRadius: '16px',
+                background: 'rgba(255, 147, 0, 0.1)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255, 147, 0, 0.2)',
+                display: 'inline-block'
+              }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{
+                    color: '#ff9300',
+                    fontWeight: 800,
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                    filter: 'drop-shadow(0 1px 2px rgba(255, 147, 0, 0.3))'
+                  }}
+                >
+                  Üzgünüm :(
+                </Typography>
+              </Box>
+              <Typography 
+                variant="body1" 
+                sx={{
+                  color: '#ffffff',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  mb: 2,
+                  lineHeight: 1.6,
+                  fontSize: '1.1rem'
+                }}
+              >
+                Herhangi bir derse 1 ay içinde 10 saatten az çalışma hedefi belirlemeni kabul edemiyorum. Bu sadece seni sıralamada geriye atar.
+              </Typography>
+              <Typography 
+                variant="body1" 
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  mb: 3,
+                  fontWeight: 600,
+                  lineHeight: 1.6,
+                  fontSize: '1.1rem'
+                }}
+              >
+                Biz tamamen ileriye yönelik akıllıca program yapmalıyız.
+              </Typography>
+              <Box sx={{
+                p: 3,
+                borderRadius: '16px',
+                background: 'linear-gradient(145deg, rgba(63, 81, 181, 0.15) 0%, rgba(63, 81, 181, 0.08) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(63, 81, 181, 0.2)',
+                mb: 3,
+                boxShadow: '0 4px 16px rgba(63, 81, 181, 0.1)'
+              }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{
+                    color: '#3f51b5',
+                    fontWeight: 800,
+                    textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                    filter: 'drop-shadow(0 1px 2px rgba(63, 81, 181, 0.3))',
+                    fontSize: '1.2rem',
+                    lineHeight: 1.5
+                  }}
+                >
+                  Unutma! Ne kadar ileriye gidebileceğini sadece ileriye giderek görebilirsin.
+                </Typography>
+              </Box>
+              <Box sx={{
+                p: 2,
+                borderRadius: '12px',
+                background: 'linear-gradient(145deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.08) 100%)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(76, 175, 80, 0.2)',
+                display: 'inline-block'
+              }}>
+                <Typography 
+                  variant="body1" 
+                  sx={{
+                    color: '#4caf50',
+                    fontWeight: 800,
+                    textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                    filter: 'drop-shadow(0 1px 2px rgba(76, 175, 80, 0.3))',
+                    fontSize: '1.1rem'
+                  }}
+                >
+                  Sana güveniyorum.
+                </Typography>
+              </Box>
+            </Box>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2, justifyContent: 'center' }}>
-          <Button variant="contained" onClick={() => setLowHoursDialog(false)} sx={{ fontWeight: 600, px: 4, borderRadius: 2 }}>Anladım</Button>
+        <DialogActions sx={{ 
+          p: 3, 
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 1,
+          borderTop: '1px solid rgba(255, 255, 255, 0.15)'
+        }}>
+          <Button 
+            variant="contained" 
+            onClick={() => setLowHoursDialog(false)} 
+            sx={{ 
+              fontWeight: 700, 
+              px: 6, 
+              py: 1.5,
+              borderRadius: '16px',
+              fontSize: '1rem',
+              background: 'linear-gradient(135deg, #ff9300 0%, #ffb300 100%)',
+              color: '#ffffff',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(10px)',
+              boxShadow: '0 4px 16px rgba(255, 147, 0, 0.4)',
+              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #ffb300 0%, #ffc107 100%)',
+                transform: 'translateY(-2px) scale(1.05)',
+                boxShadow: '0 8px 24px rgba(255, 147, 0, 0.5)',
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            Anladım
+          </Button>
         </DialogActions>
       </Dialog>
       <Snackbar

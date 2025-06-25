@@ -3,6 +3,7 @@ import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -10,7 +11,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from './firebase';
@@ -25,11 +26,11 @@ import './styles/global.css';
 // Components
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Home from './pages/Home';
 import Analytics from './pages/Analytics';
-import PomodoroPage from './pages/PomodoroPage';
 import TytAytNetTakibi from './pages/TytAytNetTakibi';
 import DersProgrami from './pages/DersProgrami';
 import Analiz from './pages/Analiz';
@@ -127,23 +128,6 @@ const App = () => {
     }
   }, [user, loading]);
 
-  // Protected route component
-  const ProtectedRoute = ({ children }) => {
-    const navigate = useNavigate();
-    
-    if (loading) return <div>Loading...</div>;
-    
-    if (!user) {
-      // React Router v7 için startTransition kullanımı
-      React.startTransition(() => {
-        navigate('/login', { replace: true });
-      });
-      return null;
-    }
-    
-    return children;
-  };
-
   // Sidebar açık/kapalı durumunu yönetmek için state
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -156,7 +140,8 @@ const App = () => {
     <ThemeProvider>
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        <NotificationProvider>
+        <AuthProvider>
+          <NotificationProvider>
         {/* Mobil cihaz uyarı diyaloğu */}
         <Dialog
           open={mobileWarningOpen}
@@ -215,7 +200,7 @@ const App = () => {
           </DialogActions>
         </Dialog>
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: 'var(--background-color)', minHeight: '100vh', position: 'relative' }}>
+        <Box sx={{ display: 'flex', bgcolor: '#1b293d', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
@@ -223,13 +208,13 @@ const App = () => {
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
               overflow: 'auto',
-              bgcolor: 'var(--background-color)',
+              bgcolor: '#1b293d',
               transition: theme => theme.transitions.create(['margin', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
               }),
-              marginLeft: '60px',
-              width: 'calc(100% - 60px)',
+              marginLeft: '80px',
+              width: 'calc(100% - 80px)',
             }}
           >
             <Header handleDrawerToggle={handleDrawerToggle} sidebarOpen={sidebarOpen} />
@@ -237,7 +222,6 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
                 <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
-                <Route path="/pomodoro" element={<ProtectedRoute><PomodoroPage /></ProtectedRoute>} />
                 <Route path="/tyt-ayt-net-takibi" element={<ProtectedRoute><TytAytNetTakibi /></ProtectedRoute>} />
                 <Route path="/performans" element={<ProtectedRoute><DersProgrami /></ProtectedRoute>} />
                 <Route path="/analiz" element={<ProtectedRoute><Analiz /></ProtectedRoute>} />
@@ -256,9 +240,9 @@ const App = () => {
                         position: 'absolute',
                         top: 0,
                         left: 0,
-                        width: '60px', // Sidebar genişliği
+                        width: '80px', // Sidebar genişliği
                         height: '100%',
-                        backgroundColor: 'var(--background-color)',
+                        backgroundColor: '#1b293d',
                         zIndex: 1,
                       },
                       '&::after': {
@@ -268,7 +252,7 @@ const App = () => {
                         right: 0,
                         width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
                         height: '100%',
-                        backgroundColor: 'var(--background-color)',
+                        backgroundColor: '#1b293d',
                         zIndex: 1,
                         '@media (max-width: 1200px)': {
                           width: '0px',
@@ -296,8 +280,9 @@ const App = () => {
         </Routes>
       )}
         </NotificationProvider>
-      </MuiThemeProvider>
-    </ThemeProvider>
+      </AuthProvider>
+    </MuiThemeProvider>
+  </ThemeProvider>
   );
 };
 

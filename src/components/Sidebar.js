@@ -3,14 +3,11 @@ import ReactDOM from 'react-dom';
 import { 
   Box, 
   Drawer, 
-  List, 
-  ListItemButton, 
-  ListItemIcon
+  List
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import HomeIcon from '@mui/icons-material/Home';
-import TimerIcon from '@mui/icons-material/Timer';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 
@@ -20,24 +17,6 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import LanguageIcon from '@mui/icons-material/Language';
-
-
-const drawerWidth = 70;
-
-
-
-const closedMixin = (theme) => ({
-  transition: theme.transitions.create('width', {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  overflowX: 'hidden',
-  width: `${drawerWidth}px`,
-  background: 'var(--sidebar-bg-color, #f4f2f5)',
-  borderRight: 'none',
-  boxShadow: '2px 0 15px 0 var(--shadow-color, rgba(0,0,0,0.1))',
-  position: 'relative',
-});
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -49,12 +28,16 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'open' })(
   ({ theme, open }) => ({
-    width: drawerWidth,
+    width: 80,
     flexShrink: 0,
-    whiteSpace: 'nowrap',
-    boxSizing: 'border-box',
     '& .MuiDrawer-paper': {
-      ...closedMixin(theme),
+      width: 80,
+      boxSizing: 'border-box',
+      backgroundColor: '#1b293d',
+      color: '#ffffff',
+      overflowX: 'hidden',
+      borderRight: 'none',
+      boxShadow: '2px 0 10px rgba(0, 0, 0, 0.3)',
     },
   }),
 );
@@ -68,7 +51,6 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
   // Menü öğeleri - Canlı ve modern renkler
   const menuItems = React.useMemo(() => [
     { text: 'Anasayfa', icon: <HomeIcon />, path: '/', color: '#2196F3' }, // Canlı Mavi
-    { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro', color: '#E91E63' }, // Canlı Pembe
     { text: 'TYT/AYT Net', icon: <AssessmentIcon />, path: '/tyt-ayt-net-takibi', color: '#FFC107' }, // Canlı Sarı
     { text: 'Ders Programı', icon: <CalendarMonthIcon />, path: '/performans', color: '#FF9800' }, // Canlı Turuncu
     { text: 'Analizler', icon: <InsightsIcon />, path: '/analiz', color: '#4CAF50' }, // Canlı Yeşil
@@ -130,23 +112,51 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
         {menuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
-            <Box 
-              key={item.text} 
+            <Box
+              key={item.text}
               id={`sidebar-item-${item.text}`}
+              sx={{
+                position: 'relative',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                cursor: 'pointer',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                borderRadius: '16px',
+                padding: '12px 8px',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  '& .icon-container': {
+                    transform: 'scale(1.1)',
+                    background: `linear-gradient(135deg, ${item.color}20, ${item.color}10)`,
+                    boxShadow: `0 8px 25px ${item.color}30, 0 4px 10px rgba(0,0,0,0.1)`,
+                  }
+                }
+              }}
+              onMouseEnter={() => setHoveredItem(item.text)}
+              onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => navigate(item.path)}
             >
-              <ListItemButton
-                id={`sidebar-item-${item.text}`}
-                onClick={() => navigate(item.path)}
-                onMouseEnter={() => setHoveredItem(item.text)}
-                onMouseLeave={() => setHoveredItem(null)}
+              <Box
+                className="icon-container"
                 sx={{
-                  minHeight: 42,
+                  display: 'flex',
                   justifyContent: 'center',
-                  p: 0.5,
-                  borderRadius: '10px',
+                  alignItems: 'center',
+                  width: 52,
+                  height: 52,
+                  borderRadius: '16px',
+                  background: isActive 
+                    ? `linear-gradient(135deg, ${item.color}25, ${item.color}15)` 
+                    : 'rgba(255, 255, 255, 0.05)',
+                  border: isActive 
+                    ? `2px solid ${item.color}50` 
+                    : '2px solid rgba(255, 255, 255, 0.1)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                   position: 'relative',
-                  zIndex: 1,
                   overflow: 'hidden',
+                  backdropFilter: 'blur(10px)',
                   '&::before': {
                     content: '""',
                     position: 'absolute',
@@ -154,42 +164,43 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: `linear-gradient(135deg, ${item.color}10, ${item.color}20)`,
-                    opacity: 0,
-                    transition: 'opacity 0.3s ease',
-                    zIndex: -1,
+                    background: isActive 
+                      ? `linear-gradient(45deg, ${item.color}15, transparent)` 
+                      : 'transparent',
                     borderRadius: '14px',
+                    transition: 'all 0.3s ease',
                   },
-                  '&:hover': {
-                    '&::before': {
-                      opacity: 1,
-                    },
-                    backgroundColor: 'rgba(0,0,0,0.03)',
-                  },
+                  '&::after': isActive ? {
+                    content: '""',
+                    position: 'absolute',
+                    left: '-2px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '4px',
+                    height: '70%',
+                    background: `linear-gradient(to bottom, ${item.color}, ${item.color}80)`,
+                    borderRadius: '0 2px 2px 0',
+                    boxShadow: `0 0 12px ${item.color}60`,
+                  } : {},
                 }}
               >
-                <ListItemIcon
+                <Box
                   sx={{
-                    color: item.color,
+                    color: isActive ? item.color : item.color,
                     fontSize: 28,
-                    opacity: isActive ? 1 : 0.9,
-                    filter: isActive ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.15))' : 'none',
-                    backgroundColor: '#f4f2f5',
+                    opacity: isActive ? 1 : 0.8,
+                    filter: isActive ? `drop-shadow(0 3px 6px ${item.color}40)` : `drop-shadow(0 2px 4px ${item.color}20)`,
+                    transition: 'all 0.3s ease',
                     position: 'relative',
-                    zIndex: 1,
-                    padding: '8px',
-                    borderRadius: '50%',
-                    border: isActive ? `1px solid ${item.color}40` : '1px solid rgba(255,255,255,0.2)',
-                    transition: 'all 0.2s ease',
-                    minWidth: 'auto', // Minimum genişliği kaldır
-                    '& .MuiSvgIcon-root': {
-                      fontSize: 28,
-                    }
+                    zIndex: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
                   {item.icon}
-                </ListItemIcon>
-              </ListItemButton>
+                </Box>
+              </Box>
               
               {hoveredItem === item.text && (() => {
                 // Element kontrolünü ReactDOM.createPortal'dan önce yapıyoruz
@@ -197,56 +208,68 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 if (!element) return null; // Element yoksa tooltip gösterme
                 
                 const rect = element.getBoundingClientRect();
-                const topPosition = rect.top + rect.height/2 - 15;
+                const topPosition = rect.top + rect.height/2 - 25;
                 
                 return ReactDOM.createPortal(
                 <Box
                   sx={{
                     position: 'fixed',
-                    left: `${drawerWidth + 10}px`,
-                    top: topPosition, // Hesaplanmış değeri doğrudan kullanıyoruz
+                    left: `${80 + 15}px`,
+                    top: topPosition,
                     transform: 'translateY(-50%)',
-                    background: `linear-gradient(135deg, ${item.color}15, ${item.color}25)`,
-                    boxShadow: `0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.12)`,
-                    border: `1px solid ${item.color}40`,
-                    backdropFilter: 'blur(8px)',
-                    borderRadius: '14px',
-                    padding: '10px 18px',
+                    background: `linear-gradient(135deg, ${item.color}20, ${item.color}10, rgba(255,255,255,0.95))`,
+                    boxShadow: `0 8px 32px ${item.color}30, 0 4px 16px rgba(0,0,0,0.1)`,
+                    border: `2px solid ${item.color}30`,
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '20px',
+                    padding: '12px 20px',
                     zIndex: 9999,
                     whiteSpace: 'nowrap',
-                    fontWeight: 600,
-                    color: '#2a5956',
+                    fontWeight: 700,
+                    color: item.color,
                     fontFamily: 'Poppins, Montserrat, sans-serif',
-                    fontSize: '0.9rem',
-                    letterSpacing: '0.3px',
+                    fontSize: '1rem',
+                    letterSpacing: '0.5px',
                     pointerEvents: 'none',
                     display: 'flex',
                     alignItems: 'center',
-                    minWidth: '120px',
+                    minWidth: '140px',
                     justifyContent: 'center',
+                    textShadow: `0 1px 2px ${item.color}20`,
                     '&::before': {
                       content: '""',
                       position: 'absolute',
-                      left: '-8px',
+                      left: '-10px',
                       top: '50%',
                       transform: 'translateY(-50%)',
                       width: 0,
                       height: 0,
-                      borderTop: '8px solid transparent',
-                      borderBottom: '8px solid transparent',
-                      boxShadow: isActive ? `0 4px 12px ${item.color}30` : '0 2px 8px rgba(0,0,0,0.03)',
-                      borderRight: `8px solid ${item.color}40`,
+                      borderTop: '10px solid transparent',
+                      borderBottom: '10px solid transparent',
+                      borderRight: `10px solid ${item.color}30`,
+                      filter: 'drop-shadow(-2px 0 4px rgba(0,0,0,0.1))',
                       zIndex: 2
                     },
-                    animation: 'tooltipFadeIn 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                    '@keyframes tooltipFadeIn': {
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: `linear-gradient(45deg, ${item.color}05, transparent, ${item.color}05)`,
+                      borderRadius: '18px',
+                      zIndex: -1,
+                    },
+                    animation: 'tooltipSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    '@keyframes tooltipSlideIn': {
                       '0%': {
                         opacity: 0,
-                        transform: 'translateY(-50%) translateX(-15px) scale(0.95)'
+                        transform: 'translateY(-50%) translateX(-20px) scale(0.8) rotateY(-10deg)',
                       },
                       '100%': {
                         opacity: 1,
-                        transform: 'translateY(-50%) translateX(0) scale(1)'
+                        transform: 'translateY(-50%) translateX(0) scale(1) rotateY(0deg)',
                       }
                     }
                   }}
@@ -254,24 +277,33 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                   <Box
                     component="span"
                     sx={{
-                      display: 'inline-block',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 1,
                       position: 'relative',
-                      '&::after': {
+                      '&::before': {
                         content: '""',
                         position: 'absolute',
-                        width: '100%',
-                        height: '2px',
-                        bottom: '-2px',
-                        left: 0,
-                        background: isActive ? `${item.color}30` : 'rgba(255,255,255,0.1)',
-                        transform: 'scaleX(0)',
-                        transformOrigin: 'bottom right',
-                        transition: 'transform 0.3s ease-out',
+                        width: '6px',
+                        height: '6px',
+                        borderRadius: '50%',
+                        background: item.color,
+                        left: '-12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        boxShadow: `0 0 8px ${item.color}60`,
+                        animation: 'pulse 2s infinite',
                       },
-                      '&:hover::after': {
-                        transform: 'scaleX(1)',
-                        transformOrigin: 'bottom left',
-                      },
+                      '@keyframes pulse': {
+                        '0%, 100%': {
+                          opacity: 1,
+                          transform: 'translateY(-50%) scale(1)',
+                        },
+                        '50%': {
+                          opacity: 0.7,
+                          transform: 'translateY(-50%) scale(1.2)',
+                        }
+                      }
                     }}
                   >
                     {item.text}

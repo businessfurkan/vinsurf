@@ -1,691 +1,537 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button,
-  CircularProgress,
-  Divider,
+import React, { useState } from 'react';
+import {
+  Box,
   TextField,
+  Button,
+  Typography,
   InputAdornment,
   IconButton,
-  Link
+  Link,
+  Paper,
+  Alert
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { motion } from 'framer-motion';
-import GoogleIcon from '@mui/icons-material/Google';
-import SchoolIcon from '@mui/icons-material/School';
-import EmailIcon from '@mui/icons-material/Email';
-import LockIcon from '@mui/icons-material/Lock';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import AssessmentIcon from '@mui/icons-material/Assessment';
-import ListAltIcon from '@mui/icons-material/ListAlt';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  Email,
+  Lock,
+  Visibility,
+  VisibilityOff,
+  School,
+  Analytics,
+  Schedule,
+  Assignment,
+  TrendingUp
+} from '@mui/icons-material';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
-// Styled components
-const LoginContainer = styled(Box)(({ theme }) => ({
-  display: 'flex',
+// Ana container - tam ekran
+const LoginContainer = styled(Box)({
   minHeight: '100vh',
-  width: '100%',
+  background: '#0f0f23',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '40px',
   position: 'relative',
   overflow: 'hidden',
-  backgroundColor: 'var(--background-color, #f5f7ff)',
-  flexDirection: 'row', // Yatay düzen
-  [theme.breakpoints.down('md')]: {
-    flexDirection: 'column', // Mobil cihazlarda dikey düzen
-  },
-}));
-
-// Arka plan için animasyonlu gradient
-const AnimatedBackground = styled(Box)({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundSize: '400% 400%',
-  animation: 'gradient 15s ease infinite',
-  opacity: 0.8,
-  zIndex: -1,
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: 'var(--overlay-color, rgba(255, 255, 255, 0.85))',
-    backdropFilter: 'blur(4px)',
-    zIndex: -1,
-  },
-  '@keyframes gradient': {
-    '0%': {
-      backgroundPosition: '0% 50%',
-    },
-    '50%': {
-      backgroundPosition: '100% 50%',
-    },
-    '100%': {
-      backgroundPosition: '0% 50%',
-    },
-  },
 });
 
-const LoginSection = styled(Box)(({ theme }) => ({
-  flex: '0 0 50%',
+// Ana layout container
+const MainLayout = styled(Box)({
+  display: 'flex',
+  width: '100%',
+  maxWidth: '1400px',
+  height: '700px',
+  gap: '60px',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+// Sol taraf - Login kartı
+const LoginCard = styled(Paper)({
+  background: '#0f0f23',
+  borderRadius: '24px',
+  padding: '48px 40px',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3), 0 8px 16px rgba(0, 0, 0, 0.2)',
+  width: '420px',
+  height: 'fit-content',
+  position: 'relative',
+});
+
+// Sağ taraf - Bilgi bölümü
+const InfoSection = styled(Box)({
+  flex: 1,
+  maxWidth: '800px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
-  padding: theme.spacing(4),
-  [theme.breakpoints.down('md')]: {
-    flex: '0 0 100%',
-    padding: theme.spacing(2),
-  },
-}));
+  alignItems: 'center',
+  textAlign: 'center',
+});
 
-const FeatureSection = styled(Box)(({ theme }) => ({
-  flex: '0 0 50%',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  padding: theme.spacing(4),
-  [theme.breakpoints.down('md')]: {
-    flex: '0 0 100%',
-    padding: theme.spacing(2),
-  },
-}));
+// Başlık bölümü
+const HeaderSection = styled(Box)({
+  marginBottom: '60px',
+});
 
-// Giriş formu için bileşen - Daha modern ve interaktif
+// Özellik kartları container
+const FeaturesGrid = styled(Box)({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
+  gap: '24px',
+  width: '100%',
+  maxWidth: '700px',
+});
+
+// Form input alanları
 const StyledTextField = styled(TextField)({
+  marginBottom: '24px',
   '& .MuiOutlinedInput-root': {
     borderRadius: '16px',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
     '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+      border: '1px solid rgba(255, 255, 255, 0.2)',
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
-    },
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#4747e1',
     },
     '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      border: '1px solid #667eea',
       transform: 'translateY(-2px)',
-      boxShadow: '0 8px 20px rgba(71, 71, 225, 0.15)',
+      boxShadow: '0 8px 20px rgba(102, 126, 234, 0.2)',
     },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#4747e1',
-      borderWidth: '2px',
+    '& fieldset': {
+      border: 'none',
     },
   },
-  '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: '#e0e0e0',
+  '& .MuiInputLabel-root': {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: '14px',
+    fontWeight: 500,
+    '&.Mui-focused': {
+      color: '#667eea',
+    },
+  },
+  '& .MuiOutlinedInput-input': {
+    color: '#ffffff',
+    fontSize: '16px',
+    padding: '18px 20px',
   },
 });
 
-// Giriş butonu için bileşen - Daha modern ve interaktif
+// Login butonu
 const LoginButton = styled(Button)({
   borderRadius: '16px',
-  padding: '14px',
-  background: 'linear-gradient(45deg, #4747e1, #6b6bf9)',
-  color: 'white',
-  fontWeight: 600,
-  textTransform: 'none',
-  boxShadow: '0 8px 16px rgba(71, 71, 225, 0.25)',
-  transition: 'all 0.3s ease',
-  position: 'relative',
-  overflow: 'hidden',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: '-100%',
-    width: '100%',
-    height: '100%',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-    transition: 'all 0.5s ease',
-  },
-  '&:hover': {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 12px 20px rgba(71, 71, 225, 0.35)',
-    '&::before': {
-      left: '100%',
-    },
-  },
-  '&:active': {
-    transform: 'translateY(0)',
-  },
-});
-
-// Google giriş butonu için bileşen - Daha modern ve interaktif
-const GoogleButton = styled(Button)({
-  backgroundColor: '#ffffff',
-  color: '#333',
-  border: '1px solid #e0e0e0',
-  borderRadius: '16px',
-  padding: '14px',
-  fontWeight: 600,
-  textTransform: 'none',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    backgroundColor: '#f8f9ff',
-    borderColor: '#4747e1',
-    transform: 'translateY(-3px)',
-    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.08)',
-  },
-  '&:active': {
-    transform: 'translateY(0)',
-  },
-});
-
-// Özellik kartları için bileşen - Daha modern ve interaktif
-const InfoCard = styled(Box)(({ theme }) => ({
-  borderRadius: '20px',
-  boxShadow: '0 8px 20px rgba(0, 0, 0, 0.08)',
-  width: '90px',
-  height: '90px',
-  background: 'var(--card-bg-color, rgba(255, 255, 255, 0.9))',
-  backdropFilter: 'blur(8px)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-  position: 'relative',
-  zIndex: 10,
-  '&:hover': {
-    transform: 'translateY(-8px) scale(1.05)',
-    boxShadow: '0 15px 30px rgba(71, 71, 225, 0.2)',
-    '& .feature-popup': {
-      opacity: 1,
-      visibility: 'visible',
-      transform: 'translateX(-50%) translateY(15px) scale(1)',
-    },
-    '& svg': {
-      transform: 'scale(1.1)',
-      color: '#6b6bf9',
-    }
-  },
-  '& svg': {
-    fontSize: '40px',
-    color: '#4747e1',
-    transition: 'all 0.3s ease',
-  }
-}));
-
-// Özellik bilgilerini gösteren bileşen - Alt kısımda açılır kartlık
-const FeaturePopup = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: '100%',
-  left: '50%',
-  transform: 'translateX(-50%) translateY(15px) scale(0.9)',
-  background: 'linear-gradient(135deg, #4747e1 0%, #6b6bf9 100%)',
+  padding: '18px 32px',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
   color: '#ffffff',
-  padding: theme.spacing(2),
+  fontWeight: 700,
+  fontSize: '16px',
+  textTransform: 'none',
+  border: 'none',
+  boxShadow: '0 8px 20px rgba(102, 126, 234, 0.4)',
+  marginBottom: '20px',
+  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 15px 30px rgba(102, 126, 234, 0.6)',
+    background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+  },
+  '&:active': {
+    transform: 'translateY(-1px) scale(0.98)',
+  },
+});
+
+// Google butonu
+const GoogleButton = styled(Button)({
   borderRadius: '16px',
-  width: '220px',
+  padding: '18px 32px',
+  background: '#ffffff',
+  color: '#1f1f1f',
+  fontWeight: 600,
+  fontSize: '16px',
+  textTransform: 'none',
+  border: '1px solid #dadce0',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  marginBottom: '24px',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '12px',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: '0 8px 20px rgba(0, 0, 0, 0.15)',
+    background: '#f8f9fa',
+  },
+  '&:active': {
+    transform: 'translateY(-1px) scale(0.98)',
+  },
+});
+
+// Google Logo SVG Component
+const GoogleLogo = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+    />
+  </svg>
+);
+
+// Özellik kartları
+const FeatureCard = styled(Box)({
+  background: 'rgba(255, 255, 255, 0.08)',
+  borderRadius: '20px',
+  padding: '32px 20px',
   textAlign: 'center',
-  boxShadow: '0 15px 30px rgba(71, 71, 225, 0.3)',
-  opacity: 0,
-  visibility: 'hidden',
-  transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-  zIndex: 100,
-  '&::after': {
-    content: '""',
-    position: 'absolute',
-    bottom: '100%',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    borderWidth: '10px',
-    borderStyle: 'solid',
-    borderColor: 'transparent transparent #4747e1 transparent',
+  transition: 'all 0.3s ease',
+  cursor: 'pointer',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  height: '160px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  '&:hover': {
+    transform: 'translateY(-8px)',
+    background: 'rgba(255, 255, 255, 0.12)',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
   },
-  '& .popup-title': {
-    fontWeight: 700,
-    fontSize: '1.1rem',
-    marginBottom: '8px',
-    position: 'relative',
-    color: '#ffffff !important',
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      bottom: '-6px',
-      left: '50%',
-      transform: 'translateX(-50%)',
-      width: '50px',
-      height: '2px',
-      background: 'rgba(255, 255, 255, 0.5)',
-      borderRadius: '2px',
-    }
-  },
-  '& .popup-description': {
-    fontSize: '0.9rem',
-    opacity: 0.9,
-    marginTop: '12px',
-    color: '#ffffff !important',
-  }
-}));
+});
 
-// Arka plan için akademik desen
-const AcademicPattern = styled(Box)(({ theme }) => ({
-  position: 'absolute',
-  top: 0,
-  right: 0,
-  bottom: 0,
-  width: '50%',
-  backgroundImage: `url('https://www.transparenttextures.com/patterns/notebook-dark.png')`,
-  backgroundRepeat: 'repeat',
-  opacity: 0.03,
-  zIndex: 0,
-  [theme.breakpoints.down('md')]: {
-    width: '100%',
-  },
-}));
-
-// Gece modu butonu için stil
-const DarkModeButton = styled(IconButton)({
-  position: 'absolute',
-  top: '20px',
-  right: '20px',
-  backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  backdropFilter: 'blur(4px)',
-  color: '#4747e1',
-  padding: '8px',
-  zIndex: 1000,
+// Şifremi unuttum linki
+const ForgotPasswordLink = styled(Link)({
+  color: 'rgba(255, 255, 255, 0.7)',
+  textDecoration: 'none',
+  fontSize: '14px',
+  fontWeight: 500,
   transition: 'all 0.3s ease',
   '&:hover': {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    transform: 'rotate(20deg)',
+    color: '#667eea',
   },
 });
 
 const Login = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  
-  // Sayfa yüklenirken localStorage'dan tema tercihini al
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('darkMode');
-    if (savedTheme) {
-      setDarkMode(savedTheme === 'true');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log('Login successful');
+      navigate('/dashboard'); // Ana sayfaya yönlendir
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(getErrorMessage(error.code));
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
-  
-  // Tema değiştiğinde CSS değişkenlerini güncelle
-  useEffect(() => {
-    document.documentElement.style.setProperty(
-      '--background-color', 
-      darkMode ? '#15254f' : '#f4f2f5'
-    );
-    
-    document.documentElement.style.setProperty(
-      '--overlay-color', 
-      darkMode ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.85)'
-    );
-    
-    document.documentElement.style.setProperty(
-      '--text-color', 
-      darkMode ? '#ffffff' : '#333333'
-    );
-    
-    document.documentElement.style.setProperty(
-      '--card-bg-color', 
-      darkMode ? 'rgba(30, 40, 70, 0.9)' : 'rgba(255, 255, 255, 0.9)'
-    );
-    
-    // Tema tercihini localStorage'a kaydet
-    localStorage.setItem('darkMode', darkMode);
-  }, [darkMode]);
-  
-  // Tema değiştirme fonksiyonu
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
   };
 
   const handleGoogleLogin = async () => {
-    try {
-      setLoading(true);
-      await signInWithPopup(auth, googleProvider);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error("Google login error:", error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const handleEmailLogin = async (e) => {
-    e.preventDefault();
-    if (!email || !password) return;
+    setIsLoading(true);
+    setError('');
     
     try {
-      setLoading(true);
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate('/dashboard');
+      // Google popup ile giriş
+      const result = await signInWithPopup(auth, googleProvider);
+      console.log('Google login successful:', result.user);
+      navigate('/dashboard'); // Ana sayfaya yönlendir
     } catch (error) {
-      console.error("Email login error:", error);
+      console.error('Google login error:', error);
+      setError(getErrorMessage(error.code));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }
+  };
 
-  // Özellik listesi - Platform özellikleri
-  const featureItems = [
-    {
-      title: "TYT-AYT Net Takibi",
-      icon: <BarChartIcon />,
-      description: "Sınav netlerinizi takip edin"
-    },
-    {
-      title: "Ders Programı",
-      icon: <CalendarMonthIcon />,
-      description: "Günlük ders programınızı görüntüleyin"
-    },
-    {
-      title: "Çalışma Analizi",
-      icon: <AssessmentIcon />,
-      description: "Çalışma performansınızı analiz edin"
-    },
-    {
-      title: "Konu Takibi",
-      icon: <ListAltIcon />,
-      description: "Çalıştığınız konuları takip edin"
-    },
-    {
-      title: "RekaNet",
-      icon: <LeaderboardIcon />,
-      description: "Arkadaşlarınızla rekabet edin"
+  const getErrorMessage = (errorCode) => {
+    switch (errorCode) {
+      case 'auth/user-not-found':
+        return 'Bu e-posta adresi ile kayıtlı kullanıcı bulunamadı.';
+      case 'auth/wrong-password':
+        return 'Hatalı şifre girdiniz.';
+      case 'auth/invalid-email':
+        return 'Geçersiz e-posta adresi.';
+      case 'auth/user-disabled':
+        return 'Bu hesap devre dışı bırakılmış.';
+      case 'auth/too-many-requests':
+        return 'Çok fazla başarısız giriş denemesi. Lütfen daha sonra tekrar deneyin.';
+      case 'auth/network-request-failed':
+        return 'Ağ bağlantısı hatası. İnternet bağlantınızı kontrol edin.';
+      case 'auth/popup-closed-by-user':
+        return 'Google giriş penceresi kapatıldı.';
+      case 'auth/popup-blocked':
+        return 'Popup engellendi. Lütfen popup engelleyiciyi devre dışı bırakın.';
+      default:
+        return 'Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.';
     }
-  ];
+  };
 
-  // Çizim öğeleri
-  const illustrations = [
-    { top: '15%', right: '10%', size: '80px', delay: 0 },
-    { bottom: '20%', left: '12%', size: '60px', delay: 0.5 },
+  const features = [
+    { 
+      icon: <Analytics sx={{ fontSize: 40, color: '#667eea', mb: 2 }} />, 
+      title: 'Analitik', 
+      desc: 'Detaylı performans analizi' 
+    },
+    { 
+      icon: <Schedule sx={{ fontSize: 40, color: '#34a853', mb: 2 }} />, 
+      title: 'Zamanlama', 
+      desc: 'Akıllı çalışma planı' 
+    },
+    { 
+      icon: <Assignment sx={{ fontSize: 40, color: '#fbbc05', mb: 2 }} />, 
+      title: 'Konu Takibi', 
+      desc: 'Kapsamlı konu yönetimi' 
+    },
+    { 
+      icon: <TrendingUp sx={{ fontSize: 40, color: '#ea4335', mb: 2 }} />, 
+      title: 'İlerleme', 
+      desc: 'Görsel ilerleme takibi' 
+    },
   ];
 
   return (
     <LoginContainer>
-      <AnimatedBackground sx={{
-        background: darkMode ? 
-          'linear-gradient(-45deg, #0a1128, #1a2a4a, #2a3a6a, #1a2a4a)' : 
-          'linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)',
-      }} />
-      
-      <DarkModeButton onClick={toggleDarkMode}>
-        {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
-      </DarkModeButton>
-      
-      {/* Animasyonlu Partiküller */}
-      <Box sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        overflow: 'hidden',
-        zIndex: 0,
-        pointerEvents: 'none'
-      }}>
-        {[...Array(15)].map((_, index) => (
-          <Box
-            key={index}
-            component={motion.div}
-            sx={{
-              position: 'absolute',
-              width: Math.random() * 20 + 10,
-              height: Math.random() * 20 + 10,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(71, 71, 225, 0.4), rgba(107, 107, 249, 0.2))',
-              boxShadow: '0 0 10px rgba(71, 71, 225, 0.3)',
-              filter: 'blur(1px)'
-            }}
-            animate={{
-              x: [Math.random() * window.innerWidth, Math.random() * window.innerWidth],
-              y: [Math.random() * window.innerHeight, Math.random() * window.innerHeight],
-              opacity: [0.2, 0.8, 0.2],
-              scale: [1, 1.5, 1]
-            }}
-            transition={{
-              duration: Math.random() * 20 + 10,
-              repeat: Infinity,
-              ease: 'easeInOut'
-            }}
-          />
-        ))}
-      </Box>
-      
-      {/* Logo ve Başlık - Sabit pozisyonda */}
-      <Box sx={{ position: 'absolute', top: 0, left: 0, p: 3, zIndex: 10 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <SchoolIcon sx={{ color: '#4747e1', fontSize: 28, mr: 1 }} />
-          <Typography variant="h6" sx={{ fontWeight: 700, color: '#4747e1' }}>
-            Online YKS Takip
-          </Typography>
-        </Box>
-      </Box>
-
-      {/* Sol Taraf - Giriş Formu */}
-      <LoginSection>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Box sx={{ maxWidth: 450, mx: 'auto', p: 3 }}>
-            <Typography variant="h4" sx={{ 
-              fontWeight: 700, 
-              color: '#333',
-              mb: 1
-            }}>
-              Hoş Geldiniz!
-            </Typography>
-            <Typography variant="body2" sx={{ 
-              color: '#666',
-              mb: 4
-            }}>
-              Lütfen giriş bilgilerinizi aşağıya girin
-            </Typography>
-            
-            <form onSubmit={handleEmailLogin}>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                  E-posta
-                </Typography>
-                <StyledTextField
-                  fullWidth
-                  placeholder="E-posta adresinizi girin"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <EmailIcon sx={{ color: '#4747e1' }} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              
-              <Box sx={{ mb: 1 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-                  Şifre
-                </Typography>
-                <StyledTextField
-                  fullWidth
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Şifrenizi girin"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <LockIcon sx={{ color: '#4747e1' }} />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword(!showPassword)}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </Box>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3 }}>
-                <Link 
-                  component="button" 
-                  variant="body2" 
-                  sx={{ 
-                    color: '#4747e1',
-                    textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline' }
-                  }}
-                >
-                  Şifremi unuttum?
-                </Link>
-              </Box>
-              
-              <LoginButton 
-                fullWidth 
-                type="submit"
-                disabled={loading}
+      <MainLayout>
+        {/* Sol Taraf - Login Kartı */}
+        <LoginCard elevation={0}>
+          <Box sx={{ mb: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <School sx={{ fontSize: 40, color: '#667eea', mr: 2 }} />
+              <Typography
+                variant="h4"
+                sx={{
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  fontSize: '28px',
+                }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Giriş Yap'}
-              </LoginButton>
-            </form>
-            
-            <Box sx={{ 
-              my: 3, 
-              display: 'flex', 
-              alignItems: 'center',
-              color: '#666'
-            }}>
-              <Divider sx={{ flexGrow: 1 }} />
-              <Typography variant="body2" sx={{ mx: 2 }}>veya</Typography>
-              <Divider sx={{ flexGrow: 1 }} />
+                YKS Study Tracker
+              </Typography>
             </Box>
-            
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+                fontSize: '16px',
+                fontWeight: 400,
+              }}
+            >
+              Hedeflerinizi gerçekleştirin
+            </Typography>
+          </Box>
+
+          <Box component="form" onSubmit={handleLogin}>
+            {error && (
+              <Alert 
+                severity="error" 
+                sx={{ 
+                  mb: 3,
+                  backgroundColor: 'rgba(211, 47, 47, 0.1)',
+                  color: '#ffffff',
+                  border: '1px solid rgba(211, 47, 47, 0.3)',
+                  '& .MuiAlert-icon': {
+                    color: '#f44336'
+                  }
+                }}
+              >
+                {error}
+              </Alert>
+            )}
+
+            <StyledTextField
+              fullWidth
+              label="E-posta Adresi"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email sx={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <StyledTextField
+              fullWidth
+              label="Şifre"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock sx={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                      sx={{ color: 'rgba(255, 255, 255, 0.5)' }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+
+            <Box sx={{ textAlign: 'right', mb: 3 }}>
+              <ForgotPasswordLink href="#" underline="none">
+                Şifremi unuttum
+              </ForgotPasswordLink>
+            </Box>
+
+            <LoginButton
+              fullWidth
+              type="submit"
+              variant="contained"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+            </LoginButton>
+
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.5)',
+                textAlign: 'center',
+                my: 2,
+                fontSize: '14px',
+              }}
+            >
+              veya
+            </Typography>
+
             <GoogleButton
               fullWidth
-              startIcon={<GoogleIcon />}
+              variant="outlined"
               onClick={handleGoogleLogin}
-              disabled={loading}
+              disabled={isLoading}
             >
-              Google ile giriş yap
+              <GoogleLogo />
+              Google ile Giriş Yap
             </GoogleButton>
-            
-            <Box sx={{ 
-              mt: 3,
-              textAlign: 'center'
-            }}>
-              <Typography variant="body2" sx={{ color: '#666' }}>
-                Hesabınız yok mu? <Link component="button" sx={{ color: '#4747e1', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}>Kayıt Ol</Link>
+
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
+              <Typography
+                variant="body2"
+                sx={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px' }}
+              >
+                Hesabınız yok mu?{' '}
+                <Link
+                  href="#"
+                  sx={{
+                    color: '#667eea',
+                    textDecoration: 'none',
+                    fontWeight: 600,
+                    '&:hover': { color: '#764ba2' },
+                  }}
+                >
+                  Kayıt Ol
+                </Link>
               </Typography>
             </Box>
           </Box>
-        </motion.div>
-      </LoginSection>
-      
-      {/* Sağ Taraf - Özellik Kartları */}
-      <FeatureSection>
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}
-        >
-          {/* Akademik desen */}
-          <AcademicPattern />
-          
+        </LoginCard>
 
-          
-          {/* Başlık */}
-          <Box sx={{ mb: 4, position: 'relative', zIndex: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: 'var(--text-color, #333)', textAlign: 'center' }}>
-              Platform Özellikleri
+        {/* Sağ Taraf - Bilgi Bölümü */}
+        <InfoSection>
+          <HeaderSection>
+            <Typography
+              variant="h2"
+              sx={{
+                color: '#ffffff',
+                fontWeight: 800,
+                mb: 3,
+                fontSize: '48px',
+                lineHeight: 1.2,
+              }}
+            >
+              YKS Hazırlık Sürecinizi
+              <br />
+              Dijitalleştirin
             </Typography>
-            <Typography variant="body2" sx={{ color: 'var(--text-color, #666)', opacity: 0.7, textAlign: 'center', mt: 1 }}>
-              Eğitim hayatınızı kolaylaştıracak araçlar
+            
+            <Typography
+              variant="h6"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '18px',
+                lineHeight: 1.6,
+                maxWidth: '600px',
+                margin: '0 auto',
+              }}
+            >
+              YKS Study Tracker ile çalışmalarınızı planlayın, takip edin ve performansınızı analiz edin.
             </Typography>
-          </Box>
-          
-          {/* Özellik Kartları */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            flexWrap: 'wrap',
-            gap: 4,
-            mt: 3,
-            position: 'relative',
-            zIndex: 1
-          }}>
-            {featureItems.map((feature, index) => (
-              <InfoCard key={index}>
+          </HeaderSection>
+
+          <FeaturesGrid>
+            {features.map((feature, index) => (
+              <FeatureCard key={index}>
                 {feature.icon}
-                <FeaturePopup className="feature-popup">
-                  <Typography className="popup-title" sx={{ fontWeight: 700 }}>
-                    {feature.title}
-                  </Typography>
-                  <Typography className="popup-description">
-                    {feature.description}
-                  </Typography>
-                </FeaturePopup>
-              </InfoCard>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    color: '#ffffff',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    mb: 1,
+                  }}
+                >
+                  {feature.title}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '13px',
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {feature.desc}
+                </Typography>
+              </FeatureCard>
             ))}
-          </Box>
-        </motion.div>
-      </FeatureSection>
-      
-      {/* Arka plan dekoratif elementleri */}
-      {illustrations.map((item, index) => (
-        <motion.div
-          key={index}
-          style={{
-            position: 'absolute',
-            top: item.top || 'auto',
-            left: item.left || 'auto',
-            right: item.right || 'auto',
-            bottom: item.bottom || 'auto',
-            zIndex: 0
-          }}
-          animate={{ 
-            y: [0, -15, 0],
-            rotate: [0, item.left ? -5 : 5, 0]
-          }}
-          transition={{ 
-            duration: 4, 
-            repeat: Infinity, 
-            ease: "easeInOut",
-            delay: item.delay
-          }}
-        >
-          <Box sx={{
-            width: item.size,
-            height: item.size,
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #6b6bf9, #4747e1)',
-            opacity: 0.2,
-            filter: 'blur(10px)'
-          }} />
-        </motion.div>
-      ))}
+          </FeaturesGrid>
+        </InfoSection>
+      </MainLayout>
     </LoginContainer>
   );
 };

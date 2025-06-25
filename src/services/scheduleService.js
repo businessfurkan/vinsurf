@@ -124,18 +124,17 @@ class ScheduleService {
    * Sınıf düzenler
    * @param {Object} schedule - Mevcut program
    * @param {string} day - Gün
-   * @param {string} classId - Sınıf ID'si
-   * @param {Object} updatedDetails - Güncellenmiş detaylar
+   * @param {Object} classDetails - Güncellenmiş sınıf detayları (id içeriyor)
    * @returns {Object} - Güncellenmiş program
    */
-  updateClass(schedule, day, classId, updatedDetails) {
+  updateClass(schedule, day, classDetails) {
     const updatedSchedule = { ...schedule };
-    const classIndex = updatedSchedule[day].findIndex(cls => cls.id === classId);
+    const classIndex = updatedSchedule[day].findIndex(cls => cls.id === classDetails.id);
     
     if (classIndex !== -1) {
       updatedSchedule[day][classIndex] = {
         ...updatedSchedule[day][classIndex],
-        ...updatedDetails,
+        ...classDetails,
         updatedAt: new Date()
       };
     }

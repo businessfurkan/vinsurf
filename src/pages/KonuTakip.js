@@ -15,10 +15,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Tab,
-  Tabs,
   Card,
-  Paper,
   LinearProgress,
   Avatar
 } from '@mui/material';
@@ -26,16 +23,15 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ScienceIcon from '@mui/icons-material/Science';
 import SaveIcon from '@mui/icons-material/Save';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import FunctionsIcon from '@mui/icons-material/Functions';
 import SquareFootIcon from '@mui/icons-material/SquareFoot';
 import BiotechIcon from '@mui/icons-material/Biotech';
-import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import PublicIcon from '@mui/icons-material/Public';
-import PsychologyAltIcon from '@mui/icons-material/Psychology';
 import TranslateIcon from '@mui/icons-material/Translate';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import AutoStoriesIcon from '@mui/icons-material/AutoStories';
-import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
+import CalculateIcon from '@mui/icons-material/Calculate';
+import HistoryIcon from '@mui/icons-material/History';
+import PsychologyIcon from '@mui/icons-material/Psychology';
+import TempleBuddhistIcon from '@mui/icons-material/TempleHindu';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
 import { 
@@ -45,395 +41,38 @@ import {
   updateDoc, 
   serverTimestamp 
 } from 'firebase/firestore';
+import yksData from '../utils/yksData';
 
-// Ders ve konu verileri
-const dersler = [
-  // TYT Dersleri
-  {
-    id: 'turkce',
-    ad: 'Türkçe',
-    color: '#9C27B0',
-    type: 'TYT',
-    konular: [
-      'Ses Bilgisi',
-      'Yazım Kuralları',
-      'Noktalama İşaretleri',
-      'Sözcük Yapısı',
-      'Sözcük Türleri',
-      'Fiilimsiler',
-      'Cümlenin Ögeleri',
-      'Cümle Türleri',
-      'Anlatım Bozuklukları'
-    ]
-  },
-  {
-    id: 'temel-matematik',
-    ad: 'Temel Matematik',
-    color: '#4285F4',
-    type: 'TYT',
-    konular: [
-      'Temel Kavramlar',
-      'Sayı Basamakları',
-      'Bölme ve Bölünebilme',
-      'EBOB-EKOK',
-      'Rasyonel Sayılar',
-      'Basit Eşitsizlikler',
-      'Mutlak Değer',
-      'Üslü Sayılar',
-      'Köklü Sayılar',
-      'Çarpanlara Ayırma',
-      'Oran-Orantı',
-      'Denklem Çözme',
-      'Problemler'
-    ]
-  },
-  {
-    id: 'geometri-tyt',
-    ad: 'Geometri',
-    color: '#EA4335',
-    type: 'TYT',
-    konular: [
-      'Doğruda Açılar',
-      'Üçgende Açılar',
-      'Özel Üçgenler',
-      'Dik Üçgen',
-      'İkizkenar Üçgen',
-      'Eşkenar Üçgen',
-      'Açıortay',
-      'Kenarortay',
-      'Üçgende Alan',
-      'Dörtgenler',
-      'Paralelkenar',
-      'Eşkenar Dörtgen',
-      'Dikdörtgen',
-      'Kare',
-      'Yamuk',
-      'Deltoid'
-    ]
-  },
-  {
-    id: 'fizik-tyt',
-    ad: 'Fizik',
-    color: '#FBBC05',
-    type: 'TYT',
-    konular: [
-      'Fizik Bilimine Giriş',
-      'Madde ve Özellikleri',
-      'Sıvıların Kaldırma Kuvveti',
-      'Basınç',
-      'Isı, Sıcaklık ve Genleşme',
-      'Hareket',
-      'Kuvvet',
-      'Dinamik',
-      'İş, Güç ve Enerji',
-      'Elektrik'
-    ]
-  },
-  {
-    id: 'kimya-tyt',
-    ad: 'Kimya',
-    color: '#34A853',
-    type: 'TYT',
-    konular: [
-      'Kimya Bilimi',
-      'Atom ve Yapısı',
-      'Periyodik Sistem',
-      'Kimyasal Türler Arası Etkileşimler',
-      'Kimyasal Tepkimeler',
-      'Kimyasal Hesaplamalar',
-      'Karışımlar',
-      'Asit, Baz ve Tuzlar'
-    ]
-  },
-  {
-    id: 'biyoloji-tyt',
-    ad: 'Biyoloji',
-    color: '#FF9800',
-    type: 'TYT',
-    konular: [
-      'Biyoloji Bilimi',
-      'Canlıların Ortak Özellikleri',
-      'Canlıların Temel Bileşenleri',
-      'Hücre ve Yapısı',
-      'Hücre Zarından Madde Geçişleri',
-      'Canlıların Sınıflandırılması',
-      'Mitoz ve Eşeysiz Üreme',
-      'Mayoz ve Eşeyli Üreme',
-      'Kalıtım'
-    ]
-  },
-  {
-    id: 'tarih-tyt',
-    ad: 'Tarih',
-    color: '#00BCD4',
-    type: 'TYT',
-    konular: [
-      'Tarih Bilimi',
-      'İlk Uygarlıklar',
-      'İlk Türk Devletleri',
-      'İslamiyet Öncesi Türk Tarihi',
-      'İslamiyet Sonrası Türk Tarihi',
-      'Türkiye Tarihi',
-      'Osmanlı Devleti Kuruluş Dönemi',
-      'Osmanlı Devleti Yükselme Dönemi',
-      'Osmanlı Devleti Duraklama Dönemi',
-      'Osmanlı Devleti Gerileme Dönemi',
-      'Osmanlı Devleti Dağılma Dönemi',
-      'I. Dünya Savaşı',
-      'Kurtuluş Savaşı'
-    ]
-  },
-  {
-    id: 'cografya-tyt',
-    ad: 'Coğrafya',
-    color: '#4CAF50',
-    type: 'TYT',
-    konular: [
-      'Doğa ve İnsan',
-      'Dünyanın Şekli ve Hareketleri',
-      'Harita Bilgisi',
-      'Atmosfer ve Sıcaklık',
-      'İklimler',
-      'Basınç ve Rüzgarlar',
-      'Nem, Yağış ve Buharlaşma',
-      'İç Kuvvetler / Dış Kuvvetler',
-      'Su - Toprak ve Bitkiler',
-      'Nüfus',
-      'Göç',
-      'Yerleşme',
-      'Türkiyenin Yer Şekilleri'
-    ]
-  },
-  {
-    id: 'felsefe-tyt',
-    ad: 'Felsefe',
-    color: '#795548',
-    type: 'TYT',
-    konular: [
-      'Felsefenin Konusu',
-      'Bilgi Felsefesi',
-      'Varlık Felsefesi',
-      'Ahlak Felsefesi'
-    ]
-  },
-  // AYT Dersleri
-  {
-    id: 'matematik-ayt',
-    ad: 'Matematik',
-    color: '#4285F4',
-    type: 'AYT',
-    konular: [
-      'Kümeler',
-      'Kartezyen Çarpım',
-      'Fonksiyonlar',
-      'Polinomlar',
-      'Permütasyon',
-      'Kombinasyon',
-      'Binom',
-      'Olasılık',
-      'İstatistik',
-      'Karmaşık Sayılar',
-      'İkinci Dereceden Denklemler',
-      'Parabol',
-      'Logaritma',
-      'Diziler',
-      'Limit',
-      'Türev',
-      'İntegral'
-    ]
-  },
-  {
-    id: 'geometri-ayt',
-    ad: 'Geometri',
-    color: '#EA4335',
-    type: 'AYT',
-    konular: [
-      'Doğrunun Analitik İncelenmesi',
-      'Çemberin Analitik İncelenmesi',
-      'Dönüşümler',
-      'Katı Cisimler',
-      'Uzay Geometri',
-      'Çember ve Daire',
-      'Trigonometri'
-    ]
-  },
-  {
-    id: 'fizik-ayt',
-    ad: 'Fizik',
-    color: '#FBBC05',
-    type: 'AYT',
-    konular: [
-      'Manyetizma',
-      'Dalgalar',
-      'Optik',
-      'Modern Fizik',
-      'Atom Fiziği',
-      'Nükleer Fizik',
-      'Elektromanyetik İndüksiyon',
-      'Alternatif Akım',
-      'Kuantum Fiziği',
-      'Görelilik'
-    ]
-  },
-  {
-    id: 'kimya-ayt',
-    ad: 'Kimya',
-    color: '#34A853',
-    type: 'AYT',
-    konular: [
-      'Maddenin Halleri',
-      'Gazlar',
-      'Çözeltiler',
-      'Kimya ve Enerji',
-      'Kimyasal Tepkimelerde Hız',
-      'Kimyasal Tepkimelerde Denge',
-      'Asit-Baz Dengesi',
-      'Çözünürlük Dengesi',
-      'Elektrokimya',
-      'Organik Kimyaya Giriş',
-      'Hidrokarbonlar',
-      'Organik Bileşikler',
-      'Endüstride Organik Bileşikler'
-    ]
-  },
-  {
-    id: 'biyoloji-ayt',
-    ad: 'Biyoloji',
-    color: '#FF9800',
-    type: 'AYT',
-    konular: [
-      'Sinir Sistemi',
-      'Endokrin Sistem',
-      'Duyu Organları',
-      'Destek ve Hareket Sistemi',
-      'Sindirim Sistemi',
-      'Dolaşım ve Bağışıklık Sistemi',
-      'Solunum Sistemi',
-      'Boşaltım Sistemi',
-      'Üreme Sistemi ve Embriyonik Gelişim',
-      'Bitki Biyolojisi',
-      'Genetik Mühendisliği',
-      'Biyoteknoloji'
-    ]
-  },
-  {
-    id: 'edebiyat-ayt',
-    ad: 'Edebiyat',
-    color: '#E91E63',
-    type: 'AYT',
-    konular: [
-      'Giriş (Edebiyat, Sanat, Metin)',
-      'Şiir Bilgisi',
-      'Öykü-Roman',
-      'Tiyatro',
-      'Destan-Efsane',
-      'Masal-Fabl',
-      'Halk Edebiyatı',
-      'Divan Edebiyatı',
-      'Tanzimat Edebiyatı',
-      'Servet-i Fünun Edebiyatı',
-      'Fecr-i Ati Edebiyatı',
-      'Milli Edebiyat',
-      'Cumhuriyet Dönemi Edebiyatı',
-      'Cumhuriyet Dönemi Şiiri',
-      'Cumhuriyet Dönemi Romanı',
-      'Cumhuriyet Dönemi Tiyatrosu'
-    ]
-  },
-  {
-    id: 'cografya-ayt',
-    ad: 'Coğrafya',
-    color: '#4CAF50',
-    type: 'AYT',
-    konular: [
-      'Doğal Sistemler',
-      'Beşeri Sistemler',
-      'Mekansal Sentez: Türkiye',
-      'Küresel Ortam: Bölgeler ve Ülkeler',
-      'Çevre ve Toplum',
-      'Türkiyenin Fiziki Coğrafyası',
-      'Türkiyenin Beşeri ve Ekonomik Coğrafyası',
-      'Türkiyenin Bölgesel Coğrafyası',
-      'Türkiyenin İklimi',
-      'Türkiyenin Bitki Örtüsü',
-      'Türkiyenin Nüfusu ve Yerleşmesi',
-      'Ekonomik Faaliyetler',
-      'Bölgesel Kalkınma Projeleri',
-      'Uluslararası Ulaşım Hatları',
-      'Türkiyenin Jeopolitik Konumu'
-    ]
-  },
-  {
-    id: 'tarih-2-ayt',
-    ad: 'Tarih-2',
-    color: '#00BCD4',
-    type: 'AYT',
-    konular: [
-      'II. Dünya Savaşı',
-      'Soğuk Savaş Dönemi',
-      'Yumuşama Dönemi',
-      'Küreselleşen Dünya',
-      'Türkiye Cumhuriyeti Tarihi',
-      'Atatürk İlkeleri',
-      'Atatürk İnkılapları',
-      'Türk İnkılabının Temel İlkeleri',
-      'Cumhuriyet Dönemi Gelişmeleri',
-      'Türkiye Ekonomisi',
-      'Türk Dış Politikası'
-    ]
-  },
-  {
-    id: 'felsefe-ayt',
-    ad: 'Felsefe',
-    color: '#795548',
-    type: 'AYT',
-    konular: [
-      'MÖ 6. Yüzyıl-MS 2. Yüzyıl Felsefesi',
-      'MS 2. Yüzyıl-MS 15. Yüzyıl Felsefesi',
-      '15. Yüzyıl-17. Yüzyıl Felsefesi',
-      '18. Yüzyıl-19. Yüzyıl Felsefesi',
-      '20. Yüzyıl Felsefesi',
-      'Bilgi Felsefesi',
-      'Varlık Felsefesi',
-      'Ahlak Felsefesi',
-      'Sanat Felsefesi',
-      'Din Felsefesi',
-      'Siyaset Felsefesi',
-      'Bilim Felsefesi'
-    ]
-  },
-  {
-    id: 'yabanci-dil-ayt',
-    ad: 'Yabancı Dil',
-    color: '#9E9E9E',
-    type: 'AYT',
-    konular: [
-      'Kelime Bilgisi',
-      'Dil Bilgisi',
-      'Cümle Tamamlama',
-      'Paragraf',
-      'Diyalog Tamamlama',
-      'Çeviri',
-      'Okuma Parçası'
-    ]
-  },
-  {
-    id: 'yabanci-dil-tyt',
-    ad: 'Yabancı Dil',
-    color: '#9C27B0',
-    type: 'TYT',
-    konular: [
-      'Kelime Bilgisi',
-      'Dil Bilgisi',
-      'Cümle Tamamlama',
-      'Cümlede Anlam',
-      'Paragraf',
-      'Diyalog Tamamlama',
-      'Anlam Bütünlüğünü Bozan Cümleyi Bulma',
-      'Verilen Durumda Söylenecek İfade'
-    ]
-  }
-];
+// yksData'dan ders verilerini oluştur
+const createDerslerFromYksData = () => {
+  const dersler = [];
+  
+  // TYT dersleri
+  Object.entries(yksData.TYT).forEach(([dersAd, dersData]) => {
+    dersler.push({
+      id: `${dersAd.toLowerCase().replace(/\s+/g, '-').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')}-tyt`,
+      ad: dersAd,
+      color: dersData.color,
+      type: 'TYT',
+      konular: dersData.topics
+    });
+  });
+  
+  // AYT dersleri
+  Object.entries(yksData.AYT).forEach(([dersAd, dersData]) => {
+    dersler.push({
+      id: `${dersAd.toLowerCase().replace(/\s+/g, '-').replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')}-ayt`,
+      ad: dersAd,
+      color: dersData.color,
+      type: 'AYT',
+      konular: dersData.topics
+    });
+  });
+  
+  return dersler;
+};
+
+const dersler = createDerslerFromYksData();
 
 const KonuTakip = () => {
   const [user] = useAuthState(auth);
@@ -442,15 +81,13 @@ const KonuTakip = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [konuDurumu, setKonuDurumu] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // 'all', 'completed', 'inProgress'
+  const [tabValue, setTabValue] = useState(0); // 0 for TYT, 1 for AYT
   const [sinavTipi, setSinavTipi] = useState('TYT'); // 'TYT' veya 'AYT'
 
   useEffect(() => {
     if (user) {
       const fetchKonuDurumu = async () => {
         try {
-          setLoading(true);
           const docRef = doc(db, 'konuDurumu', user.uid);
           const docSnap = await getDoc(docRef);
           
@@ -464,8 +101,6 @@ const KonuTakip = () => {
           console.error('Konu durumu yüklenirken hata oluştu:', error);
           setSnackbarMessage('Konu durumu yüklenirken bir hata oluştu.');
           setSnackbarOpen(true);
-        } finally {
-          setLoading(false);
         }
       };
       
@@ -531,443 +166,407 @@ const KonuTakip = () => {
     }
   };
 
-  const getDersIcon = (dersAdi) => {
-    switch(dersAdi.toLowerCase()) {
-      case 'türkçe': return <MenuBookIcon />;
-      case 'temel matematik': return <FunctionsIcon />;
-      case 'geometri': return <SquareFootIcon />;
-      case 'fizik': return <ScienceIcon />;
-      case 'kimya': return <BiotechIcon />;
-      case 'biyoloji': return <BiotechIcon />;
-      case 'tarih': return <HistoryEduIcon />;
-      case 'coğrafya': return <PublicIcon />;
-      case 'felsefe': return <PsychologyAltIcon />;
-      case 'din kültürü': return <AutoStoriesIcon />;
-      case 'yabancı dil': return <TranslateIcon />;
-      default: return <MenuBookIcon />;
+  const getDersIcon = (dersAd) => {
+    const normalizedName = dersAd.toLowerCase();
+    
+    if (normalizedName.includes('türkçe') || normalizedName.includes('edebiyat')) {
+      return <MenuBookIcon />;
     }
+    if (normalizedName.includes('matematik') || normalizedName.includes('temel matematik')) {
+      return <CalculateIcon />;
+    }
+    if (normalizedName.includes('fizik') || normalizedName.includes('kimya') || normalizedName.includes('fen bilimleri')) {
+      return <ScienceIcon />;
+    }
+    if (normalizedName.includes('biyoloji')) {
+      return <BiotechIcon />;
+    }
+    if (normalizedName.includes('tarih')) {
+      return <HistoryIcon />;
+    }
+    if (normalizedName.includes('coğrafya')) {
+      return <PublicIcon />;
+    }
+    if (normalizedName.includes('felsefe')) {
+      return <PsychologyIcon />;
+    }
+    if (normalizedName.includes('din kültürü')) {
+      return <TempleBuddhistIcon />;
+    }
+    if (normalizedName.includes('yabancı dil')) {
+      return <TranslateIcon />;
+    }
+    if (normalizedName.includes('geometri')) {
+      return <SquareFootIcon />;
+    }
+    
+    return <MenuBookIcon />;
   };
 
   const getKonuIlerleme = (dersId) => {
-    if (!konuDurumu[dersId]) return 0;
+    if (!konuDurumu[dersId]) return { completed: 0, needsReview: 0, total: 0, percentage: 0 };
     
     const ders = dersler.find(d => d.id === dersId);
-    if (!ders) return 0;
+    if (!ders) return { completed: 0, needsReview: 0, total: 0, percentage: 0 };
     
-    const tamamlananKonuSayisi = Object.values(konuDurumu[dersId]).filter(
-      durum => durum === 'completed' || durum === 'completedNeedsReview'
-    ).length;
-    return (tamamlananKonuSayisi / ders.konular.length) * 100;
+    const durumlar = Object.values(konuDurumu[dersId]);
+    const completed = durumlar.filter(durum => durum === 'completed' || durum === 'completedNeedsReview').length;
+    const needsReview = durumlar.filter(durum => durum === 'needsReview' || durum === 'completedNeedsReview').length;
+    const total = ders.konular.length;
+    const percentage = total > 0 ? (completed / total) * 100 : 0;
+    
+    return { completed, needsReview, total, percentage };
   };
 
   const filteredDersler = dersler.filter(ders => ders.type === sinavTipi);
 
-  if (!user) {
-    return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Typography variant="h5" gutterBottom>
-            Konu takibi yapabilmek için giriş yapmalısınız.
-          </Typography>
-          <Button 
-            variant="contained" 
-            href="/login"
-            sx={{ bgcolor: '#5ec837', '&:hover': { bgcolor: '#4eb02c' } }}
-          >
-            Giriş Yap
-          </Button>
-        </Paper>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ 
-        textAlign: 'center', 
-        mb: 5,
+    <Container 
+      maxWidth="xl" 
+      sx={{ 
+        py: 4, 
+        minHeight: '100vh',
+        backgroundColor: '#1b293d',
         position: 'relative',
-        '&::after': {
-          content: '""',
+        overflow: 'hidden'
+      }}
+    >
+      {/* Decorative background elements */}
+      <Box
+        sx={{
           position: 'absolute',
-          bottom: -10,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '80px',
-          height: '4px',
-          backgroundColor: '#5ec837',
-          borderRadius: '2px'
-        }
-      }}>
-        <Typography variant="h4" sx={{ 
-          fontWeight: 800,
-          color: '#333',
+          top: -100,
+          right: -100,
+          width: 300,
+          height: 300,
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.02)',
+          zIndex: 0
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: -150,
+          left: -150,
+          width: 400,
+          height: 400,
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.02)',
+          zIndex: 0
+        }}
+      />
+
+      {/* Header */}
+      <Typography 
+        variant="h3" 
+        component="h1" 
+        sx={{ 
+          textAlign: 'center', 
           mb: 1,
-          fontSize: { xs: '1.8rem', sm: '2.2rem' },
-          textShadow: '0px 1px 2px rgba(0,0,0,0.1)'
-        }}>
-          Konu Takip Sistemi
-        </Typography>
-        <Typography variant="subtitle1" sx={{ 
-          color: '#666',
-          fontWeight: 500
-        }}>
-          Çalışmalarınızı takip edin ve ilerlemenizi görün
-        </Typography>
-      </Box>
+          color: 'white',
+          fontWeight: 700,
+          textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          position: 'relative',
+          zIndex: 1
+        }}
+      >
+        Konu Takip Sistemi
+      </Typography>
       
+      <Typography 
+        variant="h6" 
+        sx={{ 
+          textAlign: 'center', 
+          mb: 4,
+          color: 'rgba(255,255,255,0.8)',
+          fontWeight: 400,
+          position: 'relative',
+          zIndex: 1
+        }}
+      >
+        Çalışmalarını takip edin ve ilerlemelerini görün
+      </Typography>
+
+      {/* Tabs Container */}
       <Box sx={{ 
         display: 'flex', 
-        justifyContent: 'space-between', 
-        mb: 4, 
-        flexWrap: 'wrap', 
-        alignItems: 'center',
-        gap: 2,
-        px: { xs: 1, sm: 2 }
+        justifyContent: 'center', 
+        mb: 4,
+        position: 'relative',
+        zIndex: 1
       }}>
-        <Box sx={{ 
-          bgcolor: 'white', 
-          borderRadius: 3, 
-          overflow: 'hidden', 
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-          border: '1px solid #e0e0e0'
+        <Box sx={{
+          display: 'flex',
+          gap: 2,
+          p: 1,
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
         }}>
-          <Tabs 
-            value={sinavTipi} 
-            onChange={(e, newValue) => setSinavTipi(newValue)}
-            sx={{ 
-              minHeight: 52,
-              '& .MuiTabs-indicator': {
-                backgroundColor: '#5ec837',
-                height: 4,
-                borderRadius: '4px 4px 0 0'
+          <Button
+            onClick={() => {
+              setTabValue(0);
+              setSinavTipi('TYT');
+            }}
+            sx={{
+              minWidth: 80,
+              py: 1,
+              px: 3,
+              borderRadius: 2,
+              backgroundColor: tabValue === 0 ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
+              color: tabValue === 0 ? '#1b293d' : 'white',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+              '&:hover': {
+                backgroundColor: tabValue === 0 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.1)'
               },
-              '& .MuiTab-root': {
-                fontWeight: 700,
-                minWidth: 120,
-                fontSize: '1rem',
-                transition: 'all 0.2s ease',
-                '&.Mui-selected': {
-                  color: '#5ec837'
-                }
-              }
+              transition: 'all 0.3s ease'
             }}
           >
-            <Tab value="TYT" label="TYT" />
-            <Tab value="AYT" label="AYT" />
-          </Tabs>
-        </Box>
-        
-        <Box sx={{ 
-          display: 'flex', 
-          gap: 1.5,
-          flexWrap: 'wrap',
-          justifyContent: { xs: 'center', sm: 'flex-end' },
-          width: { xs: '100%', sm: 'auto' },
-          mt: { xs: 1, sm: 0 }
-        }}>
-          <Button
-            variant={filter === 'all' ? 'contained' : 'outlined'}
-            onClick={() => setFilter('all')}
-            size="medium"
-            sx={{ 
-              bgcolor: filter === 'all' ? '#5662f6' : 'transparent',
-              color: filter === 'all' ? 'white' : '#5662f6',
-              borderColor: '#5662f6',
-              fontWeight: 600,
-              minWidth: 100,
-              borderRadius: 2,
-              px: 2,
-              '&:hover': {
-                bgcolor: filter === 'all' ? '#4a53d6' : 'rgba(86, 98, 246, 0.08)',
-                borderColor: '#4a53d6'
-              }
-            }}
-          >
-            Tümü
+            TYT
           </Button>
           <Button
-            variant={filter === 'completed' ? 'contained' : 'outlined'}
-            onClick={() => setFilter('completed')}
-            size="medium"
-            startIcon={<CheckCircleIcon />}
-            sx={{ 
-              bgcolor: filter === 'completed' ? '#4caf50' : 'transparent',
-              color: filter === 'completed' ? 'white' : '#4caf50',
-              borderColor: '#4caf50',
-              fontWeight: 600,
-              minWidth: 140,
+            onClick={() => {
+              setTabValue(1);
+              setSinavTipi('AYT');
+            }}
+            sx={{
+              minWidth: 80,
+              py: 1,
+              px: 3,
               borderRadius: 2,
-              px: 2,
+              backgroundColor: tabValue === 1 ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
+              color: tabValue === 1 ? '#1b293d' : 'white',
+              fontWeight: 600,
+              fontSize: '0.9rem',
               '&:hover': {
-                bgcolor: filter === 'completed' ? '#43a047' : 'rgba(76, 175, 80, 0.08)',
-                borderColor: '#43a047'
-              }
+                backgroundColor: tabValue === 1 ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.1)'
+              },
+              transition: 'all 0.3s ease'
             }}
           >
-            Tamamlanan
-          </Button>
-          <Button
-            variant={filter === 'inProgress' ? 'contained' : 'outlined'}
-            onClick={() => setFilter('inProgress')}
-            size="medium"
-            startIcon={<AccessTimeIcon />}
-            sx={{ 
-              bgcolor: filter === 'inProgress' ? '#ff9800' : 'transparent',
-              color: filter === 'inProgress' ? 'white' : '#ff9800',
-              borderColor: '#ff9800',
-              fontWeight: 600,
-              minWidth: 140,
-              borderRadius: 2,
-              px: 2,
-              '&:hover': {
-                bgcolor: filter === 'inProgress' ? '#f57c00' : 'rgba(255, 152, 0, 0.08)',
-                borderColor: '#f57c00'
-              }
-            }}
-          >
-            Devam Eden
+            AYT
           </Button>
         </Box>
       </Box>
 
-      {loading ? (
-        <Box sx={{ width: '100%', mt: 4 }}>
-          <LinearProgress />
-        </Box>
-      ) : (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3, px: 1 }}>
-          {filteredDersler.map((ders) => {
-            const ilerleme = getKonuIlerleme(ders.id);
-            const durumFiltresi = filter === 'all' || 
-              (filter === 'completed' && ilerleme === 100) || 
-              (filter === 'inProgress' && ilerleme > 0 && ilerleme < 100);
-            
-            if (!durumFiltresi) return null;
-            
-            // Tamamlanan konu sayısı
-            const tamamlananKonuSayisi = Math.round(ilerleme * ders.konular.length / 100);
-            
-            return (
-              <Card
-                key={ders.id}
-                elevation={0}
-                onClick={() => handleDersClick(ders)}
+      {/* Subject Cards Grid */}
+      <Box sx={{ 
+        display: 'grid',
+        gridTemplateColumns: { 
+          xs: '1fr', 
+          sm: 'repeat(2, 1fr)', 
+          md: 'repeat(3, 1fr)', 
+          lg: 'repeat(4, 1fr)' 
+        },
+        gap: 3,
+        position: 'relative',
+        zIndex: 1
+      }}>
+        {filteredDersler.map((ders) => {
+          const ilerleme = getKonuIlerleme(ders.id);
+          const completedCount = ilerleme.completed;
+          const totalCount = ders.konular.length;
+          const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+          
+          return (
+            <Card
+              key={ders.id}
+              onClick={() => handleDersClick(ders)}
+              sx={{
+                cursor: 'pointer',
+                borderRadius: 4,
+                overflow: 'hidden',
+                background: 'rgba(255,255,255,0.95)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                position: 'relative',
+                '&:hover': {
+                  transform: 'translateY(-8px)',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+                  '& .subject-header': {
+                    transform: 'scale(1.02)'
+                  }
+                },
+                '&:active': {
+                  transform: 'translateY(-4px)'
+                }
+              }}
+            >
+              {/* Subject Header */}
+              <Box
+                className="subject-header"
                 sx={{
-                  cursor: 'pointer',
-                  borderRadius: '16px',
-                  background: '#ffffff',
-                  boxShadow: '0 8px 20px rgba(0,0,0,0.06)',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.3s ease',
-                  overflow: 'hidden',
-                  border: `1px solid ${ders.color}30`,
-                  '&:hover': { 
-                    transform: 'translateY(-8px)',
-                    boxShadow: `0 15px 30px rgba(0,0,0,0.1), 0 8px 15px ${ders.color}30`
-                  },
-                  position: 'relative'
-                }}
-              >
-                {/* Ders Başlık Bölümü */}
-                <Box sx={{
-                  background: ders.color,
-                  p: 2.5,
+                  background: `linear-gradient(135deg, ${ders.color} 0%, ${ders.color}dd 100%)`,
+                  p: 3,
                   display: 'flex',
                   alignItems: 'center',
                   gap: 2,
+                  transition: 'transform 0.3s ease',
                   position: 'relative',
                   overflow: 'hidden',
-                  '&::after': {
+                  '&::before': {
                     content: '""',
                     position: 'absolute',
-                    bottom: 0,
+                    top: 0,
+                    left: 0,
                     right: 0,
-                    width: '30%',
-                    height: '100%',
-                    background: `linear-gradient(to right, transparent, ${ders.color}90)`,
-                    zIndex: 1
+                    bottom: 0,
+                    background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
+                    pointerEvents: 'none'
                   }
-                }}>
-                  <Avatar
-                    sx={{
-                      bgcolor: '#ffffff',
-                      color: ders.color,
-                      width: 52,
-                      height: 52,
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                      zIndex: 2,
-                      transition: 'transform 0.3s ease',
-                      '&:hover': {
-                        transform: 'rotate(10deg) scale(1.1)'
-                      }
-                    }}
-                  >
-                    {getDersIcon(ders.ad)}
-                  </Avatar>
-                  <Typography 
+                }}
+              >
+                <Avatar
+                  sx={{
+                    width: 50,
+                    height: 50,
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    color: '#ffffff',
+                    fontSize: '1.5rem',
+                    fontWeight: 700,
+                    border: '2px solid rgba(255,255,255,0.3)'
+                  }}
+                >
+                  {getDersIcon(ders.ad)}
+                </Avatar>
+                <Box sx={{ flex: 1 }}>
+                  <Typography
                     variant="h6"
-                    sx={{ 
-                      fontWeight: 900, 
-                      color: '#f4f2f5',
-                      textShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                      zIndex: 2,
-                      fontSize: '1.3rem',
-                      letterSpacing: '0.5px'
+                    sx={{
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      fontSize: '1.2rem',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.2)',
+                      lineHeight: 1.2
                     }}
                   >
                     {ders.ad}
                   </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'rgba(255,255,255,0.9)',
+                      fontWeight: 500,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    {ders.type} Dersi
+                  </Typography>
+                </Box>
+              </Box>
+
+              {/* Progress Section */}
+              <Box sx={{ p: 3 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  mb: 2
+                }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#666',
+                      fontWeight: 600,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    İlerleme Durumu
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: ders.color,
+                      fontWeight: 700,
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    {completedCount}/{totalCount}
+                  </Typography>
                 </Box>
                 
-                {/* İçerik Bölümü */}
-                <Box sx={{ p: 2.5, display: 'flex', flexDirection: 'column', flexGrow: 1, justifyContent: 'space-between' }}>
-                  {/* Konu Bilgisi */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between',
-                    p: 1.5, 
-                    borderRadius: '10px',
-                    bgcolor: '#f8f9fa',
-                    border: '1px solid #eaecef',
-                    mb: 2.5
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <FormatListBulletedIcon sx={{ color: ders.color, mr: 1.5, fontSize: '1.2rem' }} />
-                      <Typography sx={{ fontWeight: 700, color: '#495057', fontSize: '0.95rem' }}>
-                        Toplam Konu
-                      </Typography>
-                    </Box>
-                    <Typography sx={{ 
-                      fontWeight: 800, 
-                      color: ders.color, 
-                      fontSize: '1.1rem',
-                      bgcolor: `${ders.color}15`,
-                      px: 1.5,
+                <LinearProgress
+                  variant="determinate"
+                  value={progressPercentage}
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(0,0,0,0.08)',
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 4,
+                      background: `linear-gradient(90deg, ${ders.color} 0%, ${ders.color}aa 100%)`,
+                      transition: 'transform 0.4s ease'
+                    }
+                  }}
+                />
+                
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#888',
+                    fontSize: '0.8rem',
+                    mt: 1,
+                    textAlign: 'center',
+                    fontWeight: 500
+                  }}
+                >
+                  %{Math.round(progressPercentage)} Tamamlandı
+                </Typography>
+              </Box>
+
+              {/* Status Indicators */}
+              <Box sx={{ 
+                px: 3, 
+                pb: 3,
+                display: 'flex',
+                gap: 1,
+                justifyContent: 'center'
+              }}>
+                {ilerleme.needsReview > 0 && (
+                  <Box
+                    sx={{
+                      bgcolor: '#fff3e0',
+                      color: '#e65100',
+                      px: 2,
                       py: 0.5,
-                      borderRadius: '30px'
-                    }}>
-                      {ders.konular.length}
-                    </Typography>
+                      borderRadius: 2,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      border: '1px solid #ffcc02'
+                    }}
+                  >
+                    {ilerleme.needsReview} Tekrar
                   </Box>
-                  
-                  {/* İlerleme Bölümü */}
-                  <Box sx={{ mt: 'auto' }}>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center', 
-                      mb: 1.5
-                    }}>
-                      <Typography sx={{ fontWeight: 600, color: '#495057', fontSize: '0.9rem' }}>
-                        İlerleme Durumu
-                      </Typography>
-                      <Box sx={{ 
-                        bgcolor: ilerleme > 0 ? (ilerleme === 100 ? '#4caf5020' : '#ff980020') : '#e0e0e020',
-                        color: ilerleme > 0 ? (ilerleme === 100 ? '#2e7d32' : '#e65100') : '#757575',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: '30px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5
-                      }}>
-                        {ilerleme > 0 ? (
-                          ilerleme === 100 ? (
-                            <>
-                              <CheckCircleIcon fontSize="small" />
-                              Tamamlandı
-                            </>
-                          ) : (
-                            <>
-                              <AccessTimeIcon fontSize="small" />
-                              Devam Ediyor
-                            </>
-                          )
-                        ) : (
-                          'Başlanmadı'
-                        )}
-                      </Box>
-                    </Box>
-                    
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={ilerleme} 
-                      sx={{ 
-                        height: 10, 
-                        borderRadius: 5,
-                        mb: 2,
-                        bgcolor: '#f0f0f0',
-                        '& .MuiLinearProgress-bar': {
-                          background: ilerleme === 100 
-                            ? 'linear-gradient(90deg, #4caf50, #81c784)' 
-                            : `linear-gradient(90deg, ${ders.color}, ${ders.color}90)`,
-                          borderRadius: 5
-                        }
-                      }} 
-                    />
-                    
-                    {/* Tamamlanan Konu Sayacı */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      justifyContent: 'flex-end', 
+                )}
+                {completedCount === totalCount && (
+                  <Box
+                    sx={{
+                      bgcolor: '#e8f5e8',
+                      color: '#2e7d32',
+                      px: 2,
+                      py: 0.5,
+                      borderRadius: 2,
+                      fontSize: '0.75rem',
+                      fontWeight: 600,
+                      border: '1px solid #4caf50',
+                      display: 'flex',
                       alignItems: 'center',
-                      p: 2.5,
-                      borderRadius: '12px',
-                      bgcolor: '#f8f9fa',
-                      border: `2px solid ${ders.color}30`,
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: `${ilerleme}%`,
-                        height: '100%',
-                        background: `linear-gradient(to right, ${ders.color}10, ${ders.color}20)`,
-                        zIndex: 0
-                      }
-                    }}>
-                      <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        zIndex: 1,
-                        pr: 1
-                      }}>
-                        <Typography sx={{ 
-                          fontWeight: 900, 
-                          color: ders.color, 
-                          fontSize: '1.3rem',
-                          textShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          mr: 0.5
-                        }}>
-                          {tamamlananKonuSayisi}
-                        </Typography>
-                        <Typography sx={{ 
-                          fontWeight: 700, 
-                          color: '#495057', 
-                          fontSize: '1rem',
-                        }}>
-                          / {ders.konular.length} Konu Tamamlandı
-                        </Typography>
-                      </Box>
-                    </Box>
+                      gap: 0.5
+                    }}
+                  >
+                    <CheckCircleIcon sx={{ fontSize: '0.9rem' }} />
+                    Tamamlandı
                   </Box>
-                </Box>
-              </Card>
-            );
-          })}
-        </Box>
-      )}
+                )}
+              </Box>
+            </Card>
+          );
+        })}
+      </Box>
       
       <Dialog 
         open={openDialog} 
@@ -976,105 +575,166 @@ const KonuTakip = () => {
         maxWidth="md"
         PaperProps={{
           sx: {
-            borderRadius: 16,
+            borderRadius: 3,
             overflow: 'hidden',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.2)'
+            backgroundColor: '#1b293d',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+            border: '1px solid rgba(255,255,255,0.1)'
           }
         }}
       >
         {selectedDers && (
           <>
             <DialogTitle sx={{ 
-              bgcolor: selectedDers.color,
+              background: `linear-gradient(135deg, ${selectedDers.color} 0%, ${selectedDers.color}dd 100%)`,
               display: 'flex',
               alignItems: 'center',
               p: 3,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              position: 'relative',
+              overflow: 'hidden'
             }}>
+              {/* Decorative background element */}
+              <Box sx={{
+                position: 'absolute',
+                top: -20,
+                right: -20,
+                width: 100,
+                height: 100,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.1)',
+                zIndex: 0
+              }} />
+              
               <Avatar sx={{ 
-                bgcolor: 'white', 
+                bgcolor: 'rgba(255,255,255,0.9)', 
                 color: selectedDers.color, 
-                mr: 2, 
-                width: 60, 
-                height: 60,
-                boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                '& .MuiSvgIcon-root': { fontSize: '2rem' }
+                mr: 3, 
+                width: 64, 
+                height: 64,
+                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                zIndex: 2,
+                border: '3px solid rgba(255,255,255,0.3)'
               }}>
                 {getDersIcon(selectedDers.ad)}
               </Avatar>
-              <Box>
-                <Typography variant="h5" sx={{ 
-                  fontWeight: 900, 
-                  color: '#b4c0d6',
-                  textShadow: '0px 1px 2px rgba(0,0,0,0.2)'
+              <Box sx={{ zIndex: 2 }}>
+                <Typography variant="h4" sx={{ 
+                  fontWeight: 700, 
+                  color: 'white',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                  mb: 0.5
                 }}>
                   {selectedDers.ad}
                 </Typography>
                 <Typography variant="subtitle1" sx={{ 
                   color: 'rgba(255,255,255,0.9)',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  fontSize: '1.1rem'
                 }}>
                   Toplam {selectedDers.konular.length} Konu
                 </Typography>
               </Box>
             </DialogTitle>
-            <DialogContent dividers sx={{ bgcolor: '#f4f2f5', p: 0 }}>
-              <Box sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.7)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: '#444' }}>
+            
+            <DialogContent sx={{ 
+              bgcolor: '#1b293d', 
+              p: 0,
+              position: 'relative'
+            }}>
+              {/* Stats Header */}
+              <Box sx={{ 
+                p: 3, 
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                backdropFilter: 'blur(10px)',
+                borderBottom: '1px solid rgba(255,255,255,0.1)'
+              }}>
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 600, 
+                  color: 'white',
+                  mb: 2,
+                  textAlign: 'center'
+                }}>
                   Konu Listesi
                 </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#e8f5e9', px: 1.5, py: 0.5, borderRadius: 2 }}>
-                    <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 18, mr: 0.5 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#2e7d32' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center',
+                  gap: 3,
+                  flexWrap: 'wrap'
+                }}>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    bgcolor: 'rgba(76, 175, 80, 0.2)', 
+                    px: 2, 
+                    py: 1, 
+                    borderRadius: 3,
+                    border: '1px solid rgba(76, 175, 80, 0.3)',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 20, mr: 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#4caf50' }}>
                       Tamamlanan: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'completed' || durum === 'completedNeedsReview').length}
                     </Typography>
                   </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', bgcolor: '#fff3e0', px: 1.5, py: 0.5, borderRadius: 2 }}>
-                    <AccessTimeIcon sx={{ color: '#ff9800', fontSize: 18, mr: 0.5 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#e65100' }}>
-                      Tekrar Edilecek: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'needsReview' || durum === 'completedNeedsReview').length}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    bgcolor: 'rgba(255, 152, 0, 0.2)', 
+                    px: 2, 
+                    py: 1, 
+                    borderRadius: 3,
+                    border: '1px solid rgba(255, 152, 0, 0.3)',
+                    backdropFilter: 'blur(10px)'
+                  }}>
+                    <AccessTimeIcon sx={{ color: '#ff9800', fontSize: 20, mr: 1 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#ff9800' }}>
+                      Tekrar: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'needsReview' || durum === 'completedNeedsReview').length}
                     </Typography>
                   </Box>
                 </Box>
               </Box>
-              <List sx={{ p: 0 }}>
+              <List sx={{ p: 0, maxHeight: '400px', overflow: 'auto' }}>
                 {selectedDers.konular.map((konu, index) => {
                   const konuKey = `${selectedDers.id}-${index}`;
                   const durum = konuDurumu[selectedDers.id]?.[index] || 'notStarted';
                   
                   const getBgColor = () => {
-                    if (durum === 'completed') return 'rgba(76, 175, 80, 0.08)';
-                    if (durum === 'completedNeedsReview') return 'rgba(255, 152, 0, 0.08)';
+                    if (durum === 'completed') return 'rgba(76, 175, 80, 0.1)';
+                    if (durum === 'completedNeedsReview') return 'rgba(255, 152, 0, 0.1)';
                     if (durum === 'needsReview') return 'rgba(255, 152, 0, 0.05)';
-                    return 'white';
+                    return 'rgba(255,255,255,0.02)';
                   };
                   
                   return (
                     <ListItem 
                       key={konuKey} 
-                      divider 
                       sx={{ 
-                        p: 2.5,
+                        p: 3,
                         bgcolor: getBgColor(),
-                        '&:hover': { bgcolor: durum === 'completed' ? 'rgba(76, 175, 80, 0.12)' : 
-                                    durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.12)' : 
-                                    durum === 'needsReview' ? 'rgba(255, 152, 0, 0.08)' : 
-                                    'rgba(0, 0, 0, 0.02)' },
-                        transition: 'all 0.2s ease'
+                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        '&:hover': { 
+                          bgcolor: durum === 'completed' ? 'rgba(76, 175, 80, 0.15)' : 
+                                    durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.15)' : 
+                                    durum === 'needsReview' ? 'rgba(255, 152, 0, 0.1)' : 
+                                    'rgba(255,255,255,0.05)',
+                          transform: 'translateX(4px)'
+                        },
+                        transition: 'all 0.3s ease',
+                        cursor: 'pointer'
                       }}
                     >
                       <ListItemText 
                         primary={konu} 
                         primaryTypographyProps={{ 
-                          fontWeight: durum === 'completed' || durum === 'completedNeedsReview' ? 700 : 500,
-                          color: durum === 'completed' ? '#2e7d32' : 
-                                durum === 'completedNeedsReview' ? '#e65100' : 
-                                durum === 'needsReview' ? '#f57c00' : '#555',
+                          fontWeight: durum === 'completed' || durum === 'completedNeedsReview' ? 600 : 500,
+                          color: durum === 'completed' ? '#4caf50' : 
+                                durum === 'completedNeedsReview' ? '#ff9800' : 
+                                durum === 'needsReview' ? '#ffb74d' : 'rgba(255,255,255,0.9)',
                           fontSize: '1rem'
                         }}
                       />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                         <FormControlLabel
                           control={
                             <Checkbox
@@ -1086,17 +746,16 @@ const KonuTakip = () => {
                                   durum === 'needsReview' || durum === 'completedNeedsReview' ? 'completedNeedsReview' : 'completed' : 
                                   durum === 'needsReview' || durum === 'completedNeedsReview' ? 'needsReview' : 'notStarted'
                               )}
-                              color="success"
                               sx={{ 
-                                '& .MuiSvgIcon-root': { fontSize: 28 },
-                                color: '#4caf50',
+                                '& .MuiSvgIcon-root': { fontSize: 24 },
+                                color: 'rgba(76, 175, 80, 0.7)',
                                 '&.Mui-checked': {
-                                  color: '#2e7d32',
+                                  color: '#4caf50',
                                 }
                               }}
                             />
                           }
-                          label={<Typography sx={{ fontWeight: 600, color: '#444' }}>Tamamlandı</Typography>}
+                          label={<Typography sx={{ fontWeight: 500, color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>Tamamlandı</Typography>}
                           sx={{ m: 0 }}
                         />
                         <FormControlLabel
@@ -1108,17 +767,16 @@ const KonuTakip = () => {
                                 index, 
                                 e.target.checked
                               )}
-                              color="warning"
                               sx={{ 
-                                '& .MuiSvgIcon-root': { fontSize: 28 },
-                                color: '#ff9800',
+                                '& .MuiSvgIcon-root': { fontSize: 24 },
+                                color: 'rgba(255, 152, 0, 0.7)',
                                 '&.Mui-checked': {
-                                  color: '#e65100',
+                                  color: '#ff9800',
                                 }
                               }}
                             />
                           }
-                          label={<Typography sx={{ fontWeight: 600, color: '#444' }}>Tekrar Edilecek</Typography>}
+                          label={<Typography sx={{ fontWeight: 500, color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>Tekrar Edilecek</Typography>}
                           sx={{ m: 0 }}
                         />
                       </Box>
@@ -1127,18 +785,29 @@ const KonuTakip = () => {
                 })}
               </List>
             </DialogContent>
-            <DialogActions sx={{ p: 3, bgcolor: '#f4f2f5', justifyContent: 'space-between', borderTop: '1px solid #e0e0e0' }}>
+            <DialogActions sx={{ 
+              p: 3, 
+              bgcolor: 'rgba(255,255,255,0.05)', 
+              justifyContent: 'space-between',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(10px)'
+            }}>
               <Button 
                 onClick={handleDialogClose}
                 variant="outlined"
                 sx={{ 
-                  borderColor: '#bdbdbd',
-                  color: '#555',
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: 'rgba(255,255,255,0.8)',
                   fontWeight: 600,
-                  px: 3,
-                  py: 1,
-                  borderRadius: 2,
-                  '&:hover': { borderColor: '#9e9e9e', bgcolor: 'rgba(0,0,0,0.03)' }
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 3,
+                  '&:hover': { 
+                    borderColor: 'rgba(255,255,255,0.5)', 
+                    bgcolor: 'rgba(255,255,255,0.1)',
+                    color: 'white'
+                  },
+                  transition: 'all 0.3s ease'
                 }}
               >
                 Kapat
@@ -1151,13 +820,18 @@ const KonuTakip = () => {
                 variant="contained" 
                 startIcon={<SaveIcon />}
                 sx={{ 
-                  bgcolor: selectedDers.color,
+                  background: `linear-gradient(135deg, ${selectedDers.color} 0%, ${selectedDers.color}dd 100%)`,
                   fontWeight: 600,
                   px: 4,
-                  py: 1,
-                  borderRadius: 2,
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  '&:hover': { bgcolor: selectedDers.color, filter: 'brightness(90%)' }
+                  py: 1.5,
+                  borderRadius: 3,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                  '&:hover': { 
+                    background: `linear-gradient(135deg, ${selectedDers.color}dd 0%, ${selectedDers.color}bb 100%)`,
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 6px 25px rgba(0,0,0,0.3)'
+                  },
+                  transition: 'all 0.3s ease'
                 }}
               >
                 Kaydet

@@ -8,7 +8,6 @@ import {
   Button,
   IconButton,
   Dialog,
-  DialogTitle,
   DialogContent,
   DialogActions,
   CircularProgress,
@@ -97,16 +96,16 @@ const PageHeader = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(4),
   position: 'relative',
   padding: theme.spacing(2, 2, 2, 2),
-  background: 'rgba(255,255,255,0.98)',
+  background: '#566e99',
   borderRadius: 18,
-  boxShadow: '0 4px 24px rgba(60,60,80,0.07)',
-  border: '1px solid #f1f1f4',
+  boxShadow: '0 4px 24px rgba(0, 0, 0, 0.15)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
   '&::after': {
     content: '""',
     position: 'absolute',
     width: '120px',
     height: '4px',
-    background: 'linear-gradient(to right, #4285F4, #34A853, #FBBC05, #EA4335)',
+    background: 'linear-gradient(to right, #55b3d9, #3498db)',
     bottom: 8,
     left: theme.spacing(2)
   }
@@ -126,71 +125,82 @@ const SearchBar = styled(Paper)(({ theme }) => ({
   alignItems: 'center',
   borderRadius: 16,
   marginBottom: theme.spacing(3),
-  backgroundColor: '#D9D4BB',
-  boxShadow: '0 8px 25px rgba(0,0,0,0.1), 0 2px 5px rgba(0,0,0,0.07)',
-  border: '1px solid rgba(0,0,0,0.04)',
+  backgroundColor: '#566e99',
+  boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
   transition: 'all 0.3s ease',
   '&:hover': {
-    boxShadow: '0 12px 30px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.08)',
+    boxShadow: '0 12px 30px rgba(85, 179, 217, 0.3)',
     transform: 'translateY(-2px)'
   }
 }));
 
 const NoteListItem = styled(ListItem)(({ theme, categorycolor }) => ({
-  borderRadius: 12,
-  marginBottom: theme.spacing(1.5),
+  borderRadius: 16,
+  marginBottom: theme.spacing(2),
   padding: 0,
   overflow: 'hidden',
   transition: 'all 0.25s ease',
-  boxShadow: '0 4px 15px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.05)',
-  backgroundColor: '#D9D4BB',
-  border: '1px solid rgba(0,0,0,0.03)',
+  boxShadow: '0 6px 20px rgba(0,0,0,0.15)',
+  backgroundColor: '#566e99',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
   position: 'relative',
+  minHeight: '80px',
   '&::before': {
     content: '""',
     position: 'absolute',
     height: '100%',
-    width: '5px',
+    width: '6px',
     left: 0,
     top: 0,
-    backgroundColor: categorycolor || theme.palette.primary.main,
+    backgroundColor: categorycolor || '#55b3d9',
+    borderRadius: '16px 0 0 16px',
   },
   '&:hover': {
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 25px rgba(0,0,0,0.1), 0 2px 10px rgba(0,0,0,0.06)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 12px 30px rgba(85, 179, 217, 0.25)',
   }
 }));
 
 const NoteListItemContent = styled(ListItemButton)(({ theme }) => ({
-  padding: theme.spacing(2),
+  padding: theme.spacing(2.5, 3),
   width: '100%',
   alignItems: 'flex-start',
 }));
 
 const CategoryChip = styled(Chip)(({ theme, categorycolor }) => ({
-  fontWeight: 600,
-  backgroundColor: `${categorycolor}15`,
+  fontWeight: 700,
+  fontSize: '0.75rem',
+  backgroundColor: `${categorycolor}20`,
   color: categorycolor,
-  border: `1px solid ${categorycolor}30`,
-  boxShadow: `0 2px 8px ${categorycolor}20`,
-  height: 26,
+  border: `1px solid ${categorycolor}40`,
+  boxShadow: `0 3px 12px ${categorycolor}25`,
+  height: 28,
+  borderRadius: 14,
+  '& .MuiChip-label': {
+    paddingX: '12px',
+    fontWeight: 700,
+  },
   '&:hover': {
-    backgroundColor: `${categorycolor}25`,
+    backgroundColor: `${categorycolor}30`,
+    transform: 'scale(1.05)',
   }
 }));
 
 const NoteTitleText = styled(Typography)(({ theme }) => ({
-  fontWeight: 600,
-  fontSize: '1rem',
+  fontWeight: 700,
+  fontSize: '1.1rem',
   display: 'block',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap'
+  whiteSpace: 'nowrap',
+  color: 'white',
+  letterSpacing: '0.3px'
 }));
 
 const NoteDate = styled(Typography)(({ theme }) => ({
   fontSize: '0.75rem',
-  color: alpha(theme.palette.text.secondary, 0.85),
+  color: 'rgba(255, 255, 255, 0.8)',
   display: 'flex',
   alignItems: 'center',
   gap: 0.5,
@@ -292,10 +302,16 @@ const NotDefterim = () => {
 
   // Filtrelenmiş notları al
   const getFilteredNotes = () => {
+    // notes array'inin güvenli olduğundan emin ol
+    if (!Array.isArray(notes)) return [];
+    
     return notes.filter(note => {
+      // Güvenlik kontrolü - note undefined değilse işlem yap
+      if (!note || !note.id) return false;
+      
       const matchesSearch = searchTerm === '' || 
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        note.content.toLowerCase().includes(searchTerm.toLowerCase());
+        (note.title && note.title.toLowerCase().includes(searchTerm.toLowerCase())) || 
+        (note.content && note.content.toLowerCase().includes(searchTerm.toLowerCase()));
       
       const matchesCategory = selectedCategory === '' || note.category === selectedCategory;
       
@@ -329,7 +345,7 @@ const NotDefterim = () => {
       // Kategorileri çıkar
       const uniqueCategories = new Set();
       fetchedNotes.forEach(note => {
-        if (note.category) {
+        if (note && note.category) {
           uniqueCategories.add(note.category);
         }
       });
@@ -587,17 +603,17 @@ const NotDefterim = () => {
             component="h1" 
             gutterBottom 
             fontWeight={800} 
-            color="primary"
             sx={{
               fontSize: { xs: '1.2rem', md: '2rem' },
               display: 'flex',
               alignItems: 'center',
               gap: 1,
               letterSpacing: '0.5px',
-              mb: 0
+              mb: 0,
+              color: 'white'
             }}
           >
-            <EventNoteIcon fontSize="large" sx={{ color: '#4285F4' }} />
+            <EventNoteIcon fontSize="large" sx={{ color: '#55b3d9' }} />
             Not Defterim
           </Typography>
           <NewNoteButton
@@ -627,8 +643,8 @@ const NotDefterim = () => {
         </HeaderRow>
       </PageHeader>
       
-      <SearchBar elevation={3} sx={{ backgroundColor: '#D9D4BB !important' }}>
-        <SearchIcon sx={{ mr: 1, color: 'primary.main' }} />
+      <SearchBar elevation={3}>
+        <SearchIcon sx={{ mr: 1, color: '#55b3d9' }} />
         <TextField
           fullWidth
           variant="standard"
@@ -639,7 +655,7 @@ const NotDefterim = () => {
             disableUnderline: true,
             endAdornment: searchTerm && (
               <InputAdornment position="end">
-                <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: 'text.secondary' }}>
+                <IconButton size="small" onClick={() => setSearchTerm('')} sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>
                   <ClearIcon fontSize="small" />
                 </IconButton>
               </InputAdornment>
@@ -648,7 +664,12 @@ const NotDefterim = () => {
           sx={{ 
             '& .MuiInputBase-root': {
               fontSize: '1rem',
-              fontWeight: 500
+              fontWeight: 500,
+              color: 'white'
+            },
+            '& .MuiInputBase-input::placeholder': {
+              color: 'rgba(255, 255, 255, 0.7)',
+              opacity: 1
             }
           }}
         />
@@ -789,20 +810,39 @@ const NotDefterim = () => {
         </Box>
       ) : (
         <List sx={{ padding: 0 }}>
-          {getFilteredNotes().map((note) => (
-            <NoteListItem key={note.id} categorycolor={getCategoryColor(note.category)} style={{backgroundColor: '#D9D4BB'}}>
+          {getFilteredNotes().filter(note => note && note.id).map((note) => (
+            <NoteListItem key={note.id} categorycolor={getCategoryColor(note?.category)}>
               <NoteListItemContent onClick={() => handleOpenViewDialog(note)}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <CategoryChip categorycolor={getCategoryColor(note.category)} label={note.category || "Genel"} size="small" />
-                    <NoteTitleText>
-                      {note.title}
+                <Box sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  width: '100%',
+                  gap: 2
+                }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <CategoryChip 
+                        categorycolor={getCategoryColor(note?.category)} 
+                        label={note?.category || "Genel"} 
+                        size="small" 
+                      />
+                    </Box>
+                    <NoteTitleText sx={{ fontWeight: 700, fontSize: '1.1rem' }}>
+                      {note?.title || 'Başlıksız Not'}
                     </NoteTitleText>
                   </Box>
-                  <NoteDate>
-                    <AccessTimeIcon sx={{ fontSize: '0.9rem' }} />
-                    {formatDate(note.date)}
-                  </NoteDate>
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'flex-end',
+                    minWidth: 'auto'
+                  }}>
+                    <NoteDate sx={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                      <AccessTimeIcon sx={{ fontSize: '0.9rem', mr: 0.5 }} />
+                      {formatDate(note?.date)}
+                    </NoteDate>
+                  </Box>
                 </Box>
               </NoteListItemContent>
               <IconButton 
@@ -812,9 +852,10 @@ const NotDefterim = () => {
                   handleMenuOpen(e, note);
                 }}
                 sx={{ 
-                  color: 'text.secondary',
+                  color: 'rgba(255, 255, 255, 0.8)',
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.1)
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white'
                   }
                 }}
               >
@@ -869,183 +910,177 @@ const NotDefterim = () => {
       {/* Not ekleme/düzenleme diyalogları */}
       
       {/* Dialog for creating a new note */}
-      <StyledDialog 
+      <Dialog 
         open={dialogOpen} 
         onClose={handleCloseDialog}
         fullWidth
         maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+          }
+        }}
       >
         <form onSubmit={handleSaveNote}>
+          {/* Simple Header */}
           <Box sx={{
-            p: 2.5,
-            background: `linear-gradient(45deg, ${alpha('#536DFE', 0.9)} 0%, ${alpha('#3949AB', 0.7)} 100%)`,
-            color: 'white',
-            position: 'relative',
-            overflow: 'hidden'
+            p: 3,
+            backgroundColor: '#566e99',
+            color: 'white'
           }}>
-            <Box 
-              sx={{
-                position: 'absolute',
-                top: -15,
-                right: -15,
-                width: 80,
-                height: 80,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.15)',
-                zIndex: 0
-              }}
-            />
-            <Box 
-              sx={{
-                position: 'absolute',
-                bottom: -20,
-                left: -20,
-                width: 120,
-                height: 120,
-                borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)',
-                zIndex: 0
-              }}
-            />
             <Typography 
               variant="h6" 
               component="div" 
               fontWeight={600}
               sx={{ 
-                position: 'relative',
-                zIndex: 1,
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                gap: 1.5
               }}
             >
-              <NoteAddIcon sx={{ fontSize: '1.3rem' }} /> Yeni Not Ekle
+              <NoteAddIcon /> Yeni Not Ekle
             </Typography>
           </Box>
-          <DialogContent sx={{ p: 3, pt: 3 }}>
+
+          {/* Clean Content */}
+          <DialogContent sx={{ p: 3, backgroundColor: '#566e99' }}>
             <Box sx={{ 
               display: 'flex',
               flexDirection: 'column',
-              gap: 2.5,
+              gap: 3,
             }}>
-              <Paper elevation={0} sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                bgcolor: 'rgba(83, 109, 254, 0.05)',
-                border: '1px solid rgba(83, 109, 254, 0.1)'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <TitleIcon sx={{ mt: 1.5, color: '#536DFE' }} />
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    label="Başlık"
-                    name="title"
-                    fullWidth
-                    variant="outlined"
-                    value={currentNote.title}
-                    onChange={handleInputChange}
-                    required
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        backgroundColor: '#D9D4BB',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#536DFE',
-                          borderWidth: 2
-                        }
-                      },
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#536DFE'
-                      } 
-                    }}
-                  />
-                </Box>
-              </Paper>
+              {/* Title Field */}
+              <TextField
+                autoFocus
+                label="Not Başlığı"
+                name="title"
+                fullWidth
+                variant="outlined"
+                value={currentNote.title}
+                onChange={handleInputChange}
+                required
+                placeholder="Notunuz için bir başlık girin..."
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: '#566e99',
+                    color: 'white',
+                    '& fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.3)'
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.5)'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#55b3d9',
+                      borderWidth: 2
+                    }
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    '&.Mui-focused': {
+                      color: '#55b3d9'
+                    }
+                  },
+                  '& .MuiOutlinedInput-input::placeholder': {
+                    color: 'rgba(255, 255, 255, 0.6)'
+                  }
+                }}
+              />
               
-              <Paper elevation={0} sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                bgcolor: 'rgba(83, 109, 254, 0.05)',
-                border: '1px solid rgba(83, 109, 254, 0.1)'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <CategoryIcon sx={{ mt: 1.5, color: '#536DFE' }} />
-                  <TextField
-                    margin="dense"
-                    label="Kategori"
-                    name="category"
-                    fullWidth
-                    variant="outlined"
-                    value={currentNote.category}
-                    onChange={handleInputChange}
-                    placeholder="İsterseniz bir kategori ekleyin"
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        backgroundColor: '#D9D4BB',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#536DFE',
-                          borderWidth: 2
-                        }
-                      },
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#536DFE'
-                      } 
-                    }}
-                  />
-                </Box>
-              </Paper>
+              {/* Category Field */}
+              <TextField
+                label="Kategori"
+                name="category"
+                fullWidth
+                variant="outlined"
+                value={currentNote.category}
+                onChange={handleInputChange}
+                placeholder="Matematik, Fizik, Genel vb."
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: '#566e99',
+                    color: 'white',
+                    '& fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.3)'
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.5)'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#55b3d9',
+                      borderWidth: 2
+                    }
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    '&.Mui-focused': {
+                      color: '#55b3d9'
+                    }
+                  },
+                  '& .MuiOutlinedInput-input::placeholder': {
+                    color: 'rgba(255, 255, 255, 0.6)'
+                  }
+                }}
+              />
               
-              <Paper elevation={0} sx={{ 
-                p: 2, 
-                borderRadius: 2,
-                bgcolor: 'rgba(83, 109, 254, 0.05)',
-                border: '1px solid rgba(83, 109, 254, 0.1)'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <DescriptionIcon sx={{ mt: 1.5, color: '#536DFE' }} />
-                  <TextField
-                    margin="dense"
-                    label="İçerik"
-                    name="content"
-                    fullWidth
-                    variant="outlined"
-                    value={currentNote.content}
-                    onChange={handleInputChange}
-                    required
-                    multiline
-                    rows={8}
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: 2,
-                        backgroundColor: '#D9D4BB',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#536DFE',
-                          borderWidth: 2
-                        }
-                      },
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#536DFE'
-                      } 
-                    }}
-                  />
-                </Box>
-              </Paper>
+              {/* Content Field */}
+              <TextField
+                label="Not İçeriği"
+                name="content"
+                fullWidth
+                variant="outlined"
+                value={currentNote.content}
+                onChange={handleInputChange}
+                required
+                multiline
+                rows={6}
+                placeholder="Not içeriğinizi buraya yazın..."
+                sx={{ 
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: '#566e99',
+                    color: 'white',
+                    '& fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.3)'
+                    },
+                    '&:hover fieldset': {
+                      borderColor: 'rgba(255, 255, 255, 0.5)'
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#55b3d9',
+                      borderWidth: 2
+                    }
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    '&.Mui-focused': {
+                      color: '#55b3d9'
+                    }
+                  },
+                  '& .MuiOutlinedInput-input::placeholder': {
+                    color: 'rgba(255, 255, 255, 0.6)'
+                  }
+                }}
+              />
             </Box>
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1 }}>
+          <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1, backgroundColor: '#566e99' }}>
             <Button 
               onClick={handleCloseDialog}
+              variant="outlined"
               sx={{ 
                 borderRadius: 2,
                 px: 3,
-                color: 'rgba(0,0,0,0.6)',
-                fontWeight: 500,
+                fontWeight: 600,
                 textTransform: 'none',
+                color: 'white',
+                borderColor: 'rgba(255, 255, 255, 0.3)',
                 '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.05)'
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderColor: 'rgba(255, 255, 255, 0.5)'
                 }
               }}
             >
@@ -1054,29 +1089,27 @@ const NotDefterim = () => {
             <Button 
               type="submit" 
               variant="contained"
-              color="primary"
               startIcon={<SaveIcon />}
               disabled={isLoading || !currentNote.title || !currentNote.content}
               sx={{ 
                 borderRadius: 2,
                 px: 3,
-                boxShadow: '0 4px 12px rgba(94, 200, 55, 0.3)',
-                backgroundColor: '#5ec837',
+                fontWeight: 600,
                 textTransform: 'none',
-                fontWeight: 500,
-                transition: 'all 0.3s',
+                background: 'linear-gradient(135deg, #566e99 0%, #4a5f85 100%)',
+                boxShadow: '0 4px 12px rgba(86, 110, 153, 0.3)',
                 '&:hover': {
-                  backgroundColor: '#4eb02c',
-                  boxShadow: '0 6px 16px rgba(94, 200, 55, 0.4)',
+                  background: 'linear-gradient(135deg, #4a5f85 0%, #3d4f6b 100%)',
+                  boxShadow: '0 6px 16px rgba(86, 110, 153, 0.4)',
                   transform: 'translateY(-1px)'
                 }
               }}
             >
-              {isLoading ? <CircularProgress size={24} /> : 'Kaydet'}
+              {isLoading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Kaydet'}
             </Button>
           </DialogActions>
         </form>
-      </StyledDialog>
+      </Dialog>
       
       {/* Dialog for editing a note */}
       <StyledDialog 
@@ -1088,7 +1121,7 @@ const NotDefterim = () => {
         <form onSubmit={handleUpdateNote}>
           <Box sx={{
             p: 2.5,
-            background: '#ede8ce',
+            background: '#566e99',
             color: 'white',
             position: 'relative',
             overflow: 'hidden'
@@ -1133,7 +1166,7 @@ const NotDefterim = () => {
               <EditNoteIcon sx={{ fontSize: '1.3rem' }} /> Notu Düzenle
             </Typography>
           </Box>
-          <DialogContent sx={{ p: 3, pt: 3 }}>
+          <DialogContent sx={{ p: 3, pt: 3, backgroundColor: '#566e99' }}>
             <Box sx={{ 
               display: 'flex',
               flexDirection: 'column',
@@ -1142,11 +1175,11 @@ const NotDefterim = () => {
               <Paper elevation={0} sx={{ 
                 p: 2, 
                 borderRadius: 2,
-                bgcolor: 'rgba(255, 152, 0, 0.05)',
-                border: '1px solid rgba(255, 152, 0, 0.1)'
+                bgcolor: '#566e99',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <TitleIcon sx={{ mt: 1.5, color: '#FF9800' }} />
+                  <TitleIcon sx={{ mt: 1.5, color: '#55b3d9' }} />
                   <TextField
                     autoFocus
                     margin="dense"
@@ -1160,15 +1193,25 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#D9D4BB',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#FF9800',
+                        backgroundColor: '#566e99',
+                        color: 'white',
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.3)'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)'
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#55b3d9',
                           borderWidth: 2
                         }
                       },
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#FF9800'
-                      } 
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        '&.Mui-focused': {
+                          color: '#55b3d9'
+                        }
+                      }
                     }}
                   />
                 </Box>
@@ -1177,11 +1220,11 @@ const NotDefterim = () => {
               <Paper elevation={0} sx={{ 
                 p: 2, 
                 borderRadius: 2,
-                bgcolor: 'rgba(255, 152, 0, 0.05)',
-                border: '1px solid rgba(255, 152, 0, 0.1)'
+                bgcolor: '#566e99',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <CategoryIcon sx={{ mt: 1.5, color: '#FF9800' }} />
+                  <CategoryIcon sx={{ mt: 1.5, color: '#55b3d9' }} />
                   <TextField
                     margin="dense"
                     label="Kategori"
@@ -1194,15 +1237,28 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#D9D4BB',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#FF9800',
+                        backgroundColor: '#566e99',
+                        color: 'white',
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.3)'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)'
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#55b3d9',
                           borderWidth: 2
                         }
                       },
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#FF9800'
-                      } 
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        '&.Mui-focused': {
+                          color: '#55b3d9'
+                        }
+                      },
+                      '& .MuiOutlinedInput-input::placeholder': {
+                        color: 'rgba(255, 255, 255, 0.6)'
+                      }
                     }}
                   />
                 </Box>
@@ -1211,11 +1267,11 @@ const NotDefterim = () => {
               <Paper elevation={0} sx={{ 
                 p: 2, 
                 borderRadius: 2,
-                bgcolor: 'rgba(255, 152, 0, 0.05)',
-                border: '1px solid rgba(255, 152, 0, 0.1)'
+                bgcolor: '#566e99',
+                border: '1px solid rgba(255, 255, 255, 0.1)'
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
-                  <DescriptionIcon sx={{ mt: 1.5, color: '#FF9800' }} />
+                  <DescriptionIcon sx={{ mt: 1.5, color: '#55b3d9' }} />
                   <TextField
                     margin="dense"
                     label="İçerik"
@@ -1230,32 +1286,42 @@ const NotDefterim = () => {
                     sx={{ 
                       '& .MuiOutlinedInput-root': {
                         borderRadius: 2,
-                        backgroundColor: '#D9D4BB',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: '#FF9800',
+                        backgroundColor: '#566e99',
+                        color: 'white',
+                        '& fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.3)'
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(255, 255, 255, 0.5)'
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#55b3d9',
                           borderWidth: 2
                         }
                       },
-                      '& .MuiInputLabel-root.Mui-focused': {
-                        color: '#FF9800'
-                      } 
+                      '& .MuiInputLabel-root': {
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        '&.Mui-focused': {
+                          color: '#55b3d9'
+                        }
+                      }
                     }}
                   />
                 </Box>
               </Paper>
             </Box>
           </DialogContent>
-          <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1 }}>
+          <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, gap: 1, backgroundColor: '#566e99' }}>
             <Button 
               onClick={handleCloseEditDialog}
               sx={{ 
                 borderRadius: 2,
                 px: 3,
-                color: 'rgba(0,0,0,0.6)',
+                color: 'white',
                 fontWeight: 500,
                 textTransform: 'none',
                 '&:hover': {
-                  backgroundColor: 'rgba(0,0,0,0.05)'
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
                 }
               }}
             >
@@ -1386,50 +1452,248 @@ const NotDefterim = () => {
         open={viewNoteDialog} 
         onClose={handleCloseViewDialog}
         fullWidth
-        maxWidth="sm"
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+            overflow: 'hidden',
+            maxHeight: '90vh'
+          }
+        }}
       >
-        <DialogTitle>
-          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-            {viewingNote?.title}
+        {/* Simple Header */}
+        <Box sx={{
+          backgroundColor: '#566e99',
+          color: 'white',
+          p: 3,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <Typography 
+            variant="h6" 
+            component="h2" 
+            sx={{ 
+              fontWeight: 600,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}
+          >
+            <DescriptionIcon />
+            Not Detayları
           </Typography>
+          
+          {/* Close Button */}
           <IconButton
-            aria-label="close"
             onClick={handleCloseViewDialog}
             sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
+              color: 'rgba(255,255,255,0.9)',
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                color: 'white'
+              }
             }}
           >
             <CloseIcon />
           </IconButton>
-        </DialogTitle>
-        <DialogContent dividers sx={{ maxHeight: '60vh', overflowY: 'auto' }}>
-          {viewingNote?.category && (
-            <CategoryChip categorycolor={getCategoryColor(viewingNote.category)} label={viewingNote.category} size="small" />
-          )}
-          <Typography 
-            variant="body1" 
-            component="div" 
+        </Box>
+
+        {/* 3 Ayrı Bileşen */}
+        <DialogContent sx={{ 
+          p: 3,
+          backgroundColor: '#566e99',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3
+        }}>
+          {/* 1. Not Başlığı */}
+          <Paper elevation={2} sx={{ 
+            p: 3, 
+            borderRadius: 2,
+            backgroundColor: '#566e99',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{
+                backgroundColor: '#55b3d9',
+                borderRadius: '50%',
+                p: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <TitleIcon sx={{ color: 'white', fontSize: '1.2rem' }} />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                Not Başlığı
+              </Typography>
+            </Box>
+            <Typography 
+              variant="h5" 
+              sx={{ 
+                fontWeight: 500,
+                color: 'white',
+                lineHeight: 1.3,
+                wordBreak: 'break-word'
+              }}
+            >
+              {viewingNote?.title || 'Başlıksız Not'}
+            </Typography>
+          </Paper>
+
+          {/* 2. Not İçeriği */}
+          <Paper elevation={2} sx={{ 
+            p: 3, 
+            borderRadius: 2,
+            backgroundColor: '#566e99',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{
+                backgroundColor: '#55b3d9',
+                borderRadius: '50%',
+                p: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <DescriptionIcon sx={{ color: 'white', fontSize: '1.2rem' }} />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                Not İçeriği
+              </Typography>
+            </Box>
+            <Typography 
+              variant="body1" 
+              component="div" 
+              sx={{ 
+                whiteSpace: 'pre-line',
+                wordBreak: 'break-word',
+                overflowWrap: 'break-word',
+                lineHeight: 1.6,
+                fontSize: '1rem',
+                color: 'rgba(255, 255, 255, 0.9)',
+                fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',
+                minHeight: '80px',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                p: 2,
+                borderRadius: 1,
+                border: '1px solid rgba(255, 255, 255, 0.15)'
+              }}
+            >
+              {viewingNote?.content || 'İçerik bulunamadı.'}
+            </Typography>
+          </Paper>
+
+          {/* 3. Not Kategorisi */}
+          <Paper elevation={2} sx={{ 
+            p: 3, 
+            borderRadius: 2,
+            backgroundColor: '#566e99',
+            border: '1px solid rgba(255, 255, 255, 0.1)'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Box sx={{
+                backgroundColor: '#55b3d9',
+                borderRadius: '50%',
+                p: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <CategoryIcon sx={{ color: 'white', fontSize: '1.2rem' }} />
+              </Box>
+              <Typography variant="h6" sx={{ fontWeight: 600, color: 'white' }}>
+                Kategori
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {viewingNote?.category ? (
+                <Chip 
+                  label={viewingNote.category}
+                  sx={{
+                    backgroundColor: getCategoryColor(viewingNote.category) + '40',
+                    color: 'white',
+                    border: `1px solid ${getCategoryColor(viewingNote.category)}60`,
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    height: 32
+                  }}
+                />
+              ) : (
+                <Chip 
+                  label="Kategori Yok"
+                  sx={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    fontWeight: 500,
+                    fontSize: '0.9rem',
+                    height: 32
+                  }}
+                />
+              )}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 0.5,
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.85rem'
+              }}>
+                <AccessTimeIcon sx={{ fontSize: '1rem' }} />
+                {formatDate(viewingNote?.date)}
+              </Box>
+            </Box>
+          </Paper>
+        </DialogContent>
+
+        {/* Simple Action Buttons */}
+        <DialogActions sx={{ 
+          p: 3, 
+          gap: 2,
+          backgroundColor: '#566e99',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <Button 
+            onClick={handleCloseViewDialog}
+            variant="outlined"
             sx={{ 
-              whiteSpace: 'pre-line',
-              wordBreak: 'break-word',
-              overflowWrap: 'break-word'
+              borderRadius: 2,
+              px: 3,
+              fontWeight: 600,
+              textTransform: 'none',
+              color: 'white',
+              borderColor: 'rgba(255, 255, 255, 0.3)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderColor: 'rgba(255, 255, 255, 0.5)'
+              }
             }}
           >
-            {viewingNote?.content}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            handleCloseViewDialog();
-            handleOpenEditDialog(viewingNote);
-          }}>
-            Düzenle
-          </Button>
-          <Button onClick={handleCloseViewDialog}>
             Kapat
+          </Button>
+          
+          <Button 
+            onClick={() => {
+              handleCloseViewDialog();
+              handleOpenEditDialog(viewingNote);
+            }}
+            variant="contained"
+            startIcon={<EditIcon />}
+            sx={{ 
+              borderRadius: 2,
+              px: 3,
+              fontWeight: 600,
+              textTransform: 'none',
+              backgroundColor: '#566e99',
+              '&:hover': {
+                backgroundColor: '#4a5f85'
+              }
+            }}
+          >
+            Düzenle
           </Button>
         </DialogActions>
       </Dialog>

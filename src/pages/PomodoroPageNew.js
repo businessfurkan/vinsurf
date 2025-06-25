@@ -146,7 +146,7 @@ const PomodoroPage = () => {
       id: 'what',
       title: 'Pomodoro Nedir?',
       icon: <InfoIcon />,
-      color: '#4285f4',
+      color: '#47a670',
       summary: 'Zaman yönetimi tekniği',
       content: `Pomodoro Tekniği, 1980'lerde Francesco Cirillo tarafından geliştirilen bir zaman yönetimi metodudur. 
 
@@ -163,7 +163,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
       id: 'how',
       title: 'Nasıl Çalışır?',
       icon: <AutoAwesomeIcon />,
-      color: '#34a853',
+      color: '#5cb85c',
       summary: '4 basit adım',
       content: `🔄 Pomodoro Döngüsü:
 
@@ -190,7 +190,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
       id: 'benefits',
       title: 'Faydaları',
       icon: <PsychologyIcon />,
-      color: '#fbbc05',
+      color: '#8bc34a',
       summary: 'Bilimsel kanıtlar',
       content: `🧠 Bilimsel Faydalar:
 
@@ -218,7 +218,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
       id: 'tips',
       title: 'İpuçları',
       icon: <TipsAndUpdatesIcon />,
-      color: '#ea4335',
+      color: '#3e8e41',
       summary: 'Verimlilik önerileri',
       content: `💡 Başarı İpuçları:
 
@@ -302,7 +302,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
     <Box
       sx={{
         minHeight: '100vh',
-        background: '#525bb1',
+        background: '#47a670',
         py: 4,
         px: 2
       }}
@@ -332,7 +332,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
 
         <Grid container spacing={4}>
           {/* Sol Panel - Timer */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={6}>
             <Card
               sx={{
                 background: 'rgba(255, 255, 255, 0.1)',
@@ -356,11 +356,11 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
                     onClick={() => changeMode(tab.key)}
                     sx={{
                       bgcolor: mode === tab.key ? '#125861' : 'rgba(255, 255, 255, 0.1)',
-                      color: mode === tab.key ? '#525bb1' : '#ffffff',
+                      color: mode === tab.key ? '#47a670' : '#ffffff',
                       fontWeight: 600,
-                      px: 3,
+                      px: 2,
                       py: 1,
-                      fontSize: '1rem',
+                      fontSize: '0.9rem',
                       '&:hover': {
                         bgcolor: mode === tab.key ? '#f5e6d3' : 'rgba(255, 255, 255, 0.2)',
                       }
@@ -369,160 +369,163 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
                 ))}
               </Stack>
 
-              <Grid container spacing={4} alignItems="center">
-                {/* Timer Circle */}
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      width: 320,
-                      height: 320,
-                      margin: '0 auto',
-                      mb: 2
+              {/* Timer Circle */}
+              <Box
+                sx={{
+                  position: 'relative',
+                  width: 280,
+                  height: 280,
+                  margin: '0 auto',
+                  mb: 4
+                }}
+              >
+                {/* Background Circle */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '8px solid rgba(255, 255, 255, 0.2)'
+                  }}
+                />
+                
+                {/* Progress Circle */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: '50%',
+                    background: `conic-gradient(from 0deg, #125861 ${getProgress()}%, transparent ${getProgress()}%)`,
+                    transform: 'rotate(-90deg)',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+
+                {/* Timer Text */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    textAlign: 'center'
+                  }}
+                >
+                  <Typography 
+                    variant="h2" 
+                    sx={{ 
+                      fontWeight: 700, 
+                      color: '#ffffff',
+                      fontSize: '3.5rem',
+                      fontFamily: 'monospace'
                     }}
                   >
-                    {/* Background Circle */}
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '50%',
-                        background: 'rgba(255, 255, 255, 0.1)',
-                        border: '8px solid rgba(255, 255, 255, 0.2)'
-                      }}
-                    />
-                    
-                    {/* Progress Circle */}
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        borderRadius: '50%',
-                        background: `conic-gradient(from 0deg, #125861 ${getProgress()}%, transparent ${getProgress()}%)`,
-                        transform: 'rotate(-90deg)',
-                        transition: 'all 0.3s ease'
-                      }}
-                    />
-
-                    {/* Timer Text */}
-                    <Box
-                      sx={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        textAlign: 'center'
+                    {formatTime(timeLeft)}
+                  </Typography>
+                  
+                  {currentGoal && (
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        color: '#b8c7e0',
+                        mt: 1,
+                        maxWidth: 200,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
                       }}
                     >
-                      <Typography 
-                        variant="h1" 
-                        sx={{ 
-                          fontWeight: 700, 
-                          color: '#ffffff',
-                          fontSize: '4rem',
-                          fontFamily: 'monospace'
-                        }}
-                      >
-                        {formatTime(timeLeft)}
-                      </Typography>
-                      
-                      {currentGoal && (
-                        <Typography 
-                          variant="body1" 
-                          sx={{ 
-                            color: '#b8c7e0',
-                            mt: 1,
-                            maxWidth: 250,
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          {currentGoal}
-                        </Typography>
-                      )}
-                    </Box>
-                  </Box>
-                </Grid>
+                      {currentGoal}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
 
-                {/* Control Panel */}
-                <Grid item xs={12} md={6}>
-                  <Box sx={{ textAlign: 'center' }}>
-                    {/* Control Buttons */}
-                    <Stack direction="row" spacing={2} justifyContent="center" mb={4}>
-                      <Button
-                        variant="contained"
-                        size="large"
-                        onClick={handleStartPause}
-                        startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
-                        sx={{
-                          bgcolor: '#125861',
-                          color: '#525bb1',
-                          fontWeight: 600,
-                          px: 4,
-                          py: 2,
-                          borderRadius: 3,
-                          fontSize: '1.2rem',
-                          minWidth: 160,
-                          '&:hover': {
-                            bgcolor: '#f5e6d3',
-                            transform: 'translateY(-2px)',
-                          },
-                          transition: 'all 0.3s ease'
-                        }}
-                      >
-                        {isRunning ? 'Duraklat' : 'Başla'}
-                      </Button>
-                    </Stack>
+              {/* Control Buttons */}
+              <Stack direction="row" spacing={2} justifyContent="center" mb={3}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={handleStartPause}
+                  startIcon={isRunning ? <PauseIcon /> : <PlayArrowIcon />}
+                  sx={{
+                    bgcolor: '#125861',
+                    color: '#47a670',
+                    fontWeight: 600,
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: 3,
+                    fontSize: '1.1rem',
+                    '&:hover': {
+                      bgcolor: '#f5e6d3',
+                      transform: 'translateY(-2px)',
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {isRunning ? 'Duraklat' : 'Başla'}
+                </Button>
 
-                    <Stack direction="row" spacing={2} justifyContent="center" mb={4}>
-                      <IconButton
-                        onClick={handleReset}
-                        sx={{
-                          bgcolor: 'rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff',
-                          width: 56,
-                          height: 56,
-                          '&:hover': {
-                            bgcolor: 'rgba(255, 255, 255, 0.2)',
-                            transform: 'translateY(-2px)',
-                          },
-                          transition: 'all 0.3s ease'
-                        }}
-                      >
-                        <RestartAltIcon sx={{ fontSize: 28 }} />
-                      </IconButton>
+                <IconButton
+                  onClick={handleReset}
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: '#ffffff',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      transform: 'translateY(-2px)',
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  <RestartAltIcon />
+                </IconButton>
 
-                      <IconButton
-                        onClick={toggleMute}
-                        sx={{
-                          bgcolor: 'rgba(255, 255, 255, 0.1)',
-                          color: '#ffffff',
-                          width: 56,
-                          height: 56,
-                          '&:hover': {
-                            bgcolor: 'rgba(255, 255, 255, 0.2)',
-                            transform: 'translateY(-2px)',
-                          },
-                          transition: 'all 0.3s ease'
-                        }}
-                      >
-                        {muted ? <VolumeOffIcon sx={{ fontSize: 28 }} /> : <VolumeUpIcon sx={{ fontSize: 28 }} />}
-                      </IconButton>
-                    </Stack>
-                  </Box>
-                </Grid>
-              </Grid>
+                <IconButton
+                  onClick={toggleMute}
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: '#ffffff',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      transform: 'translateY(-2px)',
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {muted ? <VolumeOffIcon /> : <VolumeUpIcon />}
+                </IconButton>
+              </Stack>
+
+              {/* Stats */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  gap: 3,
+                  mt: 2
+                }}
+              >
+                <Box textAlign="center">
+                  <Typography variant="h4" sx={{ fontWeight: 700, color: '#125861' }}>
+                    {completedPomodoros}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: '#b8c7e0' }}>
+                    Tamamlanan
+                  </Typography>
+                </Box>
+              </Box>
             </Card>
           </Grid>
 
           {/* Sağ Panel - Info Cards */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={6}>
             <Grid container spacing={2}>
               {infoCards.map((card, index) => (
-                <Grid item xs={6} md={12} key={card.id}>
+                <Grid item xs={6} key={card.id}>
                   <Grow in timeout={500 + index * 200}>
                     <Card
                       onClick={() => setInfoPopup({
@@ -536,10 +539,9 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
                         backdropFilter: 'blur(10px)',
                         borderRadius: 3,
                         border: '1px solid rgba(255, 255, 255, 0.2)',
-                        p: 3,
+                        p: 2,
                         cursor: 'pointer',
                         transition: 'all 0.3s ease',
-                        minHeight: 120,
                         '&:hover': {
                           transform: 'translateY(-8px) scale(1.02)',
                           background: 'rgba(255, 255, 255, 0.15)',
@@ -550,10 +552,10 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
                       <Box
                         sx={{
                           display: 'flex',
-                          flexDirection: 'row',
+                          flexDirection: 'column',
                           alignItems: 'center',
-                          gap: 2,
-                          height: '100%'
+                          textAlign: 'center',
+                          gap: 1
                         }}
                       >
                         <Box
@@ -566,36 +568,32 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: '#ffffff',
-                            transition: 'all 0.3s ease',
-                            flexShrink: 0
+                            transition: 'all 0.3s ease'
                           }}
                         >
                           {card.icon}
                         </Box>
                         
-                        <Box sx={{ flex: 1 }}>
-                          <Typography 
-                            variant="h6" 
-                            sx={{ 
-                              fontWeight: 600, 
-                              color: '#ffffff',
-                              fontSize: '1.1rem',
-                              mb: 0.5
-                            }}
-                          >
-                            {card.title}
-                          </Typography>
-                          
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              color: '#b8c7e0',
-                              fontSize: '0.9rem'
-                            }}
-                          >
-                            {card.summary}
-                          </Typography>
-                        </Box>
+                        <Typography 
+                          variant="h6" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            color: '#125861',
+                            fontSize: '1rem'
+                          }}
+                        >
+                          {card.title}
+                        </Typography>
+                        
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#b8c7e0',
+                            fontSize: '0.85rem'
+                          }}
+                        >
+                          {card.summary}
+                        </Typography>
                       </Box>
                     </Card>
                   </Grow>
@@ -615,7 +613,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
         PaperProps={{
           sx: {
             borderRadius: 4,
-            background: '#525bb1',
+            background: '#47a670',
             color: '#ffffff',
             border: '1px solid rgba(255, 255, 255, 0.2)'
           }
@@ -645,7 +643,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
             onClick={() => setInfoPopup({ ...infoPopup, open: false })}
             sx={{
               bgcolor: '#125861',
-              color: '#525bb1',
+              color: '#47a670',
               fontWeight: 600,
               px: 3,
               borderRadius: 2,
@@ -666,7 +664,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
         PaperProps={{
           sx: {
             borderRadius: 4,
-            background: '#525bb1',
+            background: '#47a670',
             color: '#ffffff',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             maxWidth: 500,
@@ -745,7 +743,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
             disabled={!goal.trim()}
             sx={{ 
               bgcolor: '#125861',
-              color: '#525bb1',
+              color: '#47a670',
               fontWeight: 600,
               px: 3,
               '&:hover': {
@@ -769,7 +767,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
         PaperProps={{
           sx: {
             borderRadius: 4,
-            background: '#525bb1',
+            background: '#47a670',
             color: '#ffffff',
             border: '1px solid rgba(255, 255, 255, 0.2)',
             maxWidth: 500,
@@ -814,7 +812,7 @@ Sürekli odaklanma ile verimliliği artırmak ve zihinsel yorgunluğu azaltmak.`
             startIcon={<CheckCircleIcon />}
             sx={{ 
               bgcolor: '#125861',
-              color: '#525bb1',
+              color: '#47a670',
               fontWeight: 600,
               px: 3,
               '&:hover': {

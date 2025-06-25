@@ -1,21 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, Button, Card, CardContent, 
-  Accordion, AccordionSummary, AccordionDetails,
   DialogTitle, DialogContent, DialogActions,
-  CircularProgress, Divider, Avatar, Chip
+  CircularProgress, Avatar, Chip
 } from '@mui/material';
 
 // Icons
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import PauseIcon from '@mui/icons-material/Pause';
-import StopIcon from '@mui/icons-material/Stop';
 import SaveIcon from '@mui/icons-material/Save';
 import TimerIcon from '@mui/icons-material/Timer';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+
+// Ders logoları için ikonlar
+import MenuBookIcon from '@mui/icons-material/MenuBook'; // Türkçe, Edebiyat
+import PublicIcon from '@mui/icons-material/Public'; // Sosyal Bilimler, Coğrafya
+import CalculateIcon from '@mui/icons-material/Calculate'; // Matematik, Temel Matematik
+import ScienceIcon from '@mui/icons-material/Science'; // Fen Bilimleri, Fizik, Kimya
+import BioIcon from '@mui/icons-material/Biotech'; // Biyoloji
+import HistoryIcon from '@mui/icons-material/History'; // Tarih
+import PsychologyIcon from '@mui/icons-material/Psychology'; // Felsefe
+import TempleBuddhistIcon from '@mui/icons-material/TempleHindu'; // Din Kültürü
 
 import Dialog from '@mui/material/Dialog';
 import { auth, db } from '../firebase';
@@ -34,21 +37,48 @@ const AnalyticalStopwatch = () => {
   const [expandedSubject, setExpandedSubject] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Ders renklerini tanımlayalım
-  const subjectColors = {
-    'Türkçe': '#FF5722',
-    'Matematik': '#2196F3',
-    'Fizik': '#F44336',
-    'Kimya': '#FF9800',
-    'Biyoloji': '#4CAF50',
-    'Tarih': '#9C27B0',
-    'Coğrafya': '#795548',
-    'Felsefe': '#607D8B',
-    'Din Kültürü': '#009688',
-    'Yabancı Dil': '#3F51B5',
-    'Geometri': '#00BCD4'
+  // yksData'dan ders verilerini oluştur
+  const createSubjectsFromYksData = () => {
+    const subjects = {};
+    
+    // TYT ve AYT derslerini birleştir
+    [...Object.entries(yksData.TYT), ...Object.entries(yksData.AYT)].forEach(([dersAd, dersData]) => {
+      if (!subjects[dersAd]) {
+        subjects[dersAd] = {
+          color: dersData.color,
+          topics: [...dersData.topics]
+        };
+      } else {
+        // Eğer ders hem TYT hem AYT'de varsa konuları birleştir
+        subjects[dersAd].topics = [...new Set([...subjects[dersAd].topics, ...dersData.topics])];
+      }
+    });
+    
+    return subjects;
   };
+
+  const subjects = createSubjectsFromYksData();
   
+  // Ders renklerini yksData'dan al
+  const subjectColors = Object.fromEntries(
+    Object.entries(subjects).map(([name, data]) => [name, data.color])
+  );
+
+  // Ders logolarını tanımlayalım
+  const subjectIcons = {
+    'Türkçe': <MenuBookIcon />,
+    'Matematik': <CalculateIcon />,
+    'Temel Matematik': <CalculateIcon />,
+    'Fizik': <ScienceIcon />,
+    'Kimya': <ScienceIcon />,
+    'Biyoloji': <BioIcon />,
+    'Tarih': <HistoryIcon />,
+    'Coğrafya': <PublicIcon />,
+    'Felsefe': <PsychologyIcon />,
+    'Din Kültürü': <TempleBuddhistIcon />,
+    'Edebiyat': <MenuBookIcon />
+  };
+
   // Seçilen dersin rengini alalım
   const selectedColor = selectedSubject ? subjectColors[selectedSubject] || '#2196F3' : '#2196F3';
 
@@ -116,12 +146,6 @@ const AnalyticalStopwatch = () => {
     setShowSaveDialog(false);
   };
 
-  // Zamanlayıcıyı sıfırla
-  const handleReset = () => {
-    setTime(0);
-    setIsRunning(false);
-  };
-
   // Çalışma kaydını Firestore'a kaydet
   const saveStudyRecord = async () => {
     if (!user || !selectedSubject || !selectedTopic || time === 0) return;
@@ -172,11 +196,6 @@ const AnalyticalStopwatch = () => {
     }
   };
 
-  // Alt konu tıklandığında
-  const handleTopicClick = (topic) => {
-    setSelectedTopic(topic);
-  };
-
   // Çalışmaya başla butonuna tıklandığında
   const handleStartStudy = (subject, topic) => {
     setSelectedSubject(subject);
@@ -210,18 +229,18 @@ const AnalyticalStopwatch = () => {
       <Typography variant="h4" component="h1" sx={{ 
         fontWeight: 700, 
         mb: 1,
-        color: '#1a1a1a',
+        color: '#ffffff',
         fontSize: { xs: '1.8rem', md: '2.2rem' }
       }}>
         Analizli Kronometre
       </Typography>
       
       <Typography variant="body1" sx={{ 
-        color: '#555', 
+        color: '#ffffff', 
         mb: 3,
         maxWidth: '800px'
       }}>
-        Analizli kronometre ile ders ve konu bazlı çalışmalarını kaydedin. İlerlerinizi
+        Analizli kronometre ile ders ve konu bazlı çalışmalarını kaydedin. İlerilerinizi
         takip edin ve her derste ne kadar zaman harcadığınızı görün.
       </Typography>
       
@@ -237,7 +256,7 @@ const AnalyticalStopwatch = () => {
           borderRadius: '20px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          background: '#f4f2f5'
+          background: '#1b293d'
         }}>
           <CardContent sx={{ p: 0 }}>
             <Box sx={{ 
@@ -263,7 +282,7 @@ const AnalyticalStopwatch = () => {
             
             {/* Ders Listesi */}
             <Box sx={{ maxHeight: '400px', overflow: 'auto' }}>
-              {Object.keys(yksData).map((subject) => (
+              {Object.keys(subjects).map((subject) => (
                 <Box 
                   key={subject}
                   sx={{ 
@@ -290,7 +309,7 @@ const AnalyticalStopwatch = () => {
                         fontSize: '1rem'
                       }}
                     >
-                      {subject.charAt(0)}
+                      {subjectIcons[subject] || subject.charAt(0)}
                     </Avatar>
                     
                     <Typography sx={{ 
@@ -312,7 +331,7 @@ const AnalyticalStopwatch = () => {
             </Box>
             
             {/* Seçilen dersin konuları */}
-            {expandedSubject && yksData[expandedSubject] && yksData[expandedSubject].topics && (
+            {expandedSubject && subjects[expandedSubject] && subjects[expandedSubject].topics && (
               <Box sx={{ 
                 p: 2, 
                 backgroundColor: 'rgba(0,0,0,0.02)',
@@ -330,7 +349,7 @@ const AnalyticalStopwatch = () => {
                 </Typography>
                 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                  {yksData[expandedSubject].topics.map((topic) => (
+                  {subjects[expandedSubject].topics.map((topic) => (
                     <Box 
                       key={topic}
                       sx={{ 
@@ -340,7 +359,7 @@ const AnalyticalStopwatch = () => {
                         p: 1.5,
                         borderRadius: '8px',
                         backgroundColor: selectedTopic === topic ? 
-                          `${subjectColors[expandedSubject]}10` : '#f4f2f5',
+                          `${subjectColors[expandedSubject]}10` : '#1b293d',
                         border: `1px solid ${selectedTopic === topic ? 
                           subjectColors[expandedSubject] : 'rgba(0,0,0,0.06)'}`,
                       }}
@@ -388,7 +407,7 @@ const AnalyticalStopwatch = () => {
           borderRadius: '20px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          background: '#f4f2f5',
+          background: '#1b293d',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -568,7 +587,7 @@ const AnalyticalStopwatch = () => {
             borderRadius: '16px',
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
             p: 1,
-            background: '#f4f2f5'
+            background: '#1b293d'
           }
         }}
       >

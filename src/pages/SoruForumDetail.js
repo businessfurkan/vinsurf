@@ -1100,7 +1100,7 @@ const SoruForumDetail = () => {
           <Typography 
             variant="body1" 
             sx={{ 
-              color: '#2c3e50',
+              color: '#ffffff',
               mb: 4,
               whiteSpace: 'pre-wrap',
               fontSize: '1.05rem',

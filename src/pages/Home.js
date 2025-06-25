@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect, useContext, useCallback } from 'react';
 import {
   Box,
   Container,
@@ -9,7 +9,7 @@ import {
 import { useTheme } from '@mui/material/styles';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { ThemeContext } from '../context/ThemeContext';
 import { useNotifications } from '../context/NotificationContext';
 
@@ -23,47 +23,64 @@ const Home = () => {
   const [user] = useAuthState(auth);
   const { addNotification } = useNotifications() || { addNotification: () => {} };
   
-  // Kullanıcı 3 gün veya daha uzun süre giriş yapmadıysa bildirim gönder
-  useEffect(() => {
-    const checkInactivity = async () => {
-      if (!user) return;
+  // İnaktivite kontrolü fonksiyonunu useCallback ile sarmalayalım
+  const checkInactivity = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      // Kullanıcı profil dökümanına referans
+      const userRef = doc(db, 'userProfiles', user.uid);
       
-      try {
-        // Kullanıcı profil dökümanına referans
-        const userRef = doc(db, 'userProfiles', user.uid);
+      // Kullanıcı profil dökümanını al
+      const userDoc = await getDoc(userRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        const daysSinceLastLogin = userData.daysSinceLastLogin || 0;
+        const displayName = userData.displayName || user.displayName || user.email?.split('@')[0] || 'Kullanıcı';
+        const targetRank = userData.targetRank || 150000;
+        const lastInactivityNotification = userData.lastInactivityNotification?.toDate ? 
+          userData.lastInactivityNotification.toDate() : 
+          new Date(userData.lastInactivityNotification?.seconds * 1000 || 0);
         
-        // Kullanıcı profil dökümanını al
-        const userDoc = await getDoc(userRef);
-        
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          const daysSinceLastLogin = userData.daysSinceLastLogin || 0;
-          const displayName = userData.displayName || user.displayName || user.email?.split('@')[0] || 'Kullanıcı';
-          const targetRank = userData.targetRank || 150000;
+        // 3 gün veya daha uzun süre giriş yapılmadıysa ve daha önce bildirim gönderilmediyse
+        if (daysSinceLastLogin >= 3) {
+          const now = new Date();
+          const daysSinceLastNotification = Math.floor((now - lastInactivityNotification) / (1000 * 60 * 60 * 24));
           
-          // 3 gün veya daha uzun süre giriş yapılmadıysa bildirim gönder
-          if (daysSinceLastLogin >= 3) {
+          // Son bildirimden en az 1 gün geçmişse yeni bildirim gönder
+          if (!lastInactivityNotification || daysSinceLastNotification >= 1) {
             const message = `${displayName}, seni ${daysSinceLastLogin} gündür görmüyoruz. Hedefin hâlâ ${targetRank.toLocaleString()} sıralamaya girmek mi yoksa?`;
             
             // Bildirim gönder
             if (addNotification) {
-              addNotification(message, 'warning', {
+              await addNotification(message, 'warning', {
                 type: 'inactivity',
                 daysSinceLastLogin,
                 targetRank
               });
+              
+              // Son bildirim zamanını güncelle
+              await updateDoc(userRef, {
+                lastInactivityNotification: new Date()
+              });
             }
           }
         }
-      } catch (error) {
-        console.error('Kullanıcı inaktivite kontrolü sırasında hata:', error);
       }
-    };
-    
-    if (user) {
-      checkInactivity();
+    } catch (error) {
+      console.error('Kullanıcı inaktivite kontrolü sırasında hata:', error);
     }
   }, [user, addNotification]);
+  
+  // Kullanıcı 3 gün veya daha uzun süre giriş yapmadıysa bildirim gönder (sadece bir kez)
+  useEffect(() => {
+    if (user) {
+      // Sadece component ilk yüklendiğinde çalıştır
+      const timeoutId = setTimeout(checkInactivity, 2000); // 2 saniye gecikme ile
+      return () => clearTimeout(timeoutId);
+    }
+  }, [user, checkInactivity]);
 
   const { darkMode } = useContext(ThemeContext);
   const theme = useTheme();
