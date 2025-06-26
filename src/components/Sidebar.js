@@ -17,6 +17,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HandshakeIcon from '@mui/icons-material/Handshake';
 import LanguageIcon from '@mui/icons-material/Language';
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
 
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: 'flex',
@@ -58,7 +59,8 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
     { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#8BC34A' }, // Canlı Açık Yeşil
     { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#F44336' }, // Canlı Kırmızı
     { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#673AB7' }, // Canlı Mor
-    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#03A9F4' } // Canlı Açık Mavi
+    { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#03A9F4' }, // Canlı Açık Mavi
+    { text: 'Çalışma Odası', icon: <WorkspacesIcon />, path: '/calisma-odasi', color: '#E91E63' } // Canlı Pembe
   ], []);
   
   // Sayfa yüklendiğinde veya rota değiştiğinde aktif öğeyi güncelle

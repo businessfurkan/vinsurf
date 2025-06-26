@@ -16,7 +16,6 @@ import { format } from 'date-fns';
 import { tr as trLocale } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { styled } from '@mui/material/styles';
-import { useMediaQuery, useTheme } from '@mui/material';
 
 // Import ModernStepper component
 import ModernStepper from '../components/ModernStepper';
@@ -34,7 +33,7 @@ import {
 
 // Recharts components
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
@@ -49,7 +48,6 @@ import {
   NavigateNext as NavigateNextIcon,
   CheckCircle as CheckCircleIcon,
   Assignment as AssignmentIcon,
-  Close as CloseIcon,
   TrendingUp as TrendingUpIcon,
   TrendingDown as TrendingDownIcon,
   TrendingFlat as TrendingFlatIcon,
@@ -101,33 +99,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
   }
 }));
 
-const StyledButton = styled(Button)(({ theme, variant }) => ({
-  borderRadius: '30px',
-  padding: '10px 24px',
-  fontWeight: 600,
-  textTransform: 'none',
-  letterSpacing: '0.5px',
-  transition: 'all 0.3s ease',
-  position: 'relative',
-  overflow: 'hidden',
-  ...(variant === 'contained' && {
-    background: 'linear-gradient(45deg, var(--primary-color), var(--primary-light))',
-    color: 'white',
-    border: 'none',
-    '&:hover': {
-      background: 'linear-gradient(45deg, var(--primary-dark), var(--primary-color))',
-      boxShadow: '0 4px 15px rgba(74, 108, 247, 0.4)'
-    }
-  }),
-  ...(variant === 'outlined' && {
-    background: 'transparent',
-    color: 'var(--primary-color)',
-    border: '2px solid var(--primary-color)',
-    '&:hover': {
-      background: 'rgba(74, 108, 247, 0.1)'
-    }
-  })
-}));
+
 
 // Steps for the form
 const steps = [
@@ -139,8 +111,6 @@ const steps = [
 ];
 
 const TytAytNetTakibi = () => {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   
   // Get user from firebase auth
   const [user] = useAuthState(auth);
@@ -162,7 +132,6 @@ const TytAytNetTakibi = () => {
   const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
   const [tabValue, setTabValue] = useState(0); // 0: form, 1: records, 2: statistics
   const [selectedExamType, setSelectedExamType] = useState('TYT');
-  const [selectedSubject, setSelectedSubject] = useState('');
   
   // Bildirim sistemi kullanımı
   
@@ -203,13 +172,16 @@ const TytAytNetTakibi = () => {
     } else if (activeStep === 2) {
       // Exam type validation is handled by the Select component
     } else if (activeStep === 3) {
-      if (Object.keys(subjectData).length === 0) {
-        setNotification({
-          open: true,
-          message: 'En az bir ders eklemelisiniz',
-          severity: 'error'
-        });
-        isValid = false;
+      // If we're trying to proceed to next step (not adding a subject), check if at least one subject is added
+      if (!currentSubject || (!correctCount && !incorrectCount && !emptyCount)) {
+        if (Object.keys(subjectData).length === 0) {
+          setNotification({
+            open: true,
+            message: 'En az bir ders eklemelisiniz',
+            severity: 'error'
+          });
+          isValid = false;
+        }
       }
     }
     
@@ -219,31 +191,37 @@ const TytAytNetTakibi = () => {
       return;
     }
     
-    // If we're on the subject selection step and a subject is selected
-    if (activeStep === 3 && currentSubject) {
+    // If we're on the subject selection step and a subject is selected, handle adding the subject
+    if (activeStep === 3 && currentSubject && (correctCount || incorrectCount || emptyCount)) {
       // Save current subject data
-      if (correctCount || incorrectCount || emptyCount) {
-        const correct = correctCount || '0';
-        const incorrect = incorrectCount || '0';
-        const empty = emptyCount || '0';
-        const net = calculateNet(correct, incorrect);
-        
-        setSubjectData(prev => ({
-          ...prev,
-          [currentSubject]: {
-            correctCount: correct,
-            incorrectCount: incorrect,
-            emptyCount: empty,
-            net
-          }
-        }));
-      }
+      const correct = correctCount || '0';
+      const incorrect = incorrectCount || '0';
+      const empty = emptyCount || '0';
+      const net = calculateNet(correct, incorrect);
+      
+      setSubjectData(prev => ({
+        ...prev,
+        [currentSubject]: {
+          correctCount: correct,
+          incorrectCount: incorrect,
+          emptyCount: empty,
+          net
+        }
+      }));
       
       // Clear form for next subject
       setCurrentSubject('');
       setCorrectCount('');
       setIncorrectCount('');
       setEmptyCount('');
+      
+      // Show success notification
+      setNotification({
+        open: true,
+        message: `${currentSubject} dersi başarıyla eklendi`,
+        severity: 'success'
+      });
+      
       return;
     }
     
@@ -468,286 +446,2372 @@ const TytAytNetTakibi = () => {
     switch (step) {
       case 0: // Deneme Adı
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-              Deneme Adı
-            </Typography>
-            <StyledTextField
-              fullWidth
-              label="Deneme Adı"
-              value={examName}
-              onChange={(e) => setExamName(e.target.value)}
-              error={!!errors.examName}
-              helperText={errors.examName}
-              placeholder="Örn: TYT Deneme 1"
-              InputProps={{
-                startAdornment: (
-                  <AssignmentIcon sx={{ color: 'var(--primary-color)', mr: 1 }} />
-                ),
-              }}
-            />
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+            {/* Header Section */}
+            <Box sx={{
+              textAlign: 'center',
+              mb: 5,
+              position: 'relative'
+            }}>
+              <Box sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+                boxShadow: '0 10px 30px rgba(102, 126, 234, 0.4)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '-3px',
+                  left: '-3px',
+                  right: '-3px',
+                  bottom: '-3px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  opacity: 0.3,
+                  filter: 'blur(8px)',
+                  zIndex: -1
+                }
+              }}>
+                <AssignmentIcon sx={{ 
+                  color: '#ffffff', 
+                  fontSize: '2.5rem',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                }} />
+              </Box>
+              
+              <Typography variant="h4" sx={{ 
+                fontWeight: 800, 
+                color: '#ffffff',
+                mb: 1,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              }}>
+                Deneme Adı
+              </Typography>
+              
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1.1rem',
+                lineHeight: 1.6,
+                maxWidth: '500px',
+                mx: 'auto'
+              }}>
+                Denemenize tanımlayıcı bir isim verin. Bu isim daha sonra listeleme ve analiz ekranlarında görünecektir.
+              </Typography>
+            </Box>
+
+            {/* Input Section */}
+            <Box sx={{
+              width: '100%',
+              maxWidth: '500px',
+              position: 'relative'
+            }}>
+              <Box sx={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                p: 4,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                }
+              }}>
+                <StyledTextField
+                  fullWidth
+                  label="Deneme Adı"
+                  value={examName}
+                  onChange={(e) => setExamName(e.target.value)}
+                  error={!!errors.examName}
+                  helperText={errors.examName}
+                  placeholder="Örn: TYT Deneme 1, Matematik Özel Deneme"
+                  sx={{
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: '16px',
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      color: '#ffffff',
+                      transition: 'all 0.3s ease',
+                      '& fieldset': {
+                        border: 'none'
+                      },
+                      '&:hover': {
+                        background: 'rgba(255, 255, 255, 0.15)',
+                        borderColor: 'rgba(255, 255, 255, 0.3)'
+                      },
+                      '&.Mui-focused': {
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        borderColor: '#667eea',
+                        boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.2)'
+                      }
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      fontWeight: 600,
+                      '&.Mui-focused': {
+                        color: '#667eea'
+                      }
+                    },
+                    '& .MuiFormHelperText-root': {
+                      color: '#ff6b6b',
+                      fontWeight: 500,
+                      marginTop: '12px'
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <Box sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                      }}>
+                        <AssignmentIcon sx={{ 
+                          color: '#ffffff', 
+                          fontSize: '1.5rem'
+                        }} />
+                      </Box>
+                    ),
+                  }}
+                />
+                
+                {/* Öneriler */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'rgba(255,255,255,0.7)',
+                    mb: 2,
+                    fontWeight: 600
+                  }}>
+                    Öneri İsimleri:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    {[
+                      'Hız ve Renk',
+                      '3D Yayınları',
+                      'Karekök Yayınları',
+                      'Apotemi Yayınları',
+                      'Benim Hocam Yayınları',
+                      'Yediiklim Yayınları',
+                      'Kampüs Yayınları',
+                      'Limit Yayınları',
+                      'ÜçDörtBeş (345) Yayınları',
+                      'Endemik Yayınları',
+                      'Bilgi Sarmal Yayınları',
+                      'Aydın Yayınları',
+                      'Tonguç Kampüs Yayınları',
+                      'Kafa Dengi Yayınları',
+                      'Okyanus Yayınları'
+                    ].map((suggestion, index) => (
+                      <Button
+                        key={index}
+                        size="small"
+                        onClick={() => setExamName(suggestion)}
+                        sx={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          borderRadius: '12px',
+                          px: 3,
+                          py: 1,
+                          fontSize: '0.9rem',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          transition: 'all 0.3s ease',
+                          justifyContent: 'flex-start',
+                          width: '100%',
+                          '&:hover': {
+                            background: 'rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.4)',
+                            transform: 'translateX(5px)'
+                          }
+                        }}
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
           </Box>
         );
       case 1: // Tarih
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-              Deneme Tarihi
-            </Typography>
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={trLocale}>
-              <DatePicker
-                label="Deneme Tarihi"
-                value={examDate}
-                onChange={(newValue) => setExamDate(newValue)}
-                renderInput={(params) => <StyledTextField {...params} fullWidth />}
-              />
-            </LocalizationProvider>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+            {/* Header Section */}
+            <Box sx={{
+              textAlign: 'center',
+              mb: 5,
+              position: 'relative'
+            }}>
+              <Box sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+                boxShadow: '0 10px 30px rgba(255, 154, 158, 0.4)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '-3px',
+                  left: '-3px',
+                  right: '-3px',
+                  bottom: '-3px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #ff9a9e, #fecfef)',
+                  opacity: 0.3,
+                  filter: 'blur(8px)',
+                  zIndex: -1
+                }
+              }}>
+                <CalendarTodayIcon sx={{ 
+                  color: '#ffffff', 
+                  fontSize: '2.5rem',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                }} />
+              </Box>
+              
+              <Typography variant="h4" sx={{ 
+                fontWeight: 800, 
+                color: '#ffffff',
+                mb: 1,
+                background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              }}>
+                Deneme Tarihi
+              </Typography>
+              
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1.1rem',
+                lineHeight: 1.6,
+                maxWidth: '500px',
+                mx: 'auto'
+              }}>
+                Denemenizi hangi tarihte yaptığınızı belirtin. Bu bilgi istatistikler ve gelişim takibi için önemlidir.
+              </Typography>
+            </Box>
+
+            {/* Date Picker Section */}
+            <Box sx={{
+              width: '100%',
+              maxWidth: '500px',
+              position: 'relative'
+            }}>
+              <Box sx={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                p: 4,
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                }
+              }}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={trLocale}>
+                  <DatePicker
+                    label="Deneme Tarihi"
+                    value={examDate}
+                    onChange={(newValue) => setExamDate(newValue)}
+                    renderInput={(params) => 
+                      <StyledTextField 
+                        {...params} 
+                        fullWidth
+                        sx={{
+                          '& .MuiOutlinedInput-root': {
+                            borderRadius: '16px',
+                            fontSize: '1.1rem',
+                            fontWeight: 600,
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            color: '#ffffff',
+                            transition: 'all 0.3s ease',
+                            '& fieldset': {
+                              border: 'none'
+                            },
+                            '&:hover': {
+                              background: 'rgba(255, 255, 255, 0.15)',
+                              borderColor: 'rgba(255, 255, 255, 0.3)'
+                            },
+                            '&.Mui-focused': {
+                              background: 'rgba(255, 255, 255, 0.2)',
+                              borderColor: '#ff9a9e',
+                              boxShadow: '0 0 0 3px rgba(255, 154, 158, 0.2)'
+                            }
+                          },
+                          '& .MuiInputLabel-root': {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontWeight: 600,
+                            '&.Mui-focused': {
+                              color: '#ff9a9e'
+                            }
+                          },
+                          '& .MuiInputAdornment-root .MuiIconButton-root': {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            backgroundColor: 'rgba(255, 154, 158, 0.2)',
+                            borderRadius: '8px',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 154, 158, 0.3)',
+                              color: '#ffffff'
+                            }
+                          }
+                        }}
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <Box sx={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: '12px',
+                              background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              mr: 2,
+                              boxShadow: '0 4px 12px rgba(255, 154, 158, 0.3)'
+                            }}>
+                              <CalendarTodayIcon sx={{ 
+                                color: '#ffffff', 
+                                fontSize: '1.5rem'
+                              }} />
+                            </Box>
+                          ),
+                        }}
+                      />
+                    }
+                  />
+                </LocalizationProvider>
+                
+                {/* Hızlı Tarih Seçenekleri */}
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'rgba(255,255,255,0.7)',
+                    mb: 2,
+                    fontWeight: 600
+                  }}>
+                    Hızlı Seçim:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {[
+                      { label: 'Bugün', value: new Date() },
+                      { label: 'Dün', value: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+                      { label: '1 Hafta Önce', value: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+                      { label: '1 Ay Önce', value: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
+                    ].map((option, index) => (
+                      <Button
+                        key={index}
+                        size="small"
+                        onClick={() => setExamDate(option.value)}
+                        sx={{
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          borderRadius: '20px',
+                          px: 2,
+                          py: 0.5,
+                          fontSize: '0.85rem',
+                          fontWeight: 500,
+                          textTransform: 'none',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'rgba(255, 154, 158, 0.2)',
+                            color: '#ffffff',
+                            borderColor: 'rgba(255, 154, 158, 0.4)',
+                            transform: 'translateY(-1px)'
+                          }
+                        }}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </Box>
+                </Box>
+
+                {/* Seçilen Tarih Önizlemesi */}
+                {examDate && (
+                  <Box sx={{
+                    mt: 3,
+                    p: 2,
+                    borderRadius: '12px',
+                    background: 'rgba(255, 154, 158, 0.1)',
+                    border: '1px solid rgba(255, 154, 158, 0.3)',
+                    textAlign: 'center'
+                  }}>
+                    <Typography variant="subtitle2" sx={{ 
+                      color: 'rgba(255,255,255,0.7)',
+                      mb: 1
+                    }}>
+                      Seçilen Tarih:
+                    </Typography>
+                    <Typography variant="h6" sx={{ 
+                      color: '#ff9a9e',
+                      fontWeight: 700
+                    }}>
+                      {format(examDate, 'dd MMMM yyyy EEEE', { locale: trLocale })}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
           </Box>
         );
       case 2: // Sınav Türü
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-              Sınav Türü
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel>Sınav Türü</InputLabel>
-              <Select
-                value={examType}
-                onChange={(e) => setExamType(e.target.value)}
-                label="Sınav Türü"
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
+            {/* Header Section */}
+            <Box sx={{
+              textAlign: 'center',
+              mb: 5,
+              position: 'relative'
+            }}>
+              <Box sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+                boxShadow: '0 10px 30px rgba(79, 172, 254, 0.4)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '-3px',
+                  left: '-3px',
+                  right: '-3px',
+                  bottom: '-3px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #4facfe, #00f2fe)',
+                  opacity: 0.3,
+                  filter: 'blur(8px)',
+                  zIndex: -1
+                }
+              }}>
+                <AssignmentIcon sx={{ 
+                  color: '#ffffff', 
+                  fontSize: '2.5rem',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                }} />
+              </Box>
+              
+              <Typography variant="h4" sx={{ 
+                fontWeight: 800, 
+                color: '#ffffff',
+                mb: 1,
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              }}>
+                Sınav Türü
+              </Typography>
+              
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1.1rem',
+                lineHeight: 1.6,
+                maxWidth: '500px',
+                mx: 'auto'
+              }}>
+                Denemenizin türünü seçin. TYT temel yeterlilik, AYT ise alan yeterlilik testini temsil eder.
+              </Typography>
+            </Box>
+
+            {/* Exam Type Selection */}
+            <Box sx={{
+              width: '100%',
+              maxWidth: '600px',
+              display: 'flex',
+              gap: 3,
+              flexDirection: { xs: 'column', md: 'row' }
+            }}>
+              {/* TYT Card */}
+              <Box
+                onClick={() => setExamType('TYT')}
+                sx={{
+                  flex: 1,
+                  cursor: 'pointer',
+                  position: 'relative',
+                  borderRadius: '24px',
+                  padding: 4,
+                  background: examType === 'TYT' 
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                    : 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(20px)',
+                  border: examType === 'TYT' 
+                    ? '2px solid rgba(102, 126, 234, 0.8)'
+                    : '1px solid rgba(255, 255, 255, 0.15)',
+                  boxShadow: examType === 'TYT' 
+                    ? '0 20px 60px rgba(102, 126, 234, 0.4), 0 8px 25px rgba(102, 126, 234, 0.2)'
+                    : '0 10px 30px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  transform: examType === 'TYT' ? 'translateY(-12px) scale(1.03)' : 'translateY(0) scale(1)',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: examType === 'TYT' 
+                      ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)'
+                      : 'transparent',
+                    borderRadius: '24px',
+                    opacity: examType === 'TYT' ? 1 : 0,
+                    transition: 'opacity 0.4s ease',
+                    animation: examType === 'TYT' ? 'pulse 2s infinite' : 'none'
+                  },
+                  '&:hover': {
+                    transform: examType === 'TYT' ? 'translateY(-12px) scale(1.03)' : 'translateY(-6px) scale(1.02)',
+                    background: examType === 'TYT' 
+                      ? 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)'
+                      : 'rgba(255, 255, 255, 0.12)',
+                    borderColor: examType === 'TYT' 
+                      ? 'rgba(102, 126, 234, 1)'
+                      : 'rgba(255, 255, 255, 0.25)',
+                    boxShadow: examType === 'TYT' 
+                      ? '0 25px 70px rgba(102, 126, 234, 0.5), 0 12px 30px rgba(102, 126, 234, 0.3)'
+                      : '0 15px 40px rgba(0, 0, 0, 0.15)'
+                  },
+                  '@keyframes pulse': {
+                    '0%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.02)' },
+                    '100%': { transform: 'scale(1)' }
+                  }
+                }}
               >
-                <MenuItem value="TYT">TYT</MenuItem>
-                <MenuItem value="AYT">AYT</MenuItem>
-              </Select>
-            </FormControl>
+                {/* Selection Indicator */}
+                {examType === 'TYT' && (
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'pulse 2s infinite'
+                  }}>
+                    <CheckCircleIcon sx={{ color: '#ffffff', fontSize: '1.5rem' }} />
+                  </Box>
+                )}
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 800,
+                    color: examType === 'TYT' ? '#ffffff' : 'rgba(255,255,255,0.9)',
+                    mb: 2,
+                    fontSize: { xs: '2.5rem', md: '3rem' }
+                  }}>
+                    TYT
+                  </Typography>
+                  
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 700,
+                    color: examType === 'TYT' ? '#ffffff' : 'rgba(255,255,255,0.8)',
+                    mb: 2
+                  }}>
+                    Temel Yeterlilik Testi
+                  </Typography>
+                  
+                  <Typography variant="body2" sx={{ 
+                    color: examType === 'TYT' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.7)',
+                    lineHeight: 1.6,
+                    mb: 3
+                  }}>
+                    Türkçe, Sosyal Bilimler, Temel Matematik ve Fen Bilimleri derslerini kapsar
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    {['Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'Matematik', 'Fizik', 'Kimya', 'Biyoloji'].map((subject, index) => (
+                      <Chip 
+                        key={index}
+                        label={subject} 
+                        size="small"
+                        sx={{ 
+                          backgroundColor: examType === 'TYT' 
+                            ? 'rgba(255, 255, 255, 0.2)' 
+                            : 'rgba(79, 172, 254, 0.2)',
+                          color: examType === 'TYT' ? '#ffffff' : '#4facfe',
+                          fontWeight: 600,
+                          border: `1px solid ${examType === 'TYT' 
+                            ? 'rgba(255, 255, 255, 0.3)' 
+                            : 'rgba(79, 172, 254, 0.3)'}`
+                        }} 
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* AYT Card */}
+              <Box
+                onClick={() => setExamType('AYT')}
+                sx={{
+                  flex: 1,
+                  cursor: 'pointer',
+                  position: 'relative',
+                  borderRadius: '24px',
+                  padding: 4,
+                  background: examType === 'AYT' 
+                    ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                    : 'rgba(255, 255, 255, 0.08)',
+                  backdropFilter: 'blur(20px)',
+                  border: examType === 'AYT' 
+                    ? '2px solid rgba(240, 147, 251, 0.8)'
+                    : '1px solid rgba(255, 255, 255, 0.15)',
+                  boxShadow: examType === 'AYT' 
+                    ? '0 20px 60px rgba(240, 147, 251, 0.4), 0 8px 25px rgba(240, 147, 251, 0.2)'
+                    : '0 10px 30px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  transform: examType === 'AYT' ? 'translateY(-12px) scale(1.03)' : 'translateY(0) scale(1)',
+                  overflow: 'hidden',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: examType === 'AYT' 
+                      ? 'linear-gradient(135deg, rgba(240, 147, 251, 0.1) 0%, rgba(245, 87, 108, 0.1) 100%)'
+                      : 'transparent',
+                    borderRadius: '24px',
+                    opacity: examType === 'AYT' ? 1 : 0,
+                    transition: 'opacity 0.4s ease',
+                    animation: examType === 'AYT' ? 'pulse 2s infinite' : 'none'
+                  },
+                  '&:hover': {
+                    transform: examType === 'AYT' ? 'translateY(-12px) scale(1.03)' : 'translateY(-6px) scale(1.02)',
+                    background: examType === 'AYT' 
+                      ? 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)'
+                      : 'rgba(255, 255, 255, 0.12)',
+                    borderColor: examType === 'AYT' 
+                      ? 'rgba(240, 147, 251, 1)'
+                      : 'rgba(255, 255, 255, 0.25)',
+                    boxShadow: examType === 'AYT' 
+                      ? '0 25px 70px rgba(240, 147, 251, 0.5), 0 12px 30px rgba(240, 147, 251, 0.3)'
+                      : '0 15px 40px rgba(0, 0, 0, 0.15)'
+                  },
+                  '@keyframes pulse': {
+                    '0%': { transform: 'scale(1)' },
+                    '50%': { transform: 'scale(1.02)' },
+                    '100%': { transform: 'scale(1)' }
+                  }
+                }}
+              >
+                {/* Selection Indicator */}
+                {examType === 'AYT' && (
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 16,
+                    right: 16,
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: 'rgba(255, 255, 255, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    animation: 'pulse 2s infinite'
+                  }}>
+                    <CheckCircleIcon sx={{ color: '#ffffff', fontSize: '1.5rem' }} />
+                  </Box>
+                )}
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h3" sx={{ 
+                    fontWeight: 800,
+                    color: examType === 'AYT' ? '#ffffff' : 'rgba(255,255,255,0.9)',
+                    mb: 2,
+                    fontSize: { xs: '2.5rem', md: '3rem' }
+                  }}>
+                    AYT
+                  </Typography>
+                  
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 700,
+                    color: examType === 'AYT' ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.8)',
+                    mb: 2
+                  }}>
+                    Alan Yeterlilik Testi
+                  </Typography>
+                  
+                  <Typography variant="body2" sx={{ 
+                    color: examType === 'AYT' ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.7)',
+                    lineHeight: 1.6,
+                    mb: 3
+                  }}>
+                    Matematik, Edebiyat, Fen Bilimleri ve Sosyal Bilimler alanlarını kapsar
+                  </Typography>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    {['Matematik', 'Edebiyat', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'Fizik', 'Kimya', 'Biyoloji'].map((subject, index) => (
+                      <Chip 
+                        key={index}
+                        label={subject} 
+                        size="small"
+                        sx={{ 
+                          backgroundColor: examType === 'AYT' 
+                            ? 'rgba(255, 255, 255, 0.2)' 
+                            : 'rgba(240, 147, 251, 0.2)',
+                          color: examType === 'AYT' ? '#ffffff' : '#f093fb',
+                          fontWeight: 600,
+                          border: `1px solid ${examType === 'AYT' 
+                            ? 'rgba(255, 255, 255, 0.3)' 
+                            : 'rgba(240, 147, 251, 0.3)'}`
+                        }} 
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+
+            {/* Selected Info */}
+            {examType && (
+              <Box sx={{
+                mt: 4,
+                p: 3,
+                borderRadius: '16px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                textAlign: 'center',
+                maxWidth: '400px',
+                width: '100%'
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#ffffff',
+                  fontWeight: 700,
+                  mb: 1
+                }}>
+                  Seçiminiz: {examType}
+                </Typography>
+                <Typography variant="body2" sx={{ 
+                  color: 'rgba(255,255,255,0.8)'
+                }}>
+                  {examType === 'TYT' 
+                    ? 'Temel Yeterlilik Testi seçildi. 4 temel ders alanında sorularınızı girebilirsiniz.'
+                    : 'Alan Yeterlilik Testi seçildi. 7 farklı ders alanında sorularınızı girebilirsiniz.'
+                  }
+                </Typography>
+              </Box>
+            )}
           </Box>
         );
       case 3: // Ders Bilgileri
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+          <Box sx={{ py: 2 }}>
+                        {/* Header Section */}
+            <Box sx={{
+              textAlign: 'center',
+              mb: 5,
+              position: 'relative'
+            }}>
+              <Box sx={{
+                width: 65,
+                height: 65,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 2,
+                boxShadow: '0 10px 25px rgba(102, 126, 234, 0.4)',
+                position: 'relative',
+                animation: 'float 3s ease-in-out infinite',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '-4px',
+                  left: '-4px',
+                  right: '-4px',
+                  bottom: '-4px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  opacity: 0.3,
+                  filter: 'blur(12px)',
+                  zIndex: -1,
+                  animation: 'pulse 2s ease-in-out infinite'
+                },
+                '@keyframes float': {
+                  '0%, 100%': { transform: 'translateY(0px)' },
+                  '50%': { transform: 'translateY(-8px)' }
+                },
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 0.3 },
+                  '50%': { opacity: 0.6 }
+                }
+              }}>
+                <ShowChartIcon sx={{ 
+                  color: '#ffffff', 
+                  fontSize: '2rem',
+                  filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.3))'
+                }} />
+              </Box>
+              
+              <Typography variant="h5" sx={{ 
+                fontWeight: 800, 
+                color: '#ffffff',
+                mb: 1.5,
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontSize: { xs: '1.5rem', md: '1.8rem' }
+              }}>
               Ders Bilgileri
             </Typography>
             
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={4}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                  Dersler
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255,255,255,0.85)',
+                fontSize: '1.1rem',
+                maxWidth: '650px',
+                mx: 'auto',
+                lineHeight: 1.7,
+                fontWeight: 500
+              }}>
+                Her ders için doğru, yanlış ve boş sayılarını girin. Net değerleriniz otomatik hesaplanacaktır.
                 </Typography>
-                <Box sx={{ maxHeight: 400, overflow: 'auto', pr: 1 }}>
-                  {(examType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
-                    <Card 
-                      key={subject}
-                      className={`subject-card ${examType === 'TYT' ? 'tyt' : 'ayt'} ${currentSubject === subject ? 'active' : ''}`}
-                      onClick={() => handleSubjectSelect(subject)}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {subject}
-                        </Typography>
-                        {subjectData[subject] && (
-                          <Chip 
-                            label={`Net: ${subjectData[subject].net}`}
-                            size="small"
-                            sx={{ 
-                              bgcolor: 'rgba(255, 255, 255, 0.2)', 
-                              color: 'white',
-                              fontWeight: 600
-                            }} 
-                          />
-                        )}
-                      </Box>
-                    </Card>
-                  ))}
+            </Box>
+            
+            <Grid container spacing={4}>
+              {/* Sol Panel - Ders Listesi */}
+              <Grid item xs={12} md={5}>
+                <Box sx={{
+                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                  backdropFilter: 'blur(25px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  p: 3,
+                  height: '480px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  boxShadow: '0 8px 30px rgba(0, 0, 0, 0.1)',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+                  }
+                }}>
+                  <Box sx={{ 
+                    textAlign: 'center',
+                    mb: 3,
+                    pb: 2,
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <Typography variant="h6" sx={{ 
+                      color: '#ffffff',
+                      fontWeight: 800,
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      fontSize: '1.2rem'
+                    }}>
+                      {examType} Dersleri
+                    </Typography>
+                    <Typography variant="body2" sx={{
+                      color: 'rgba(255,255,255,0.7)',
+                      mt: 0.5,
+                      fontSize: '0.85rem'
+                    }}>
+                      Ders seçin ve bilgilerini girin
+                    </Typography>
+                  </Box>
+                  
+                  <Box sx={{ 
+                    maxHeight: '350px', 
+                    overflow: 'auto',
+                    pr: 1,
+                    '&::-webkit-scrollbar': {
+                      width: '4px',
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: 'rgba(255,255,255,0.05)',
+                      borderRadius: '2px',
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      borderRadius: '2px',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                      }
+                    }
+                  }}>
+                    {(examType === 'TYT' ? tytSubjects : aytSubjects).map((subject, index) => {
+                      // Her ders için özel renk paleti
+                      const getSubjectColors = (index) => {
+                        const colorPalettes = [
+                          { primary: '#6366f1', secondary: '#818cf8', name: 'Indigo' }, // TYT Türkçe
+                          { primary: '#8b5cf6', secondary: '#a78bfa', name: 'Purple' }, // TYT Sosyal
+                          { primary: '#06b6d4', secondary: '#67e8f9', name: 'Cyan' },   // TYT Matematik  
+                          { primary: '#10b981', secondary: '#6ee7b7', name: 'Emerald' }, // TYT Fen
+                          { primary: '#f59e0b', secondary: '#fbbf24', name: 'Amber' },   // AYT için ekstra
+                          { primary: '#ef4444', secondary: '#f87171', name: 'Red' },     // AYT için ekstra
+                          { primary: '#ec4899', secondary: '#f472b6', name: 'Pink' },    // AYT için ekstra
+                          { primary: '#84cc16', secondary: '#a3e635', name: 'Lime' },    // AYT için ekstra
+                          { primary: '#3b82f6', secondary: '#60a5fa', name: 'Blue' },    // AYT için ekstra
+                        ];
+                        return colorPalettes[index] || colorPalettes[0];
+                      };
+
+                      const colors = getSubjectColors(index);
+                      const isSelected = currentSubject === subject;
+
+                      return (
+                        <Box
+                          key={subject}
+                          onClick={() => handleSubjectSelect(subject)}
+                          sx={{
+                            cursor: 'pointer',
+                            borderRadius: '16px',
+                            p: 2.5,
+                            mb: 2,
+                            background: isSelected 
+                              ? `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
+                              : 'rgba(255, 255, 255, 0.06)',
+                            border: isSelected
+                              ? `2px solid ${colors.primary}40`
+                              : '1px solid rgba(255, 255, 255, 0.1)',
+                            transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                            transform: isSelected ? 'translateY(-1px)' : 'translateY(0)',
+                            boxShadow: isSelected 
+                              ? `0 8px 32px ${colors.primary}30`
+                              : '0 2px 12px rgba(0, 0, 0, 0.1)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&::before': isSelected ? {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                              borderRadius: '16px'
+                            } : {},
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              background: isSelected 
+                                ? `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`
+                                : `linear-gradient(135deg, ${colors.primary}15 0%, ${colors.secondary}15 100%)`,
+                              borderColor: isSelected
+                                ? `${colors.primary}60`
+                                : `${colors.primary}30`,
+                              boxShadow: isSelected
+                                ? `0 12px 40px ${colors.primary}40`
+                                : `0 6px 24px ${colors.primary}20`
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, position: 'relative', zIndex: 1 }}>
+                            <Box sx={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: '12px',
+                              background: isSelected 
+                                ? 'rgba(255, 255, 255, 0.25)'
+                                : `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '1rem',
+                              fontWeight: 800,
+                              color: '#ffffff',
+                              boxShadow: isSelected
+                                ? '0 4px 12px rgba(255, 255, 255, 0.2)'
+                                : `0 4px 12px ${colors.primary}40`,
+                              border: isSelected ? '1px solid rgba(255, 255, 255, 0.3)' : 'none'
+                            }}>
+                              {index + 1}
+                            </Box>
+                            
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="subtitle1" sx={{ 
+                                fontWeight: 700,
+                                color: isSelected ? '#ffffff' : 'rgba(255,255,255,0.95)',
+                                fontSize: '1.05rem',
+                                mb: 0.3,
+                                lineHeight: 1.2
+                              }}>
+                                {subject}
+                              </Typography>
+                              {subjectData[subject] && (
+                                <Typography variant="body2" sx={{
+                                  color: isSelected ? 'rgba(255,255,255,0.8)' : `${colors.primary}`,
+                                  fontSize: '0.85rem',
+                                  fontWeight: 600
+                                }}>
+                                  Net: {subjectData[subject].net}
+                                </Typography>
+                              )}
+                            </Box>
+
+                            {subjectData[subject] && (
+                              <Box sx={{
+                                width: 8,
+                                height: 8,
+                                borderRadius: '50%',
+                                background: isSelected 
+                                  ? 'rgba(255, 255, 255, 0.8)'
+                                  : colors.primary,
+                                boxShadow: isSelected
+                                  ? '0 0 8px rgba(255, 255, 255, 0.6)'
+                                  : `0 0 8px ${colors.primary}60`
+                              }} />
+                            )}
+                          </Box>
+                        </Box>
+                      );
+                    })}
+                  </Box>
                 </Box>
               </Grid>
               
-              <Grid item xs={12} md={8}>
-                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                  {currentSubject ? `${currentSubject} Bilgileri` : 'Ders Seçin'}
-                </Typography>
-                
-                {currentSubject ? (
-                  <Box className="modern-card" sx={{ p: 3 }}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={4}>
-                        <StyledTextField
-                          fullWidth
-                          label="Doğru Sayısı"
-                          type="number"
-                          value={correctCount}
-                          onChange={(e) => setCorrectCount(e.target.value)}
-                          InputProps={{
-                            inputProps: { min: 0 }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <StyledTextField
-                          fullWidth
-                          label="Yanlış Sayısı"
-                          type="number"
-                          value={incorrectCount}
-                          onChange={(e) => setIncorrectCount(e.target.value)}
-                          InputProps={{
-                            inputProps: { min: 0 }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={4}>
-                        <StyledTextField
-                          fullWidth
-                          label="Boş Sayısı"
-                          type="number"
-                          value={emptyCount}
-                          onChange={(e) => setEmptyCount(e.target.value)}
-                          InputProps={{
-                            inputProps: { min: 0 }
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                            Net: {calculateNet(correctCount, incorrectCount)}
-                          </Typography>
-                          <StyledButton 
-                            variant="contained" 
-                            onClick={handleNext}
-                            startIcon={<AddIcon />}
-                          >
-                            Dersi Ekle
-                          </StyledButton>
+              {/* Sağ Panel - Ders Bilgisi Formu */}
+              <Grid item xs={12} md={7}>
+                <Box sx={{
+                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                  backdropFilter: 'blur(30px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  p: 3,
+                  minHeight: '480px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  position: 'relative',
+                  boxShadow: '0 15px 50px rgba(0, 0, 0, 0.1)',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                    borderRadius: '24px 24px 0 0'
+                  }
+                }}>
+                  {currentSubject ? (
+                    <>
+                      {/* Ders Header */}
+                      <Box sx={{ 
+                        textAlign: 'center', 
+                        mb: 4,
+                        p: 4,
+                        borderRadius: '20px',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
+                        border: '1px solid rgba(255,255,255,0.15)',
+                        backdropFilter: 'blur(20px)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: '2px',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                          borderRadius: '20px 20px 0 0'
+                        }
+                      }}>
+                        <Box sx={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: '18px',
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mx: 'auto',
+                          mb: 3,
+                          position: 'relative',
+                          boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: '2px',
+                            left: '2px',
+                            right: '2px',
+                            height: '50%',
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
+                            borderRadius: '16px 16px 0 0'
+                          }
+                        }}>
+                          <ShowChartIcon sx={{ 
+                            color: '#ffffff', 
+                            fontSize: '1.8rem',
+                            position: 'relative',
+                            zIndex: 1
+                          }} />
                         </Box>
+                        
+                        <Typography variant="h4" sx={{ 
+                          color: '#ffffff',
+                          fontWeight: 900,
+                          mb: 2,
+                          fontSize: { xs: '1.6rem', md: '1.8rem' },
+                          textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                        }}>
+                          {currentSubject}
+                        </Typography>
+                        <Typography variant="body1" sx={{ 
+                          color: 'rgba(255,255,255,0.85)',
+                          fontSize: '1.1rem',
+                          fontWeight: 500,
+                          maxWidth: '420px',
+                          mx: 'auto',
+                          lineHeight: 1.7
+                        }}>
+                          Lütfen bu ders için soru sayılarını girin
+                        </Typography>
+                      </Box>
+
+                      {/* Input Grid */}
+                      <Grid container spacing={3} sx={{ mb: 3 }}>
+                        <Grid item xs={12} sm={4}>
+                          <StyledTextField
+                            fullWidth
+                            label="Doğru Sayısı"
+                            type="number"
+                            value={correctCount}
+                            onChange={(e) => setCorrectCount(e.target.value)}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '18px',
+                                fontSize: '1rem',
+                                fontFamily: '"Satoshi", "Inter", "Roboto", sans-serif',
+                                fontWeight: 600,
+                                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                                backdropFilter: 'blur(15px)',
+                                border: '2px solid rgba(76, 175, 80, 0.3)',
+                                color: '#ffffff',
+                                minHeight: '56px',
+                                boxShadow: '0 8px 25px rgba(76, 175, 80, 0.15)',
+                                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                                '& fieldset': { border: 'none' },
+                                '&:hover': {
+                                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%)',
+                                  borderColor: 'rgba(76, 175, 80, 0.5)',
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: '0 12px 35px rgba(76, 175, 80, 0.25)'
+                                },
+                                '&.Mui-focused': {
+                                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                                  borderColor: '#4CAF50',
+                                  boxShadow: '0 0 0 4px rgba(76, 175, 80, 0.3)',
+                                  transform: 'translateY(-2px)'
+                                }
+                              },
+                              '& .MuiInputLabel-root': {
+                                color: 'rgba(255, 255, 255, 0.85)',
+                                fontWeight: 700,
+                                fontSize: '1.05rem',
+                                '&.Mui-focused': { 
+                                  color: '#4CAF50',
+                                  fontWeight: 800
+                                }
+                              }
+                            }}
+                            InputProps={{
+                              inputProps: { min: 0, max: 100 },
+                              startAdornment: (
+                                <Box sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: '12px',
+                                  background: 'linear-gradient(135deg, #4CAF50 0%, #81C784 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  mr: 1.5,
+                                  color: '#ffffff',
+                                  fontWeight: 900,
+                                  fontSize: '1.2rem',
+                                  boxShadow: '0 4px 16px rgba(76, 175, 80, 0.3)',
+                                  border: '2px solid rgba(255, 255, 255, 0.15)',
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: '1px',
+                                    left: '1px',
+                                    right: '1px',
+                                    height: '50%',
+                                    background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
+                                    borderRadius: '10px 10px 0 0'
+                                  }
+                                }}>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+                                  </svg>
+                                </Box>
+                              ),
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <StyledTextField
+                            fullWidth
+                            label="Yanlış Sayısı"
+                            type="number"
+                            value={incorrectCount}
+                            onChange={(e) => setIncorrectCount(e.target.value)}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '18px',
+                                fontSize: '1rem',
+                                fontFamily: '"Satoshi", "Inter", "Roboto", sans-serif',
+                                fontWeight: 600,
+                                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                                backdropFilter: 'blur(15px)',
+                                border: '2px solid rgba(244, 67, 54, 0.3)',
+                                color: '#ffffff',
+                                minHeight: '56px',
+                                boxShadow: '0 8px 25px rgba(244, 67, 54, 0.15)',
+                                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                                '& fieldset': { border: 'none' },
+                                '&:hover': {
+                                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%)',
+                                  borderColor: 'rgba(244, 67, 54, 0.5)',
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: '0 12px 35px rgba(244, 67, 54, 0.25)'
+                                },
+                                '&.Mui-focused': {
+                                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                                  borderColor: '#f44336',
+                                  boxShadow: '0 0 0 4px rgba(244, 67, 54, 0.3)',
+                                  transform: 'translateY(-2px)'
+                                }
+                              },
+                              '& .MuiInputLabel-root': {
+                                color: 'rgba(255, 255, 255, 0.85)',
+                                fontWeight: 700,
+                                fontSize: '1.05rem',
+                                '&.Mui-focused': { 
+                                  color: '#f44336',
+                                  fontWeight: 800
+                                }
+                              }
+                            }}
+                            InputProps={{
+                              inputProps: { min: 0, max: 100 },
+                              startAdornment: (
+                                <Box sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: '12px',
+                                  background: 'linear-gradient(135deg, #f44336 0%, #EF5350 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  mr: 1.5,
+                                  color: '#ffffff',
+                                  fontWeight: 900,
+                                  fontSize: '1.2rem',
+                                  boxShadow: '0 4px 16px rgba(244, 67, 54, 0.3)',
+                                  border: '2px solid rgba(255, 255, 255, 0.15)',
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: '1px',
+                                    left: '1px',
+                                    right: '1px',
+                                    height: '50%',
+                                    background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
+                                    borderRadius: '10px 10px 0 0'
+                                  }
+                                }}>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" fill="currentColor"/>
+                                  </svg>
+                                </Box>
+                              ),
+                            }}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                          <StyledTextField
+                            fullWidth
+                            label="Boş Sayısı"
+                            type="number"
+                            value={emptyCount}
+                            onChange={(e) => setEmptyCount(e.target.value)}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '18px',
+                                fontSize: '1rem',
+                                fontFamily: '"Satoshi", "Inter", "Roboto", sans-serif',
+                                fontWeight: 600,
+                                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                                backdropFilter: 'blur(15px)',
+                                border: '2px solid rgba(255, 152, 0, 0.3)',
+                                color: '#ffffff',
+                                minHeight: '56px',
+                                boxShadow: '0 8px 25px rgba(255, 152, 0, 0.15)',
+                                transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                                '& fieldset': { border: 'none' },
+                                '&:hover': {
+                                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.12) 100%)',
+                                  borderColor: 'rgba(255, 152, 0, 0.5)',
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: '0 12px 35px rgba(255, 152, 0, 0.25)'
+                                },
+                                '&.Mui-focused': {
+                                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                                  borderColor: '#ff9800',
+                                  boxShadow: '0 0 0 4px rgba(255, 152, 0, 0.3)',
+                                  transform: 'translateY(-2px)'
+                                }
+                              },
+                              '& .MuiInputLabel-root': {
+                                color: 'rgba(255, 255, 255, 0.85)',
+                                fontWeight: 700,
+                                fontSize: '1.05rem',
+                                '&.Mui-focused': { 
+                                  color: '#ff9800',
+                                  fontWeight: 800
+                                }
+                              }
+                            }}
+                            InputProps={{
+                              inputProps: { min: 0, max: 100 },
+                              startAdornment: (
+                                <Box sx={{
+                                  width: 40,
+                                  height: 40,
+                                  borderRadius: '12px',
+                                  background: 'linear-gradient(135deg, #ff9800 0%, #FFB74D 100%)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  mr: 1.5,
+                                  color: '#ffffff',
+                                  fontWeight: 900,
+                                  fontSize: '1.2rem',
+                                  boxShadow: '0 4px 16px rgba(255, 152, 0, 0.3)',
+                                  border: '2px solid rgba(255, 255, 255, 0.15)',
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: '1px',
+                                    left: '1px',
+                                    right: '1px',
+                                    height: '50%',
+                                    background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
+                                    borderRadius: '10px 10px 0 0'
+                                  }
+                                }}>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                    <path d="M12 6v6h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                                  </svg>
+                                </Box>
+                              ),
+                            }}
+                          />
+                        </Grid>
                       </Grid>
-                    </Grid>
-                  </Box>
-                ) : (
-                  <Box className="modern-card" sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography variant="body1" color="text.secondary">
-                      Lütfen sol taraftan bir ders seçin.
-                    </Typography>
-                  </Box>
-                )}
-                
-                {Object.keys(subjectData).length > 0 && (
-                  <Box sx={{ mt: 3 }}>
-                    <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-                      Eklenen Dersler
-                    </Typography>
-                    <TableContainer component={Paper} className="modern-card">
-                      <Table className="modern-table">
-                        <TableHead>
-                          <TableRow>
-                            <TableCell>Ders</TableCell>
-                            <TableCell align="center">Doğru</TableCell>
-                            <TableCell align="center">Yanlış</TableCell>
-                            <TableCell align="center">Boş</TableCell>
-                            <TableCell align="center">Net</TableCell>
-                            <TableCell align="right">İşlemler</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {Object.entries(subjectData).map(([subject, data]) => (
-                            <TableRow key={subject}>
-                              <TableCell component="th" scope="row" sx={{ fontWeight: 800, fontSize: '1rem' }}>
-                                {subject}
-                              </TableCell>
-                              <TableCell align="center">{data.correctCount}</TableCell>
-                              <TableCell align="center">{data.incorrectCount}</TableCell>
-                              <TableCell align="center">{data.emptyCount}</TableCell>
-                              <TableCell align="center" sx={{ fontWeight: 600 }}>{data.net}</TableCell>
-                              <TableCell align="right">
-                                <IconButton 
-                                  size="small" 
-                                  color="primary"
-                                  onClick={() => handleSubjectSelect(subject)}
-                                >
-                                  <EditIcon fontSize="small" />
-                                </IconButton>
-                                <IconButton 
-                                  size="small" 
-                                  color="error"
-                                  onClick={() => {
-                                    const newData = { ...subjectData };
-                                    delete newData[subject];
-                                    setSubjectData(newData);
-                                  }}
-                                >
-                                  <DeleteIcon fontSize="small" />
-                                </IconButton>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Box>
-                )}
+
+                      {/* Net Hesaplama ve Ekle Butonu */}
+                      <Box sx={{
+                        p: 4,
+                        borderRadius: '24px',
+                        background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.06) 100%)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexDirection: 'row',
+                        gap: 2,
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
+                        backdropFilter: 'blur(25px)',
+                        position: 'relative',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          height: '2px',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          borderRadius: '24px 24px 0 0'
+                        }
+                      }}>
+                        <Box sx={{ 
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 2,
+                          flex: 1
+                        }}>
+                          <Box sx={{
+                            width: 40,
+                            height: 40,
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 6px 20px rgba(102, 126, 234, 0.4)',
+                            position: 'relative',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: '1px',
+                              left: '1px',
+                              right: '1px',
+                              height: '50%',
+                              background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
+                              borderRadius: '11px 11px 0 0'
+                            }
+                          }}>
+                            <ShowChartIcon sx={{ 
+                              color: '#ffffff', 
+                              fontSize: '1.2rem',
+                              position: 'relative',
+                              zIndex: 1
+                            }} />
+                          </Box>
+                          
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="h6" sx={{ 
+                              color: '#ffffff',
+                              fontWeight: 700,
+                              fontSize: '1.2rem',
+                              textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                            }}>
+                              NETİNİZ:
+                            </Typography>
+                            <Typography variant="h6" sx={{ 
+                              color: '#1e40af',
+                              fontWeight: 900,
+                              fontSize: '1.3rem',
+                              fontFamily: '"Satoshi", "Inter", sans-serif'
+                            }}>
+                              {calculateNet(correctCount, incorrectCount)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        
+                        <Button 
+                          variant="contained" 
+                          onClick={handleNext}
+                          startIcon={<AddIcon sx={{ fontSize: '1.1rem' }} />}
+                          disabled={!correctCount && !incorrectCount && !emptyCount}
+                          sx={{
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: '#ffffff',
+                            fontWeight: 700,
+                            px: 3,
+                            py: 1.5,
+                            borderRadius: '14px',
+                            fontSize: '0.95rem',
+                            minHeight: '44px',
+                            minWidth: '120px',
+                            boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
+                            transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                            border: '1px solid rgba(255, 255, 255, 0.2)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            textTransform: 'none',
+                            letterSpacing: '0.3px',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                              transition: 'opacity 0.3s ease'
+                            },
+                            '&::after': {
+                              content: '""',
+                              position: 'absolute',
+                              top: '1px',
+                              left: '1px',
+                              right: '1px',
+                              height: '50%',
+                              background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%)',
+                              borderRadius: '13px 13px 0 0'
+                            },
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                              transform: 'translateY(-2px) scale(1.02)',
+                              boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)',
+                              borderColor: 'rgba(255, 255, 255, 0.3)',
+                              '&::before': {
+                                opacity: 0.8
+                              }
+                            },
+                            '&:active': {
+                              transform: 'translateY(-1px) scale(1.01)'
+                            },
+                            '&:disabled': {
+                              background: 'rgba(255, 255, 255, 0.06)',
+                              color: 'rgba(255, 255, 255, 0.3)',
+                              transform: 'none',
+                              boxShadow: '0 1px 4px rgba(0, 0, 0, 0.1)',
+                              borderColor: 'rgba(255, 255, 255, 0.1)'
+                            }
+                          }}
+                        >
+                          Dersi Ekle
+                        </Button>
+                      </Box>
+                    </>
+                  ) : (
+                    <Box sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      textAlign: 'center',
+                      py: 6
+                    }}>
+                      <Box sx={{
+                        width: 80,
+                        height: 80,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mb: 3,
+                        border: '2px dashed rgba(255, 255, 255, 0.3)'
+                      }}>
+                        <ShowChartIcon sx={{ 
+                          color: 'rgba(255,255,255,0.5)', 
+                          fontSize: '2.5rem'
+                        }} />
+                      </Box>
+                      <Typography variant="h6" sx={{ 
+                        color: 'rgba(255,255,255,0.7)',
+                        fontWeight: 600,
+                        mb: 1
+                      }}>
+                        Ders Seçin
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        color: 'rgba(255,255,255,0.5)',
+                        maxWidth: '300px'
+                      }}>
+                        Lütfen sol taraftan bir ders seçerek soru sayılarını giriniz
+                      </Typography>
+                    </Box>
+                  )}
+                </Box>
               </Grid>
             </Grid>
+
+            {/* Eklenen Dersler Tablosu */}
+            {Object.keys(subjectData).length > 0 && (
+              <Box sx={{ mt: 6 }}>
+                <Box sx={{
+                  textAlign: 'center',
+                  mb: 4,
+                  position: 'relative'
+                }}>
+                  <Box sx={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 1.5,
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                    border: '2px solid rgba(255, 255, 255, 0.2)'
+                  }}>
+                    <Typography sx={{ 
+                      color: '#ffffff', 
+                      fontSize: '1.4rem',
+                      fontWeight: 900
+                    }}>
+                      {Object.keys(subjectData).length}
+                    </Typography>
+                  </Box>
+                  
+                  <Typography variant="h6" sx={{ 
+                    color: '#ffffff',
+                    fontWeight: 800,
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    fontSize: '1.3rem'
+                  }}>
+                    Eklenen Dersler
+                  </Typography>
+                  
+                  <Typography variant="body1" sx={{
+                    color: 'rgba(255,255,255,0.7)',
+                    mt: 1,
+                    fontSize: '1.05rem'
+                  }}>
+                    Girdiğiniz ders bilgilerinin özeti
+                  </Typography>
+                </Box>
+                
+                <Box sx={{
+                  background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                  backdropFilter: 'blur(30px)',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  overflow: 'hidden',
+                  boxShadow: '0 15px 50px rgba(0, 0, 0, 0.1)',
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                    borderRadius: '24px 24px 0 0'
+                  }
+                }}>
+                  <TableContainer>
+                    <Table>
+                      <TableHead sx={{ 
+                        background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%)',
+                        position: 'relative',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          height: '1px',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)'
+                        }
+                      }}>
+                        <TableRow>
+                          <TableCell sx={{ 
+                            fontWeight: 900, 
+                            fontSize: '1.1rem',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                            py: 3,
+                            px: 3
+                          }}>
+                            Ders
+                          </TableCell>
+                          <TableCell align="center" sx={{ 
+                            fontWeight: 900, 
+                            fontSize: '1.1rem',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                            py: 3,
+                            px: 3
+                          }}>
+                            Doğru
+                          </TableCell>
+                          <TableCell align="center" sx={{ 
+                            fontWeight: 900, 
+                            fontSize: '1.1rem',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                            py: 3,
+                            px: 3
+                          }}>
+                            Yanlış
+                          </TableCell>
+                          <TableCell align="center" sx={{ 
+                            fontWeight: 900, 
+                            fontSize: '1.1rem',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                            py: 3,
+                            px: 3
+                          }}>
+                            Boş
+                          </TableCell>
+                          <TableCell align="center" sx={{ 
+                            fontWeight: 900, 
+                            fontSize: '1.1rem',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                            py: 3,
+                            px: 3
+                          }}>
+                            Net
+                          </TableCell>
+                          <TableCell align="right" sx={{ 
+                            fontWeight: 900, 
+                            fontSize: '1.1rem',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                            py: 3,
+                            px: 3
+                          }}>
+                            İşlemler
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {Object.entries(subjectData).map(([subject, data], index) => (
+                          <TableRow 
+                            key={subject}
+                            sx={{
+                              transition: 'all 0.3s ease',
+                              '&:hover': {
+                                background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+                                transform: 'scale(1.01)',
+                                '& td': {
+                                  transform: 'translateX(2px)'
+                                }
+                              }
+                            }}
+                          >
+                            <TableCell sx={{ 
+                              fontWeight: 800, 
+                              fontSize: '1.05rem',
+                              color: '#ffffff',
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                              py: 2.5,
+                              px: 3,
+                              transition: 'all 0.3s ease'
+                            }}>
+                              {subject}
+                            </TableCell>
+                            <TableCell align="center" sx={{ 
+                              color: '#4CAF50',
+                              fontWeight: 800,
+                              fontSize: '1.1rem',
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                              py: 2.5,
+                              px: 3,
+                              transition: 'all 0.3s ease'
+                            }}>
+                              {data.correctCount}
+                            </TableCell>
+                            <TableCell align="center" sx={{ 
+                              color: '#f44336',
+                              fontWeight: 800,
+                              fontSize: '1.1rem',
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                              py: 2.5,
+                              px: 3,
+                              transition: 'all 0.3s ease'
+                            }}>
+                              {data.incorrectCount}
+                            </TableCell>
+                            <TableCell align="center" sx={{ 
+                              color: '#ff9800',
+                              fontWeight: 600,
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}>
+                              {data.emptyCount}
+                            </TableCell>
+                            <TableCell align="center" sx={{ 
+                              fontWeight: 800,
+                              fontSize: '1.1rem',
+                              color: '#f093fb',
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}>
+                              {data.net}
+                            </TableCell>
+                            <TableCell align="right" sx={{
+                              borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                            }}>
+                              <IconButton 
+                                size="small" 
+                                onClick={() => handleSubjectSelect(subject)}
+                                sx={{
+                                  color: '#f093fb',
+                                  background: 'rgba(240, 147, 251, 0.1)',
+                                  mr: 1,
+                                  '&:hover': {
+                                    background: 'rgba(240, 147, 251, 0.2)',
+                                    transform: 'scale(1.1)'
+                                  }
+                                }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton 
+                                size="small" 
+                                onClick={() => {
+                                  const newData = { ...subjectData };
+                                  delete newData[subject];
+                                  setSubjectData(newData);
+                                }}
+                                sx={{
+                                  color: '#f44336',
+                                  background: 'rgba(244, 67, 54, 0.1)',
+                                  '&:hover': {
+                                    background: 'rgba(244, 67, 54, 0.2)',
+                                    transform: 'scale(1.1)'
+                                  }
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              </Box>
+            )}
           </Box>
         );
       case 4: // Özet
         return (
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-              Deneme Özeti
-            </Typography>
-            
-            <Box className="summary-info">
-              <Box className="summary-item name">
-                <Typography variant="subtitle2">Deneme Adı</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>{examName}</Typography>
+          <Box sx={{ py: 2 }}>
+            {/* Header Section */}
+            <Box sx={{
+              textAlign: 'center',
+              mb: 4,
+              position: 'relative'
+            }}>
+              <Box sx={{
+                width: 80,
+                height: 80,
+                borderRadius: '50%',
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mx: 'auto',
+                mb: 3,
+                boxShadow: '0 10px 30px rgba(67, 233, 123, 0.4)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '-3px',
+                  left: '-3px',
+                  right: '-3px',
+                  bottom: '-3px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #43e97b, #38f9d7)',
+                  opacity: 0.3,
+                  filter: 'blur(8px)',
+                  zIndex: -1
+                }
+              }}>
+                <CheckCircleIcon sx={{ 
+                  color: '#ffffff', 
+                  fontSize: '2.5rem',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
+                }} />
               </Box>
               
-              <Box className="summary-item date">
-                <Typography variant="subtitle2">Tarih</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
-                </Typography>
-              </Box>
-              
-              <Box className="summary-item type">
-                <Typography variant="subtitle2">Sınav Türü</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>{examType}</Typography>
-              </Box>
-            </Box>
-            
-            <Box className="summary-card">
-              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                Dersler
+              <Typography variant="h4" sx={{ 
+                fontWeight: 800, 
+                color: '#ffffff',
+                mb: 1,
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+              }}>
+                Deneme Özeti
               </Typography>
               
+              <Typography variant="body1" sx={{ 
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '1.1rem',
+                lineHeight: 1.6,
+                maxWidth: '500px',
+                mx: 'auto'
+              }}>
+                Deneme bilgilerinizi son kez kontrol edin ve kaydı tamamlayın.
+              </Typography>
+            </Box>
+
+            {/* Ana Bilgiler Kartları */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} md={4}>
+                <Box sx={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  p: 3,
+                  textAlign: 'center',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                  }
+                }}>
+                  <Box sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                    boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                  }}>
+                    <AssignmentIcon sx={{ color: '#ffffff', fontSize: '1.8rem' }} />
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'rgba(255,255,255,0.7)',
+                    mb: 1,
+                    fontWeight: 600
+                  }}>
+                    Deneme Adı
+                  </Typography>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    wordBreak: 'break-word'
+                  }}>
+                    {examName}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Box sx={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  p: 3,
+                  textAlign: 'center',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                  }
+                }}>
+                  <Box sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                    boxShadow: '0 8px 25px rgba(255, 154, 158, 0.3)'
+                  }}>
+                    <CalendarTodayIcon sx={{ color: '#ffffff', fontSize: '1.8rem' }} />
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'rgba(255,255,255,0.7)',
+                    mb: 1,
+                    fontWeight: 600
+                  }}>
+                    Tarih
+                  </Typography>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 700,
+                    color: '#ffffff'
+                  }}>
+                    {format(examDate, 'dd MMMM yyyy', { locale: trLocale })}
+                  </Typography>
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} md={4}>
+                <Box sx={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(20px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  p: 3,
+                  textAlign: 'center',
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15)'
+                  }
+                }}>
+                  <Box sx={{
+                    width: 60,
+                    height: 60,
+                    borderRadius: '50%',
+                    background: examType === 'TYT' 
+                      ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+                      : 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 2,
+                    boxShadow: examType === 'TYT' 
+                      ? '0 8px 25px rgba(79, 172, 254, 0.3)'
+                      : '0 8px 25px rgba(168, 237, 234, 0.3)'
+                  }}>
+                    <Typography variant="h6" sx={{ 
+                      color: '#ffffff',
+                      fontWeight: 800
+                    }}>
+                      {examType}
+                    </Typography>
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ 
+                    color: 'rgba(255,255,255,0.7)',
+                    mb: 1,
+                    fontWeight: 600
+                  }}>
+                    Sınav Türü
+                  </Typography>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 700,
+                    color: '#ffffff'
+                  }}>
+                    {examType === 'TYT' ? 'Temel Yeterlilik' : 'Alan Yeterlilik'}
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* Dersler Tablosu */}
+            <Box sx={{
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(20px)',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              overflow: 'hidden',
+              mb: 4
+            }}>
+              <Box sx={{
+                p: 3,
+                background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#ffffff',
+                  fontWeight: 800,
+                  textAlign: 'center'
+                }}>
+                  Ders Detayları ({Object.keys(subjectData).length} Ders)
+                </Typography>
+              </Box>
+
               <TableContainer>
-                <Table className="modern-table">
-                  <TableHead>
+                <Table>
+                  <TableHead sx={{ 
+                    background: 'rgba(67, 233, 123, 0.1)' 
+                  }}>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 800, fontSize: '1rem' }}>Ders</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Doğru</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Yanlış</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Boş</TableCell>
-                      <TableCell align="center" sx={{ fontWeight: 800, fontSize: '1rem' }}>Net</TableCell>
+                      <TableCell sx={{ 
+                        fontWeight: 800, 
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}>
+                        Ders
+                      </TableCell>
+                      <TableCell align="center" sx={{ 
+                        fontWeight: 800, 
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}>
+                        Doğru
+                      </TableCell>
+                      <TableCell align="center" sx={{ 
+                        fontWeight: 800, 
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}>
+                        Yanlış
+                      </TableCell>
+                      <TableCell align="center" sx={{ 
+                        fontWeight: 800, 
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}>
+                        Boş
+                      </TableCell>
+                      <TableCell align="center" sx={{ 
+                        fontWeight: 800, 
+                        fontSize: '1rem',
+                        color: '#ffffff',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.2)'
+                      }}>
+                        Net Puan
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {Object.entries(subjectData).map(([subject, data]) => (
-                      <TableRow key={subject}>
-                        <TableCell component="th" scope="row" sx={{ fontWeight: 800, fontSize: '1rem' }}>
-                          {subject}
-                        </TableCell>
-                        <TableCell align="center">{data.correctCount}</TableCell>
-                        <TableCell align="center">{data.incorrectCount}</TableCell>
-                        <TableCell align="center">{data.emptyCount}</TableCell>
-                        <TableCell align="center" sx={{ fontWeight: 600 }}>{data.net}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
-          </Box>
+                                         {Object.entries(subjectData).map(([subject, data], index) => (
+                       <TableRow 
+                         key={subject}
+                         sx={{
+                           '&:hover': {
+                             background: 'rgba(255, 255, 255, 0.05)'
+                           },
+                           '&:nth-of-type(even)': {
+                             background: 'rgba(255, 255, 255, 0.02)'
+                           }
+                         }}
+                       >
+                         <TableCell sx={{ 
+                           fontWeight: 700, 
+                           fontSize: '1.1rem',
+                           color: '#ffffff',
+                           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                           display: 'flex',
+                           alignItems: 'center',
+                           gap: 2
+                         }}>
+                           <Box sx={{
+                             width: 35,
+                             height: 35,
+                             borderRadius: '8px',
+                             background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                             display: 'flex',
+                             alignItems: 'center',
+                             justifyContent: 'center',
+                             color: '#ffffff',
+                             fontWeight: 700,
+                             fontSize: '0.9rem'
+                           }}>
+                             {index + 1}
+                           </Box>
+                           {subject}
+                         </TableCell>
+                         <TableCell align="center" sx={{ 
+                           color: '#4CAF50',
+                           fontWeight: 700,
+                           fontSize: '1.1rem',
+                           borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                         }}>
+                           {data.correctCount}
+                         </TableCell>
+                         <TableCell align="center" sx={{ 
+                           color: '#f44336',
+                           fontWeight: 700,
+                           fontSize: '1.1rem',
+                           borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                         }}>
+                           {data.incorrectCount}
+                         </TableCell>
+                         <TableCell align="center" sx={{ 
+                           color: '#ff9800',
+                           fontWeight: 700,
+                           fontSize: '1.1rem',
+                           borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+                         }}>
+                           {data.emptyCount}
+                         </TableCell>
+                         <TableCell align="center" sx={{ 
+                           fontWeight: 800,
+                           fontSize: '1.2rem',
+                           color: '#43e97b',
+                           borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                           position: 'relative'
+                         }}>
+                           <Box sx={{
+                             background: 'rgba(67, 233, 123, 0.2)',
+                             borderRadius: '12px',
+                             px: 2,
+                             py: 1,
+                             display: 'inline-block',
+                             border: '1px solid rgba(67, 233, 123, 0.3)'
+                           }}>
+                             {data.net}
+                           </Box>
+                         </TableCell>
+                       </TableRow>
+                     ))}
+                     
+                     {/* Toplam Net Satırı */}
+                     <TableRow sx={{
+                       background: 'rgba(67, 233, 123, 0.1)',
+                       borderTop: '2px solid rgba(67, 233, 123, 0.3)'
+                     }}>
+                       <TableCell sx={{ 
+                         fontWeight: 800, 
+                         fontSize: '1.2rem',
+                         color: '#43e97b',
+                         borderBottom: 'none'
+                       }}>
+                         TOPLAM
+                       </TableCell>
+                       <TableCell align="center" sx={{ 
+                         color: '#4CAF50',
+                         fontWeight: 800,
+                         fontSize: '1.2rem',
+                         borderBottom: 'none'
+                       }}>
+                         {Object.values(subjectData).reduce((sum, data) => sum + parseInt(data.correctCount || 0), 0)}
+                       </TableCell>
+                       <TableCell align="center" sx={{ 
+                         color: '#f44336',
+                         fontWeight: 800,
+                         fontSize: '1.2rem',
+                         borderBottom: 'none'
+                       }}>
+                         {Object.values(subjectData).reduce((sum, data) => sum + parseInt(data.incorrectCount || 0), 0)}
+                       </TableCell>
+                       <TableCell align="center" sx={{ 
+                         color: '#ff9800',
+                         fontWeight: 800,
+                         fontSize: '1.2rem',
+                         borderBottom: 'none'
+                       }}>
+                         {Object.values(subjectData).reduce((sum, data) => sum + parseInt(data.emptyCount || 0), 0)}
+                       </TableCell>
+                       <TableCell align="center" sx={{ 
+                         fontWeight: 900,
+                         fontSize: '1.4rem',
+                         color: '#43e97b',
+                         borderBottom: 'none'
+                       }}>
+                         <Box sx={{
+                           background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                           borderRadius: '16px',
+                           px: 3,
+                           py: 1.5,
+                           display: 'inline-block',
+                           color: '#ffffff',
+                           boxShadow: '0 6px 20px rgba(67, 233, 123, 0.3)'
+                         }}>
+                           {Object.values(subjectData).reduce((sum, data) => sum + parseFloat(data.net || 0), 0).toFixed(2)}
+                         </Box>
+                       </TableCell>
+                     </TableRow>
+                   </TableBody>
+                 </Table>
+               </TableContainer>
+             </Box>
+
+             {/* Son Kontrol Mesajı */}
+             <Box sx={{
+               background: 'rgba(255, 255, 255, 0.1)',
+               backdropFilter: 'blur(20px)',
+               borderRadius: '20px',
+               border: '1px solid rgba(255, 255, 255, 0.2)',
+               p: 4,
+               textAlign: 'center'
+             }}>
+               <Box sx={{
+                 width: 60,
+                 height: 60,
+                 borderRadius: '50%',
+                 background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 mx: 'auto',
+                 mb: 2,
+                 boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)'
+               }}>
+                 <CheckCircleIcon sx={{ color: '#ffffff', fontSize: '1.8rem' }} />
+               </Box>
+               
+               <Typography variant="h6" sx={{ 
+                 color: '#ffffff',
+                 fontWeight: 700,
+                 mb: 2
+               }}>
+                 Tüm Bilgiler Hazır!
+               </Typography>
+               
+               <Typography variant="body1" sx={{ 
+                 color: 'rgba(255,255,255,0.8)',
+                 lineHeight: 1.6,
+                 maxWidth: '600px',
+                 mx: 'auto'
+               }}>
+                 Deneme bilgileriniz yukarıda özetlenmiştir. Bilgilerin doğruluğunu kontrol ettikten sonra 
+                 &quot;İleri&quot; butonuna tıklayarak kaydı tamamlayabilirsiniz. 
+                 Değişiklik yapmak için &quot;Geri&quot; butonunu kullanabilirsiniz.
+               </Typography>
+               
+               <Box sx={{
+                 mt: 3,
+                 p: 2,
+                 borderRadius: '12px',
+                 background: 'rgba(67, 233, 123, 0.1)',
+                 border: '1px solid rgba(67, 233, 123, 0.3)'
+               }}>
+                 <Typography variant="body2" sx={{ 
+                   color: '#43e97b',
+                   fontWeight: 600
+                 }}>
+                   💡 İpucu: Kayıt tamamlandıktan sonra bu deneme bilgileriniz analiz ekranlarında görünecek 
+                   ve gelişim takibiniz için kullanılacaktır.
+                 </Typography>
+               </Box>
+             </Box>
+           </Box>
         );
       default:
         return null;
@@ -756,209 +2820,7 @@ const TytAytNetTakibi = () => {
 
   // Not: renderRecordsList fonksiyonu artık kullanılmıyor, yeni tasarım için kaldırıldı
 
-  // İstatistik yardımcı fonksiyonları
-  // En yüksek net yapılan dersi hesapla
-  const calculateHighestNetSubject = () => {
-    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
-    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
-    
-    if (filteredRecords.length === 0) return 'Veri yok';
-    
-    let highestSubject = '';
-    let highestNet = 0;
-    
-    subjects.forEach(subject => {
-      const subjectNets = filteredRecords
-        .filter(record => record.subjects && record.subjects[subject])
-        .map(record => parseFloat(record.subjects[subject].net));
-      
-      if (subjectNets.length > 0) {
-        const maxNet = Math.max(...subjectNets);
-        if (maxNet > highestNet) {
-          highestNet = maxNet;
-          highestSubject = subject;
-        }
-      }
-    });
-    
-    return highestSubject ? `${highestSubject}: ${highestNet.toFixed(2)}` : 'Veri yok';
-  };
-  
-  // Gelişim durumunu hesapla
-  const calculateGrowthStatus = () => {
-    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
-    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
-    
-    if (filteredRecords.length < 2) {
-      return (
-        <Typography variant="h5" sx={{ fontWeight: 800 }}>
-          Yetersiz veri
-        </Typography>
-      );
-    }
-    
-    // Tüm dersler için ortalama net değişimini hesapla
-    let totalGrowth = 0;
-    let validSubjectCount = 0;
-    
-    subjects.forEach(subject => {
-      const subjectRecords = filteredRecords.filter(record => 
-        record.subjects && record.subjects[subject]
-      );
-      
-      if (subjectRecords.length >= 2) {
-        // Tarihe göre sırala
-        const sortedRecords = [...subjectRecords].sort((a, b) => {
-          try {
-            if (a.examDate && a.examDate.toDate && b.examDate && b.examDate.toDate) {
-              return b.examDate.toDate() - a.examDate.toDate();
-            }
-            return 0;
-          } catch (error) {
-            return 0;
-          }
-        });
-        
-        // Son iki denemenin netlerini al
-        const lastNet = parseFloat(sortedRecords[0].subjects[subject].net);
-        const prevNet = parseFloat(sortedRecords[1].subjects[subject].net);
-        
-        // Değişim yüzdesini hesapla
-        const change = lastNet - prevNet;
-        const changePercent = prevNet !== 0 ? (change / prevNet) * 100 : 0;
-        
-        totalGrowth += changePercent;
-        validSubjectCount++;
-      }
-    });
-    
-    // Ortalama gelişim yüzdesi
-    const avgGrowth = validSubjectCount > 0 ? totalGrowth / validSubjectCount : 0;
-    
-    // Gelişim durumunu görsel olarak göster
-    if (avgGrowth > 0) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TrendingUpIcon sx={{ color: '#2ecc71', mr: 1, fontSize: 28 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#2ecc71' }}>
-            Yükseliyor ({avgGrowth.toFixed(2)}%)
-          </Typography>
-        </Box>
-      );
-    } else if (avgGrowth < 0) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TrendingDownIcon sx={{ color: '#e74c3c', mr: 1, fontSize: 28 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#e74c3c' }}>
-            Düşüş ({Math.abs(avgGrowth).toFixed(2)}%)
-          </Typography>
-        </Box>
-      );
-    } else {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TrendingFlatIcon sx={{ color: '#f39c12', mr: 1, fontSize: 28 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#f39c12' }}>
-            Stabil (0.00%)
-          </Typography>
-        </Box>
-      );
-    }
-  };
-  
-  // Belirli bir dersin gelişim durumunu hesapla
-  const calculateSubjectGrowthStatus = (subject) => {
-    const filteredRecords = netRecords.filter(record => 
-      record.examType === selectedExamType && 
-      record.subjects && 
-      record.subjects[subject]
-    );
-    
-    if (filteredRecords.length < 2) {
-      return (
-        <Typography variant="h5" sx={{ fontWeight: 800 }}>
-          Veri yok
-        </Typography>
-      );
-    }
-    
-    // Tarihe göre sırala (en yeniden en eskiye)
-    const sortedRecords = [...filteredRecords].sort((a, b) => {
-      try {
-        if (a.examDate && a.examDate.toDate && b.examDate && b.examDate.toDate) {
-          return b.examDate.toDate() - a.examDate.toDate();
-        }
-        return 0;
-      } catch (error) {
-        console.error('Date sorting error:', error);
-        return 0;
-      }
-    });
-    
-    // Son iki denemenin netlerini al
-    const lastNet = parseFloat(sortedRecords[0].subjects[subject].net);
-    const prevNet = parseFloat(sortedRecords[1].subjects[subject].net);
-    
-    // Değişim yüzdesini hesapla
-    const change = lastNet - prevNet;
-    const changePercent = prevNet !== 0 ? (change / prevNet) * 100 : 0;
-    
-    // Gelişim durumunu görsel olarak göster
-    if (change > 0) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TrendingUpIcon sx={{ color: '#2ecc71', mr: 1, fontSize: 28 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#2ecc71' }}>
-            Yükseliyor ({changePercent.toFixed(2)}%)
-          </Typography>
-        </Box>
-      );
-    } else if (change < 0) {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TrendingDownIcon sx={{ color: '#e74c3c', mr: 1, fontSize: 28 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#e74c3c' }}>
-            Düşüş ({Math.abs(changePercent).toFixed(2)}%)
-          </Typography>
-        </Box>
-      );
-    } else {
-      return (
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <TrendingFlatIcon sx={{ color: '#f39c12', mr: 1, fontSize: 28 }} />
-          <Typography variant="h5" sx={{ fontWeight: 800, color: '#f39c12' }}>
-            Stabil (0.00%)
-          </Typography>
-        </Box>
-      );
-    }
-  };
-  
-  // Ders bazlı ortalama netleri hesapla
-  const calculateSubjectAverages = () => {
-    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
-    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
-    
-    if (filteredRecords.length === 0) return [];
-    
-    const result = [];
-    
-    subjects.forEach(subject => {
-      const subjectNets = filteredRecords
-        .filter(record => record.subjects && record.subjects[subject])
-        .map(record => parseFloat(record.subjects[subject].net));
-      
-      if (subjectNets.length > 0) {
-        const average = subjectNets.reduce((a, b) => a + b, 0) / subjectNets.length;
-        result.push({
-          subject,
-          average
-        });
-      }
-    });
-    
-    return result;
-  };
+
   
   // Zaman içinde gelişim verilerini hesapla
   const calculateTimeProgress = () => {
@@ -1079,161 +2941,8 @@ const TytAytNetTakibi = () => {
     return recommendations;
   };
   
-  // Not: renderStatistics fonksiyonu artık kullanılmıyor, yeni tasarım için kaldırıldı
-  
-  // Render statistics function - commented out as it's not used anymore
-  /*
-  const renderStatistics = () => {
-    // These variables would need to be defined if this function were used
-    const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
-    const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
-    const chartData = calculateTimeProgress();
-    
-    // Generate random colors for chart
-    const COLORS = ['#4a6cf7', '#ff6b6b', '#2ecc71', '#f39c12', '#3498db', '#9b59b6', '#1abc9c', '#e74c3c'];
-    
-    return (
-      <Box>
-        <Box sx={{ mb: 3 }}>
-          <FormControl sx={{ minWidth: 200 }}>
-            <InputLabel>Sınav Türü</InputLabel>
-            <Select
-              value={selectedExamType}
-              onChange={(e) => setSelectedExamType(e.target.value)}
-              label="Sınav Türü"
-            >
-              <MenuItem value="TYT">TYT</MenuItem>
-              <MenuItem value="AYT">AYT</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-        
-        <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-            Net Değişim Grafiği
-          </Typography>
-          
-          <Box sx={{ width: '100%', height: 400 }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={chartData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {subjects.map((subject, index) => (
-                  <Line 
-                    key={subject}
-                    type="monotone"
-                    dataKey={subject}
-                    stroke={COLORS[index % COLORS.length]}
-                    activeDot={{ r: 8 }}
-                    strokeWidth={2}
-                  />
-                ))}
-              </LineChart>
-            </ResponsiveContainer>
-          </Box>
-        </Box>
-        
-        {selectedSubject ? (
-          <Box className="modern-card" sx={{ p: 3 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                {selectedSubject} Detaylı Analiz
-              </Typography>
-              <IconButton size="small" onClick={() => setSelectedSubject('')}>
-                <CloseIcon />
-              </IconButton>
-            </Box>
-            
-            <Box sx={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={chartData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey={selectedSubject} fill="#4a6cf7" />
-                </BarChart>
-              </ResponsiveContainer>
-            </Box>
-          </Box>
-        ) : (
-          <Box className="modern-card" sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-              Ders Bazlı Performans
-            </Typography>
-            
-            <Grid container spacing={2}>
-              {subjects.map((subject, index) => {
-                // Calculate average net for this subject
-                const subjectData = filteredRecords
-                  .filter(record => record.subjects && record.subjects[subject])
-                  .map(record => parseFloat(record.subjects[subject].net));
-                
-                const avgNet = subjectData.length > 0 
-                  ? (subjectData.reduce((a, b) => a + b, 0) / subjectData.length).toFixed(2)
-                  : 0;
-                
-                // Calculate trend (up or down)
-                let trend = 'stable';
-                if (subjectData.length >= 2) {
-                  const lastNet = subjectData[0];
-                  const prevNet = subjectData[1];
-                  trend = lastNet > prevNet ? 'up' : lastNet < prevNet ? 'down' : 'stable';
-                }
-                
-                return (
-                  <Grid item xs={12} sm={6} md={4} key={subject}>
-                    <Card 
-                      className="subject-card"
-                      sx={{ 
-                        cursor: 'pointer',
-                        bgcolor: COLORS[index % COLORS.length],
-                        color: 'white'
-                      }}
-                      onClick={() => setSelectedSubject(subject)}
-                    >
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                          {subject}
-                        </Typography>
-                        {trend === 'up' ? (
-                          <TrendingUpIcon sx={{ color: '#2ecc71' }} />
-                        ) : trend === 'down' ? (
-                          <TrendingDownIcon sx={{ color: '#e74c3c' }} />
-                        ) : (
-                          <TrendingFlatIcon />
-                        )}
-                      </Box>
-                      <Typography variant="h4" sx={{ fontWeight: 700, mt: 2 }}>
-                        {avgNet}
-                      </Typography>
-                      <Typography variant="body2">
-                        Ortalama Net
-                      </Typography>
-                    </Card>
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </Box>
-        )}
-      </Box>
-    );
-  };
-  */
-
   return (
-    <Box sx={{ 
+    <Box sx={{
       minHeight: '100vh',
       backgroundColor: '#1e293d',
       position: 'relative'
@@ -1246,7 +2955,7 @@ const TytAytNetTakibi = () => {
       >
         <Container maxWidth="xl" sx={{ py: { xs: 4, md: 8 } }}>
           {/* Modern Header */}
-          <Box sx={{ 
+          <Box sx={{
             textAlign: 'center', 
             mb: { xs: 6, md: 8 },
             pt: { xs: 4, md: 6 }
@@ -1393,958 +3102,342 @@ const TytAytNetTakibi = () => {
               </Button>
             </Box>
           </motion.div>
-        
-          {/* Tab panels */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-          >
-            {tabValue === 0 && (
-              <Box>
-                {/* Modern Stepper Container */}
-                <Paper 
-                  elevation={0}
-                  sx={{ 
-                    mb: 4,
-                    borderRadius: '16px',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    p: 3
-                  }}
-                >
-                  <ModernStepper activeStep={activeStep} />
-                </Paper>
-                
-                <Box sx={{ mt: 4 }}>
-                  {activeStep === steps.length ? (
-                    /* Form submitted successfully */
-                    <Paper 
-                      elevation={0}
-                      sx={{ 
-                        textAlign: 'center', 
-                        py: 6,
+
+          {/* Tab Content */}
+          {tabValue === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              {/* Multi-step Form */}
+              <Paper sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                p: { xs: 3, md: 5 },
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24)'
+              }}>
+                {/* Stepper */}
+                <Box sx={{ mb: 4 }}>
+                  <ModernStepper activeStep={activeStep} steps={steps} />
+                </Box>
+
+                {/* Step Content */}
+                <Box sx={{ minHeight: '400px' }}>
+                  {getStepContent(activeStep)}
+                </Box>
+
+                {/* Navigation Buttons */}
+                {activeStep < steps.length && (
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    gap: 2,
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mt: 4,
+                    pt: 3,
+                    borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    <Button
+                      onClick={handleBack}
+                      disabled={activeStep === 0}
+                      startIcon={<NavigateBeforeIcon />}
+                      sx={{
+                        px: 4,
+                        py: 1.5,
                         borderRadius: '16px',
-                        background: 'rgba(255, 255, 255, 0.05)',
+                        fontWeight: 600,
+                        textTransform: 'none',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
                         backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'rgba(255, 255, 255, 0.15)',
+                          color: '#ffffff',
+                          transform: 'translateY(-2px)'
+                        },
+                        '&:disabled': {
+                          opacity: 0.5,
+                          transform: 'none'
+                        }
                       }}
                     >
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                      >
-                        <CheckCircleIcon sx={{ 
-                          fontSize: 80, 
-                          color: '#4CAF50', 
-                          mb: 3,
-                          filter: 'drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3))'
-                        }} />
-                      </motion.div>
-                      <Typography variant="h4" gutterBottom sx={{ 
-                        color: '#fff', 
+                      Geri
+                    </Button>
+
+                    <Button
+                      variant="contained"
+                      onClick={handleNext}
+                      endIcon={<NavigateNextIcon />}
+                      sx={{
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: '16px',
                         fontWeight: 700,
-                        mb: 2
-                      }}>
-                        Başarılı!
-                      </Typography>
-                      <Typography variant="h6" sx={{ 
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        mb: 4,
-                        maxWidth: '400px',
-                        mx: 'auto'
-                      }}>
-                        Deneme sonuçlarınız başarıyla kaydedildi!
-                      </Typography>
+                        textTransform: 'none',
+                        background: 'linear-gradient(135deg, #4a6cf7 0%, #667eea 100%)',
+                        color: '#ffffff',
+                        fontSize: '1rem',
+                        boxShadow: '0 8px 25px rgba(74, 108, 247, 0.3)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 12px 30px rgba(74, 108, 247, 0.4)'
+                        }
+                      }}
+                    >
+                      {activeStep === steps.length - 1 ? 'Kaydet' : 'İleri'}
+                    </Button>
+                  </Box>
+                )}
+
+                {/* Completion Message */}
+                {activeStep >= steps.length && (
+                  <Box sx={{
+                    textAlign: 'center',
+                    py: 6
+                  }}>
+                    <Box sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 3,
+                      boxShadow: '0 10px 30px rgba(67, 233, 123, 0.4)'
+                    }}>
+                      <CheckCircleIcon sx={{ color: '#ffffff', fontSize: '2.5rem' }} />
+                    </Box>
+                    
+                    <Typography variant="h4" sx={{
+                      fontWeight: 800,
+                      color: '#ffffff',
+                      mb: 2
+                    }}>
+                      Deneme Kaydedildi!
+                    </Typography>
+                    
+                    <Typography variant="body1" sx={{
+                      color: 'rgba(255,255,255,0.8)',
+                      mb: 4,
+                      maxWidth: '500px',
+                      mx: 'auto',
+                      lineHeight: 1.6
+                    }}>
+                      Deneme sonuçlarınız başarıyla kaydedildi. Şimdi &quot;Kayıtlı Denemeler&quot; veya &quot;İstatistikler&quot; sekmesinden performansınızı inceleyebilirsiniz.
+                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <Button
+                        onClick={() => {
+                          setActiveStep(0);
+                          setTabValue(1);
+                        }}
+                        variant="contained"
+                        startIcon={<ViewListIcon />}
+                        sx={{
+                          px: 3,
+                          py: 1.5,
+                          borderRadius: '16px',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          background: 'linear-gradient(135deg, #55b3d9, #4a9cc7)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #6bc1e1, #55b3d9)'
+                          }
+                        }}
+                      >
+                        Kayıtları Görüntüle
+                      </Button>
+                      
+                      <Button
+                        onClick={() => {
+                          setActiveStep(0);
+                          setTabValue(2);
+                        }}
+                        variant="contained"
+                        startIcon={<BarChartIcon />}
+                        sx={{
+                          px: 3,
+                          py: 1.5,
+                          borderRadius: '16px',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, #f5576c 0%, #f093fb 100%)'
+                          }
+                        }}
+                      >
+                        İstatistikleri Gör
+                      </Button>
+                      
                       <Button
                         onClick={() => setActiveStep(0)}
-                        sx={{ 
-                          mt: 2,
-                          background: 'linear-gradient(135deg, #55b3d9, #4a9cc7)',
-                          color: 'white',
-                          fontWeight: 700,
-                          padding: '12px 32px',
-                          borderRadius: '50px',
-                          fontSize: '1.1rem',
-                          boxShadow: '0 8px 16px rgba(85, 179, 217, 0.3)',
-                          transition: 'all 0.3s ease',
+                        variant="outlined"
+                        startIcon={<AddIcon />}
+                        sx={{
+                          px: 3,
+                          py: 1.5,
+                          borderRadius: '16px',
+                          fontWeight: 600,
+                          textTransform: 'none',
+                          color: '#ffffff',
+                          borderColor: 'rgba(255, 255, 255, 0.3)',
                           '&:hover': {
-                            background: 'linear-gradient(135deg, #6bc1e1, #55b3d9)',
-                            transform: 'translateY(-2px)',
-                            boxShadow: '0 12px 24px rgba(85, 179, 217, 0.4)'
+                            borderColor: '#ffffff',
+                            background: 'rgba(255, 255, 255, 0.1)'
                           }
                         }}
                       >
                         Yeni Deneme Ekle
                       </Button>
-                    </Paper>
-                  ) : (
-                    /* Form steps */
-                    <>
-                      <Paper 
-                        elevation={0}
-                        sx={{ 
-                          p: { xs: 3, md: 4 }, 
-                          mb: 4,
-                          borderRadius: '16px',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          backdropFilter: 'blur(10px)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          minHeight: '400px'
-                        }}
-                      >
-                        {getStepContent(activeStep)}
-                      </Paper>
-                    
-                      <Box sx={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        mt: 4,
-                        flexDirection: isMobile ? 'column' : 'row',
-                        gap: isMobile ? 3 : 0
-                      }}>
-                        <Button
-                          disabled={activeStep === 0}
-                          onClick={handleBack}
-                          startIcon={<NavigateBeforeIcon />}
-                          sx={{ 
-                            opacity: activeStep === 0 ? 0.3 : 1,
-                            order: isMobile ? 2 : 1,
-                            width: isMobile ? '100%' : 'auto',
-                            background: activeStep === 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.2)',
-                            backdropFilter: 'blur(10px)',
-                            border: '1px solid rgba(255, 255, 255, 0.3)',
-                            color: 'white',
-                            fontWeight: 700,
-                            padding: '12px 24px',
-                            borderRadius: '50px',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              background: 'rgba(255, 255, 255, 0.25)',
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)'
-                            },
-                            '&:disabled': {
-                              background: 'rgba(255, 255, 255, 0.05)',
-                              color: 'rgba(255, 255, 255, 0.3)'
-                            }
-                          }}
-                        >
-                          Geri
-                        </Button>
-                        
-                        <Button
-                          onClick={handleNext}
-                          endIcon={<NavigateNextIcon />}
-                          disabled={activeStep === 3 && Object.keys(subjectData).length === 0}
-                          sx={{ 
-                            order: isMobile ? 1 : 2,
-                            width: isMobile ? '100%' : 'auto',
-                            background: 'linear-gradient(135deg, #55b3d9, #4a9cc7)',
-                            color: 'white',
-                            fontWeight: 700,
-                            padding: '12px 32px',
-                            borderRadius: '50px',
-                            fontSize: '1rem',
-                            boxShadow: '0 8px 16px rgba(85, 179, 217, 0.3)',
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                              background: 'linear-gradient(135deg, #6bc1e1, #55b3d9)',
-                              transform: 'translateY(-2px)',
-                              boxShadow: '0 12px 24px rgba(85, 179, 217, 0.4)'
-                            },
-                            '&:disabled': {
-                              background: 'rgba(255, 255, 255, 0.1)',
-                              color: 'rgba(255, 255, 255, 0.3)',
-                              boxShadow: 'none'
-                            }
-                          }}
-                        >
-                          {activeStep === steps.length - 1 ? 'Bitir' : 'İleri'}
-                        </Button>
-                      </Box>
-                  </>
+                    </Box>
+                  </Box>
                 )}
-              </Box>
-            </Box>
+              </Paper>
+            </motion.div>
           )}
-          
+
           {tabValue === 1 && (
-            <Box>
-              <Paper 
-                elevation={0}
-                sx={{ 
-                  p: { xs: 3, md: 4 }, 
-                  mb: 4,
-                  borderRadius: '16px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  mb: 4,
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? 2 : 0
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              <Paper sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                p: { xs: 3, md: 5 },
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24)'
+              }}>
+                <Typography variant="h5" sx={{
+                  fontWeight: 700,
+                  color: '#ffffff',
+                  mb: 3,
+                  textAlign: 'center'
                 }}>
-                  <Typography variant="h4" sx={{ 
-                    color: '#fff', 
-                    fontWeight: 700,
-                    textAlign: isMobile ? 'center' : 'left'
-                  }}>
-                    Deneme Sonuçları
-                  </Typography>
-                </Box>
-                
-                {/* TYT/AYT Seçim Butonları */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: 3, 
-                  mb: 5,
-                  flexDirection: isMobile ? 'column' : 'row' 
-                }}>
-                  <Button
-                    onClick={() => setSelectedExamType('TYT')}
-                    sx={{
-                      flex: 1,
-                      py: 3,
-                      background: selectedExamType === 'TYT' 
-                        ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
-                        : 'rgba(255, 255, 255, 0.08)',
-                      backdropFilter: 'blur(10px)',
-                      border: `2px solid ${selectedExamType === 'TYT' ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
-                      color: 'white',
-                      fontWeight: 700,
-                      fontSize: '1.2rem',
-                      borderRadius: '16px',
-                      boxShadow: selectedExamType === 'TYT' 
-                        ? '0 8px 16px rgba(102, 126, 234, 0.3)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.1)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        boxShadow: '0 10px 20px rgba(102, 126, 234, 0.4)',
-                        background: selectedExamType === 'TYT' 
-                          ? 'linear-gradient(135deg, #6bc1e1, #55b3d9)' 
-                          : 'rgba(255, 255, 255, 0.12)'
-                      }
-                    }}
-                  >
-                    TYT Denemeleri
-                  </Button>
-                  
-                  <Button
-                    onClick={() => setSelectedExamType('AYT')}
-                    sx={{
-                      flex: 1,
-                      py: 3,
-                      background: selectedExamType === 'AYT' 
-                        ? 'linear-gradient(135deg, #55b3d9, #4a9cc7)' 
-                        : 'rgba(255, 255, 255, 0.08)',
-                      backdropFilter: 'blur(10px)',
-                      border: `2px solid ${selectedExamType === 'AYT' ? 'transparent' : 'rgba(255, 255, 255, 0.1)'}`,
-                      color: 'white',
-                      fontWeight: 700,
-                      fontSize: '1.2rem',
-                      borderRadius: '16px',
-                      boxShadow: selectedExamType === 'AYT' 
-                        ? '0 8px 16px rgba(53, 152, 219, 0.25)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-3px)',
-                        boxShadow: '0 10px 20px rgba(53, 152, 219, 0.3)'
-                      }
-                    }}
-                  >
-                    AYT Denemeleri
-                  </Button>
-                </Box>
-                
-                {/* Seçilen Sınav Türüne Göre Dersler */}
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ 
-                    fontWeight: 600, 
-                    color: '#fff',
-                    mb: 3
-                  }}>
-                    {selectedExamType} Dersleri
-                  </Typography>
-                  
-                  <Grid container spacing={2}>
-                    {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
-                      <Grid item xs={12} sm={6} md={4} key={subject}>
-                        <Card 
-                          sx={{
-                            p: 2,
-                            borderRadius: '12px',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                            background: selectedSubject === subject
-                              ? selectedExamType === 'TYT'
-                                ? 'linear-gradient(135deg, #4a6cf7, #3a56d4)'
-                                : 'linear-gradient(135deg, #9b59b6, #8e44ad)'
-                              : 'white',
-                            color: selectedSubject === subject ? 'white' : 'var(--text-primary)',
-                            transition: 'all 0.3s ease',
-                            cursor: 'pointer',
-                            '&:hover': {
-                              transform: 'translateY(-5px)',
-                              boxShadow: '0 10px 20px rgba(0, 0, 0, 0.1)'
-                            }
-                          }}
-                          onClick={() => setSelectedSubject(subject)}
-                        >
-                          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {subject}
-                          </Typography>
-                        </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Box>
-                
-                {/* Seçilen Derse Göre Sonuçlar */}
-                {selectedSubject && (
-                  <Box className="modern-card" sx={{ p: 3, mb: 4 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                      <Typography variant="h6" sx={{ fontWeight: 600, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
-                        {selectedSubject} Sonuçları
-                      </Typography>
-                      <IconButton size="small" onClick={() => setSelectedSubject('')}>
-                        <CloseIcon />
-                      </IconButton>
-                    </Box>
-                    
-                    <TableContainer component={Paper} sx={{ borderRadius: '12px', overflow: 'hidden' }}>
-                      <Table>
-                        <TableHead sx={{ 
-                          background: selectedExamType === 'TYT' 
-                            ? 'linear-gradient(135deg, #4a6cf7, #3a56d4)' 
-                            : 'linear-gradient(135deg, #9b59b6, #8e44ad)' 
-                        }}>
-                          <TableRow>
-                            <TableCell sx={{ color: 'white', fontWeight: 700 }}>Deneme Adı</TableCell>
-                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Tarih</TableCell>
-                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Doğru</TableCell>
-                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Yanlış</TableCell>
-                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Boş</TableCell>
-                            <TableCell align="center" sx={{ color: 'white', fontWeight: 700 }}>Net</TableCell>
-                            <TableCell align="right" sx={{ color: 'white', fontWeight: 700 }}>İşlemler</TableCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {netRecords
-                            .filter(record => record.examType === selectedExamType && record.subjects && record.subjects[selectedSubject])
-                            .map((record) => (
-                              <TableRow key={record.id}>
-                                <TableCell component="th" scope="row" sx={{ fontWeight: 600 }}>
-                                  {record.examName}
-                                </TableCell>
-                                <TableCell align="center">
-                                  {record.examDate && format(record.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale })}
-                                </TableCell>
-                                <TableCell align="center">{record.subjects[selectedSubject].correctCount}</TableCell>
-                                <TableCell align="center">{record.subjects[selectedSubject].incorrectCount}</TableCell>
-                                <TableCell align="center">{record.subjects[selectedSubject].emptyCount}</TableCell>
-                                <TableCell align="center" sx={{ fontWeight: 700, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
-                                  {record.subjects[selectedSubject].net}
-                                </TableCell>
-                                <TableCell align="right">
-                                  <IconButton 
-                                    size="small" 
-                                    sx={{ color: '#4a6cf7' }}
-                                    onClick={() => {
-                                      // Düzenleme işlemi için gerekli state'leri ayarla
-                                      setExamName(record.examName);
-                                      setExamDate(record.examDate.toDate());
-                                      setExamType(record.examType);
-                                      setSubjectData(record.subjects);
-                                      setActiveStep(0);
-                                      setTabValue(0);
-                                      
-                                      // Bildirim göster
-                                      setNotification({
-                                        open: true,
-                                        message: 'Deneme düzenleme moduna geçildi',
-                                        severity: 'info'
-                                      });
-                                    }}
-                                  >
-                                    <EditIcon fontSize="small" />
-                                  </IconButton>
-                                  <IconButton 
-                                    size="small" 
-                                    sx={{ color: '#e74c3c' }}
-                                    onClick={() => handleDelete(record.id)}
-                                  >
-                                    <DeleteIcon fontSize="small" />
-                                  </IconButton>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                    
-                    {/* Grafik Gösterimi */}
-                    <Box sx={{ mt: 4 }}>
-                      <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6' }}>
-                        {selectedSubject} Performans Grafiği
-                      </Typography>
-                      
-                      <Box sx={{ width: '100%', height: 300 }}>
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart
-                            data={netRecords
-                              .filter(record => record.examType === selectedExamType && record.subjects && record.subjects[selectedSubject])
-                              .map(record => ({
-                                name: record.examName,
-                                date: record.examDate ? format(record.examDate.toDate(), 'dd/MM', { locale: trLocale }) : '',
-                                net: parseFloat(record.subjects[selectedSubject].net)
-                              }))}
-                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line 
-                              type="monotone" 
-                              dataKey="net" 
-                              name="Net"
-                              stroke={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
-                              activeDot={{ r: 8 }} 
-                              strokeWidth={2}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </Box>
-                    </Box>
-                  </Box>
-                )}
-                
-                {/* Deneme yoksa veya ders seçilmediyse */}
-                {(!selectedSubject && netRecords.length > 0) && (
-                  <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <Typography variant="body1" color="text.secondary">
-                      Lütfen incelemek istediğiniz dersi seçin.
+                  Kayıtlı Denemeler ({netRecords.length})
+                </Typography>
+
+                {netRecords.length === 0 ? (
+                  <Box sx={{ textAlign: 'center', py: 6 }}>
+                    <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 2 }}>
+                      Henüz deneme kaydınız bulunmamaktadır
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                      İlk denemenizi eklemek için &quot;Yeni Deneme Ekle&quot; sekmesini kullanın
                     </Typography>
                   </Box>
+                ) : (
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 700, color: '#ffffff' }}>Deneme Adı</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#ffffff' }}>Tarih</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#ffffff' }}>Tür</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#ffffff' }}>Toplam Net</TableCell>
+                          <TableCell sx={{ fontWeight: 700, color: '#ffffff' }}>İşlemler</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {netRecords.map((record) => {
+                          const totalNet = Object.values(record.subjects || {})
+                            .reduce((sum, subject) => sum + parseFloat(subject.net || 0), 0);
+                          
+                          return (
+                            <TableRow key={record.id}>
+                              <TableCell sx={{ color: '#ffffff' }}>{record.examName}</TableCell>
+                              <TableCell sx={{ color: '#ffffff' }}>
+                                {record.examDate?.toDate ? 
+                                  format(record.examDate.toDate(), 'dd/MM/yyyy', { locale: trLocale }) : 
+                                  'Tarih yok'
+                                }
+                              </TableCell>
+                              <TableCell sx={{ color: '#ffffff' }}>{record.examType}</TableCell>
+                              <TableCell sx={{ color: '#4CAF50', fontWeight: 600 }}>
+                                {totalNet.toFixed(2)}
+                              </TableCell>
+                              <TableCell>
+                                <IconButton
+                                  onClick={() => handleDelete(record.id)}
+                                  sx={{ color: '#f44336' }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
                 )}
-                
-                {netRecords.length === 0 && (
-                  <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      Henüz kaydedilmiş deneme sonucu bulunmamaktadır.
-                    </Typography>
-                  </Box>
-                )}
-                </Paper>
-              </Box>
-            )}
-          
+              </Paper>
+            </motion.div>
+          )}
+
           {tabValue === 2 && (
-            <Box>
-              <Paper 
-                elevation={0}
-                sx={{ 
-                  p: { xs: 3, md: 4 }, 
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.6 }}
+            >
+              <Paper sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                p: { xs: 3, md: 5 },
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24)'
+              }}>
+                <Typography variant="h5" sx={{
+                  fontWeight: 700,
+                  color: '#ffffff',
                   mb: 4,
-                  borderRadius: '16px',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  mb: 4,
-                  flexDirection: isMobile ? 'column' : 'row',
-                  gap: isMobile ? 2 : 0
+                  textAlign: 'center'
                 }}>
-                  <Typography variant="h4" sx={{ 
-                    color: '#fff', 
-                    fontWeight: 700,
-                    textAlign: isMobile ? 'center' : 'left'
-                  }}>
-                    İstatistikler ve Analizler
-                  </Typography>
-                </Box>
-                
-                {/* Ders Seçim Bölümü */}
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                    Hangi dersin istatistiklerini görmek istersiniz?
-                  </Typography>
-                  
-                  <Grid container spacing={2} sx={{ mt: 2 }}>
-                    {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
-                      <Grid item xs={12} sm={6} md={3} key={subject}>
-                        <Card 
+                  Performans İstatistikleri
+                </Typography>
+
+                {netRecords.length > 0 ? (
+                  <>
+                    {/* Exam Type Filter */}
+                    <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+                      <FormControl sx={{ minWidth: 120 }}>
+                        <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>Sınav Türü</InputLabel>
+                        <Select
+                          value={selectedExamType}
+                          onChange={(e) => setSelectedExamType(e.target.value)}
                           sx={{
-                            p: 2,
-                            borderRadius: '12px',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                            background: selectedSubject === subject
-                              ? 'linear-gradient(135deg, #5db6d9, #4a9cc7)'
-                              : 'white',
-                            color: selectedSubject === subject ? 'white' : 'var(--text-primary)',
-                            transition: 'all 0.3s ease',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            minHeight: '80px',
-                            '&:hover': {
-                              transform: 'translateY(-3px)',
-                              boxShadow: '0 8px 16px rgba(93, 182, 217, 0.25)'
+                            color: '#ffffff',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(255, 255, 255, 0.3)'
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'rgba(255, 255, 255, 0.5)'
                             }
                           }}
-                          onClick={() => setSelectedSubject(subject)}
                         >
-                          <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
-                            {subject}
-                          </Typography>
-                        </Card>
-                      </Grid>
-                    ))}
-                    <Grid item xs={12} sm={6} md={3}>
-                      <Card 
-                        sx={{
-                          p: 2,
-                          borderRadius: '12px',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-                          background: selectedSubject === '' 
-                            ? 'linear-gradient(135deg, #5db6d9, #4a9cc7)' 
-                            : 'white',
-                          color: selectedSubject === '' ? 'white' : 'var(--text-primary)',
-                          transition: 'all 0.3s ease',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          minHeight: '80px',
-                          '&:hover': {
-                            transform: 'translateY(-3px)',
-                            boxShadow: '0 8px 16px rgba(93, 182, 217, 0.25)'
-                          }
-                        }}
-                        onClick={() => setSelectedSubject('')}
-                      >
-                        <Typography variant="h6" sx={{ fontWeight: 600, textAlign: 'center' }}>
-                          Tüm Dersler
-                        </Typography>
-                      </Card>
-                    </Grid>
-                  </Grid>
-                </Box>
-                
-                {/* TYT/AYT Seçim Butonları */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  gap: 3, 
-                  mb: 4,
-                  flexDirection: isMobile ? 'column' : 'row' 
-                }}>
-                  <Button
-                    onClick={() => setSelectedExamType('TYT')}
-                    sx={{
-                      flex: 1,
-                      py: 3,
-                      background: selectedExamType === 'TYT' 
-                        ? 'linear-gradient(135deg, #4a6cf7, #3a56d4)' 
-                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
-                      color: selectedExamType === 'TYT' ? 'white' : 'var(--text-primary)',
-                      fontWeight: 700,
-                      fontSize: '1.2rem',
-                      borderRadius: '16px',
-                      boxShadow: selectedExamType === 'TYT' 
-                        ? '0 10px 20px rgba(74, 108, 247, 0.3)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0 15px 30px rgba(74, 108, 247, 0.2)'
-                      }
-                    }}
-                  >
-                    TYT İstatistikleri
-                  </Button>
-                  
-                  <Button
-                    onClick={() => setSelectedExamType('AYT')}
-                    sx={{
-                      flex: 1,
-                      py: 3,
-                      background: selectedExamType === 'AYT' 
-                        ? 'linear-gradient(135deg, #9b59b6, #8e44ad)' 
-                        : 'linear-gradient(135deg, #f5f7fa, #e4e8f0)',
-                      color: selectedExamType === 'AYT' ? 'white' : 'var(--text-primary)',
-                      fontWeight: 700,
-                      fontSize: '1.2rem',
-                      borderRadius: '16px',
-                      boxShadow: selectedExamType === 'AYT' 
-                        ? '0 10px 20px rgba(155, 89, 182, 0.3)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.05)',
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        transform: 'translateY(-5px)',
-                        boxShadow: '0 15px 30px rgba(155, 89, 182, 0.2)'
-                      }
-                    }}
-                  >
-                    AYT İstatistikleri
-                  </Button>
-                </Box>
-                
-                {/* İstatistik Kartları */}
-                {netRecords.filter(record => record.examType === selectedExamType).length > 0 ? (
-                  <>
-                    {/* Özet Bilgiler */}
-                    <Box sx={{ mb: 4 }}>
-                      <Typography variant="h6" gutterBottom sx={{ 
-                        fontWeight: 600, 
-                        color: '#5db6d9',
-                        borderBottom: `2px solid #5db6d9`,
-                        pb: 1,
-                        mb: 3
-                      }}>
-                        Genel Performans Özeti
-                      </Typography>
-                      
-                      <Box sx={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: 3,
-                        justifyContent: 'center'
-                      }}>
-                        {/* Toplam Deneme Kartı */}
-                        <Box sx={{
-                          width: { xs: '100%', sm: '45%', md: '22%' },
-                          p: 3,
-                          borderRadius: '16px',
-                          background: 'linear-gradient(135deg, #FFD3A5, #FD6585)',
-                          color: 'white',
-                          boxShadow: '0 8px 16px rgba(253, 101, 133, 0.2)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          textAlign: 'center',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-5px)',
-                            boxShadow: '0 12px 20px rgba(253, 101, 133, 0.3)'
-                          }
-                        }}>
-                          <Box sx={{ 
-                            width: 60, 
-                            height: 60, 
-                            borderRadius: '50%', 
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 2
-                          }}>
-                            <AssignmentIcon sx={{ fontSize: 30 }} />
-                          </Box>
-                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
-                            Toplam Deneme
-                          </Typography>
-                          <Typography variant="h3" sx={{ fontWeight: 800 }}>
-                            {(() => {
-                              // Tüm Dersler seçiliyse
-                              if (selectedSubject === '') {
-                                return netRecords.filter(record => record.examType === selectedExamType).length;
-                              }
-                              // Belirli bir ders seçiliyse
-                              else {
-                                return netRecords.filter(record => 
-                                  record.examType === selectedExamType && 
-                                  record.subjects && 
-                                  record.subjects[selectedSubject]
-                                ).length;
-                              }
-                            })()}
-                          </Typography>
-                        </Box>
-                        
-                        {/* Son Deneme Tarihi Kartı */}
-                        <Box sx={{
-                          width: { xs: '100%', sm: '45%', md: '22%' },
-                          p: 3,
-                          borderRadius: '16px',
-                          background: 'linear-gradient(135deg, #90F7EC, #32CCBC)',
-                          color: 'white',
-                          boxShadow: '0 8px 16px rgba(50, 204, 188, 0.2)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          textAlign: 'center',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-5px)',
-                            boxShadow: '0 12px 20px rgba(50, 204, 188, 0.3)'
-                          }
-                        }}>
-                          <Box sx={{ 
-                            width: 60, 
-                            height: 60, 
-                            borderRadius: '50%', 
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 2
-                          }}>
-                            <CalendarTodayIcon sx={{ fontSize: 30 }} />
-                          </Box>
-                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
-                            Son Deneme Tarihi
-                          </Typography>
-                          <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                            {(() => {
-                              try {
-                                // Önce sınav türüne göre filtrele
-                                let filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
-                                
-                                // Eğer belirli bir ders seçilmişse, sadece o derse ait kayıtları filtrele
-                                if (selectedSubject && selectedSubject !== '') {
-                                  filteredRecords = filteredRecords.filter(record => 
-                                    record.subjects && record.subjects[selectedSubject]
-                                  );
-                                }
-                                
-                                if (filteredRecords.length === 0) return 'Tarih yok';
-                                
-                                // Güvenli sıralama fonksiyonu
-                                const sortedRecords = [...filteredRecords].sort((a, b) => {
-                                  // Eğer examDate tanımlı değilse veya toDate metodu yoksa, karşılaştırma yapma
-                                  if (!a.examDate || !a.examDate.toDate || !b.examDate || !b.examDate.toDate) {
-                                    return 0; // Sıralamayı değiştirme
-                                  }
-                                  try {
-                                    return b.examDate.toDate() - a.examDate.toDate();
-                                  } catch (error) {
-                                    console.error('Date sorting error:', error);
-                                    return 0; // Hata durumunda sıralamayı değiştirme
-                                  }
-                                });
-                                
-                                // İlk kaydın tarihini güvenli bir şekilde al
-                                const latestRecord = sortedRecords[0];
-                                if (!latestRecord || !latestRecord.examDate) return 'Tarih yok';
-                                
-                                try {
-                                  if (typeof latestRecord.examDate.toDate === 'function') {
-                                    return format(latestRecord.examDate.toDate(), 'dd MMMM yyyy', { locale: trLocale });
-                                  } else if (latestRecord.examDate instanceof Date) {
-                                    return format(latestRecord.examDate, 'dd MMMM yyyy', { locale: trLocale });
-                                  } else {
-                                    return 'Tarih yok';
-                                  }
-                                } catch (error) {
-                                  console.error('Date formatting error:', error);
-                                  return 'Tarih yok';
-                                }
-                              } catch (error) {
-                                console.error('General error in date processing:', error);
-                                return 'Tarih yok';
-                              }
-                            })()}
-                          </Typography>
-                        </Box>
-                        
-                        {/* En Yüksek Net Kartı */}
-                        <Box sx={{
-                          width: { xs: '100%', sm: '45%', md: '22%' },
-                          p: 3,
-                          borderRadius: '16px',
-                          background: 'linear-gradient(135deg, #ABDCFF, #0396FF)',
-                          color: 'white',
-                          boxShadow: '0 8px 16px rgba(3, 150, 255, 0.2)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          textAlign: 'center',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-5px)',
-                            boxShadow: '0 12px 20px rgba(3, 150, 255, 0.3)'
-                          }
-                        }}>
-                          <Box sx={{ 
-                            width: 60, 
-                            height: 60, 
-                            borderRadius: '50%', 
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 2
-                          }}>
-                            <TrendingUpIcon sx={{ fontSize: 30 }} />
-                          </Box>
-                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
-                            En Yüksek Net
-                          </Typography>
-                          <Typography variant="h5" sx={{ fontWeight: 800 }}>
-                            {(() => {
-                              // Belirli bir ders seçiliyse
-                              if (selectedSubject && selectedSubject !== '') {
-                                const filteredRecords = netRecords
-                                  .filter(record => 
-                                    record.examType === selectedExamType && 
-                                    record.subjects && 
-                                    record.subjects[selectedSubject]
-                                  )
-                                  .map(record => parseFloat(record.subjects[selectedSubject].net));
-                                
-                                if (filteredRecords.length === 0) return 'Veri yok';
-                                
-                                const maxNet = Math.max(...filteredRecords);
-                                return `${maxNet.toFixed(2)}`;
-                              } 
-                              // Tüm dersler seçiliyse
-                              else {
-                                return calculateHighestNetSubject();
-                              }
-                            })()}
-                          </Typography>
-                        </Box>
-                        
-                        {/* Gelişim Durumu Kartı */}
-                        <Box sx={{
-                          width: { xs: '100%', sm: '45%', md: '22%' },
-                          p: 3,
-                          borderRadius: '16px',
-                          background: 'linear-gradient(135deg, #FFF6B7, #F6416C)',
-                          color: 'white',
-                          boxShadow: '0 8px 16px rgba(246, 65, 108, 0.2)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          textAlign: 'center',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            transform: 'translateY(-5px)',
-                            boxShadow: '0 12px 20px rgba(246, 65, 108, 0.3)'
-                          }
-                        }}>
-                          <Box sx={{ 
-                            width: 60, 
-                            height: 60, 
-                            borderRadius: '50%', 
-                            background: 'rgba(255, 255, 255, 0.2)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            mb: 2
-                          }}>
-                            <ShowChartIcon sx={{ fontSize: 30 }} />
-                          </Box>
-                          <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
-                            Gelişim Durumu
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            {(() => {
-                              // Belirli bir ders seçiliyse
-                              if (selectedSubject && selectedSubject !== '') {
-                                return calculateSubjectGrowthStatus(selectedSubject);
-                              }
-                              // Tüm dersler seçiliyse
-                              else {
-                                return calculateGrowthStatus();
-                              }
-                            })()}
-                          </Box>
-                        </Box>
-                      </Box>
+                          <MenuItem value="TYT">TYT</MenuItem>
+                          <MenuItem value="AYT">AYT</MenuItem>
+                        </Select>
+                      </FormControl>
                     </Box>
-                    
-                    {/* Ders Bazlı Performans */}
-                    <Box sx={{ mb: 4 }}>
-                      <Typography variant="h6" gutterBottom sx={{ 
-                        fontWeight: 600, 
-                        color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6',
-                        borderBottom: `2px solid ${selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'}`,
-                        pb: 1
-                      }}>
-                        Ders Bazlı Performans
-                      </Typography>
-                      
-                      {/* Belirli bir ders seçilmişse ve Tüm Dersler değilse, o derse özel grafik göster */}
-                      {selectedSubject && selectedSubject !== '' ? (
-                        <Box sx={{ width: '100%', height: 400, mt: 3 }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <LineChart
-                              data={netRecords
-                                .filter(record => 
-                                  record.examType === selectedExamType && 
-                                  record.subjects && 
-                                  record.subjects[selectedSubject]
-                                )
-                                .map(record => ({
-                                  name: record.examName,
-                                  date: record.examDate ? format(record.examDate.toDate(), 'dd/MM', { locale: trLocale }) : '',
-                                  net: parseFloat(record.subjects[selectedSubject].net)
-                                }))}
-                              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="date" />
-                              <YAxis />
-                              <Tooltip />
-                              <Legend />
-                              <Line 
-                                type="monotone" 
-                                dataKey="net" 
-                                name={`${selectedSubject} Net`}
-                                stroke={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
-                                activeDot={{ r: 8 }} 
-                                strokeWidth={2}
-                              />
-                            </LineChart>
-                          </ResponsiveContainer>
-                        </Box>
-                      ) : (
-                        <Box sx={{ width: '100%', height: 400, mt: 3 }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                              data={calculateSubjectAverages()}
-                              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                            >
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="subject" />
-                              <YAxis />
-                              <Tooltip />
-                              <Legend />
-                              <Bar 
-                                dataKey="average" 
-                                name="Ortalama Net" 
-                                fill={selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'} 
-                                radius={[8, 8, 0, 0]}
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </Box>
-                      )}
-                    </Box>
-                    
-                    {/* Zaman İçinde Gelişim */}
+
+                    {/* Progress Chart */}
                     <Box sx={{ mb: 4 }}>
                       <Typography variant="h6" gutterBottom sx={{ 
                         fontWeight: 600, 
@@ -2366,37 +3459,23 @@ const TytAytNetTakibi = () => {
                             <YAxis />
                             <Tooltip />
                             <Legend />
-                            {/* Belirli bir ders seçilmişse ve Tüm Dersler değilse, sadece o dersi göster */}
-                            {selectedSubject ? (
+                            {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
                               <Line 
-                                key={selectedSubject}
+                                key={subject}
                                 type="monotone" 
-                                dataKey={selectedSubject} 
-                                stroke={getSubjectColor(selectedSubject)} 
-                                strokeWidth={3}
-                                dot={{ r: 6, fill: getSubjectColor(selectedSubject), strokeWidth: 2, stroke: '#fff' }}
-                                activeDot={{ r: 9, fill: getSubjectColor(selectedSubject), strokeWidth: 3, stroke: '#fff' }}
+                                dataKey={subject} 
+                                stroke={getSubjectColor(subject)} 
+                                strokeWidth={2}
+                                dot={{ r: 5, fill: getSubjectColor(subject), strokeWidth: 1, stroke: '#fff' }}
+                                activeDot={{ r: 8, fill: getSubjectColor(subject), strokeWidth: 2, stroke: '#fff' }}
                               />
-                            ) : (
-                              /* Tüm dersler seçilmişse, tüm dersleri göster */
-                              (selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
-                                <Line 
-                                  key={subject}
-                                  type="monotone" 
-                                  dataKey={subject} 
-                                  stroke={getSubjectColor(subject)} 
-                                  strokeWidth={2}
-                                  dot={{ r: 5, fill: getSubjectColor(subject), strokeWidth: 1, stroke: '#fff' }}
-                                  activeDot={{ r: 8, fill: getSubjectColor(subject), strokeWidth: 2, stroke: '#fff' }}
-                                />
-                              ))
-                            )}
+                            ))}
                           </LineChart>
                         </ResponsiveContainer>
                       </Box>
                     </Box>
                     
-                    {/* Tavsiyeler */}
+                    {/* Recommendations */}
                     <Box sx={{ mb: 4 }}>
                       <Typography variant="h6" gutterBottom sx={{ 
                         fontWeight: 600, 
@@ -2412,14 +3491,13 @@ const TytAytNetTakibi = () => {
                           <Card key={index} sx={{ 
                             p: 2.5, 
                             mb: 2.5, 
-                            borderRadius: 'var(--card-border-radius)',
-                            boxShadow: 'var(--card-shadow)',
+                            borderRadius: '16px',
+                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
                             borderLeft: `4px solid ${recommendation.color}`,
-                            transition: 'var(--card-transition)',
-                            background: `linear-gradient(to right, ${recommendation.color}10, transparent)`,
+                            transition: 'all 0.3s ease',
                             '&:hover': {
-                              boxShadow: 'var(--card-hover-shadow)',
-                              transform: 'translateY(-3px)'
+                              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                              transform: 'translateY(-2px)'
                             }
                           }}>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -2447,7 +3525,7 @@ const TytAytNetTakibi = () => {
                             </Box>
                             <Typography variant="body1" sx={{ 
                               mt: 1.5, 
-                              color: 'text.secondary',
+                              color: 'rgba(255, 255, 255, 0.8)',
                               lineHeight: 1.6,
                               pl: 7
                             }}>
@@ -2465,10 +3543,10 @@ const TytAytNetTakibi = () => {
                     </Typography>
                   </Box>
                 )}
-                </Paper>
-              </Box>
-            )}
-          
+              </Paper>
+            </motion.div>
+          )}
+
           {/* Notification */}
           <Snackbar 
             open={notification.open} 
@@ -2484,7 +3562,6 @@ const TytAytNetTakibi = () => {
               {notification.message}
             </Alert>
           </Snackbar>
-          </motion.div>
         </Container>
       </motion.div>
     </Box>

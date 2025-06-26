@@ -143,8 +143,6 @@ const AnalyticalStopwatch = () => {
     setShowSaveDialog(false);
   };
 
-  // Not: Sıfırlama işlemi butonlar içinde inline olarak kullanılıyor
-
   // Çalışma kaydını Firestore'a kaydet
   const saveStudyRecord = async () => {
     if (!user) {
@@ -243,8 +241,6 @@ const AnalyticalStopwatch = () => {
       return formattedTime;
     }
   };
-
-  // Not: Konu seçimi işlemi butonlar içinde inline olarak kullanılıyor
 
   // Ders tıklandığında konuları göster/gizle
   const handleSubjectClick = (subject) => {
@@ -626,40 +622,90 @@ const AnalyticalStopwatch = () => {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            p: 3
+            p: 3,
+            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(85, 179, 217, 0.1) 100%)'
           }}>
             {/* Daire içinde zaman gösterimi */}
             <Box sx={{ 
-              width: { xs: '180px', sm: '220px' },
-              height: { xs: '180px', sm: '220px' },
+              width: { xs: '200px', sm: '250px' },
+              height: { xs: '200px', sm: '250px' },
               borderRadius: '50%',
-              border: '2px solid rgba(33, 150, 243, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
-              mb: 3,
-              background: 'rgba(255, 255, 255, 0.5)',
-              boxShadow: '0 8px 32px rgba(31, 38, 135, 0.1)',
-              backdropFilter: 'blur(4px)',
+              mb: 4,
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)',
+              backdropFilter: 'blur(15px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: `
+                0 8px 32px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1)
+              `,
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.02)',
+                boxShadow: `
+                  0 12px 40px rgba(0, 0, 0, 0.15),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                  0 0 0 1px rgba(255, 255, 255, 0.2)
+                `
+              },
               '&::before': {
                 content: '""',
                 position: 'absolute',
-                top: '-4px',
-                left: '-4px',
-                width: 'calc(100% + 8px)',
-                height: 'calc(100% + 8px)',
+                top: '-6px',
+                left: '-6px',
+                width: 'calc(100% + 12px)',
+                height: 'calc(100% + 12px)',
                 borderRadius: '50%',
-                border: '4px solid transparent',
-                borderTopColor: selectedColor || '#2196F3',
-                borderRightColor: 'rgba(33, 150, 243, 0.3)',
-                animation: isRunning ? 'spin 2s linear infinite' : 'none',
-                '@keyframes spin': {
+                background: `conic-gradient(
+                  from 0deg,
+                  ${selectedColor || '#2196F3'} 0deg,
+                  ${selectedColor || '#2196F3'}80 90deg,
+                  ${selectedColor || '#2196F3'}40 180deg,
+                  ${selectedColor || '#2196F3'}20 270deg,
+                  ${selectedColor || '#2196F3'} 360deg
+                )`,
+                animation: isRunning ? 'spinGlow 3s linear infinite' : 'none',
+                opacity: isRunning ? 1 : 0.3,
+                transition: 'opacity 0.3s ease',
+                zIndex: -1,
+                '@keyframes spinGlow': {
                   '0%': {
-                    transform: 'rotate(0deg)'
+                    transform: 'rotate(0deg)',
+                    filter: 'blur(0px)'
+                  },
+                  '50%': {
+                    transform: 'rotate(180deg)',
+                    filter: 'blur(2px)'
                   },
                   '100%': {
-                    transform: 'rotate(360deg)'
+                    transform: 'rotate(360deg)',
+                    filter: 'blur(0px)'
+                  }
+                }
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: '-3px',
+                left: '-3px',
+                width: 'calc(100% + 6px)',
+                height: 'calc(100% + 6px)',
+                borderRadius: '50%',
+                border: `2px solid ${selectedColor || '#2196F3'}`,
+                opacity: isRunning ? 0.6 : 0.2,
+                animation: isRunning ? 'pulse 2s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': {
+                    opacity: 0.6,
+                    transform: 'scale(1)'
+                  },
+                  '50%': {
+                    opacity: 0.8,
+                    transform: 'scale(1.02)'
                   }
                 }
               }
@@ -668,24 +714,52 @@ const AnalyticalStopwatch = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                zIndex: 1
               }}>
                 <TimerIcon sx={{ 
-                  color: '#2196F3',
-                  fontSize: '1.5rem',
+                  color: selectedColor || '#2196F3',
+                  fontSize: { xs: '2rem', sm: '2.5rem' },
                   mb: 1,
-                  opacity: 0.8
+                  opacity: 0.9,
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
                 }} />
                 
                 <Typography variant="h1" sx={{ 
-                  fontSize: { xs: '1.8rem', sm: '2.2rem' },
-                  fontWeight: 700,
-                  fontFamily: 'monospace',
-                  color: '#333',
-                  letterSpacing: '1px'
+                  fontSize: { xs: '2.2rem', sm: '2.8rem' },
+                  fontWeight: 800,
+                  fontFamily: '"Satoshi", "Segoe UI", monospace',
+                  color: '#ffffff',
+                  letterSpacing: '2px',
+                  textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                  background: `linear-gradient(135deg, #ffffff 0%, ${selectedColor || '#2196F3'}40 100%)`,
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 0 8px rgba(255,255,255,0.3))',
+                  transition: 'all 0.3s ease'
                 }}>
                   {formatTime(time, true)}
                 </Typography>
+                
+                {/* Alt bilgi yazısı */}
+                {selectedSubject && selectedTopic && (
+                  <Typography sx={{ 
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    color: 'rgba(255,255,255,0.8)',
+                    textAlign: 'center',
+                    mt: 1,
+                    background: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    borderRadius: '12px',
+                    px: 2,
+                    py: 0.5,
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}>
+                    {selectedSubject} • {selectedTopic}
+                  </Typography>
+                )}
               </Box>
             </Box>
             
@@ -693,32 +767,39 @@ const AnalyticalStopwatch = () => {
             <Box sx={{ 
               display: 'flex',
               flexDirection: isRunning ? 'row' : 'column',
-              gap: 1.5,
-              mt: 2,
+              gap: 2,
+              mt: 3,
               width: '100%',
-              maxWidth: '300px'
+              maxWidth: '320px'
             }}>
               {selectedSubject && selectedTopic ? (
                 !isRunning ? (
                   <Button
                     variant="contained"
                     fullWidth
-                    size="medium"
+                    size="large"
                     onClick={() => setIsRunning(true)}
                     sx={{
-                      background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                      color: '#fff',
-                      py: 1.2,
-                      borderRadius: '10px',
-                      fontWeight: 600,
-                      fontSize: '0.9rem',
+                      background: `linear-gradient(135deg, ${selectedColor || '#2196F3'} 0%, ${selectedColor || '#2196F3'}CC 50%, ${selectedColor || '#21CBF3'} 100%)`,
+                      color: '#ffffff',
+                      py: 1.8,
+                      px: 3,
+                      borderRadius: '16px',
+                      fontWeight: 700,
+                      fontSize: '1.1rem',
                       textTransform: 'none',
-                      boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
-                      transition: 'all 0.3s ease',
+                      boxShadow: `0 8px 24px ${selectedColor || '#2196F3'}40`,
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
-                        background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 10px 2px rgba(33, 150, 243, .3)'
+                        background: `linear-gradient(135deg, ${selectedColor || '#21CBF3'} 0%, ${selectedColor || '#2196F3'} 50%, ${selectedColor || '#1976D2'} 100%)`,
+                        transform: 'translateY(-4px) scale(1.02)',
+                        boxShadow: `0 12px 32px ${selectedColor || '#2196F3'}50`,
+                        border: '1px solid rgba(255,255,255,0.3)'
+                      },
+                      '&:active': {
+                        transform: 'translateY(-2px) scale(1.01)'
                       }
                     }}
                   >
@@ -729,22 +810,26 @@ const AnalyticalStopwatch = () => {
                     <Button
                       variant="contained"
                       fullWidth
-                      size="small"
+                      size="medium"
                       onClick={() => setIsRunning(false)}
                       sx={{
-                        background: 'linear-gradient(45deg, #FF5722 30%, #FF9800 90%)',
-                        color: '#fff',
-                        py: 1,
-                        borderRadius: '8px',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
+                        background: 'linear-gradient(135deg, #FF5722 0%, #FF7043 50%, #FF9800 100%)',
+                        color: '#ffffff',
+                        py: 1.3,
+                        px: 2,
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
                         textTransform: 'none',
-                        boxShadow: '0 2px 4px 1px rgba(255, 87, 34, .3)',
-                        transition: 'all 0.3s ease',
+                        boxShadow: '0 6px 20px rgba(255, 87, 34, 0.4)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
-                          background: 'linear-gradient(45deg, #FF9800 30%, #FF5722 90%)',
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 8px 1px rgba(255, 87, 34, .3)'
+                          background: 'linear-gradient(135deg, #FF7043 0%, #FF5722 50%, #E64A19 100%)',
+                          transform: 'translateY(-3px) scale(1.02)',
+                          boxShadow: '0 8px 24px rgba(255, 87, 34, 0.5)',
+                          border: '1px solid rgba(255,255,255,0.3)'
                         }
                       }}
                     >
@@ -754,25 +839,29 @@ const AnalyticalStopwatch = () => {
                     <Button
                       variant="contained"
                       fullWidth
-                      size="small"
+                      size="medium"
                       onClick={() => {
                         setTime(0);
                         setIsRunning(false);
                       }}
                       sx={{
-                        background: 'linear-gradient(45deg, #9C27B0 30%, #E040FB 90%)',
-                        color: '#fff',
-                        py: 1,
-                        borderRadius: '8px',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
+                        background: 'linear-gradient(135deg, #9C27B0 0%, #BA68C8 50%, #E040FB 100%)',
+                        color: '#ffffff',
+                        py: 1.3,
+                        px: 2,
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
                         textTransform: 'none',
-                        boxShadow: '0 2px 4px 1px rgba(156, 39, 176, .3)',
-                        transition: 'all 0.3s ease',
+                        boxShadow: '0 6px 20px rgba(156, 39, 176, 0.4)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
-                          background: 'linear-gradient(45deg, #E040FB 30%, #9C27B0 90%)',
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 8px 1px rgba(156, 39, 176, .3)'
+                          background: 'linear-gradient(135deg, #BA68C8 0%, #9C27B0 50%, #7B1FA2 100%)',
+                          transform: 'translateY(-3px) scale(1.02)',
+                          boxShadow: '0 8px 24px rgba(156, 39, 176, 0.5)',
+                          border: '1px solid rgba(255,255,255,0.3)'
                         }
                       }}
                     >
@@ -782,22 +871,26 @@ const AnalyticalStopwatch = () => {
                     <Button
                       variant="contained"
                       fullWidth
-                      size="small"
+                      size="medium"
                       onClick={handleSaveStudy}
                       sx={{
-                        background: 'linear-gradient(45deg, #4CAF50 30%, #8BC34A 90%)',
-                        color: '#fff',
-                        py: 1,
-                        borderRadius: '8px',
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
+                        background: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #8BC34A 100%)',
+                        color: '#ffffff',
+                        py: 1.3,
+                        px: 2,
+                        borderRadius: '12px',
+                        fontWeight: 700,
+                        fontSize: '0.9rem',
                         textTransform: 'none',
-                        boxShadow: '0 2px 4px 1px rgba(76, 175, 80, .3)',
-                        transition: 'all 0.3s ease',
+                        boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
-                          background: 'linear-gradient(45deg, #8BC34A 30%, #4CAF50 90%)',
-                          transform: 'translateY(-1px)',
-                          boxShadow: '0 4px 8px 1px rgba(76, 175, 80, .3)'
+                          background: 'linear-gradient(135deg, #66BB6A 0%, #4CAF50 50%, #388E3C 100%)',
+                          transform: 'translateY(-3px) scale(1.02)',
+                          boxShadow: '0 8px 24px rgba(76, 175, 80, 0.5)',
+                          border: '1px solid rgba(255,255,255,0.3)'
                         }
                       }}
                     >
@@ -806,18 +899,26 @@ const AnalyticalStopwatch = () => {
                   </>
                 )
               ) : (
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    textAlign: 'center', 
-                    color: '#ffffff',
-                    fontStyle: 'italic',
-                    p: 2,
-                    opacity: 0.8
-                  }}
-                >
-                  Lütfen soldan bir ders ve konu seçiniz
-                </Typography>
+                <Box sx={{
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '16px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  p: 3,
+                  textAlign: 'center'
+                }}>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: 'rgba(255,255,255,0.9)',
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      lineHeight: 1.5
+                    }}
+                  >
+                    Lütfen soldan bir ders ve konu seçiniz
+                  </Typography>
+                </Box>
               )}
             </Box>
           </Box>
@@ -830,25 +931,108 @@ const AnalyticalStopwatch = () => {
         onClose={() => setShowSaveDialog(false)}
         PaperProps={{
           sx: {
-            borderRadius: '16px',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
-            p: 1,
-            background: '#1b293d'
+            borderRadius: '20px',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            p: 0,
+            background: 'linear-gradient(135deg, rgba(27, 41, 61, 0.95) 0%, rgba(27, 41, 61, 0.98) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            minWidth: '400px'
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            backdropFilter: 'blur(8px)',
+            backgroundColor: 'rgba(0,0,0,0.5)'
           }
         }}
       >
-        <DialogTitle>Çalışma Kaydı</DialogTitle>
-        <DialogContent>
-          <Typography>
-            {selectedExamType} - {selectedSubject} - {selectedTopic} için {formatTime(time, false)} süresince çalıştınız. 
-            Bu çalışmayı kaydetmek istiyor musunuz?
-          </Typography>
+        <DialogTitle sx={{
+          background: `linear-gradient(135deg, ${selectedColor || '#2196F3'}20 0%, ${selectedColor || '#2196F3'}10 100%)`,
+          color: '#ffffff',
+          fontWeight: 700,
+          fontSize: '1.3rem',
+          textAlign: 'center',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          py: 3
+        }}>
+          Çalışma Kaydı
+        </DialogTitle>
+        <DialogContent sx={{ 
+          p: 3,
+          color: 'rgba(255,255,255,0.9)'
+        }}>
+          <Box sx={{
+            background: 'rgba(255,255,255,0.05)',
+            borderRadius: '12px',
+            p: 2.5,
+            border: '1px solid rgba(255,255,255,0.1)',
+            textAlign: 'center'
+          }}>
+            <Typography sx={{
+              fontSize: '1rem',
+              lineHeight: 1.6,
+              fontWeight: 500
+            }}>
+              <strong style={{ color: selectedColor || '#2196F3' }}>{selectedExamType}</strong> - <strong style={{ color: selectedColor || '#2196F3' }}>{selectedSubject}</strong> - <strong style={{ color: selectedColor || '#2196F3' }}>{selectedTopic}</strong> için <strong style={{ color: '#4CAF50' }}>{formatTime(time, false)}</strong> süresince çalıştınız. 
+            </Typography>
+            <Typography sx={{
+              fontSize: '0.95rem',
+              mt: 1.5,
+              opacity: 0.8
+            }}>
+              Bu çalışmayı kaydetmek istiyor musunuz?
+            </Typography>
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelSave} color="error">
+        <DialogActions sx={{ 
+          p: 3, 
+          gap: 2,
+          borderTop: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <Button 
+            onClick={handleCancelSave} 
+            sx={{
+              background: 'linear-gradient(135deg, #f44336 0%, #e57373 100%)',
+              color: '#ffffff',
+              fontWeight: 600,
+              px: 3,
+              py: 1.2,
+              borderRadius: '12px',
+              textTransform: 'none',
+              boxShadow: '0 4px 16px rgba(244, 67, 54, 0.3)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #e57373 0%, #f44336 100%)',
+                transform: 'translateY(-2px)',
+                boxShadow: '0 6px 20px rgba(244, 67, 54, 0.4)'
+              }
+            }}
+          >
             Kaydetme
           </Button>
-          <Button onClick={handleConfirmSave} color="primary" startIcon={<SaveIcon />}>
+          <Button 
+            onClick={handleConfirmSave} 
+            startIcon={<SaveIcon />}
+            sx={{
+              background: `linear-gradient(135deg, ${selectedColor || '#2196F3'} 0%, ${selectedColor || '#21CBF3'} 100%)`,
+              color: '#ffffff',
+              fontWeight: 600,
+              px: 3,
+              py: 1.2,
+              borderRadius: '12px',
+              textTransform: 'none',
+              boxShadow: `0 4px 16px ${selectedColor || '#2196F3'}40`,
+              border: '1px solid rgba(255,255,255,0.1)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: `linear-gradient(135deg, ${selectedColor || '#21CBF3'} 0%, ${selectedColor || '#2196F3'} 100%)`,
+                transform: 'translateY(-2px)',
+                boxShadow: `0 6px 20px ${selectedColor || '#2196F3'}50`
+              }
+            }}
+          >
             Kaydet
           </Button>
         </DialogActions>

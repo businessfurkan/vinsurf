@@ -571,3 +571,19 @@ div[role="search"],
   font-weight: 500 !important; /* Bolder list item text */
   color: #ffffff !important;
 }
+
+/* Pulse animation for admin panel */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.5);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  }
+}

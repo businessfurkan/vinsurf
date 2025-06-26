@@ -63,13 +63,14 @@ import { tr } from 'date-fns/locale';
 const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: '16px',
   overflow: 'hidden',
-  transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-  border: 'none',
-  background: 'linear-gradient(to bottom, #ffffff, #f8f9fa)',
-  boxShadow: '0 10px 25px rgba(0,0,0,0.08)',
+  transition: 'all 0.3s ease',
+  border: '4px solid #2d4870',
+  backgroundColor: '#2d4870',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+  position: 'relative',
   '&:hover': {
-    transform: 'translateY(-4px)',
-    boxShadow: '0 15px 35px rgba(0,0,0,0.12)',
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.4)',
   },
   padding: theme.spacing(3),
   margin: theme.spacing(2, 0),
@@ -117,68 +118,75 @@ const StyledChip = styled(Chip)(({ theme, colorIndex, label }) => {
 });
 
 const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: '30px',
-  padding: '10px 28px',
-  fontWeight: 700,
+  borderRadius: '12px',
+  padding: '10px 24px',
+  fontWeight: 600,
   fontSize: '0.95rem',
   textTransform: 'none',
-  boxShadow: '0 6px 15px rgba(0,0,0,0.12)',
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
   transition: 'all 0.3s ease',
   '&:hover': {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
+    transform: 'translateY(-2px)',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
   },
   '&.MuiButton-containedPrimary': {
-    background: 'linear-gradient(45deg, #5ec837, #4eb02c)',
+    backgroundColor: '#4CAF50',
+    color: '#ffffff',
     '&:hover': {
-      background: 'linear-gradient(45deg, #4eb02c, #3d9020)',
+      backgroundColor: '#45a049',
     }
   },
   '&.MuiButton-outlined': {
     borderWidth: '2px',
+    borderColor: '#4CAF50',
+    color: '#4CAF50',
     '&:hover': {
-      borderWidth: '2px'
+      borderWidth: '2px',
+      backgroundColor: 'rgba(76, 175, 80, 0.04)',
     }
   }
 }));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    borderRadius: '16px',
-    backgroundColor: '#f8f9fa',
+    borderRadius: '12px',
+    backgroundColor: '#1b293d',
     transition: 'all 0.3s ease',
     '& fieldset': {
-      borderColor: alpha(theme.palette.primary.main, 0.15),
+      borderColor: '#4CAF50',
       borderWidth: '2px',
     },
     '&:hover': {
-      backgroundColor: '#f0f2f5',
+      backgroundColor: '#1b293d',
     },
     '&:hover fieldset': {
-      borderColor: alpha(theme.palette.primary.main, 0.4),
+      borderColor: '#4CAF50',
     },
     '&.Mui-focused': {
-      backgroundColor: '#ffffff',
-      boxShadow: `0 4px 15px ${alpha(theme.palette.primary.main, 0.15)}`,
+      backgroundColor: '#1b293d',
+      boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
     },
     '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
+      borderColor: '#4CAF50',
       borderWidth: '2px',
     },
   },
   '& .MuiInputBase-input': {
     fontSize: '1rem',
     padding: '16px 20px',
+    color: '#ffffff',
     '&::placeholder': {
+      color: 'rgba(255, 255, 255, 0.7)',
       fontStyle: 'italic',
-      opacity: 0.7,
+      opacity: 1,
     },
   },
   '& .MuiInputLabel-root': {
     fontSize: '1rem',
     fontWeight: 500,
+    color: 'rgba(255, 255, 255, 0.7)',
     '&.Mui-focused': {
-      color: theme.palette.primary.main,
+      color: '#4CAF50',
     },
   },
   marginBottom: theme.spacing(2),
@@ -186,28 +194,28 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 
 const CommentCard = styled(Paper)(({ theme, isReply }) => ({
   padding: theme.spacing(3),
-  marginBottom: theme.spacing(3),
-  marginLeft: isReply ? theme.spacing(7) : 0,
-  borderRadius: '20px',
-  border: 'none',
-  backgroundColor: isReply ? 'linear-gradient(to right, #f8f9ff, #f0f4ff)' : 'linear-gradient(to right, #ffffff, #fafbfc)',
-  boxShadow: isReply ? '0 4px 12px rgba(0,0,0,0.04)' : '0 6px 18px rgba(0,0,0,0.06)',
+  marginBottom: theme.spacing(2),
+  marginLeft: isReply ? theme.spacing(4) : 0,
+  borderRadius: '16px',
+  border: '4px solid #2d4870',
+  backgroundColor: '#2d4870',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
   position: 'relative',
   transition: 'all 0.3s ease',
-  '&:hover': {
-    boxShadow: isReply ? '0 5px 15px rgba(0,0,0,0.06)' : '0 8px 24px rgba(0,0,0,0.09)',
-    transform: 'translateY(-2px)'
-  },
   '&::before': isReply ? {
     content: '""',
     position: 'absolute',
-    left: '-25px',
-    top: '25px',
-    width: '25px',
-    height: '2px',
-    backgroundColor: alpha(theme.palette.primary.main, 0.3),
+    left: '-4px',
+    top: '20%',
+    bottom: '20%',
+    width: '4px',
+    background: '#4CAF50',
     borderRadius: '2px'
-  } : {}
+  } : {},
+  '&:hover': {
+    transform: 'translateY(-3px)',
+    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.4)'
+  }
 }));
 
 const SoruForumDetail = () => {
@@ -1011,13 +1019,48 @@ const SoruForumDetail = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Breadcrumbs sx={{ mb: 3 }}>
-        <Link to="/soru-forum" style={{ textDecoration: 'none', color: '#4285F4' }}>
-          Soru Forum
-        </Link>
-        <Typography color="text.primary">{post.title}</Typography>
-      </Breadcrumbs>
+    <Box sx={{
+      minHeight: '100vh',
+      backgroundColor: '#1b293d',
+      position: 'relative'
+    }}>
+      <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
+        <Breadcrumbs 
+          sx={{ 
+            mb: 4,
+            '& .MuiBreadcrumbs-separator': {
+              color: 'rgba(255, 255, 255, 0.7)'
+            }
+          }}
+        >
+          <Link 
+            to="/soru-forum" 
+            style={{ 
+              textDecoration: 'none', 
+              color: '#ffffff',
+              fontWeight: 600,
+              fontSize: '1rem',
+              transition: 'color 0.2s ease',
+            }}
+            onMouseEnter={(e) => e.target.style.color = '#4CAF50'}
+            onMouseLeave={(e) => e.target.style.color = '#ffffff'}
+          >
+            Soru Forum
+          </Link>
+          <Typography 
+            color="rgba(255, 255, 255, 0.8)" 
+            sx={{ 
+              fontWeight: 500,
+              fontSize: '1rem',
+              maxWidth: '300px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {post.title}
+          </Typography>
+        </Breadcrumbs>
 
       <StyledCard>
         <CardContent sx={{ px: { xs: 2, sm: 3 }, py: 3 }}>
@@ -1076,22 +1119,17 @@ const SoruForumDetail = () => {
           </Box>
 
           <Typography 
-            variant="h5" 
+            variant="h4" 
             component="h1" 
             sx={{ 
-              fontWeight: 800, 
-              color: '#1a2b4a',
+              fontWeight: 700, 
+              color: '#ffffff',
               mt: 3,
               mb: 3,
               fontSize: { xs: '1.6rem', md: '2rem' },
               lineHeight: 1.3,
-              background: 'linear-gradient(to right, #ffffff, #f8f9fa)',
-              p: 3,
-              borderRadius: '16px',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
-              borderLeft: '4px solid #5ec837',
               letterSpacing: '-0.02em',
-              fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+              fontFamily: '"Poppins", "Montserrat", sans-serif'
             }}
           >
             {post.title}
@@ -1101,15 +1139,11 @@ const SoruForumDetail = () => {
             variant="body1" 
             sx={{ 
               color: '#ffffff',
-              mb: 4,
+              mb: 3,
               whiteSpace: 'pre-wrap',
               fontSize: '1.05rem',
-              lineHeight: 1.8,
-              background: 'linear-gradient(to right, #f8f9ff, #f0f4ff)',
-              p: 4,
-              borderRadius: '16px',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.03)',
-              fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+              lineHeight: 1.7,
+              fontFamily: '"Poppins", "Montserrat", sans-serif',
               letterSpacing: '0.01em'
             }}
           >
@@ -1266,29 +1300,26 @@ const SoruForumDetail = () => {
         </CardActions>
       </StyledCard>
       
-      <Box sx={{ mt: 4 }}>
+      <Box sx={{ mt: 4, mb: 3 }}>
         <Typography 
           variant="h6" 
           sx={{ 
             mb: 3, 
             fontWeight: 700, 
-            color: '#2e3856',
+            color: '#ffffff',
             display: 'flex',
             alignItems: 'center',
-            backgroundColor: '#f5f5f0',
-            p: 2,
-            borderRadius: '10px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
-            '&::before': {
-              content: '""',
-              width: '4px',
-              height: '24px',
-              backgroundColor: '#5ec837',
-              borderRadius: '4px',
-              marginRight: '12px'
-            }
+            fontSize: '1.4rem',
+            fontFamily: '"Poppins", "Montserrat", sans-serif'
           }}
         >
+          <CommentIcon 
+            sx={{ 
+              mr: 2, 
+              fontSize: '1.8rem',
+              color: '#4CAF50'
+            }} 
+          />
           Yorumlar ({post.commentCount || 0})
         </Typography>
       </Box>
@@ -1296,13 +1327,13 @@ const SoruForumDetail = () => {
       {user ? (
         <Box 
           sx={{ 
-            mb: 4,
+            mb: 3,
             mt: 3,
             p: 3,
             borderRadius: '16px',
-            border: '1px solid rgba(66, 133, 244, 0.2)',
-            backgroundColor: '#F8FAFF',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.03)'
+            border: '4px solid #2d4870',
+            backgroundColor: '#2d4870',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
           }}
         >
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -1333,7 +1364,10 @@ const SoruForumDetail = () => {
             sx={{ 
               mb: 2,
               '& .MuiOutlinedInput-root': {
-                backgroundColor: '#FFFFFF'
+                backgroundColor: '#1b293d !important'
+              },
+              '& .MuiInputBase-input': {
+                color: '#ffffff !important'
               }
             }}
           />
@@ -1366,9 +1400,10 @@ const SoruForumDetail = () => {
             sx={{ 
               p: 4, 
               textAlign: 'center',
-              borderRadius: 4,
-              backgroundColor: alpha('#4285F4', 0.05),
-              border: `1px dashed ${alpha('#4285F4', 0.3)}`,
+              borderRadius: '16px',
+              backgroundColor: '#2d4870',
+              border: '4px solid #2d4870',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
               mt: 2
             }}
           >
@@ -1455,7 +1490,7 @@ const SoruForumDetail = () => {
                       </Box>
                     </Box>
                     
-                    {user && (user.uid === comment.userId || user.uid === post?.userId) && (
+                    {user && user.uid === comment.userId && (
                       <IconButton 
                         size="small"
                         onClick={(e) => handleOpenMenu(e, comment)}
@@ -1485,7 +1520,15 @@ const SoruForumDetail = () => {
                         onChange={(e) => setEditText(e.target.value)}
                         variant="outlined"
                         placeholder="Yorumunuzu düzenleyin..."
-                        sx={{ mb: 2 }}
+                        sx={{ 
+                          mb: 2,
+                          '& .MuiOutlinedInput-root': {
+                            backgroundColor: '#1b293d !important'
+                          },
+                          '& .MuiInputBase-input': {
+                            color: '#ffffff !important'
+                          }
+                        }}
                       />
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
                         <Button 
@@ -1521,9 +1564,9 @@ const SoruForumDetail = () => {
                         mb: 3, 
                         whiteSpace: 'pre-wrap',
                         lineHeight: 1.7,
-                        color: '#2c3e50',
+                        color: '#ffffff',
                         fontSize: '1rem',
-                        fontFamily: '"Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+                        fontFamily: '"Poppins", "Montserrat", sans-serif',
                         letterSpacing: '0.01em'
                       }}
                     >
@@ -1618,7 +1661,15 @@ const SoruForumDetail = () => {
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         variant="outlined"
-                        sx={{ mb: 2 }}
+                        sx={{ 
+                          mb: 2,
+                          '& .MuiOutlinedInput-root': {
+                            backgroundColor: '#1b293d !important'
+                          },
+                          '& .MuiInputBase-input': {
+                            color: '#ffffff !important'
+                          }
+                        }}
                       />
                       
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1.5 }}>
@@ -1865,7 +1916,7 @@ const SoruForumDetail = () => {
             <Typography sx={{ fontWeight: 500 }}>Düzenle</Typography>
           </MenuItem>
         )}
-        {selectedComment && user && (user.uid === selectedComment.userId || user.uid === post.userId) && (
+        {selectedComment && user && user.uid === selectedComment.userId && (
           <MenuItem 
             onClick={() => {
               handleDeleteComment(selectedComment.id);
@@ -2033,20 +2084,36 @@ const SoruForumDetail = () => {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={4000}
+        autoHideDuration={3000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ top: '24px !important' }}
       >
         <Alert 
           onClose={handleCloseSnackbar} 
           severity={snackbar.severity}
           variant="filled"
-          sx={{ borderRadius: 2 }}
+          sx={{ 
+            borderRadius: '12px',
+            backgroundColor: '#ffffff !important',
+            color: '#1b293d !important',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            border: '2px solid #4CAF50',
+            '& .MuiAlert-icon': {
+              color: '#4CAF50 !important'
+            },
+            '& .MuiAlert-action': {
+              '& .MuiIconButton-root': {
+                color: '#1b293d !important'
+              }
+            }
+          }}
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Container>
+      </Container>
+    </Box>
   );
 };
 

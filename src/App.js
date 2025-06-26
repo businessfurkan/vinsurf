@@ -40,6 +40,7 @@ import SoruForum from './pages/SoruForum';
 import SoruForumDetail from './pages/SoruForumDetail';
 import BenimleCalis from './pages/BenimleCalis';
 import RekaNET from './pages/RekaNET';
+import CalismaOdasi from './pages/CalismaOdasi';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import AdminPanel from './pages/AdminPanel';
@@ -265,6 +266,7 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 <Route path="/rekanet" element={<ProtectedRoute><RekaNET /></ProtectedRoute>} />
+                <Route path="/calisma-odasi" element={<ProtectedRoute><CalismaOdasi /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                 <Route path="/admin-panel" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
                 <Route path="/check-admin" element={<ProtectedRoute><CheckAdminStatus /></ProtectedRoute>} />

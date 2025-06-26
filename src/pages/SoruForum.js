@@ -24,7 +24,11 @@ import {
   Card,
   CardContent,
   Fade,
-  Zoom
+  Zoom,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 import {
   AddPhotoAlternate as AddPhotoIcon,
@@ -199,6 +203,21 @@ const ModernTabs = styled(Tabs)(({ theme }) => ({
     }
   }
 }));
+
+// Predefined etiketler
+const PREDEFINED_TAGS = [
+  'Derslerle Alakalı Soru',
+  'Kaynak Tavsiyeleri',
+  'Kanal Tavsiyesi',
+  'Sınav Psikolojisi',
+  'Sayısalcılar bi baksın',
+  'Eşit Ağırlıkçılar bi baksın',
+  'Sözelciler bi baksın',
+  'Evde Spor',
+  'Meslek Tercihi',
+  'Genel Soru',
+  'Sohbet Muhabbet'
+];
 
 const SoruForum = () => {
   const [user] = useAuthState(auth);
@@ -421,11 +440,8 @@ const SoruForum = () => {
         });
       }
       
-      // Parse tags
-      const tags = newPost.tags
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
+      // Parse tags - artık tek etiket seçiyoruz
+      const tags = newPost.tags ? [newPost.tags] : [];
       
       // Create post object
       const postData = {
@@ -829,19 +845,36 @@ const SoruForum = () => {
             placeholder="Sorunuzu detaylı bir şekilde açıklayın..."
           />
           
-          <FormField
-            margin="dense"
-            name="tags"
-            label="Etiketler"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={newPost.tags}
-            onChange={handleInputChange}
-            placeholder="matematik, geometri, fizik"
-            sx={{ mb: 3 }}
-            helperText="Virgülle ayırarak etiket ekleyin"
-          />
+          <FormControl fullWidth variant="outlined" sx={{ mb: 3 }}>
+            <InputLabel id="tags-select-label" sx={{ color: '#1e293d', '&.Mui-focused': { color: '#55b3d9' } }}>
+              Etiket Seçin
+            </InputLabel>
+            <Select
+              labelId="tags-select-label"
+              name="tags"
+              value={newPost.tags}
+              onChange={handleInputChange}
+              label="Etiket Seçin"
+              sx={{
+                borderRadius: '12px',
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#55b3d9'
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#55b3d9'
+                }
+              }}
+            >
+              {PREDEFINED_TAGS.map((tag) => (
+                <MenuItem key={tag} value={tag}>
+                  {tag}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           
           <Box sx={{ mb: 3 }}>
             <input
