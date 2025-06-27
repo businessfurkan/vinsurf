@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, 
   Typography, 
@@ -31,7 +31,9 @@ import {
   Storage as DatabaseIcon,
   Group as GroupIcon,
   Message as MessageIcon,
-  Visibility as VisibilityIcon
+  Visibility as VisibilityIcon,
+  EmojiEvents as RekaNetIcon,
+  Delete as DeleteIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { db, auth } from '../firebase';
@@ -57,6 +59,15 @@ const AdminPanel = () => {
     totalMessages: 0,
     activeSession: null
   });
+
+  // RekaNET State'leri
+  const [rekaNetActive, setRekaNetActive] = useState(false);
+  const [rekaNetStats, setRekaNetStats] = useState({
+    totalParticipants: 0,
+    totalSubmissions: 0,
+    lastActivated: null,
+    activatedBy: null
+  });
   
 
   
@@ -64,6 +75,121 @@ const AdminPanel = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   
   const navigate = useNavigate();
+
+  // Çalışma Odası istatistiklerini getir
+  const fetchStudyRoomStats = useCallback(async () => {
+    try {
+      // Online kullanıcıları say
+      const onlineUsersRef = collection(db, 'studyRoom', 'activeSession', 'onlineUsers');
+      const onlineSnapshot = await getDocs(onlineUsersRef);
+      let onlineCount = 0;
+      
+      onlineSnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const lastSeen = userData.lastSeen?.toDate() || new Date(0);
+        const now = new Date();
+        if ((now - lastSeen) < 120000) {
+          onlineCount++;
+        }
+      });
+
+      // Toplam mesaj sayısını al
+      const messagesRef = collection(db, 'studyRoom', 'activeSession', 'messages');
+      const messagesSnapshot = await getDocs(messagesRef);
+      
+      setStudyRoomStats(prev => ({
+        ...prev,
+        onlineUsers: onlineCount,
+        totalMessages: messagesSnapshot.size
+      }));
+    } catch (error) {
+      console.error('Study room stats error:', error);
+    }
+  }, []);
+
+  // RekaNET istatistiklerini getir
+  const fetchRekaNetStats = useCallback(async () => {
+    try {
+      // RekaNET yarışma verilerini al
+      const rekaNetRef = collection(db, 'rekaNetSubmissions');
+      const submissionsSnapshot = await getDocs(rekaNetRef);
+      
+      const totalSubmissions = submissionsSnapshot.size;
+      const uniqueParticipants = new Set();
+      
+      submissionsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.userId) {
+          uniqueParticipants.add(data.userId);
+        }
+      });
+
+      setRekaNetStats(prev => ({
+        ...prev,
+        totalParticipants: uniqueParticipants.size,
+        totalSubmissions: totalSubmissions
+      }));
+    } catch (error) {
+      console.error('RekaNET stats error:', error);
+    }
+  }, []);
+
+  // Fetch dashboard stats
+  const fetchDashboardStats = useCallback(async () => {
+    try {
+      // Get total users from userProfiles collection
+      const usersQuery = query(collection(db, 'userProfiles'));
+      const usersSnapshot = await getDocs(usersQuery);
+      const totalUsers = usersSnapshot.size;
+
+      // Get active users (logged in within last 7 days)
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      let activeUsers = 0;
+      usersSnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const lastLogin = userData.lastLogin?.toDate();
+        if (lastLogin && lastLogin >= sevenDaysAgo) {
+          activeUsers++;
+        }
+      });
+
+      // Get total forum posts
+      const postsQuery = query(collection(db, 'forumPosts'));
+      const postsSnapshot = await getDocs(postsQuery);
+      const totalPosts = postsSnapshot.size;
+
+      // Get total forum comments
+      const commentsQuery = query(collection(db, 'forumComments'));
+      const commentsSnapshot = await getDocs(commentsQuery);
+      const totalComments = commentsSnapshot.size;
+
+      console.log('Dashboard Stats:', {
+        totalUsers,
+        activeUsers,
+        totalPosts,
+        totalComments,
+        studyRoomActive
+      });
+
+      setStats({
+        totalUsers,
+        activeUsers,
+        totalPosts,
+        totalComments
+      });
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      // Hata durumunda varsayılan değerler
+      setStats({
+        totalUsers: 0,
+        activeUsers: 0,
+        totalPosts: 0,
+        totalComments: 0
+      });
+    }
+  }, [studyRoomActive]);
 
   // Check if user is admin
   useEffect(() => {
@@ -108,48 +234,40 @@ const AdminPanel = () => {
     return () => unsubscribe();
   }, [isAdmin]);
 
+  // RekaNET durumunu dinle
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const rekaNetRef = doc(db, 'rekaNet', 'competitionStatus');
+    const unsubscribe = onSnapshot(rekaNetRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setRekaNetActive(data.active || false);
+        setRekaNetStats(prev => ({
+          ...prev,
+          lastActivated: data.lastActivated?.toDate(),
+          activatedBy: data.activatedBy
+        }));
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isAdmin]);
+
   // Fetch data when tab changes
   useEffect(() => {
     if (isAdmin) {
       if (tabValue === 0) {
         fetchDashboardStats();
         fetchStudyRoomStats();
+        fetchRekaNetStats();
       } else if (tabValue === 4) {
         fetchStudyRoomStats();
+      } else if (tabValue === 5) {
+        fetchRekaNetStats();
       }
     }
-  }, [tabValue, isAdmin]);
-
-  // Çalışma Odası istatistiklerini getir
-  const fetchStudyRoomStats = async () => {
-    try {
-      // Online kullanıcıları say
-      const onlineUsersRef = collection(db, 'studyRoom', 'activeSession', 'onlineUsers');
-      const onlineSnapshot = await getDocs(onlineUsersRef);
-      let onlineCount = 0;
-      
-      onlineSnapshot.forEach((doc) => {
-        const userData = doc.data();
-        const lastSeen = userData.lastSeen?.toDate() || new Date(0);
-        const now = new Date();
-        if ((now - lastSeen) < 120000) {
-          onlineCount++;
-        }
-      });
-
-      // Toplam mesaj sayısını al
-      const messagesRef = collection(db, 'studyRoom', 'activeSession', 'messages');
-      const messagesSnapshot = await getDocs(messagesRef);
-      
-      setStudyRoomStats(prev => ({
-        ...prev,
-        onlineUsers: onlineCount,
-        totalMessages: messagesSnapshot.size
-      }));
-    } catch (error) {
-      console.error('Study room stats error:', error);
-    }
-  };
+  }, [tabValue, isAdmin, fetchDashboardStats, fetchStudyRoomStats, fetchRekaNetStats]);
 
   // Çalışma Odası toggle fonksiyonu
   const toggleStudyRoom = async () => {
@@ -227,66 +345,76 @@ const AdminPanel = () => {
     }
   };
 
+  // RekaNET yarışması toggle fonksiyonu
+  const toggleRekaNet = async () => {
+    try {
+      const rekaNetRef = doc(db, 'rekaNet', 'competitionStatus');
+      const newActiveState = !rekaNetActive;
+      
+      await setDoc(rekaNetRef, {
+        active: newActiveState,
+        lastActivated: serverTimestamp(),
+        activatedBy: user.uid,
+        activatedByEmail: user.email
+      });
+
+      // Eğer yarışma kapatılıyorsa, opsiyonel olarak verileri temizleyebiliriz
+      if (!newActiveState) {
+        // Şu an için veri temizlemiyoruz, sadece durumu kapatıyoruz
+        // İleride gerekirse temizleme fonksiyonu eklenebilir
+      }
+
+      setSnackbar({
+        open: true,
+        message: newActiveState 
+          ? '🎯 RekaNET Yarışması başlatıldı! Kullanıcılar artık net verilerini girebilir.' 
+          : '🛑 RekaNET Yarışması durduruldu.',
+        severity: 'success'
+      });
+
+      // İstatistikleri güncelle
+      await fetchRekaNetStats();
+    } catch (error) {
+      console.error('RekaNET toggle error:', error);
+      setSnackbar({
+        open: true,
+        message: '❌ RekaNET işlemi başarısız oldu!',
+        severity: 'error'
+      });
+    }
+  };
+
+  // RekaNET verilerini temizleme fonksiyonu
+  const clearRekaNetData = async () => {
+    try {
+      // Tüm katılımcı verilerini temizle
+      const submissionsRef = collection(db, 'rekaNetSubmissions');
+      const submissionsSnapshot = await getDocs(submissionsRef);
+      const deletePromises = submissionsSnapshot.docs.map(submissionDoc => 
+        deleteDoc(submissionDoc.ref)
+      );
+      
+      await Promise.all(deletePromises);
+      await fetchRekaNetStats();
+
+      setSnackbar({
+        open: true,
+        message: '🧹 RekaNET yarışma verileri temizlendi!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Clear RekaNET data error:', error);
+      setSnackbar({
+        open: true,
+        message: '❌ RekaNET temizleme işlemi başarısız!',
+        severity: 'error'
+      });
+    }
+  };
+
   // Bildirimleri kapat
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
-  };
-
-  // Fetch dashboard stats
-  const fetchDashboardStats = async () => {
-    try {
-      // Get total users from userProfiles collection
-      const usersQuery = query(collection(db, 'userProfiles'));
-      const usersSnapshot = await getDocs(usersQuery);
-      const totalUsers = usersSnapshot.size;
-
-      // Get active users (logged in within last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
-      let activeUsers = 0;
-      usersSnapshot.forEach((doc) => {
-        const userData = doc.data();
-        const lastLogin = userData.lastLogin?.toDate();
-        if (lastLogin && lastLogin >= sevenDaysAgo) {
-          activeUsers++;
-        }
-      });
-
-      // Get total forum posts
-      const postsQuery = query(collection(db, 'forumPosts'));
-      const postsSnapshot = await getDocs(postsQuery);
-      const totalPosts = postsSnapshot.size;
-
-      // Get total forum comments
-      const commentsQuery = query(collection(db, 'forumComments'));
-      const commentsSnapshot = await getDocs(commentsQuery);
-      const totalComments = commentsSnapshot.size;
-
-      console.log('Dashboard Stats:', {
-        totalUsers,
-        activeUsers,
-        totalPosts,
-        totalComments,
-        studyRoomActive
-      });
-
-      setStats({
-        totalUsers,
-        activeUsers,
-        totalPosts,
-        totalComments
-      });
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
-      // Hata durumunda varsayılan değerler
-      setStats({
-        totalUsers: 0,
-        activeUsers: 0,
-        totalPosts: 0,
-        totalComments: 0
-      });
-    }
   };
 
   // Handle tab change
@@ -416,6 +544,7 @@ const AdminPanel = () => {
           <Tab icon={<ForumIcon />} label="Forum" iconPosition="start" />
           <Tab icon={<SettingsIcon />} label="Ayarlar" iconPosition="start" />
           <Tab icon={<StudyRoomIcon />} label="Çalışma Odası" iconPosition="start" />
+          <Tab icon={<RekaNetIcon />} label="RekaNET" iconPosition="start" />
         </Tabs>
       </Card>
 
@@ -503,6 +632,30 @@ const AdminPanel = () => {
             </Card>
           </Grid>
 
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{
+              background: rekaNetActive 
+                ? 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)'
+                : 'linear-gradient(135deg, #757575 0%, #424242 100%)',
+              color: 'white',
+              borderRadius: '16px',
+              transition: 'transform 0.3s ease',
+              '&:hover': { transform: 'translateY(-8px)' },
+              height: '200px'
+            }}>
+              <CardContent sx={{ textAlign: 'center', py: 4, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <RekaNetIcon sx={{ fontSize: 48, mb: 2, opacity: 0.9 }} />
+                <Typography variant="h6" gutterBottom>RekaNET Yarışması</Typography>
+                <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>
+                  {rekaNetActive ? 'AKTİF' : 'PASİF'}
+                </Typography>
+                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                  {rekaNetStats.totalParticipants} katılımcı
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
           {/* Hızlı Kontroller */}
           <Grid item xs={12}>
             <Card sx={{
@@ -541,6 +694,27 @@ const AdminPanel = () => {
                       }}
                     >
                       {studyRoomActive ? 'Odayı Durdur' : 'Odayı Başlat'}
+                    </Button>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      size="large"
+                      startIcon={rekaNetActive ? <StopIcon /> : <RekaNetIcon />}
+                      onClick={toggleRekaNet}
+                      sx={{
+                        py: 2,
+                        backgroundColor: rekaNetActive ? '#757575' : '#FF9800',
+                        fontWeight: 700,
+                        '&:hover': {
+                          backgroundColor: rekaNetActive ? '#616161' : '#F57C00',
+                          transform: 'translateY(-2px)'
+                        },
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      {rekaNetActive ? 'RekaNET Durdur' : 'RekaNET Başlat'}
                     </Button>
                   </Grid>
                   <Grid item xs={12} sm={6} md={3}>
@@ -682,6 +856,231 @@ const AdminPanel = () => {
         </Card>
       )}
 
+      {/* RekaNET Tab */}
+      {tabValue === 5 && (
+        <Grid container spacing={3}>
+          {/* RekaNET Başlık */}
+          <Grid item xs={12}>
+            <Typography variant="h4" sx={{ 
+              mb: 3, 
+              fontWeight: 700, 
+              color: '#ffffff',
+              textAlign: 'center'
+            }}>
+              🎯 RekaNET Yarışma Kontrol Merkezi
+            </Typography>
+          </Grid>
+
+          {/* Ana Kontrol Kartı */}
+          <Grid item xs={12} md={8}>
+            <Card sx={{
+              background: rekaNetActive 
+                ? 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)'
+                : 'linear-gradient(135deg, #757575 0%, #424242 100%)',
+              color: 'white',
+              borderRadius: '24px',
+              height: '280px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              textAlign: 'center',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%, rgba(255,255,255,0.1) 100%)',
+                pointerEvents: 'none'
+              }
+            }}>
+              <CardContent sx={{ position: 'relative', zIndex: 1 }}>
+                <Box sx={{ mb: 3 }}>
+                  <Chip 
+                    icon={<RekaNetIcon />}
+                    label={rekaNetActive ? 'YARIŞMA AKTİF' : 'YARIŞMA PASİF'}
+                    size="large"
+                    sx={{ 
+                      fontSize: '1.2rem',
+                      fontWeight: 700,
+                      backgroundColor: 'rgba(255,255,255,0.2)',
+                      color: '#ffffff',
+                      px: 3,
+                      py: 1
+                    }}
+                  />
+                </Box>
+
+                <Typography variant="h3" sx={{ 
+                  color: '#ffffff', 
+                  fontWeight: 900, 
+                  mb: 2,
+                  textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                }}>
+                  {rekaNetActive ? 'REKANET AKTİF' : 'YARIŞMA KAPALI'}
+                </Typography>
+
+                <Typography variant="body1" sx={{ 
+                  color: 'rgba(255,255,255,0.8)', 
+                  mb: 4,
+                  maxWidth: 400,
+                  mx: 'auto'
+                }}>
+                  {rekaNetActive 
+                    ? 'Öğrenciler şu anda net verilerini girebilir ve karşılaştırma yapabilir.'
+                    : 'RekaNET yarışmasını başlatarak öğrencilerin katılmasını sağlayın.'
+                  }
+                </Typography>
+
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={rekaNetActive ? <StopIcon /> : <RekaNetIcon />}
+                  onClick={toggleRekaNet}
+                  sx={{
+                    px: 6,
+                    py: 2,
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    backgroundColor: '#ffffff',
+                    color: rekaNetActive ? '#b71c1c' : '#e65100',
+                    borderRadius: '12px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  {rekaNetActive ? '🛑 Yarışmayı Durdur' : '🚀 Yarışmayı Başlat'}
+                </Button>
+
+                {rekaNetActive && rekaNetStats.lastActivated && (
+                  <Box sx={{ mt: 3, p: 2, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+                    <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                      Son Aktivasyon: {rekaNetStats.lastActivated?.toLocaleString('tr-TR')}
+                    </Typography>
+                    {rekaNetStats.activatedBy && (
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.7)' }}>
+                        Tarafından: Admin
+                      </Typography>
+                    )}
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* İstatistikler ve Kontroller */}
+          <Grid item xs={12} md={4}>
+            <Grid container spacing={2}>
+              {/* Yarışma İstatistikleri */}
+              <Grid item xs={12}>
+                <Card sx={{ backgroundColor: '#1a0545', borderRadius: '16px' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="h6" sx={{ 
+                      color: '#ffffff', 
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      📊 Yarışma Verileri
+                    </Typography>
+                    <List>
+                      <ListItem sx={{ px: 0 }}>
+                        <ListItemIcon>
+                          <GroupIcon sx={{ color: '#FF9800' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary="Toplam Katılımcı"
+                          secondary={`${rekaNetStats.totalParticipants} kişi`}
+                          primaryTypographyProps={{ color: '#ffffff', fontWeight: 600 }}
+                          secondaryTypographyProps={{ color: '#FF9800', fontWeight: 700 }}
+                        />
+                      </ListItem>
+                      <ListItem sx={{ px: 0 }}>
+                        <ListItemIcon>
+                          <AnalyticsIcon sx={{ color: '#4CAF50' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary="Toplam Gönderim"
+                          secondary={`${rekaNetStats.totalSubmissions} net verisi`}
+                          primaryTypographyProps={{ color: '#ffffff', fontWeight: 600 }}
+                          secondaryTypographyProps={{ color: '#4CAF50', fontWeight: 700 }}
+                        />
+                      </ListItem>
+                    </List>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Yönetim Butonları */}
+              <Grid item xs={12}>
+                <Card sx={{ backgroundColor: '#2d4870', borderRadius: '16px' }}>
+                  <CardContent sx={{ p: 3 }}>
+                    <Typography variant="h6" sx={{ color: '#ffffff', mb: 2 }}>
+                      🔧 RekaNET Yönetimi
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<AnalyticsIcon />}
+                        onClick={fetchRekaNetStats}
+                        sx={{ 
+                          borderColor: '#FF9800',
+                          color: '#FF9800',
+                          '&:hover': {
+                            backgroundColor: 'rgba(255, 152, 0, 0.1)'
+                          }
+                        }}
+                      >
+                        İstatistikleri Yenile
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<DeleteIcon />}
+                        onClick={clearRekaNetData}
+                        sx={{ 
+                          borderColor: '#f44336',
+                          color: '#f44336',
+                          '&:hover': {
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)'
+                          }
+                        }}
+                      >
+                        Yarışma Verilerini Temizle
+                      </Button>
+                      <Button
+                        fullWidth
+                        variant="outlined"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() => navigate('/rekanet')}
+                        sx={{ 
+                          borderColor: '#4CAF50',
+                          color: '#4CAF50',
+                          '&:hover': {
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                          }
+                        }}
+                      >
+                        RekaNET&apos;i Görüntüle
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
+      )}
+
       {/* Çalışma Odası Tab */}
       {tabValue === 4 && (
         <Grid container spacing={3}>
@@ -788,7 +1187,7 @@ const AdminPanel = () => {
             <Grid container spacing={2}>
               {/* Anlık İstatistikler */}
               <Grid item xs={12}>
-                <Card sx={{ backgroundColor: '#1b293d', borderRadius: '16px' }}>
+                <Card sx={{ backgroundColor: '#1a0545', borderRadius: '16px' }}>
                   <CardContent sx={{ p: 3 }}>
                     <Typography variant="h6" sx={{ 
                       color: '#ffffff', 

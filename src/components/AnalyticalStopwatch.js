@@ -284,7 +284,7 @@ const AnalyticalStopwatch = () => {
 
   // Ana içerik
   return (
-    <Box sx={{ display: 'flex', gap: 3, height: '100%', p: 2 }}>
+          <Box sx={{ display: 'flex', gap: 3, height: '100%', p: 2, bgcolor: '#1a0545' }}>
       {/* Sol Panel - Ders ve Konu Seçimi */}
       <Box sx={{ flex: 2, maxWidth: '500px' }}>
         <Card sx={{ 
@@ -292,7 +292,7 @@ const AnalyticalStopwatch = () => {
           borderRadius: '20px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          background: '#1b293d',
+          background: '#1a0545',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -578,7 +578,7 @@ const AnalyticalStopwatch = () => {
         borderRadius: '20px', 
         boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
         overflow: 'hidden',
-        background: '#1b293d',
+                    background: '#1a0545',
         display: 'flex',
         flexDirection: 'column',
         height: { xs: 'auto', md: '600px' }

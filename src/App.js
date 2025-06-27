@@ -38,7 +38,6 @@ import NotDefterim from './pages/NotDefterim';
 import KonuTakip from './pages/KonuTakip';
 import SoruForum from './pages/SoruForum';
 import SoruForumDetail from './pages/SoruForumDetail';
-import BenimleCalis from './pages/BenimleCalis';
 import RekaNET from './pages/RekaNET';
 import CalismaOdasi from './pages/CalismaOdasi';
 import Profile from './pages/Profile';
@@ -201,7 +200,7 @@ const App = () => {
           </DialogActions>
         </Dialog>
       {user ? (
-        <Box sx={{ display: 'flex', bgcolor: '#1b293d', minHeight: '100vh', position: 'relative' }}>
+        <Box sx={{ display: 'flex', bgcolor: '#1a0545', minHeight: '100vh', position: 'relative' }}>
           <Sidebar open={sidebarOpen} handleDrawerToggle={handleDrawerToggle} />
           <Box
             component="main"
@@ -209,7 +208,7 @@ const App = () => {
               flexGrow: 1,
               p: { xs: 2, sm: 3 },
               overflow: 'auto',
-              bgcolor: '#1b293d',
+              bgcolor: '#1a0545',
               transition: theme => theme.transitions.create(['margin', 'width'], {
                 easing: theme.transitions.easing.sharp,
                 duration: theme.transitions.duration.leavingScreen,
@@ -230,41 +229,6 @@ const App = () => {
                 <Route path="/konu-takip" element={<ProtectedRoute><KonuTakip /></ProtectedRoute>} />
                 <Route path="/soru-forum" element={<ProtectedRoute><SoruForum /></ProtectedRoute>} />
                 <Route path="/soru-forum/:postId" element={<ProtectedRoute><SoruForumDetail /></ProtectedRoute>} />
-                <Route path="/benimle-calis" element={
-                  <ProtectedRoute>
-                    <Box sx={{
-                      position: 'relative',
-                      width: '100%',
-                      height: '100%',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '80px', // Sidebar genişliği
-                        height: '100%',
-                        backgroundColor: '#1b293d',
-                        zIndex: 1,
-                      },
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: 'calc((100% - 1200px) / 2)', // Sağ kenar boşluğu
-                        height: '100%',
-                        backgroundColor: '#1b293d',
-                        zIndex: 1,
-                        '@media (max-width: 1200px)': {
-                          width: '0px',
-                        },
-                      },
-                    }}>
-
-                      <BenimleCalis />
-                    </Box>
-                  </ProtectedRoute>
-                } />
                 <Route path="/rekanet" element={<ProtectedRoute><RekaNET /></ProtectedRoute>} />
                 <Route path="/calisma-odasi" element={<ProtectedRoute><CalismaOdasi /></ProtectedRoute>} />
                 <Route path="/profil" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

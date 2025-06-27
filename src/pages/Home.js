@@ -186,7 +186,7 @@ const Home = () => {
             <Box sx={{
               height: '4px',
               width: '100%',
-              background: 'linear-gradient(90deg, #55b3d9, #abe7ff)',
+              background: 'linear-gradient(90deg, #55b3d9, #1a0545)',
             }} />
             
             <Box sx={{ p: { xs: 2, md: 3 } }}>

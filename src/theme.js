@@ -3,9 +3,9 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1b293d',
+      main: '#1a0545',
       light: '#2d4870',
-      dark: '#1b293d',
+      dark: '#1a0545',
       contrastText: '#FFFFFF',
     },
     secondary: {
@@ -15,7 +15,7 @@ const theme = createTheme({
       contrastText: '#FFFFFF',
     },
     background: {
-      default: '#1b293d',
+      default: '#1a0545',
       paper: '#15202b',
     },
     text: {
@@ -69,7 +69,7 @@ const theme = createTheme({
       main: '#FFD166',
     },
     info: {
-      main: '#1b293d',
+      main: '#1a0545',
     },
     success: {
       main: '#06D6A0',
@@ -152,7 +152,7 @@ const theme = createTheme({
           backgroundColor: '#15202b',
           color: '#ffffff',
           '&:hover': {
-            backgroundColor: '#1b293d',
+            backgroundColor: '#1a0545',
           },
         },
         outlined: {
@@ -179,7 +179,7 @@ const theme = createTheme({
     MuiDrawer: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#1b293d',
+          backgroundColor: '#1a0545',
           borderRight: '1px solid rgba(255, 255, 255, 0.1)',
         },
       },
@@ -187,7 +187,7 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1b293d',
+          backgroundColor: '#1a0545',
           color: '#ffffff',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
         },
@@ -196,7 +196,7 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1b293d',
+          backgroundColor: '#1a0545',
           borderRadius: 16,
         },
       },
@@ -212,7 +212,7 @@ const theme = createTheme({
       styleOverrides: {
         head: {
           fontWeight: 600,
-          backgroundColor: '#1b293d',
+          backgroundColor: '#1a0545',
         },
       },
     },

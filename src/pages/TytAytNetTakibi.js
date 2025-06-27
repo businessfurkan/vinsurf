@@ -26,7 +26,7 @@ import '../styles/tyt-ayt-modern.css';
 // Material UI components
 import {
   Container, Box, Typography, Button, TextField, Grid, Paper,
-  Select, MenuItem, FormControl, InputLabel, Card, IconButton,
+  IconButton,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Chip, Snackbar, Alert
 } from '@mui/material';
@@ -2892,7 +2892,7 @@ const TytAytNetTakibi = () => {
     return subjectColors[subject] || '#4a6cf7';
   };
   
-  // Tavsiyeler oluştur
+  // Akıllı tavsiyeler oluştur
   const generateRecommendations = () => {
     const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
     const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
@@ -2901,50 +2901,129 @@ const TytAytNetTakibi = () => {
     
     const recommendations = [];
     
-    subjects.forEach((subject, index) => {
-      const subjectRecords = filteredRecords
-        .filter(record => record.subjects && record.subjects[subject])
-        .sort((a, b) => a.examDate.toDate() - b.examDate.toDate());
+    // Tarihe göre sırala
+    const sortedRecords = [...filteredRecords].sort((a, b) => {
+      try {
+        return a.examDate.toDate() - b.examDate.toDate();
+      } catch (error) {
+        return 0;
+      }
+    });
+    
+    subjects.forEach((subject) => {
+      const subjectRecords = sortedRecords.filter(record => 
+        record.subjects && record.subjects[subject] && record.subjects[subject].net
+      );
       
       if (subjectRecords.length >= 2) {
-        const firstNet = parseFloat(subjectRecords[0].subjects[subject].net);
-        const lastNet = parseFloat(subjectRecords[subjectRecords.length - 1].subjects[subject].net);
-        const growth = lastNet - firstNet;
+        const lastRecord = subjectRecords[subjectRecords.length - 1];
+        const previousRecord = subjectRecords[subjectRecords.length - 2];
+        
+        const lastNet = parseFloat(lastRecord.subjects[subject].net);
+        const previousNet = parseFloat(previousRecord.subjects[subject].net);
+        const change = lastNet - previousNet;
+        
+        const lastCorrect = parseInt(lastRecord.subjects[subject].correct || 0);
+        const lastIncorrect = parseInt(lastRecord.subjects[subject].incorrect || 0);
+        const previousCorrect = parseInt(previousRecord.subjects[subject].correct || 0);
+        const previousIncorrect = parseInt(previousRecord.subjects[subject].incorrect || 0);
         
         let message = '';
         let icon = null;
         let color = '';
+        let actionTitle = '';
         
-        if (growth > 2) {
-          message = `${subject} dersinde güzel bir ilerleme kaydettiniz. Bu tempoyu koruyun!`;
+        if (change > 1.5) {
+          // Güzel yükseliş
+          actionTitle = 'Mükemmel İlerleme! 🚀';
+          message = `${subject} dersinde harika bir performans sergiliyorsun! Önceki denemede ${previousNet.toFixed(1)} net yapmıştın, şimdi ${lastNet.toFixed(1)} net ile ${change.toFixed(1)} puanlık artış gösterdin. Bu başarıyı sürdürmek için: düzenli çalışma programını korumaya devam et, yanlış yaptığın soruları analiz etmeyi ihmal etme.`;
           icon = <TrendingUpIcon sx={{ color: '#4caf50' }} />;
           color = '#4caf50';
-        } else if (growth < -2) {
-          message = `${subject} dersinde düşüş görülüyor. Daha fazla pratik yapmanızı öneririz.`;
+        } else if (change < -1.5) {
+          // Düşüş var
+          actionTitle = 'Gelişim Fırsatı 📈';
+          const correctDiff = lastCorrect - previousCorrect;
+          const incorrectDiff = lastIncorrect - previousIncorrect;
+          
+          let detailedAdvice = '';
+          if (correctDiff < 0) {
+            detailedAdvice = `Doğru sayın ${Math.abs(correctDiff)} azaldı. Daha fazla soru çözme pratiği yapman gerekiyor.`;
+          }
+          if (incorrectDiff > 0) {
+            detailedAdvice += ` Yanlış sayın ${incorrectDiff} arttı. Hata analizine odaklan ve zayıf konuları tespit et.`;
+          }
+          
+          message = `${subject} dersinde önceki denemende ${previousNet.toFixed(1)} net yapmıştın, fakat şimdiki denemende ${lastNet.toFixed(1)} net yaptın (${Math.abs(change).toFixed(1)} puanlık düşüş). ${detailedAdvice} Bu düşüşü yükselişe çevirmek için: hatalarını not sistemine kaydet, zayıf konularda ekstra çalışma yap, düzenli tekrar programı oluştur.`;
           icon = <TrendingDownIcon sx={{ color: '#f44336' }} />;
           color = '#f44336';
+        } else if (change >= -1.5 && change <= 1.5) {
+          // Stabil performans
+          actionTitle = 'Kararlı Performans ⚖️';
+          
+          // Detaylı analiz
+          let stabilityAdvice = '';
+          if (lastNet >= 15) {
+            stabilityAdvice = 'Yüksek seviyede kararlı bir performans sergiliyorsun. Şimdi sıra daha zor sorulara geçmekte.';
+          } else if (lastNet >= 10) {
+            stabilityAdvice = 'Orta seviyede istikrarlı gidiyorsun. Biraz daha hız kazanman için çözüm tekniklerini geliştir.';
         } else {
-          message = `${subject} dersinde performansınız stabil. Geliştirmek için farklı soru tipleri deneyin.`;
+            stabilityAdvice = 'Temel seviyede kararlısın. Konu eksiklerini giderip hızını artırman gerekiyor.';
+          }
+          
+          message = `${subject} dersinde istikrarlı bir performans gösteriyorsun (önceki: ${previousNet.toFixed(1)}, şimdi: ${lastNet.toFixed(1)}). ${stabilityAdvice} Önerim: farklı soru tipleri dene, zaman yönetimini geliştir, güçlü olduğun konuları da ihmal etme.`;
           icon = <TrendingFlatIcon sx={{ color: '#ff9800' }} />;
           color = '#ff9800';
+        }
+        
+        // Özel durumlar için ek analizler
+        if (lastIncorrect > previousIncorrect + 2) {
+          message += ` ⚠️ Dikkat: Yanlış sayın önemli ölçüde arttı (${previousIncorrect} → ${lastIncorrect}). Hızlı çözme yerine doğru çözmeye odaklan.`;
+        }
+        
+        if (lastCorrect > previousCorrect + 3) {
+          message += ` 🎯 Doğru sayında güzel artış var (${previousCorrect} → ${lastCorrect}). Bu motivasyonla devam et!`;
+        }
+        
+        // Tarihe dayalı öneriler
+        try {
+          const daysDiff = Math.floor((lastRecord.examDate.toDate() - previousRecord.examDate.toDate()) / (1000 * 60 * 60 * 24));
+          if (daysDiff <= 3) {
+            message += ` 📅 Son iki denemen arasında ${daysDiff} gün var. Düzenli çalışma tempon süper!`;
+          } else if (daysDiff > 7) {
+            message += ` 📅 Son iki denemen arasında ${daysDiff} gün geçmiş. Daha sık deneme çözmeni öneririm.`;
+          }
+        } catch (error) {
+          // Tarih hatası durumunda sessizce devam et
         }
         
         recommendations.push({
           subject,
           message,
           icon,
-          color
+          color,
+          actionTitle: actionTitle || subject,
+          lastNet: lastNet.toFixed(1),
+          previousNet: previousNet.toFixed(1),
+          change: change.toFixed(1),
+          lastCorrect,
+          lastIncorrect,
+          previousCorrect,
+          previousIncorrect
         });
       }
     });
     
-    return recommendations;
+    // En önemli önerileri öne çıkar (en büyük değişimler)
+    recommendations.sort((a, b) => Math.abs(parseFloat(b.change)) - Math.abs(parseFloat(a.change)));
+    
+    // En fazla 6 öneri göster
+    return recommendations.slice(0, 6);
   };
   
   return (
     <Box sx={{
       minHeight: '100vh',
-      backgroundColor: '#1e293d',
+      backgroundColor: '#1a0545',
       position: 'relative'
     }}>
       <motion.div
@@ -3395,155 +3474,819 @@ const TytAytNetTakibi = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
+              {netRecords.length > 0 ? (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {/* Modern Header with Exam Type Selector */}
               <Paper sx={{
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                backdropFilter: 'blur(20px)',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                    backdropFilter: 'blur(25px)',
                 borderRadius: '24px',
-                border: '1px solid rgba(255, 255, 255, 0.12)',
-                p: { xs: 3, md: 5 },
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.24)'
-              }}>
-                <Typography variant="h5" sx={{
-                  fontWeight: 700,
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    p: 4,
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '4px',
+                      background: selectedExamType === 'TYT' 
+                        ? 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
+                        : 'linear-gradient(90deg, #f093fb 0%, #f5576c 100%)',
+                      zIndex: 1
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Box sx={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: '16px',
+                          background: selectedExamType === 'TYT' 
+                            ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                            : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: selectedExamType === 'TYT'
+                            ? '0 8px 25px rgba(102, 126, 234, 0.4)'
+                            : '0 8px 25px rgba(240, 147, 251, 0.4)',
+                          transition: 'all 0.3s ease'
+                        }}>
+                          <ShowChartIcon sx={{ fontSize: 32, color: '#ffffff' }} />
+                        </Box>
+                        <Box>
+                          <Typography variant="h4" sx={{
+                            fontWeight: 900,
                   color: '#ffffff',
-                  mb: 4,
-                  textAlign: 'center'
-                }}>
-                  Performans İstatistikleri
+                            fontSize: { xs: '1.8rem', md: '2.2rem' },
+                            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            letterSpacing: '-1px'
+                          }}>
+                            📊 Performans Analizi
                 </Typography>
-
-                {netRecords.length > 0 ? (
-                  <>
-                    {/* Exam Type Filter */}
-                    <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-                      <FormControl sx={{ minWidth: 120 }}>
-                        <InputLabel sx={{ color: 'rgba(255, 255, 255, 0.8)' }}>Sınav Türü</InputLabel>
-                        <Select
-                          value={selectedExamType}
-                          onChange={(e) => setSelectedExamType(e.target.value)}
+                          <Typography variant="body1" sx={{
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '1.1rem',
+                            mt: 0.5
+                          }}>
+                            Detaylı gelişim takibi ve akıllı öneriler
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', gap: 2 }}>
+                        <Button
+                          variant={selectedExamType === 'TYT' ? 'contained' : 'outlined'}
+                          onClick={() => setSelectedExamType('TYT')}
                           sx={{
-                            color: '#ffffff',
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'rgba(255, 255, 255, 0.3)'
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: 'rgba(255, 255, 255, 0.5)'
+                            borderRadius: '16px',
+                            px: 3,
+                            py: 1.5,
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            background: selectedExamType === 'TYT' 
+                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                              : 'transparent',
+                            color: selectedExamType === 'TYT' ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
+                            border: selectedExamType === 'TYT' ? 'none' : '2px solid rgba(255, 255, 255, 0.2)',
+                            boxShadow: selectedExamType === 'TYT' 
+                              ? '0 8px 25px rgba(102, 126, 234, 0.4)'
+                              : 'none',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              boxShadow: selectedExamType === 'TYT' 
+                                ? '0 12px 35px rgba(102, 126, 234, 0.5)'
+                                : '0 8px 25px rgba(255, 255, 255, 0.1)',
+                              background: selectedExamType === 'TYT' 
+                                ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)'
+                                : 'rgba(255, 255, 255, 0.05)'
                             }
                           }}
                         >
-                          <MenuItem value="TYT">TYT</MenuItem>
-                          <MenuItem value="AYT">AYT</MenuItem>
-                        </Select>
-                      </FormControl>
+                          🎯 TYT
+                        </Button>
+                        <Button
+                          variant={selectedExamType === 'AYT' ? 'contained' : 'outlined'}
+                          onClick={() => setSelectedExamType('AYT')}
+                          sx={{
+                            borderRadius: '16px',
+                            px: 3,
+                            py: 1.5,
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            background: selectedExamType === 'AYT' 
+                              ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+                              : 'transparent',
+                            color: selectedExamType === 'AYT' ? '#ffffff' : 'rgba(255, 255, 255, 0.8)',
+                            border: selectedExamType === 'AYT' ? 'none' : '2px solid rgba(255, 255, 255, 0.2)',
+                            boxShadow: selectedExamType === 'AYT' 
+                              ? '0 8px 25px rgba(240, 147, 251, 0.4)'
+                              : 'none',
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              boxShadow: selectedExamType === 'AYT' 
+                                ? '0 12px 35px rgba(240, 147, 251, 0.5)'
+                                : '0 8px 25px rgba(255, 255, 255, 0.1)',
+                              background: selectedExamType === 'AYT' 
+                                ? 'linear-gradient(135deg, #e885f0 0%, #e84a5f 100%)'
+                                : 'rgba(255, 255, 255, 0.05)'
+                            }
+                          }}
+                        >
+                          🚀 AYT
+                        </Button>
                     </Box>
+                    </Box>
+                  </Paper>
 
-                    {/* Progress Chart */}
-                    <Box sx={{ mb: 4 }}>
-                      <Typography variant="h6" gutterBottom sx={{ 
-                        fontWeight: 600, 
-                        color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6',
-                        borderBottom: `2px solid ${selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'}`,
-                        pb: 1
+                  {/* Statistics Cards Grid */}
+                  <Grid container spacing={3}>
+                    {/* Average Net Score Card */}
+                    <Grid item xs={12} md={4}>
+                      <Paper sx={{
+                        background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(129, 199, 132, 0.1) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(76, 175, 80, 0.2)',
+                        p: 3,
+                        height: 180,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 30px rgba(76, 175, 80, 0.15)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 15px 45px rgba(76, 175, 80, 0.25)'
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -50,
+                          right: -50,
+                          width: 100,
+                          height: 100,
+                          background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.1), transparent)',
+                          borderRadius: '50%',
+                          zIndex: 0
+                        }
                       }}>
-                        Zaman İçinde Gelişim
+                        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                          <Typography variant="h6" sx={{ 
+                            color: '#4caf50', 
+                            fontWeight: 700, 
+                            mb: 1,
+                            fontSize: '0.95rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                          }}>
+                            📈 Ortalama Net
                       </Typography>
-                      
-                      <Box sx={{ width: '100%', height: 400, mt: 3 }}>
+                          <Typography variant="h3" sx={{ 
+                            color: '#ffffff', 
+                            fontWeight: 900,
+                            fontSize: '2.5rem',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                          }}>
+                            {(() => {
+                              const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+                              if (filteredRecords.length === 0) return '0.0';
+                              const totalNet = filteredRecords.reduce((sum, record) => {
+                                const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+                                const recordNet = subjects.reduce((subSum, subject) => {
+                                  if (record.subjects && record.subjects[subject]) {
+                                    return subSum + parseFloat(record.subjects[subject].net);
+                                  }
+                                  return subSum;
+                                }, 0);
+                                return sum + recordNet;
+                              }, 0);
+                              return (totalNet / filteredRecords.length).toFixed(1);
+                            })()}
+                          </Typography>
+                          <Typography variant="body2" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontWeight: 500
+                          }}>
+                            Son {netRecords.filter(record => record.examType === selectedExamType).length} denemede
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+
+                    {/* Best Performance Card */}
+                    <Grid item xs={12} md={4}>
+                      <Paper sx={{
+                        background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 224, 130, 0.1) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(255, 193, 7, 0.2)',
+                        p: 3,
+                        height: 180,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 30px rgba(255, 193, 7, 0.15)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 15px 45px rgba(255, 193, 7, 0.25)'
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -50,
+                          right: -50,
+                          width: 100,
+                          height: 100,
+                          background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.1), transparent)',
+                          borderRadius: '50%',
+                          zIndex: 0
+                        }
+                      }}>
+                        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                          <Typography variant="h6" sx={{ 
+                            color: '#ffc107', 
+                            fontWeight: 700, 
+                            mb: 1,
+                            fontSize: '0.95rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                          }}>
+                            🏆 En İyi Performans
+                          </Typography>
+                          <Typography variant="h3" sx={{ 
+                            color: '#ffffff', 
+                            fontWeight: 900,
+                            fontSize: '2.5rem',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                          }}>
+                            {(() => {
+                              const filteredRecords = netRecords.filter(record => record.examType === selectedExamType);
+                              if (filteredRecords.length === 0) return '0.0';
+                              const bestNet = Math.max(...filteredRecords.map(record => {
+                                const subjects = selectedExamType === 'TYT' ? tytSubjects : aytSubjects;
+                                return subjects.reduce((sum, subject) => {
+                                  if (record.subjects && record.subjects[subject]) {
+                                    return sum + parseFloat(record.subjects[subject].net);
+                                  }
+                                  return sum;
+                                }, 0);
+                              }));
+                              return bestNet.toFixed(1);
+                            })()}
+                          </Typography>
+                          <Typography variant="body2" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontWeight: 500
+                          }}>
+                            Toplam net skorun
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+
+                    {/* Total Exams Card */}
+                    <Grid item xs={12} md={4}>
+                      <Paper sx={{
+                        background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.15) 0%, rgba(100, 181, 246, 0.1) 100%)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        border: '1px solid rgba(33, 150, 243, 0.2)',
+                        p: 3,
+                        height: 180,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: '0 8px 30px rgba(33, 150, 243, 0.15)',
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'translateY(-5px)',
+                          boxShadow: '0 15px 45px rgba(33, 150, 243, 0.25)'
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: -50,
+                          right: -50,
+                          width: 100,
+                          height: 100,
+                          background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1), transparent)',
+                          borderRadius: '50%',
+                          zIndex: 0
+                        }
+                      }}>
+                        <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+                          <Typography variant="h6" sx={{ 
+                            color: '#2196f3', 
+                            fontWeight: 700, 
+                            mb: 1,
+                            fontSize: '0.95rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '1px'
+                          }}>
+                            📚 Toplam Deneme
+                          </Typography>
+                          <Typography variant="h3" sx={{ 
+                            color: '#ffffff', 
+                            fontWeight: 900,
+                            fontSize: '2.5rem',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                          }}>
+                            {netRecords.filter(record => record.examType === selectedExamType).length}
+                          </Typography>
+                          <Typography variant="body2" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontWeight: 500
+                          }}>
+                            {selectedExamType} denemesi çözüldü
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  </Grid>
+
+                  {/* Modern Chart Section */}
+                  <Paper sx={{
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                    backdropFilter: 'blur(25px)',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    p: 4,
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                      <Box sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 3,
+                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.3)'
+                      }}>
+                        <TrendingUpIcon sx={{ fontSize: 28, color: '#ffffff' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h5" sx={{
+                          fontWeight: 800,
+                          color: '#ffffff',
+                          fontSize: { xs: '1.5rem', md: '1.8rem' },
+                          background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent'
+                        }}>
+                          📊 Gelişim Grafiği
+                        </Typography>
+                        <Typography variant="body1" sx={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '1rem'
+                        }}>
+                          Zaman içindeki net skorlarınızın değişimi
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ 
+                      width: '100%', 
+                      height: 450, 
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: '16px',
+                      p: 2,
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart
                             data={calculateTimeProgress()}
                             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject) => (
+                          <defs>
+                            {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject, index) => (
+                              <linearGradient key={subject} id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor={getSubjectColor(subject)} stopOpacity={0.8}/>
+                                <stop offset="100%" stopColor={getSubjectColor(subject)} stopOpacity={0.2}/>
+                              </linearGradient>
+                            ))}
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                          <XAxis 
+                            dataKey="date" 
+                            stroke="rgba(255, 255, 255, 0.7)"
+                            fontSize={12}
+                            fontWeight={600}
+                          />
+                          <YAxis 
+                            stroke="rgba(255, 255, 255, 0.7)"
+                            fontSize={12}
+                            fontWeight={600}
+                          />
+                          <Tooltip 
+                            contentStyle={{
+                              backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                              border: '1px solid rgba(255, 255, 255, 0.2)',
+                              borderRadius: '12px',
+                              backdropFilter: 'blur(20px)',
+                              color: '#ffffff',
+                              fontWeight: 600
+                            }}
+                          />
+                          <Legend 
+                            wrapperStyle={{
+                              color: '#ffffff',
+                              fontWeight: 600
+                            }}
+                          />
+                          {(selectedExamType === 'TYT' ? tytSubjects : aytSubjects).map((subject, index) => (
                               <Line 
                                 key={subject}
                                 type="monotone" 
                                 dataKey={subject} 
                                 stroke={getSubjectColor(subject)} 
-                                strokeWidth={2}
-                                dot={{ r: 5, fill: getSubjectColor(subject), strokeWidth: 1, stroke: '#fff' }}
-                                activeDot={{ r: 8, fill: getSubjectColor(subject), strokeWidth: 2, stroke: '#fff' }}
+                              strokeWidth={3}
+                              dot={{ 
+                                r: 6, 
+                                fill: getSubjectColor(subject), 
+                                strokeWidth: 3, 
+                                stroke: '#ffffff',
+                                filter: `drop-shadow(0 2px 4px ${getSubjectColor(subject)}40)`
+                              }}
+                              activeDot={{ 
+                                r: 10, 
+                                fill: getSubjectColor(subject), 
+                                strokeWidth: 4, 
+                                stroke: '#ffffff',
+                                filter: `drop-shadow(0 4px 8px ${getSubjectColor(subject)}60)`
+                              }}
+                              connectNulls={false}
                               />
                             ))}
                           </LineChart>
                         </ResponsiveContainer>
                       </Box>
+                  </Paper>
+                  
+                  {/* Enhanced Recommendations Section */}
+                  <Paper sx={{
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                    backdropFilter: 'blur(25px)',
+                    borderRadius: '24px',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    p: 4,
+                    boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                      <Box sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 3,
+                        boxShadow: '0 8px 25px rgba(240, 147, 251, 0.3)'
+                      }}>
+                        <AssignmentIcon sx={{ fontSize: 28, color: '#ffffff' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h5" sx={{
+                          fontWeight: 800,
+                          color: '#ffffff',
+                          fontSize: { xs: '1.5rem', md: '1.8rem' },
+                          background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                          backgroundClip: 'text',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent'
+                        }}>
+                          🤖 Akıllı Öneriler
+                      </Typography>
+                        <Typography variant="body1" sx={{
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontSize: '1rem'
+                        }}>
+                          Performansınıza özel gelişim tavsiyeleri
+                        </Typography>
+                      </Box>
                     </Box>
                     
-                    {/* Recommendations */}
-                    <Box sx={{ mb: 4 }}>
-                      <Typography variant="h6" gutterBottom sx={{ 
-                        fontWeight: 600, 
-                        color: selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6',
-                        borderBottom: `2px solid ${selectedExamType === 'TYT' ? '#4a6cf7' : '#9b59b6'}`,
-                        pb: 1
-                      }}>
-                        Gelişim Tavsiyeleri
-                      </Typography>
-                      
-                      <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        {generateRecommendations().map((recommendation, index) => (
-                          <Card key={index} sx={{ 
-                            p: 2.5, 
-                            mb: 2.5, 
-                            borderRadius: '16px',
-                            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                            borderLeft: `4px solid ${recommendation.color}`,
-                            transition: 'all 0.3s ease',
+                                         <Grid container spacing={3}>
+                       {generateRecommendations().length > 0 ? generateRecommendations().map((recommendation, index) => (
+                         <Grid item xs={12} md={6} key={index}>
+                           <Paper sx={{ 
+                             p: 4, 
+                             borderRadius: '24px',
+                             background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                             border: `2px solid ${recommendation.color}40`,
+                             transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                             position: 'relative',
+                             overflow: 'hidden',
+                             minHeight: 280,
                             '&:hover': {
-                              backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                              transform: 'translateY(-2px)'
-                            }
-                          }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                               transform: 'translateY(-8px) scale(1.02)',
+                               boxShadow: `0 20px 40px ${recommendation.color}30`,
+                               border: `2px solid ${recommendation.color}60`
+                             },
+                             '&::before': {
+                               content: '""',
+                               position: 'absolute',
+                               top: 0,
+                               left: 0,
+                               right: 0,
+                               height: '4px',
+                               background: `linear-gradient(90deg, ${recommendation.color}, ${recommendation.color}80)`,
+                               zIndex: 1
+                             }
+                           }}>
+                             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                               {/* Header with icon and title */}
+                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
                               <Box sx={{ 
-                                width: 40, 
-                                height: 40, 
-                                borderRadius: '50%', 
+                                   width: 60, 
+                                   height: 60, 
+                                   borderRadius: '18px', 
                                 display: 'flex', 
                                 alignItems: 'center', 
                                 justifyContent: 'center',
                                 background: `linear-gradient(135deg, ${recommendation.color}, ${recommendation.color}cc)`,
                                 color: 'white',
-                                boxShadow: `0 4px 12px ${recommendation.color}40`,
-                                mr: 2
+                                   boxShadow: `0 8px 25px ${recommendation.color}40`,
+                                   flexShrink: 0,
+                                   position: 'relative',
+                                   '&::before': {
+                                     content: '""',
+                                     position: 'absolute',
+                                     inset: -2,
+                                     borderRadius: '20px',
+                                     background: `linear-gradient(135deg, ${recommendation.color}60, transparent, ${recommendation.color}40)`,
+                                     zIndex: -1,
+                                     opacity: 0,
+                                     transition: 'opacity 0.3s ease'
+                                   },
+                                   '&:hover::before': {
+                                     opacity: 1
+                                   }
                               }}>
                                 {recommendation.icon}
                               </Box>
-                              <Typography variant="subtitle1" sx={{ 
-                                fontWeight: 700, 
+                                 <Box sx={{ flex: 1 }}>
+                                   <Typography variant="h6" sx={{ 
+                                     fontWeight: 800, 
                                 color: recommendation.color,
-                                fontSize: '1.1rem'
+                                     fontSize: '1.3rem',
+                                     textShadow: `0 2px 8px ${recommendation.color}40`,
+                                     lineHeight: 1.2
+                                   }}>
+                                     {recommendation.actionTitle}
+                                   </Typography>
+                                   <Typography variant="body2" sx={{ 
+                                     color: 'rgba(255, 255, 255, 0.7)',
+                                     fontSize: '0.9rem',
+                                     fontWeight: 600,
+                                     mt: 0.5
                               }}>
                                 {recommendation.subject}
                               </Typography>
                             </Box>
-                            <Typography variant="body1" sx={{ 
-                              mt: 1.5, 
+                               </Box>
+
+                               {/* Performance comparison */}
+                               <Box sx={{ 
+                                 background: 'rgba(255, 255, 255, 0.08)',
+                                 borderRadius: '16px',
+                                 p: 2.5,
+                                 mb: 3,
+                                 border: '1px solid rgba(255, 255, 255, 0.1)'
+                               }}>
+                                 <Typography variant="body2" sx={{ 
                               color: 'rgba(255, 255, 255, 0.8)',
-                              lineHeight: 1.6,
-                              pl: 7
+                                   mb: 1.5,
+                                   fontWeight: 600,
+                                   fontSize: '0.9rem'
+                                 }}>
+                                   📊 Performans Karşılaştırması
+                                 </Typography>
+                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                   <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem' }}>
+                                       Önceki Deneme
+                                     </Typography>
+                                     <Typography variant="h6" sx={{ 
+                                       color: '#ffffff', 
+                                       fontWeight: 700,
+                                       fontSize: '1.1rem'
+                                     }}>
+                                       {recommendation.previousNet} net
+                                     </Typography>
+                                     <Typography variant="caption" sx={{ 
+                                       color: 'rgba(255, 255, 255, 0.5)',
+                                       fontSize: '0.75rem'
+                                     }}>
+                                       D:{recommendation.previousCorrect} Y:{recommendation.previousIncorrect}
+                                     </Typography>
+                                   </Box>
+                                   
+                                   <Box sx={{ 
+                                     display: 'flex', 
+                                     alignItems: 'center',
+                                     px: 1
+                                   }}>
+                                     <Box sx={{
+                                       width: 40,
+                                       height: 2,
+                                       background: parseFloat(recommendation.change) > 0 
+                                         ? 'linear-gradient(90deg, #4caf50, #81c784)' 
+                                         : parseFloat(recommendation.change) < 0
+                                         ? 'linear-gradient(90deg, #f44336, #e57373)'
+                                         : 'linear-gradient(90deg, #ff9800, #ffb74d)',
+                                       borderRadius: '1px',
+                                       position: 'relative',
+                                       '&::after': {
+                                         content: parseFloat(recommendation.change) > 0 ? '"→"' : parseFloat(recommendation.change) < 0 ? '"→"' : '"→"',
+                                         position: 'absolute',
+                                         right: -8,
+                                         top: -8,
+                                         fontSize: '12px',
+                                         color: parseFloat(recommendation.change) > 0 ? '#4caf50' : parseFloat(recommendation.change) < 0 ? '#f44336' : '#ff9800'
+                                       }
+                                     }} />
+                                   </Box>
+                                   
+                                   <Box sx={{ textAlign: 'center', flex: 1 }}>
+                                     <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem' }}>
+                                       Son Deneme
+                                     </Typography>
+                                     <Typography variant="h6" sx={{ 
+                                       color: '#ffffff', 
+                                       fontWeight: 700,
+                                       fontSize: '1.1rem'
+                                     }}>
+                                       {recommendation.lastNet} net
+                                     </Typography>
+                                     <Typography variant="caption" sx={{ 
+                                       color: 'rgba(255, 255, 255, 0.5)',
+                                       fontSize: '0.75rem'
+                                     }}>
+                                       D:{recommendation.lastCorrect} Y:{recommendation.lastIncorrect}
+                                     </Typography>
+                                   </Box>
+                                 </Box>
+                                 
+                                 {/* Change indicator */}
+                                 <Box sx={{ 
+                                   mt: 2, 
+                                   textAlign: 'center',
+                                   p: 1,
+                                   borderRadius: '12px',
+                                   background: parseFloat(recommendation.change) > 0 
+                                     ? 'rgba(76, 175, 80, 0.15)' 
+                                     : parseFloat(recommendation.change) < 0
+                                     ? 'rgba(244, 67, 54, 0.15)'
+                                     : 'rgba(255, 152, 0, 0.15)'
+                                 }}>
+                                   <Typography variant="body2" sx={{ 
+                                     color: parseFloat(recommendation.change) > 0 ? '#4caf50' : parseFloat(recommendation.change) < 0 ? '#f44336' : '#ff9800',
+                                     fontWeight: 700,
+                                     fontSize: '0.9rem'
+                                   }}>
+                                     {parseFloat(recommendation.change) > 0 ? '+' : ''}{recommendation.change} net değişim
+                                   </Typography>
+                                 </Box>
+                               </Box>
+
+                               {/* Detailed message */}
+                               <Typography variant="body1" sx={{ 
+                                 color: 'rgba(255, 255, 255, 0.9)',
+                                 lineHeight: 1.7,
+                                 fontSize: '0.95rem',
+                                 fontWeight: 500,
+                                 flex: 1
                             }}>
                               {recommendation.message}
                             </Typography>
-                          </Card>
-                        ))}
                       </Box>
+                           </Paper>
+                         </Grid>
+                      )) : (
+                        <Grid item xs={12}>
+                          <Box sx={{
+                            textAlign: 'center',
+                            p: 6,
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            borderRadius: '20px',
+                            border: '2px dashed rgba(255, 255, 255, 0.2)'
+                          }}>
+                            <Typography variant="h6" sx={{
+                              color: 'rgba(255, 255, 255, 0.8)',
+                              fontWeight: 600,
+                              mb: 2
+                            }}>
+                              🔄 Öneriler Hazırlanıyor
+                            </Typography>
+                            <Typography variant="body1" sx={{
+                              color: 'rgba(255, 255, 255, 0.6)',
+                              fontSize: '1rem'
+                            }}>
+                              Kişiselleştirilmiş öneriler için en az 2 deneme sonucu ekleyin
+                            </Typography>
                     </Box>
-                  </>
-                ) : (
-                  <Box sx={{ textAlign: 'center', p: 4 }}>
-                    <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                      İstatistikler için yeterli veri bulunmamaktadır.
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Paper>
+                </Box>
+              ) : (
+                <Paper sx={{
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                  backdropFilter: 'blur(25px)',
+                  borderRadius: '24px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  p: 6,
+                  textAlign: 'center',
+                  boxShadow: '0 12px 40px rgba(0, 0, 0, 0.3)'
+                }}>
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 3
+                  }}>
+                    <Box sx={{
+                      width: 120,
+                      height: 120,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, rgba(96, 125, 139, 0.2) 0%, rgba(96, 125, 139, 0.1) 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '3px dashed rgba(255, 255, 255, 0.3)'
+                    }}>
+                      <BarChartIcon sx={{ fontSize: 60, color: 'rgba(255, 255, 255, 0.5)' }} />
+                    </Box>
+                    <Typography variant="h5" sx={{
+                      color: '#ffffff',
+                      fontWeight: 700,
+                      mb: 1
+                    }}>
+                      📊 İstatistik Verisi Bulunamadı
                     </Typography>
+                    <Typography variant="body1" sx={{
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '1.1rem',
+                      maxWidth: 400,
+                      lineHeight: 1.6
+                    }}>
+                      İstatistikleri görüntülemek için önce bir deneme sonucu ekleyin. 
+                      Performans analizi için en az bir deneme gereklidir.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => setTabValue(0)}
+                      sx={{
+                        mt: 2,
+                        borderRadius: '16px',
+                        px: 4,
+                        py: 1.5,
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                        fontWeight: 700,
+                        fontSize: '1rem',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)'
+                        }
+                      }}
+                    >
+                      ➕ İlk Denemeyi Ekle
+                    </Button>
                   </Box>
-                )}
               </Paper>
+              )}
             </motion.div>
           )}
 

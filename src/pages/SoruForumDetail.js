@@ -150,20 +150,20 @@ const StyledButton = styled(Button)(({ theme }) => ({
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: '12px',
-    backgroundColor: '#1b293d',
+    backgroundColor: '#1a0545',
     transition: 'all 0.3s ease',
     '& fieldset': {
       borderColor: '#4CAF50',
       borderWidth: '2px',
     },
     '&:hover': {
-      backgroundColor: '#1b293d',
+      backgroundColor: '#1a0545',
     },
     '&:hover fieldset': {
       borderColor: '#4CAF50',
     },
     '&.Mui-focused': {
-      backgroundColor: '#1b293d',
+      backgroundColor: '#1a0545',
       boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
     },
     '&.Mui-focused fieldset': {
@@ -1021,7 +1021,7 @@ const SoruForumDetail = () => {
   return (
     <Box sx={{
       minHeight: '100vh',
-      backgroundColor: '#1b293d',
+      backgroundColor: '#1a0545',
       position: 'relative'
     }}>
       <Container maxWidth="lg" sx={{ py: 6, position: 'relative', zIndex: 1 }}>
@@ -1364,7 +1364,7 @@ const SoruForumDetail = () => {
             sx={{ 
               mb: 2,
               '& .MuiOutlinedInput-root': {
-                backgroundColor: '#1b293d !important'
+                backgroundColor: '#1a0545 !important'
               },
               '& .MuiInputBase-input': {
                 color: '#ffffff !important'
@@ -1523,7 +1523,7 @@ const SoruForumDetail = () => {
                         sx={{ 
                           mb: 2,
                           '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#1b293d !important'
+                            backgroundColor: '#1a0545 !important'
                           },
                           '& .MuiInputBase-input': {
                             color: '#ffffff !important'
@@ -1664,7 +1664,7 @@ const SoruForumDetail = () => {
                         sx={{ 
                           mb: 2,
                           '& .MuiOutlinedInput-root': {
-                            backgroundColor: '#1b293d !important'
+                            backgroundColor: '#1a0545 !important'
                           },
                           '& .MuiInputBase-input': {
                             color: '#ffffff !important'
@@ -2096,7 +2096,7 @@ const SoruForumDetail = () => {
           sx={{ 
             borderRadius: '12px',
             backgroundColor: '#ffffff !important',
-            color: '#1b293d !important',
+            color: '#1a0545 !important',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
             border: '2px solid #4CAF50',
             '& .MuiAlert-icon': {
@@ -2104,7 +2104,7 @@ const SoruForumDetail = () => {
             },
             '& .MuiAlert-action': {
               '& .MuiIconButton-root': {
-                color: '#1b293d !important'
+                color: '#1a0545 !important'
               }
             }
           }}

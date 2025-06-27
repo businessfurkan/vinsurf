@@ -14,7 +14,13 @@ import {
   Snackbar,
   Tooltip,
   Fade,
-  CircularProgress
+  CircularProgress,
+  Slide,
+  Zoom,
+  Avatar,
+  Badge,
+  styled,
+  keyframes
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -24,7 +30,11 @@ import {
   Delete as DeleteIcon,
   People as PeopleIcon,
   Reply as ReplyIcon,
-  Close as CloseIcon
+  Close as CloseIcon,
+  Chat as ChatIcon,
+  Bolt as BoltIcon,
+  Star as StarIcon,
+  AutoAwesome as AutoAwesomeIcon
 } from '@mui/icons-material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '../firebase';
@@ -40,6 +50,97 @@ import {
   deleteDoc,
   serverTimestamp
 } from 'firebase/firestore';
+
+// Animasyonlar ve stil tanımları
+const pulseAnimation = keyframes`
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+`;
+
+const glowAnimation = keyframes`
+  0% { box-shadow: 0 0 20px rgba(33, 150, 243, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(33, 150, 243, 0.5), 0 0 40px rgba(33, 150, 243, 0.3); }
+  100% { box-shadow: 0 0 20px rgba(33, 150, 243, 0.3); }
+`;
+
+const floatAnimation = keyframes`
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+`;
+
+// Styled components
+const GlassCard = styled(Card)(({ theme }) => ({
+  borderRadius: '24px',
+  background: 'rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(20px)',
+  border: '1px solid rgba(255, 255, 255, 0.2)',
+  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+  transition: 'all 0.3s ease',
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: '-100%',
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)',
+    transition: 'left 0.5s ease',
+  },
+  '&:hover::before': {
+    left: '100%',
+  },
+  '&:hover': {
+    transform: 'translateY(-5px)',
+    boxShadow: '0 16px 40px rgba(0, 0, 0, 0.4)',
+  }
+}));
+
+const ModernButton = styled(Button)(({ theme }) => ({
+  borderRadius: '16px',
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '1rem',
+  padding: '12px 24px',
+  background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+  boxShadow: '0 4px 20px rgba(33, 150, 243, 0.3)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'scale(1.05)',
+    boxShadow: '0 8px 30px rgba(33, 150, 243, 0.5)',
+    background: 'linear-gradient(135deg, #42A5F5 0%, #2196F3 100%)',
+  },
+  '&:active': {
+    transform: 'scale(0.98)',
+  }
+}));
+
+const AnimatedChip = styled(Chip)(({ theme }) => ({
+  fontWeight: 600,
+  borderRadius: '12px',
+  animation: `${pulseAnimation} 2s infinite`,
+  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+}));
+
+const MessageBubble = styled(Paper)(({ theme }) => ({
+  borderRadius: '20px',
+  background: 'rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(10px)',
+  border: '1px solid rgba(255, 255, 255, 0.1)',
+  transition: 'all 0.3s ease',
+  position: 'relative',
+  overflow: 'hidden',
+  '&:hover': {
+    transform: 'translateX(5px)',
+    boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
+    '& .message-actions': {
+      opacity: 1,
+      transform: 'translateX(0)',
+    }
+  }
+}));
 
 const CalismaOdasi = () => {
   const [user] = useAuthState(auth);
@@ -330,246 +431,542 @@ const CalismaOdasi = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4, mt: 14 }}>
-        <Card sx={{ borderRadius: '16px', backgroundColor: '#2d4870', p: 4, textAlign: 'center' }}>
-          <Typography sx={{ color: '#ffffff' }}>Yükleniyor...</Typography>
-        </Card>
+      <Container maxWidth="lg" sx={{ 
+        py: 4, 
+        mt: 14,
+        bgcolor: '#1a0545',
+        minHeight: '100vh'
+      }}>
+        <GlassCard sx={{ p: 6, textAlign: 'center' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: 3 
+          }}>
+            <Box sx={{ 
+              animation: `${floatAnimation} 2s ease-in-out infinite`,
+              position: 'relative'
+            }}>
+              <ChatIcon sx={{ 
+                fontSize: 80, 
+                color: '#2196F3',
+                filter: 'drop-shadow(0 4px 8px rgba(33, 150, 243, 0.3))'
+              }} />
+              <Box sx={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '120px',
+                height: '120px',
+                border: '3px solid rgba(33, 150, 243, 0.3)',
+                borderRadius: '50%',
+                animation: `${pulseAnimation} 2s infinite`
+              }} />
+            </Box>
+            <CircularProgress 
+              size={60} 
+              thickness={4}
+              sx={{ 
+                color: '#2196F3',
+                animation: `${glowAnimation} 2s infinite`
+              }} 
+            />
+            <Typography variant="h5" sx={{ 
+              color: '#ffffff', 
+              fontWeight: 700,
+              background: 'linear-gradient(45deg, #2196F3, #42A5F5)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}>
+              Çalışma Odası Yükleniyor...
+            </Typography>
+            <Typography sx={{ 
+              color: 'rgba(255,255,255,0.7)',
+              textAlign: 'center',
+              maxWidth: '400px'
+            }}>
+              Arkadaşlarınla birlikte çalışabileceğin, sohbet edebileceğin modern çalışma ortamın hazırlanıyor ✨
+            </Typography>
+          </Box>
+        </GlassCard>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4, mt: 14 }}>
-      {/* Header */}
-      <Card sx={{ 
-        borderRadius: '16px',
-        backgroundColor: '#2d4870',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-        border: '4px solid #2d4870',
-        mb: 2
-      }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <WorkspacesIcon sx={{ fontSize: 40, color: '#E91E63' }} />
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: '#ffffff' }}>
-                  Çalışma Odası
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-                  <Chip
-                    label={roomActive ? 'AKTİF' : 'PASİF'}
-                    size="small"
-                    sx={{
-                      backgroundColor: roomActive ? '#4CAF50' : '#757575',
-                      color: '#ffffff',
-                      fontWeight: 600
-                    }}
-                  />
-                  <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)' }}>
-                    {messages.length} mesaj
+            <Container maxWidth="lg" sx={{ 
+          py: 4, 
+          mt: 14,
+          bgcolor: '#1a0545',
+          minHeight: '100vh'
+        }}>
+      {/* Modern Header */}
+      <Zoom in={true} timeout={800}>
+        <GlassCard sx={{ mb: 3 }}>
+          <CardContent sx={{ p: 4 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Box sx={{ 
+                  position: 'relative',
+                  animation: `${floatAnimation} 3s ease-in-out infinite`
+                }}>
+                  <WorkspacesIcon sx={{ 
+                    fontSize: 50, 
+                    color: '#2196F3',
+                    filter: 'drop-shadow(0 4px 8px rgba(33, 150, 243, 0.4))'
+                  }} />
+                  <AutoAwesomeIcon sx={{
+                    position: 'absolute',
+                    top: -5,
+                    right: -5,
+                    fontSize: 20,
+                    color: '#FFD700',
+                    animation: `${pulseAnimation} 1.5s infinite`
+                  }} />
+                </Box>
+                <Box>
+                  <Typography variant="h4" sx={{ 
+                    fontWeight: 800, 
+                    color: '#ffffff',
+                    background: 'linear-gradient(45deg, #2196F3, #42A5F5, #FFD700)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 1
+                  }}>
+                    Çalışma Odası ✨
                   </Typography>
-                  {roomActive && (
-                    <Tooltip title="Online kullanıcılar">
-                      <Chip
-                        icon={<PeopleIcon />}
-                        label={onlineUsers.length}
-                        size="small"
-                        sx={{
-                          backgroundColor: '#4CAF50',
-                          color: '#ffffff',
-                          fontWeight: 600,
-                          ml: 1
-                        }}
-                      />
-                    </Tooltip>
-                  )}
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                    <AnimatedChip
+                      label={roomActive ? '🟢 AKTİF' : '🔴 PASİF'}
+                      size="medium"
+                      sx={{
+                        backgroundColor: roomActive ? 
+                          'linear-gradient(135deg, #4CAF50, #66BB6A)' : 
+                          'linear-gradient(135deg, #757575, #9E9E9E)',
+                        color: '#ffffff',
+                        fontWeight: 700,
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                    <Chip
+                      icon={<ChatIcon />}
+                      label={`${messages.length} mesaj`}
+                      size="medium"
+                      sx={{
+                        backgroundColor: 'rgba(33, 150, 243, 0.2)',
+                        color: '#2196F3',
+                        border: '1px solid rgba(33, 150, 243, 0.3)',
+                        fontWeight: 600
+                      }}
+                    />
+                    {roomActive && (
+                      <Tooltip title="Şu anda online olan kullanıcılar" arrow>
+                        <Badge 
+                          badgeContent={onlineUsers.length} 
+                          color="success"
+                          sx={{
+                            '& .MuiBadge-badge': {
+                              animation: `${pulseAnimation} 2s infinite`
+                            }
+                          }}
+                        >
+                          <Chip
+                            icon={<PeopleIcon />}
+                            label="Online"
+                            size="medium"
+                            sx={{
+                              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                              color: '#4CAF50',
+                              border: '1px solid rgba(76, 175, 80, 0.3)',
+                              fontWeight: 600
+                            }}
+                          />
+                        </Badge>
+                      </Tooltip>
+                    )}
+                  </Box>
                 </Box>
               </Box>
+
+              {/* Modern Admin Kontrolleri */}
+              {isAdmin && (
+                <Slide direction="left" in={true} timeout={1000}>
+                  <ModernButton
+                    startIcon={roomActive ? <StopIcon /> : <StartIcon />}
+                    onClick={toggleRoom}
+                    sx={{
+                      background: roomActive ? 
+                        'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)' : 
+                        'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                      animation: `${glowAnimation} 3s infinite`,
+                      minWidth: '160px'
+                    }}
+                  >
+                    {roomActive ? '⏹️ Durdur' : '▶️ Başlat'}
+                  </ModernButton>
+                </Slide>
+              )}
             </Box>
+          </CardContent>
+        </GlassCard>
+      </Zoom>
 
-            {/* Admin Kontrolleri */}
-            {isAdmin && (
-              <Button
-                variant="contained"
-                startIcon={roomActive ? <StopIcon /> : <StartIcon />}
-                onClick={toggleRoom}
-                sx={{
-                  backgroundColor: roomActive ? '#f44336' : '#4CAF50',
-                  '&:hover': {
-                    backgroundColor: roomActive ? '#d32f2f' : '#45a049'
-                  }
-                }}
-              >
-                {roomActive ? 'Odayı Durdur' : 'Odayı Başlat'}
-              </Button>
-            )}
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Admin Oda Başlatma Uyarısı */}
+      {/* Modern Admin Oda Başlatma Uyarısı */}
       {isAdmin && !roomActive && (
-        <Card sx={{ 
-          borderRadius: '16px',
-          backgroundColor: '#4CAF50',
-          border: '4px solid #4CAF50',
-          mb: 2,
-          animation: 'pulse 2s infinite'
-        }}>
-          <CardContent sx={{ p: 3, textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700, mb: 2 }}>
-              🚀 Admin Paneli
-            </Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.9)', mb: 3 }}>
-              Çalışma odası kapalı. Kullanıcılar sohbet edebilmesi için odayı başlatmanız gerekiyor.
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<StartIcon />}
-              onClick={toggleRoom}
-              sx={{
-                backgroundColor: '#ffffff',
-                color: '#4CAF50',
-                fontWeight: 700,
-                fontSize: '1.1rem',
-                px: 4,
-                py: 1.5,
-                '&:hover': {
-                  backgroundColor: '#f5f5f5',
-                  transform: 'scale(1.05)'
-                },
-                transition: 'all 0.2s'
-              }}
-            >
-              Çalışma Odasını Başlat
-            </Button>
-          </CardContent>
-        </Card>
-             )}
-
-      {/* Admin Oda Aktif Bilgisi */}
-      {isAdmin && roomActive && (
-        <Card sx={{ 
-          borderRadius: '16px',
-          backgroundColor: '#2196F3',
-          border: '4px solid #2196F3',
-          mb: 2
-        }}>
-          <CardContent sx={{ p: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 600 }}>
-                  ⚡ Admin: Oda Aktif
+        <Slide direction="up" in={true} timeout={1200}>
+          <GlassCard sx={{ 
+            mb: 3,
+            background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(102, 187, 106, 0.2) 100%)',
+            border: '2px solid rgba(76, 175, 80, 0.4)',
+            animation: `${glowAnimation} 2s infinite`
+          }}>
+            <CardContent sx={{ p: 4, textAlign: 'center' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                gap: 3 
+              }}>
+                <Box sx={{ 
+                  position: 'relative',
+                  animation: `${floatAnimation} 2s ease-in-out infinite`
+                }}>
+                  <BoltIcon sx={{ 
+                    fontSize: 60, 
+                    color: '#4CAF50',
+                    filter: 'drop-shadow(0 4px 8px rgba(76, 175, 80, 0.4))'
+                  }} />
+                  <StarIcon sx={{
+                    position: 'absolute',
+                    top: -10,
+                    right: -10,
+                    fontSize: 25,
+                    color: '#FFD700',
+                    animation: `${pulseAnimation} 1s infinite`
+                  }} />
+                </Box>
+                <Typography variant="h5" sx={{ 
+                  color: '#ffffff', 
+                  fontWeight: 800,
+                  background: 'linear-gradient(45deg, #4CAF50, #66BB6A)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1
+                }}>
+                  🚀 Admin Paneli
                 </Typography>
-                <Chip
-                  label={`${onlineUsers.length} kullanıcı online`}
-                  size="small"
+                <Typography sx={{ 
+                  color: 'rgba(255,255,255,0.9)', 
+                  fontSize: '1.1rem',
+                  textAlign: 'center',
+                  maxWidth: '500px',
+                  lineHeight: 1.6
+                }}>
+                  Çalışma odası şu anda kapalı. Kullanıcıların birlikte çalışabilmesi ve sohbet edebilmesi için odayı başlatın.
+                </Typography>
+                <ModernButton
+                  size="large"
+                  startIcon={<StartIcon />}
+                  onClick={toggleRoom}
                   sx={{
-                    backgroundColor: '#ffffff',
-                    color: '#2196F3',
-                    fontWeight: 600
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
+                    color: '#4CAF50',
+                    fontSize: '1.2rem',
+                    px: 5,
+                    py: 2,
+                    boxShadow: '0 8px 25px rgba(76, 175, 80, 0.3)',
+                    '&:hover': {
+                      transform: 'scale(1.1)',
+                      boxShadow: '0 12px 35px rgba(76, 175, 80, 0.5)',
+                    }
                   }}
-                />
+                >
+                  🎯 Çalışma Odasını Başlat
+                </ModernButton>
               </Box>
-              <Button
-                variant="contained"
-                startIcon={<StopIcon />}
-                onClick={toggleRoom}
-                size="small"
-                sx={{
-                  backgroundColor: '#ffffff',
-                  color: '#2196F3',
-                  fontWeight: 600,
-                  '&:hover': {
-                    backgroundColor: '#f5f5f5'
-                  }
-                }}
-              >
-                Odayı Durdur
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </GlassCard>
+        </Slide>
       )}
 
-      {/* Chat Area */}
-      <Card sx={{ 
-        borderRadius: '16px',
-        backgroundColor: '#2d4870',
-        border: '4px solid #2d4870',
-        height: '500px',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
-        {/* Mesajlar */}
-        <Box sx={{ 
-          flexGrow: 1, 
-          p: 2, 
-          overflowY: 'auto',
-          maxHeight: '400px'
+      {/* Modern Admin Oda Aktif Bilgisi */}
+      {isAdmin && roomActive && (
+        <Slide direction="down" in={true} timeout={1000}>
+          <GlassCard sx={{ 
+            mb: 3,
+            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(25, 118, 210, 0.2) 100%)',
+            border: '2px solid rgba(33, 150, 243, 0.4)'
+          }}>
+            <CardContent sx={{ p: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <Box sx={{ 
+                    animation: `${pulseAnimation} 2s infinite`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2
+                  }}>
+                    <BoltIcon sx={{ fontSize: 30, color: '#2196F3' }} />
+                    <Typography variant="h6" sx={{ 
+                      color: '#ffffff', 
+                      fontWeight: 700,
+                      background: 'linear-gradient(45deg, #2196F3, #64B5F6)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent'
+                    }}>
+                      ⚡ Admin: Oda Aktif
+                    </Typography>
+                  </Box>
+                  <AnimatedChip
+                    icon={<PeopleIcon />}
+                    label={`${onlineUsers.length} kullanıcı online`}
+                    size="medium"
+                    sx={{
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
+                      color: '#2196F3',
+                      fontWeight: 700,
+                      border: '2px solid rgba(33, 150, 243, 0.3)'
+                    }}
+                  />
+                </Box>
+                <ModernButton
+                  startIcon={<StopIcon />}
+                  onClick={toggleRoom}
+                  size="medium"
+                  sx={{
+                    background: 'linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%)',
+                    color: '#2196F3',
+                    boxShadow: '0 4px 15px rgba(33, 150, 243, 0.3)',
+                    minWidth: '140px'
+                  }}
+                >
+                  🛑 Durdur
+                </ModernButton>
+              </Box>
+            </CardContent>
+          </GlassCard>
+        </Slide>
+      )}
+
+      {/* Modern Chat Area */}
+      <Fade in={true} timeout={1500}>
+        <GlassCard sx={{ 
+          height: '600px',
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          overflow: 'hidden'
         }}>
-          {!roomActive ? (
-            <Box sx={{ textAlign: 'center', mt: 8 }}>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', mb: 2 }}>
-                Çalışma odası şu anda kapalı
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.4)' }}>
-                Admin tarafından oda açıldığında mesajlaşabilirsiniz
+          {/* Chat Header */}
+          <Box sx={{
+            p: 3,
+            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(25, 118, 210, 0.2) 100%)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <ChatIcon sx={{ 
+                fontSize: 28, 
+                color: '#2196F3',
+                animation: `${pulseAnimation} 2s infinite`
+              }} />
+              <Typography variant="h6" sx={{
+                color: '#ffffff',
+                fontWeight: 700,
+                background: 'linear-gradient(45deg, #2196F3, #42A5F5)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent'
+              }}>
+                💬 Canlı Sohbet
               </Typography>
             </Box>
-          ) : messages.length === 0 ? (
-            <Box sx={{ textAlign: 'center', mt: 8 }}>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)' }}>
-                Henüz mesaj yok. İlk mesajı sen at! 💬
-              </Typography>
-            </Box>
-                     ) : (
-             messages.map((message) => (
-               <Fade key={message.id} in={true} timeout={500}>
-                 <Paper
+            {roomActive && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: '#4CAF50',
+                  animation: `${pulseAnimation} 1s infinite`
+                }} />
+                <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 600 }}>
+                  Bağlantı Aktif
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* Mesajlar Alanı */}
+          <Box sx={{ 
+            flexGrow: 1, 
+            p: 3, 
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            '&::-webkit-scrollbar': {
+              width: '8px',
+            },
+            '&::-webkit-scrollbar-track': {
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '10px',
+            },
+            '&::-webkit-scrollbar-thumb': {
+              background: 'linear-gradient(45deg, #2196F3, #42A5F5)',
+              borderRadius: '10px',
+            },
+            '&::-webkit-scrollbar-thumb:hover': {
+              background: 'linear-gradient(45deg, #42A5F5, #2196F3)',
+            }
+          }}>
+            {!roomActive ? (
+              <Fade in={true} timeout={1000}>
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  mt: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 3
+                }}>
+                  <Box sx={{ 
+                    animation: `${floatAnimation} 3s ease-in-out infinite`,
+                    opacity: 0.6
+                  }}>
+                    <ChatIcon sx={{ fontSize: 80, color: 'rgba(255,255,255,0.3)' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ 
+                    color: 'rgba(255,255,255,0.7)', 
+                    fontWeight: 600,
+                    mb: 1
+                  }}>
+                    🔒 Çalışma odası şu anda kapalı
+                  </Typography>
+                  <Typography sx={{ 
+                    color: 'rgba(255,255,255,0.5)',
+                    maxWidth: '400px',
+                    lineHeight: 1.6
+                  }}>
+                    Admin tarafından oda açıldığında arkadaşlarınla sohbet edebilir, birlikte çalışabilirsin
+                  </Typography>
+                </Box>
+              </Fade>
+            ) : messages.length === 0 ? (
+              <Fade in={true} timeout={1000}>
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  mt: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 3
+                }}>
+                  <Box sx={{ 
+                    animation: `${floatAnimation} 2s ease-in-out infinite`,
+                    position: 'relative'
+                  }}>
+                    <ChatIcon sx={{ fontSize: 60, color: '#2196F3' }} />
+                    <AutoAwesomeIcon sx={{
+                      position: 'absolute',
+                      top: -10,
+                      right: -10,
+                      fontSize: 25,
+                      color: '#FFD700',
+                      animation: `${pulseAnimation} 1.5s infinite`
+                    }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ 
+                    color: '#ffffff', 
+                    fontWeight: 700,
+                    background: 'linear-gradient(45deg, #2196F3, #42A5F5)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                    🎉 Sohbet başlasın!
+                  </Typography>
+                  <Typography sx={{ 
+                    color: 'rgba(255,255,255,0.7)',
+                    fontSize: '1.1rem'
+                  }}>
+                    Henüz mesaj yok. İlk mesajı sen at ve arkadaşlarınla buluş! 💬✨
+                  </Typography>
+                </Box>
+              </Fade>
+            ) : (
+             messages.map((message, index) => (
+               <Slide key={message.id} direction="up" in={true} timeout={300 + index * 50}>
+                 <MessageBubble
                    sx={{
-                     p: 2,
-                     mb: 1,
-                     backgroundColor: '#1b293d',
-                     borderRadius: '12px',
-                     border: '1px solid rgba(255,255,255,0.1)',
+                     p: 3,
+                     mb: 2,
                      position: 'relative',
-                     '&:hover .delete-btn': {
-                       opacity: 1
+                     '&:hover .message-actions': {
+                       opacity: 1,
+                       transform: 'translateX(0)',
                      }
                    }}
                  >
-                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                     <Chip
-                       label={message.userName}
-                       size="small"
-                       sx={{
+                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                       <Avatar sx={{ 
+                         width: 32, 
+                         height: 32, 
                          backgroundColor: getUserColor(message.userId),
-                         color: '#ffffff',
-                         fontWeight: 600,
-                         fontSize: '0.75rem'
-                       }}
-                     />
-                     <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)' }}>
-                       {formatTime(message.timestamp)}
-                     </Typography>
+                         fontSize: '0.8rem',
+                         fontWeight: 700,
+                         border: '2px solid rgba(255, 255, 255, 0.2)'
+                       }}>
+                         {message.userName.charAt(0).toUpperCase()}
+                       </Avatar>
+                       <Box>
+                         <Typography variant="subtitle2" sx={{ 
+                           color: '#ffffff', 
+                           fontWeight: 700,
+                           lineHeight: 1.2
+                         }}>
+                           {message.userName}
+                         </Typography>
+                         <Typography variant="caption" sx={{ 
+                           color: 'rgba(255,255,255,0.6)',
+                           fontSize: '0.75rem'
+                         }}>
+                           {formatTime(message.timestamp)}
+                         </Typography>
+                       </Box>
+                     </Box>
                      
-                     {/* Action butonları */}
-                     <Box sx={{ ml: 'auto', display: 'flex', gap: 0.5 }}>
-                       {/* Reply butonu */}
-                       <Tooltip title="Yanıtla">
+                     {/* Modern Action butonları */}
+                     <Box 
+                       className="message-actions"
+                       sx={{ 
+                         display: 'flex', 
+                         gap: 1,
+                         opacity: 0,
+                         transform: 'translateX(10px)',
+                         transition: 'all 0.3s ease'
+                       }}
+                     >
+                       <Tooltip title="💬 Yanıtla" arrow>
                          <IconButton
-                           className="delete-btn"
                            size="small"
                            onClick={() => replyToMessage(message)}
                            sx={{
-                             opacity: 0,
-                             transition: 'opacity 0.2s',
+                             backgroundColor: 'rgba(33, 150, 243, 0.2)',
                              color: '#2196F3',
+                             border: '1px solid rgba(33, 150, 243, 0.3)',
                              '&:hover': {
-                               backgroundColor: 'rgba(33, 150, 243, 0.1)'
+                               backgroundColor: 'rgba(33, 150, 243, 0.3)',
+                               transform: 'scale(1.1)'
                              }
                            }}
                          >
@@ -577,19 +974,18 @@ const CalismaOdasi = () => {
                          </IconButton>
                        </Tooltip>
 
-                       {/* Silme butonu - sadece mesaj sahibi veya admin görebilir */}
                        {(message.userId === user?.uid || isAdmin) && (
-                         <Tooltip title="Mesajı sil">
+                         <Tooltip title="🗑️ Sil" arrow>
                            <IconButton
-                             className="delete-btn"
                              size="small"
                              onClick={() => deleteMessage(message.id, message.userId)}
                              sx={{
-                               opacity: 0,
-                               transition: 'opacity 0.2s',
+                               backgroundColor: 'rgba(244, 67, 54, 0.2)',
                                color: '#f44336',
+                               border: '1px solid rgba(244, 67, 54, 0.3)',
                                '&:hover': {
-                                 backgroundColor: 'rgba(244, 67, 54, 0.1)'
+                                 backgroundColor: 'rgba(244, 67, 54, 0.3)',
+                                 transform: 'scale(1.1)'
                                }
                              }}
                            >
@@ -598,7 +994,7 @@ const CalismaOdasi = () => {
                          </Tooltip>
                        )}
                      </Box>
-                                        </Box>
+                   </Box>
                      
                      {/* Reply gösterimi */}
                      {message.replyTo && (
@@ -625,98 +1021,153 @@ const CalismaOdasi = () => {
                        </Box>
                      )}
                      
-                     <Typography sx={{ color: '#ffffff', fontSize: '0.95rem', mt: message.replyTo ? 1 : 0 }}>
+                     <Typography sx={{ 
+                       color: '#ffffff', 
+                       fontSize: '1rem',
+                       lineHeight: 1.5,
+                       mt: message.replyTo ? 2 : 1,
+                       wordBreak: 'break-word'
+                     }}>
                        {message.text}
                      </Typography>
-                 </Paper>
-               </Fade>
+                 </MessageBubble>
+               </Slide>
              ))
            )}
           <div ref={messagesEndRef} />
         </Box>
 
-        {/* Mesaj Input */}
-        <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          {/* Reply Preview */}
+        {/* Modern Mesaj Input */}
+                 <Box sx={{ 
+           p: 3, 
+           background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(25, 118, 210, 0.1) 100%)',
+           borderTop: '1px solid rgba(255, 255, 255, 0.1)' 
+         }}>
+          {/* Modern Reply Preview */}
           {replyingTo && (
-            <Box sx={{ 
-              mb: 1, 
-              p: 1, 
-              backgroundColor: 'rgba(33, 150, 243, 0.1)',
-              borderRadius: '8px',
-              borderLeft: '3px solid #2196F3',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                <Typography variant="caption" sx={{ color: '#2196F3', fontWeight: 600 }}>
-                  {replyingTo.userName} kullanıcısına yanıt veriyorsunuz:
-                </Typography>
-                <Typography variant="caption" sx={{ 
-                  color: 'rgba(255,255,255,0.7)', 
-                  display: 'block',
-                  fontStyle: 'italic',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>
-                  {replyingTo.text}
-                </Typography>
+            <Slide direction="down" in={Boolean(replyingTo)} timeout={300}>
+              <Box sx={{ 
+                mb: 2, 
+                p: 2, 
+                background: 'rgba(33, 150, 243, 0.15)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '16px',
+                border: '1px solid rgba(33, 150, 243, 0.3)',
+                borderLeft: '4px solid #2196F3',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                  <Typography variant="subtitle2" sx={{ 
+                    color: '#2196F3', 
+                    fontWeight: 700,
+                    mb: 0.5
+                  }}>
+                    💬 {replyingTo.userName} kullanıcısına yanıt veriyorsunuz:
+                  </Typography>
+                  <Typography sx={{ 
+                    color: 'rgba(255,255,255,0.8)', 
+                    fontStyle: 'italic',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.9rem'
+                  }}                     >
+                       &ldquo;{replyingTo.text}&rdquo;
+                     </Typography>
+                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => setReplyingTo(null)}
+                  sx={{ 
+                    color: 'rgba(255,255,255,0.8)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      transform: 'scale(1.1)'
+                    }
+                  }}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
               </Box>
-              <IconButton
-                size="small"
-                onClick={() => setReplyingTo(null)}
-                sx={{ color: 'rgba(255,255,255,0.7)' }}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </Box>
+            </Slide>
           )}
           
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end' }}>
             <TextField
               fullWidth
               multiline
-              maxRows={3}
+              maxRows={4}
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder={roomActive ? "Mesajınızı yazın..." : "Oda kapalı"}
+              placeholder={roomActive ? "✨ Mesajınızı yazın..." : "🔒 Oda kapalı"}
               disabled={!roomActive}
               sx={{
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: '#1b293d',
-                  borderRadius: '12px',
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.3)' },
-                  '&.Mui-focused fieldset': { borderColor: '#E91E63' }
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '20px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  transition: 'all 0.3s ease',
+                  '& fieldset': { 
+                    border: 'none'
+                  },
+                                     '&:hover': { 
+                     background: 'rgba(255, 255, 255, 0.15)',
+                     border: '1px solid rgba(33, 150, 243, 0.3)',
+                     transform: 'translateY(-2px)'
+                   },
+                   '&.Mui-focused': { 
+                     background: 'rgba(255, 255, 255, 0.15)',
+                     border: '2px solid rgba(33, 150, 243, 0.5)',
+                     boxShadow: '0 4px 20px rgba(33, 150, 243, 0.3)'
+                   }
                 },
                 '& .MuiInputBase-input': {
                   color: '#ffffff',
-                  '&::placeholder': { color: 'rgba(255,255,255,0.5)' }
+                  fontSize: '1rem',
+                  padding: '16px 20px',
+                  '&::placeholder': { 
+                    color: 'rgba(255,255,255,0.6)',
+                    fontWeight: 500
+                  }
                 }
               }}
             />
-                         <IconButton
-               onClick={sendMessage}
-               disabled={!newMessage.trim() || !roomActive || sending}
-               sx={{
-                 backgroundColor: '#E91E63',
-                 color: '#ffffff',
-                 '&:hover': { backgroundColor: '#C2185B' },
-                 '&:disabled': { backgroundColor: 'rgba(255,255,255,0.1)' }
-               }}
-             >
-               {sending ? (
-                 <CircularProgress size={20} sx={{ color: '#ffffff' }} />
-               ) : (
-                 <SendIcon />
-               )}
-             </IconButton>
+            <ModernButton
+              onClick={sendMessage}
+              disabled={!newMessage.trim() || !roomActive || sending}
+              sx={{
+                minWidth: '60px',
+                height: '60px',
+                borderRadius: '50%',
+                p: 0,
+                                 background: newMessage.trim() && roomActive && !sending ? 
+                   'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' : 
+                   'rgba(255, 255, 255, 0.1)',
+                 boxShadow: newMessage.trim() && roomActive && !sending ? 
+                   '0 4px 20px rgba(33, 150, 243, 0.4)' : 'none',
+                animation: newMessage.trim() && roomActive ? `${glowAnimation} 2s infinite` : 'none',
+                '&:hover': {
+                  transform: newMessage.trim() && roomActive && !sending ? 'scale(1.1)' : 'none'
+                }
+              }}
+            >
+              {sending ? (
+                <CircularProgress size={24} sx={{ color: '#ffffff' }} />
+              ) : (
+                <SendIcon sx={{ fontSize: 24 }} />
+              )}
+            </ModernButton>
           </Box>
         </Box>
-      </Card>
+        </GlassCard>
+      </Fade>
 
       {/* Snackbar */}
       <Snackbar

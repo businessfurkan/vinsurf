@@ -22,6 +22,7 @@ import PieChartIcon from '@mui/icons-material/PieChart';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import BookIcon from '@mui/icons-material/Book';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
@@ -351,9 +352,9 @@ const Login = () => {
       color: "#FF5252"
     },
     {
-      title: "Benimle Çalış",
-      description: "Arkadaşlarınla birlikte çalışarak motivasyonunu artır, daha verimli çalışma seansları oluştur.",
-      icon: <GroupsIcon />,
+      title: "Çalışma Odası",
+      description: "Canlı chat ile diğer öğrencilerle birlikte çalış, motivasyonunu artır ve daha verimli çalışma seansları oluştur.",
+      icon: <WorkspacesIcon />,
       color: "#448AFF"
     },
     {

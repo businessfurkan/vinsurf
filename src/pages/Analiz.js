@@ -38,12 +38,11 @@ import FunctionsIcon from '@mui/icons-material/Functions';
 import ScienceIcon from '@mui/icons-material/Science';
 import BiotechIcon from '@mui/icons-material/Biotech';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import LanguageIcon from '@mui/icons-material/Language';
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import PublicIcon from '@mui/icons-material/Public';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import TranslateIcon from '@mui/icons-material/Translate';
+
 import WarningIcon from '@mui/icons-material/Warning';
 import { auth, db } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
@@ -62,6 +61,39 @@ const Analiz = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [lowHoursDialog, setLowHoursDialog] = useState(false);
+  const [examType, setExamType] = useState('TYT');
+  const [cardExamType, setCardExamType] = useState('TYT');
+  const [targetDialogOpen, setTargetDialogOpen] = useState(false);
+
+  // TYT ve AYT ders listeleri
+  const subjectLists = {
+    TYT: [
+      'Türkçe',
+      'Tarih',
+      'Coğrafya',
+      'Felsefe',
+      'Din Kültürü',
+      'Temel Matematik',
+      'Fizik',
+      'Kimya',
+      'Biyoloji'
+    ],
+    AYT: [
+      'Matematik',
+      'Edebiyat',
+      'Fizik',
+      'Biyoloji',
+      'Kimya',
+      'Tarih',
+      'Coğrafya',
+      'Felsefe',
+      'Din Kültürü'
+    ]
+  };
+
+  const getCurrentSubjects = () => {
+    return subjectLists[examType] || [];
+  };
 
   const fetchStudyRecords = useCallback(async () => {
     if (!user) return;
@@ -209,35 +241,29 @@ const Analiz = () => {
   const getSubjectColor = (subject) => {
     if (!subject) return '#4285F4';
     const subjectColors = {
-      'Matematik': '#1E90FF',
-      'Fizik': '#2ECC71',
-      'Kimya': '#E74C3C',
-      'Biyoloji': '#F1C40F',
-      'Türkçe': '#9B59B6',
-      'Tarih': '#E67E22',
-      'Coğrafya': '#00BFFF',
-      'Edebiyat': '#8E44AD',
-      'Felsefe': '#7F8C8D',
-      'Din Kültürü': '#A0522D',
-      'İngilizce': '#2980B9',
+      // TYT Dersleri
+      'Türkçe': '#4285f4',
+      'Tarih': '#9c27b0',
+      'Coğrafya': '#795548',
+      'Felsefe': '#607d8b',
+      'Din Kültürü': '#00bcd4',
+      'Temel Matematik': '#34a853',
+      'Fizik': '#ea4335',
+      'Kimya': '#fbbc05',
+      'Biyoloji': '#0f9d58',
+      
+      // AYT Dersleri
+      'Matematik': '#34a853',
+      'Edebiyat': '#4285f4'
     };
     return subjectColors[subject] || '#1E90FF';
   };
 
   const getSubjectIcon = (subject) => {
     switch (subject) {
-      case 'Matematik':
-        return <FunctionsIcon />;
-      case 'Fizik':
-        return <ScienceIcon />;
-      case 'Kimya':
-        return <ScienceIcon sx={{ transform: 'rotate(45deg)' }} />;
-      case 'Biyoloji':
-        return <BiotechIcon />;
-      case 'Edebiyat':
-        return <MenuBookIcon />;
+      // TYT Dersleri
       case 'Türkçe':
-        return <LanguageIcon />;
+        return <MenuBookIcon />;
       case 'Tarih':
         return <HistoryEduIcon />;
       case 'Coğrafya':
@@ -246,8 +272,20 @@ const Analiz = () => {
         return <PsychologyIcon />;
       case 'Din Kültürü':
         return <AccountBalanceIcon />;
-      case 'İngilizce':
-        return <TranslateIcon />;
+      case 'Temel Matematik':
+        return <FunctionsIcon />;
+      case 'Fizik':
+        return <ScienceIcon />;
+      case 'Kimya':
+        return <ScienceIcon sx={{ transform: 'rotate(45deg)' }} />;
+      case 'Biyoloji':
+        return <BiotechIcon />;
+      
+      // AYT Dersleri
+      case 'Matematik':
+        return <FunctionsIcon />;
+      case 'Edebiyat':
+        return <MenuBookIcon />;
       default:
         return <SubjectIcon />;
     }
@@ -283,18 +321,160 @@ const Analiz = () => {
   }
 
   return (
-    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#1b293d' }}>
+    <Box sx={{ minHeight: '100vh', py: 4, px: { xs: 1, sm: 2, md: 4 }, background: '#1a0545' }}>
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '5px', background: 'linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)' }} />
-      <Typography
-        variant="h5"
-        fontWeight="bold"
-        gutterBottom
-        sx={{ mb: 3, display: 'flex', alignItems: 'center', '&::before': { content: '""', width: 5, height: 24, backgroundColor: '#ede8ce', borderRadius: 4, marginRight: 1.5 } }}
-      >
-        Çalışma Analizleri
-      </Typography>
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(4, 1fr)' }, gap: 3 }}>
-        {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].map(subject => {
+      {/* Modern Header Section */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        justifyContent: 'space-between', 
+        alignItems: { xs: 'flex-start', md: 'center' },
+        mb: 4, 
+        mt: 3,
+        gap: 3
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{
+            width: 6,
+            height: 32,
+            background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)',
+            borderRadius: 3,
+            mr: 2,
+            boxShadow: '0 4px 12px rgba(33, 150, 243, 0.4)'
+          }} />
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 900,
+              background: 'linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%)',
+              backgroundClip: 'text',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-1px',
+              fontFamily: "'Poppins', 'Montserrat', sans-serif"
+            }}
+          >
+            📊 Çalışma Analizleri
+          </Typography>
+        </Box>
+        
+        {/* Modern TYT/AYT Toggle */}
+        <Box sx={{ 
+          display: 'flex',
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '20px',
+          padding: '6px',
+          border: '1px solid rgba(33, 150, 243, 0.2)',
+          boxShadow: '0 8px 32px rgba(33, 150, 243, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%)',
+            borderRadius: '20px',
+            zIndex: 0
+          }
+        }}>
+          {['TYT', 'AYT'].map((type) => (
+            <Button
+              key={type}
+              variant="text"
+              onClick={() => setCardExamType(type)}
+              sx={{
+                minWidth: '100px',
+                py: 1.5,
+                px: 3,
+                borderRadius: '16px',
+                fontWeight: 700,
+                fontSize: '1rem',
+                textTransform: 'none',
+                position: 'relative',
+                zIndex: 1,
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                ...(cardExamType === type ? {
+                  background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 24px rgba(33, 150, 243, 0.4), 0 4px 12px rgba(33, 150, 243, 0.2)',
+                  transform: 'scale(1.05)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)',
+                    boxShadow: '0 12px 32px rgba(33, 150, 243, 0.5), 0 6px 16px rgba(33, 150, 243, 0.3)',
+                    transform: 'scale(1.08)'
+                  }
+                } : {
+                  background: 'transparent',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  '&:hover': {
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    transform: 'scale(1.02)'
+                  }
+                })
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ fontSize: '1.2rem' }}>
+                  {type === 'TYT' ? '📝' : '🎯'}
+                </Box>
+                {type}
+              </Box>
+            </Button>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Dynamic Subject Count Info */}
+      <Box sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        mb: 3,
+        p: 2,
+        background: 'rgba(255, 255, 255, 0.05)',
+        backdropFilter: 'blur(15px)',
+        borderRadius: '16px',
+        border: '1px solid rgba(33, 150, 243, 0.2)',
+        maxWidth: 'fit-content',
+        mx: 'auto'
+      }}>
+        <Typography sx={{
+          color: 'rgba(255, 255, 255, 0.8)',
+          fontWeight: 600,
+          fontSize: '0.95rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <Box sx={{ 
+            width: 8, 
+            height: 8, 
+            borderRadius: '50%', 
+            background: cardExamType === 'TYT' ? '#2196F3' : '#1976D2',
+            boxShadow: `0 0 8px ${cardExamType === 'TYT' ? '#2196F3' : '#1976D2'}60`
+          }} />
+          {cardExamType} Dersleri • {subjectLists[cardExamType].length} Ders
+        </Typography>
+      </Box>
+
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: { 
+          xs: 'repeat(1, 1fr)', 
+          sm: 'repeat(2, 1fr)', 
+          md: cardExamType === 'TYT' ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)', 
+          lg: cardExamType === 'TYT' ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)',
+          xl: cardExamType === 'TYT' ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)'
+        }, 
+        gap: 3,
+        mb: 6
+      }}>
+        {subjectLists[cardExamType].map(subject => {
           const subjectData = analytics[subject] || { totalTime: 0 };
           const progress = calculateProgress(subjectData.totalTime, subject);
           const hasTarget = studyTargets[subject] > 0;
@@ -306,34 +486,38 @@ const Analiz = () => {
               onClick={() => handleOpenTopicDialog(subject)}
               sx={{
                 cursor: 'pointer',
-                borderRadius: '24px',
-                background: '#15393d',
-                backdropFilter: 'blur(20px)',
+                borderRadius: '20px',
+                background: '#2d5a70',
+                backdropFilter: 'blur(25px)',
                 boxShadow: `
-                  0 8px 32px rgba(0, 0, 0, 0.12),
-                  0 2px 8px rgba(0, 0, 0, 0.08),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                  0 4px 16px ${getSubjectColor(subject)}20
+                  0 12px 40px rgba(0, 0, 0, 0.15),
+                  0 4px 16px rgba(0, 0, 0, 0.1),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.15),
+                  0 6px 20px ${getSubjectColor(subject)}25
                 `,
-                minHeight: 200,
+                minHeight: 220,
                 display: 'flex',
                 flexDirection: 'column',
-                padding: 2.5,
-                border: `1px solid rgba(255, 255, 255, 0.12)`,
-                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': { 
-                  background: '#15393d',
-                  boxShadow: `
-                    0 12px 40px rgba(0, 0, 0, 0.16),
-                    0 4px 12px rgba(0, 0, 0, 0.12),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                    0 8px 24px ${getSubjectColor(subject)}30
-                  `,
-                  borderColor: `rgba(255, 255, 255, 0.2)`,
-                  transform: 'translateY(-8px) scale(1.02)'
-                },
+                padding: 3,
+                border: `2px solid ${getSubjectColor(subject)}40`,
+                transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 position: 'relative',
                 overflow: 'hidden',
+                '&:hover': { 
+                  background: '#3a6485',
+                  boxShadow: `
+                    0 20px 60px rgba(0, 0, 0, 0.2),
+                    0 8px 25px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                    0 12px 35px ${getSubjectColor(subject)}40
+                  `,
+                  border: `2px solid ${getSubjectColor(subject)}60`,
+                  transform: 'translateY(-12px) scale(1.03) rotateX(5deg)',
+                  '&::after': {
+                    opacity: 1,
+                    transform: 'translateX(100%) translateY(100%)'
+                  }
+                },
                 '&::before': {
                   content: '""',
                   position: 'absolute',
@@ -341,9 +525,28 @@ const Analiz = () => {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  background: 'transparent',
+                  background: `linear-gradient(135deg, 
+                    ${getSubjectColor(subject)}15 0%, 
+                    transparent 30%, 
+                    transparent 70%, 
+                    ${getSubjectColor(subject)}10 100%)`,
+                  borderRadius: '20px',
                   pointerEvents: 'none',
                   zIndex: 0,
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: '-50%',
+                  left: '-50%',
+                  width: '200%',
+                  height: '200%',
+                  background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)',
+                  opacity: 0,
+                  transition: 'all 0.6s ease',
+                  transform: 'translateX(-100%) translateY(-100%)',
+                  pointerEvents: 'none',
+                  zIndex: 1,
                 }
               }}
             >
@@ -353,37 +556,57 @@ const Analiz = () => {
                   top: 0,
                   left: 0,
                   width: '100%',
-                  height: '4px',
-                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}80 100%)`,
-                  borderTopLeftRadius: '24px',
-                  borderTopRightRadius: '24px',
-                  boxShadow: `0 0 12px ${getSubjectColor(subject)}60`,
+                  height: '5px',
+                  background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}CC 50%, ${getSubjectColor(subject)} 100%)`,
+                  borderTopLeftRadius: '20px',
+                  borderTopRightRadius: '20px',
+                  boxShadow: `0 0 15px ${getSubjectColor(subject)}80, 0 2px 8px ${getSubjectColor(subject)}40`,
                 }}
               />
               
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2.5, position: 'relative', zIndex: 1 }}>
                 <Avatar
                   sx={{
-                    bgcolor: `linear-gradient(135deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}CC 100%)`,
+                    background: `linear-gradient(135deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}AA 50%, ${getSubjectColor(subject)}CC 100%)`,
                     color: '#ffffff',
-                    width: 56,
-                    height: 56,
+                    width: 64,
+                    height: 64,
                     boxShadow: `
-                      0 8px 24px ${getSubjectColor(subject)}40,
-                      0 4px 12px rgba(0, 0, 0, 0.15),
-                      inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                      0 12px 30px ${getSubjectColor(subject)}50,
+                      0 6px 16px rgba(0, 0, 0, 0.2),
+                      inset 0 2px 4px rgba(255, 255, 255, 0.25),
+                      inset 0 -2px 4px rgba(0, 0, 0, 0.1)
                     `,
-                    mr: 2,
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    border: `2px solid rgba(255, 255, 255, 0.15)`,
-                    backdropFilter: 'blur(10px)',
+                    mr: 2.5,
+                    transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    border: `3px solid rgba(255, 255, 255, 0.2)`,
+                    backdropFilter: 'blur(15px)',
+                    position: 'relative',
+                    zIndex: 2,
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: '-2px',
+                      left: '-2px',
+                      right: '-2px',
+                      bottom: '-2px',
+                      background: `linear-gradient(135deg, ${getSubjectColor(subject)}60, transparent, ${getSubjectColor(subject)}40)`,
+                      borderRadius: '50%',
+                      zIndex: -1,
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease'
+                    },
                     '&:hover': {
-                      transform: 'scale(1.1) rotate(5deg)',
+                      transform: 'scale(1.15) rotate(8deg) translateY(-2px)',
                       boxShadow: `
-                        0 12px 32px ${getSubjectColor(subject)}50,
-                        0 6px 16px rgba(0, 0, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.3)
+                        0 16px 40px ${getSubjectColor(subject)}60,
+                        0 8px 20px rgba(0, 0, 0, 0.25),
+                        inset 0 2px 6px rgba(255, 255, 255, 0.3),
+                        inset 0 -2px 6px rgba(0, 0, 0, 0.15)
                       `,
+                      '&::before': {
+                        opacity: 1
+                      }
                     }
                   }}
                 >
@@ -391,14 +614,20 @@ const Analiz = () => {
                 </Avatar>
                 <Typography 
                   sx={{ 
-                    fontSize: 20, 
-                    fontWeight: 800, 
+                    fontSize: 22, 
+                    fontWeight: 900, 
                     color: '#ffffff', 
-                    fontFamily: `'Poppins','Inter','Roboto',sans-serif`,
-                    lineHeight: 1.2,
-                    letterSpacing: '-0.5px',
-                    textShadow: `0 2px 8px ${getSubjectColor(subject)}60, 0 1px 2px rgba(0,0,0,0.3)`,
-                    filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+                    fontFamily: `'Poppins','Montserrat','Inter',sans-serif`,
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.8px',
+                    textShadow: `0 3px 12px ${getSubjectColor(subject)}80, 0 2px 4px rgba(0,0,0,0.4)`,
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    position: 'relative',
+                    zIndex: 2,
+                    background: `linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #ffffff 100%)`,
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
                   }}
                 >
                   {subject}
@@ -500,19 +729,42 @@ const Analiz = () => {
                   variant="determinate"
                   value={hasTarget ? progress : 0}
                   sx={{
-                    height: 10,
-                    borderRadius: 5,
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    height: 12,
+                    borderRadius: 8,
+                    bgcolor: 'rgba(255, 255, 255, 0.12)',
+                    backdropFilter: 'blur(15px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)',
+                    overflow: 'hidden',
+                    position: 'relative',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent)',
+                      animation: hasTarget && progress > 0 ? 'shimmer 2s ease-in-out infinite' : 'none',
+                      '@keyframes shimmer': {
+                        '0%': { transform: 'translateX(-100%)' },
+                        '100%': { transform: 'translateX(100%)' }
+                      }
+                    },
                     '& .MuiLinearProgress-bar': {
-                      background: `linear-gradient(90deg, ${getSubjectColor(subject)} 0%, ${getSubjectColor(subject)}CC 100%)`,
-                      borderRadius: 5,
+                      background: `linear-gradient(90deg, 
+                        ${getSubjectColor(subject)} 0%, 
+                        ${getSubjectColor(subject)}DD 50%, 
+                        ${getSubjectColor(subject)} 100%)`,
+                      borderRadius: 8,
                       boxShadow: `
-                        0 0 12px ${getSubjectColor(subject)}60,
-                        inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                        0 0 16px ${getSubjectColor(subject)}70,
+                        0 2px 8px ${getSubjectColor(subject)}50,
+                        inset 0 1px 2px rgba(255, 255, 255, 0.3),
+                        inset 0 -1px 2px rgba(0, 0, 0, 0.1)
                       `,
                       position: 'relative',
+                      overflow: 'hidden',
                       '&::after': {
                         content: '""',
                         position: 'absolute',
@@ -520,8 +772,18 @@ const Analiz = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: `linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%)`,
-                        borderRadius: 5,
+                        background: `linear-gradient(90deg, 
+                          transparent 0%, 
+                          rgba(255, 255, 255, 0.25) 50%, 
+                          transparent 100%)`,
+                        borderRadius: 8,
+                        transform: 'translateX(-100%)',
+                        animation: hasTarget && progress > 0 ? 'slideProgress 3s ease-in-out infinite' : 'none',
+                        '@keyframes slideProgress': {
+                          '0%': { transform: 'translateX(-100%)' },
+                          '50%': { transform: 'translateX(100%)' },
+                          '100%': { transform: 'translateX(100%)' }
+                        }
                       }
                     },
                   }}
@@ -531,485 +793,270 @@ const Analiz = () => {
           );
         })}
       </Box>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', px: 3, pt: 2 }}>
-        <Button
-          variant="contained"
-          color="primary"
-          sx={{ fontWeight: 700, borderRadius: 2, boxShadow: '0 2px 8px rgba(33, 150, 243, 0.14)', mb: 1, minWidth: 200 }}
-          onClick={() => setTopicDialog(true)}
-        >
-          Konu Bazlı Çalışma Süreleri
-        </Button>
-      </Box>
+
+      {/* Çalışma Hedefi Belirle Butonu */}
       <Box sx={{ 
-        p: 3, 
-        pb: 0, 
-        position: 'relative',
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(33, 150, 243, 0.02) 100%)',
-          borderRadius: '20px',
-          zIndex: -1,
-        }
+        display: 'flex',
+        justifyContent: 'center',
+        mt: 15,
+        mb: 4
       }}>
-        <Box sx={{ 
-          display: 'flex', 
-          alignItems: 'center',
-          mb: 2
-        }}>
+        <Button
+          onClick={() => setTargetDialogOpen(true)}
+          sx={{
+            p: 2.5,
+            borderRadius: '18px',
+            background: 'rgba(255, 255, 255, 0.08)',
+            backdropFilter: 'blur(20px)',
+            border: '2px solid rgba(33, 150, 243, 0.3)',
+            boxShadow: '0 12px 40px rgba(33, 150, 243, 0.15), 0 4px 16px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            maxWidth: '380px',
+            minWidth: '320px',
+            position: 'relative',
+            overflow: 'hidden',
+            '&:hover': {
+              transform: 'translateY(-4px) scale(1.02)',
+              boxShadow: '0 16px 50px rgba(33, 150, 243, 0.2), 0 6px 20px rgba(0, 0, 0, 0.15)',
+              border: '2px solid rgba(33, 150, 243, 0.5)',
+              background: 'rgba(255, 255, 255, 0.12)',
+            },
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%)',
+              borderRadius: '18px',
+              zIndex: 0,
+            }
+          }}
+        >
           <Box sx={{ 
             display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: 60, 
-            height: 60, 
-            borderRadius: '16px', 
-            background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)', 
-            color: 'white', 
-            mr: 2.5, 
-            boxShadow: '0 8px 20px rgba(33, 150, 243, 0.3)',
-            transform: 'rotate(-5deg)',
-            transition: 'all 0.3s ease',
-            '&:hover': {
-              transform: 'rotate(0deg) scale(1.05)',
-              boxShadow: '0 10px 25px rgba(33, 150, 243, 0.4)'
-            }
+            alignItems: 'center',
+            gap: 2,
+            position: 'relative',
+            zIndex: 1
           }}>
-            <FlagIcon sx={{ fontSize: 28 }} />
-          </Box>
-          <Box>
-            <Typography 
-              variant="h5" 
-              sx={{
-                fontWeight: 800,
-                color: '#1565C0',
-                mb: 0.5,
-                letterSpacing: '-0.5px',
-                textShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                fontFamily: "'Poppins', 'Montserrat', sans-serif"
-              }}
-            >
-              Çalışma Hedefi Belirle
-            </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{
-                color: '#546E7A',
-                fontWeight: 500,
-                fontSize: '1rem',
-                letterSpacing: '0.2px'
-              }}
-            >
-              Her ders için hedeflediğin çalışma sürelerini ayarla
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
-      <Divider sx={{ 
-        my: 3, 
-        borderColor: 'rgba(33, 150, 243, 0.2)',
-        '&::before, &::after': {
-          borderColor: 'rgba(33, 150, 243, 0.2)'
-        }
-      }} />
-      <Box sx={{ px: 3, pb: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={5}>
-            <Box sx={{ mb: 3 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              width: 48, 
+              height: 48, 
+              borderRadius: '14px', 
+              background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 50%, #42A5F5 100%)', 
+              color: 'white', 
+              boxShadow: '0 8px 20px rgba(33, 150, 243, 0.4), 0 3px 8px rgba(33, 150, 243, 0.2)',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transform: 'scale(1.1) rotate(5deg)',
+                boxShadow: '0 12px 25px rgba(33, 150, 243, 0.5), 0 4px 12px rgba(33, 150, 243, 0.3)',
+              }
+            }}>
+              <FlagIcon sx={{ fontSize: 24 }} />
+            </Box>
+            <Box sx={{ textAlign: 'left' }}>
               <Typography 
-                variant="subtitle1" 
+                variant="h6" 
                 sx={{
-                  fontWeight: 700, 
-                  color: '#55b3d9', 
-                  mb: 1.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&::before': {
-                    content: '""',
-                    display: 'inline-block',
-                    width: 4,
-                    height: 18,
-                    backgroundColor: '#55b3d9',
-                    borderRadius: 4,
-                    mr: 1.5
-                  }
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 0.5,
+                  letterSpacing: '-0.3px',
+                  fontFamily: "'Poppins', 'Montserrat', sans-serif",
                 }}
               >
-                Ders Seç
+                🎯 Çalışma Hedefi Belirle
               </Typography>
-              <FormControl fullWidth>
-                <Select
-                  value={targetSubject}
-                  onChange={(e) => setTargetSubject(e.target.value)}
-                  displayEmpty
+              <Typography 
+                variant="body2" 
+                sx={{
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  fontWeight: 500,
+                  fontSize: '0.85rem',
+                  letterSpacing: '0.1px',
+                }}
+              >
+                ✨ Hedeflerini ayarla ve başarına odaklan
+              </Typography>
+            </Box>
+          </Box>
+        </Button>
+      </Box>
+
+      {/* Mevcut Hedefler */}
+      {Object.keys(studyTargets).length > 0 && (
+        <Box sx={{ mt: 4 }}>
+          <Typography 
+            variant="h6" 
+            sx={{
+              fontWeight: 700, 
+              color: '#55b3d9', 
+              mb: 2,
+              display: 'flex',
+              alignItems: 'center',
+              '&::before': {
+                content: '""',
+                display: 'inline-block',
+                width: 4,
+                height: 18,
+                backgroundColor: '#55b3d9',
+                borderRadius: 4,
+                mr: 1.5
+              }
+            }}
+          >
+            Mevcut Hedefler
+          </Typography>
+          <List sx={{ p: 0 }}>
+            {Object.entries(studyTargets).map(([subject, seconds]) => {
+              const hours = Math.round(seconds / 3600);
+              return (
+                <Paper
+                  key={subject}
                   sx={{
-                    borderRadius: 3,
-                    backgroundColor: '#ede8ce',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    height: 56,
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(25, 118, 210, 0.2)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(25, 118, 210, 0.5)' },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#55b3d9', borderWidth: 2 },
-                    '& .MuiSelect-select': { 
-                      display: 'flex', 
-                      alignItems: 'center',
-                      fontWeight: 600,
-                      fontSize: '1rem',
-                      py: 1.5
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    p: 2.5,
+                    mb: 2,
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    backdropFilter: 'blur(20px)',
+                    border: `2px solid ${getSubjectColor(subject)}40`,
+                    boxShadow: `0 8px 25px ${getSubjectColor(subject)}20, 0 2px 8px rgba(0,0,0,0.1)`,
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '6px',
+                      height: '100%',
+                      background: `linear-gradient(180deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`,
+                      borderRadius: '0 8px 8px 0'
+                    },
+                    '&:hover': { 
+                      transform: 'translateX(8px) translateY(-3px) scale(1.02)', 
+                      boxShadow: `0 12px 35px ${getSubjectColor(subject)}30, 0 4px 15px rgba(0,0,0,0.15)`,
+                      border: `2px solid ${getSubjectColor(subject)}60`
                     }
                   }}
-                  MenuProps={{ 
-                    PaperProps: { 
-                      sx: { 
-                        borderRadius: 3, 
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.15)', 
-                        mt: 0.5,
-                        maxHeight: 350
-                      } 
-                    } 
-                  }}
                 >
-                  <MenuItem value="" disabled>
-                    <Box sx={{ display: 'flex', alignItems: 'center', color: '#757575' }}>
-                      <SubjectIcon sx={{ mr: 1.5, fontSize: 20, opacity: 0.7 }} />
-                      Lütfen bir ders seçin
-                    </Box>
-                  </MenuItem>
-                  {['Matematik', 'Fizik', 'Kimya', 'Biyoloji', 'Edebiyat', 'Türkçe', 'Tarih', 'Coğrafya', 'Felsefe', 'Din Kültürü', 'İngilizce'].sort().map(subject => (
-                    <MenuItem
-                      key={subject}
-                      value={subject}
-                      sx={{
-                        borderLeft: `4px solid ${getSubjectColor(subject)}`,
-                        my: 0.8,
-                        mx: 0.5,
-                        borderRadius: 2,
-                        py: 1.5,
-                        transition: 'all 0.2s ease',
-                        '&.Mui-selected': { 
-                          bgcolor: `${getSubjectColor(subject)}15`, 
-                          fontWeight: 'bold',
-                          boxShadow: `0 2px 8px ${getSubjectColor(subject)}30`
-                        },
-                        '&.Mui-selected:hover': { bgcolor: `${getSubjectColor(subject)}25` },
-                        '&:hover': { bgcolor: `${getSubjectColor(subject)}10` }
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar 
-                          sx={{ 
-                            width: 28, 
-                            height: 28, 
-                            bgcolor: getSubjectColor(subject),
-                            mr: 1.5,
-                            fontSize: '0.9rem'
-                          }}
-                        >
-                          {getSubjectIcon(subject)}
-                        </Avatar>
-                        <Typography sx={{ fontWeight: 600 }}>{subject}</Typography>
-                      </Box>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-            <Box>
-              <Typography 
-                variant="subtitle1" 
-                sx={{
-                  fontWeight: 700, 
-                  color: '#55b3d9', 
-                  mb: 1.5,
-                  mt: 3,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&::before': {
-                    content: '""',
-                    display: 'inline-block',
-                    width: 4,
-                    height: 18,
-                    backgroundColor: '#55b3d9',
-                    borderRadius: 4,
-                    mr: 1.5
-                  }
-                }}
-              >
-                Hedef Süre (Saat)
-              </Typography>
-              <TextField
-                type="number"
-                value={targetHours}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (!isNaN(value) && value >= 1 && value <= 150) setTargetHours(value);
-                  else if (!isNaN(value) && value > 150) setTargetHours(150);
-                  else if (!isNaN(value) && value < 1) setTargetHours(1);
-                }}
-                inputProps={{ min: 1, max: 150, step: 1 }}
-                fullWidth
-                variant="outlined"
-                placeholder="Hedef saat (1-150)"
-                sx={{
-                  mb: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 3,
-                    backgroundColor: '#ede8ce',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                    height: 56,
-                    '& fieldset': { borderColor: targetSubject ? `${getSubjectColor(targetSubject)}50` : 'rgba(25, 118, 210, 0.2)' },
-                    '&:hover fieldset': { borderColor: targetSubject ? getSubjectColor(targetSubject) : '#55b3d9' },
-                    '&.Mui-focused fieldset': { borderColor: targetSubject ? getSubjectColor(targetSubject) : '#55b3d9', borderWidth: 2 },
-                  },
-                  '& .MuiInputBase-input': { 
-                    textAlign: 'center', 
-                    fontSize: '1.5rem', 
-                    fontWeight: 'bold', 
-                    py: 1.5,
-                    color: targetSubject ? getSubjectColor(targetSubject) : '#55b3d9'
-                  },
-                  '& .MuiInputAdornment-root': {
-                    mr: 2
-                  }
-                }}
-              />
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center', 
-                px: 1, 
-                mb: 3,
-                mt: 1,
-                backgroundColor: 'rgba(33, 150, 243, 0.08)',
-                borderRadius: 2,
-                py: 1
-              }}>
-                <Chip 
-                  label="Minimum: 1 saat" 
-                  size="small" 
-                  sx={{ 
-                    bgcolor: 'rgba(33, 150, 243, 0.1)', 
-                    color: '#55b3d9',
-                    fontWeight: 600,
-                    border: '1px solid rgba(33, 150, 243, 0.2)'
-                  }}
-                />
-                <Chip 
-                  label="Maksimum: 150 saat" 
-                  size="small" 
-                  sx={{ 
-                    bgcolor: 'rgba(33, 150, 243, 0.1)', 
-                    color: '#55b3d9',
-                    fontWeight: 600,
-                    border: '1px solid rgba(33, 150, 243, 0.2)'
-                  }}
-                />
-              </Box>
-            </Box>
-            <Box sx={{ mt: 3 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<SaveIcon sx={{ fontSize: 22 }} />}
-                onClick={() => saveStudyTarget(targetSubject, targetHours)}
-                disabled={!targetSubject}
-                fullWidth
-                sx={{
-                  py: 1.5,
-                  borderRadius: 3,
-                  boxShadow: targetSubject ? `0 6px 16px ${getSubjectColor(targetSubject)}40` : '0 6px 16px rgba(33, 150, 243, 0.3)',
-                  background: targetSubject ? `linear-gradient(135deg, ${getSubjectColor(targetSubject)} 0%, ${getLighterColor(getSubjectColor(targetSubject))} 100%)` : 'linear-gradient(135deg, #2196F3 0%, #64B5F6 100%)',
-                  transition: 'all 0.3s ease',
-                  fontSize: '1.1rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.5px',
-                  '&:hover': { 
-                    boxShadow: targetSubject ? `0 8px 20px ${getSubjectColor(targetSubject)}50` : '0 8px 20px rgba(33, 150, 243, 0.4)', 
-                    transform: 'translateY(-3px)' 
-                  },
-                  '&:active': { 
-                    transform: 'translateY(-1px)', 
-                    boxShadow: targetSubject ? `0 4px 12px ${getSubjectColor(targetSubject)}30` : '0 4px 12px rgba(33, 150, 243, 0.25)' 
-                  },
-                }}
-              >
-                Hedefi Kaydet
-              </Button>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={7}>
-            <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <Typography 
-                variant="subtitle1" 
-                sx={{
-                  fontWeight: 700, 
-                  color: '#55b3d9', 
-                  mb: 1.5,
-                  display: 'flex',
-                  alignItems: 'center',
-                  '&::before': {
-                    content: '""',
-                    display: 'inline-block',
-                    width: 4,
-                    height: 18,
-                    backgroundColor: '#55b3d9',
-                    borderRadius: 4,
-                    mr: 1.5
-                  }
-                }}
-              >
-                Mevcut Hedefler
-              </Typography>
-              <Box sx={{ 
-                flex: 1, 
-                bgcolor: '#ede8ce', 
-                borderRadius: 3, 
-                p: 2.5, 
-                overflowY: 'auto', 
-                maxHeight: 280,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                border: '1px solid rgba(33, 150, 243, 0.15)'
-              }}>
-                {Object.keys(studyTargets).length === 0 ? (
-                  <Box sx={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    height: '100%', 
-                    p: 4, 
-                    color: 'text.secondary', 
-                    textAlign: 'center',
-                    backgroundColor: 'rgba(33, 150, 243, 0.03)',
-                    borderRadius: 2
-                  }}>
-                    <Box
-                      sx={{
-                        width: 70,
-                        height: 70,
-                        borderRadius: '50%',
-                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        mb: 2
-                      }}
-                    >
-                      <HelpOutlineIcon sx={{ fontSize: 40, color: '#55b3d9' }} />
-                    </Box>
-                    <Typography 
-                      variant="body1" 
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Avatar 
                       sx={{ 
-                        fontWeight: 600, 
-                        color: '#55b3d9',
-                        mb: 1
+                        background: `linear-gradient(135deg, ${getSubjectColor(subject)} 0%, ${getLighterColor(getSubjectColor(subject))} 100%)`, 
+                        width: 48, 
+                        height: 48, 
+                        mr: 2.5,
+                        boxShadow: `0 6px 20px ${getSubjectColor(subject)}40, 0 2px 8px ${getSubjectColor(subject)}20`,
+                        border: '2px solid rgba(255, 255, 255, 0.3)',
+                        fontSize: '1.2rem',
+                        fontWeight: 700,
+                        transition: 'all 0.3s ease',
+                        '&:hover': {
+                          transform: 'scale(1.1) rotate(5deg)',
+                          boxShadow: `0 8px 25px ${getSubjectColor(subject)}50, 0 4px 12px ${getSubjectColor(subject)}30`
+                        }
                       }}
                     >
-                      Henüz Hedef Belirlemedin
-                    </Typography>
-                    <Typography variant="body2" sx={{ color: '#546E7A', lineHeight: 1.6 }}>
-                      Hedefler, çalışma motivasyonunu artırmaya ve ilerlemeyi takip etmeye yardımcı olur.
-                    </Typography>
-                  </Box>
-                ) : (
-                  <List sx={{ p: 0 }}>
-                    {Object.keys(studyTargets).filter(subject => subject !== 'daily').sort().map(subject => {
-                      const targetTime = studyTargets[subject];
-                      const hours = Math.floor(targetTime / 3600);
-                      return (
-                        <Paper
-                          key={subject}
-                          sx={{
-                            mb: 2,
-                            p: 2,
-                            borderRadius: 3,
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                            borderLeft: `5px solid ${getSubjectColor(subject)}`,
-                            transition: 'all 0.3s ease',
-                            backgroundColor: '#ede8ce',
-                            '&:hover': { 
-                              transform: 'translateX(5px) scale(1.01)', 
-                              boxShadow: `0 6px 16px ${getSubjectColor(subject)}20` 
-                            },
+                      {getSubjectIcon(subject)}
+                    </Avatar>
+                    <Box>
+                      <Typography 
+                        variant="h6" 
+                        sx={{ 
+                          fontWeight: 800, 
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          textShadow: `0 1px 3px ${getSubjectColor(subject)}60`,
+                          mb: 0.5
+                        }}
+                      >
+                        {subject}
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <AccessTimeIcon sx={{ 
+                          fontSize: 18, 
+                          color: getSubjectColor(subject),
+                          filter: `drop-shadow(0 1px 2px ${getSubjectColor(subject)}40)`
+                        }} />
+                        <Typography 
+                          variant="body1" 
+                          sx={{ 
+                            fontWeight: 700, 
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '1rem'
                           }}
                         >
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Avatar 
-                              sx={{ 
-                                bgcolor: getSubjectColor(subject), 
-                                width: 36, 
-                                height: 36, 
-                                mr: 2,
-                                boxShadow: `0 3px 8px ${getSubjectColor(subject)}40`
-                              }}
-                            >
-                              {getSubjectIcon(subject)}
-                            </Avatar>
-                            <Box>
-                              <Typography variant="subtitle1" fontWeight="700" sx={{ color: getSubjectColor(subject) }}>{subject}</Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                <AccessTimeIcon sx={{ fontSize: 16, mr: 0.7, color: 'text.secondary' }} />
-                                <Typography variant="body2" fontWeight="600" color="text.secondary">{hours} saat</Typography>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <IconButton 
-                            size="small" 
-                            onClick={() => handleDeleteTarget(subject)} 
-                            sx={{ 
-                              color: 'text.secondary', 
-                              bgcolor: 'rgba(244, 67, 54, 0.1)',
-                              borderRadius: 2,
-                              transition: 'all 0.3s ease',
-                              '&:hover': { 
-                                color: 'white', 
-                                bgcolor: 'error.main',
-                                transform: 'scale(1.1)'
-                              } 
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Paper>
-                      );
-                    })}
-                  </List>
-                )}
+                          ⏰ {hours} saat
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                  <IconButton 
+                    size="medium" 
+                    onClick={() => handleDeleteTarget(subject)} 
+                    sx={{ 
+                      background: 'rgba(244, 67, 54, 0.15)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(244, 67, 54, 0.3)',
+                      color: 'rgba(244, 67, 54, 0.9)', 
+                      borderRadius: '12px',
+                      width: 44,
+                      height: 44,
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': { 
+                        background: 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                        color: 'white',
+                        border: '1px solid rgba(244, 67, 54, 0.8)',
+                        transform: 'scale(1.15) rotate(5deg)',
+                        boxShadow: '0 8px 25px rgba(244, 67, 54, 0.4)'
+                      } 
+                    }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Paper>
+              );
+            })}
+          </List>
+        </Box>
+      )}
+      
+      {/* İpucu */}
+      <Box sx={{ 
+        mt: 3, 
+        display: 'flex', 
+        alignItems: 'center',
+        p: 1.5,
+        borderRadius: 2,
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 193, 7, 0.3)'
+      }}>
+        <LightbulbIcon sx={{ color: '#ffc107', mr: 1.5, fontSize: 24 }} />
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: 'rgba(255, 255, 255, 0.9)', 
+            fontWeight: 600,
+            lineHeight: 1.5
+          }}
+        >
+          İpucu: Hedeflerini düzenli olarak gözden geçir ve güncelle. Gerçekçi hedefler motivasyonunu artırır.
+        </Typography>
               </Box>
-              <Box sx={{ 
-                mt: 3, 
-                display: 'flex', 
-                alignItems: 'center',
-                p: 1.5,
-                borderRadius: 2,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 193, 7, 0.3)'
-              }}>
-                <LightbulbIcon sx={{ color: '#ffc107', mr: 1.5, fontSize: 24 }} />
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
-                    color: 'rgba(255, 255, 255, 0.9)', 
-                    fontWeight: 600,
-                    lineHeight: 1.5
-                  }}
-                >
-                  İpucu: Hedeflerini düzenli olarak gözden geçir ve güncelle. Gerçekçi hedefler motivasyonunu artırır.
-                </Typography>
-              </Box>
-            </Box>
-          </Grid>
-        </Grid>
-      </Box>
+      
       <Dialog 
         open={topicDialog} 
         onClose={handleCloseTopicDialog} 
@@ -1777,6 +1824,435 @@ const Analiz = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Hedef Belirleme Dialog */}
+      <Dialog
+        open={targetDialogOpen}
+        onClose={() => setTargetDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'rgba(27, 41, 61, 0.95)',
+            backdropFilter: 'blur(25px)',
+            borderRadius: '24px',
+            border: '1px solid rgba(33, 150, 243, 0.3)',
+            boxShadow: '0 24px 80px rgba(0, 0, 0, 0.3), 0 8px 32px rgba(33, 150, 243, 0.2)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.1) 100%)',
+          borderBottom: '1px solid rgba(33, 150, 243, 0.2)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                width: 48, 
+                height: 48, 
+                borderRadius: '14px', 
+                background: 'linear-gradient(135deg, #2196F3 0%, #64B5F6 50%, #42A5F5 100%)', 
+                color: 'white', 
+                mr: 2,
+                boxShadow: '0 8px 20px rgba(33, 150, 243, 0.4)'
+              }}>
+                <FlagIcon sx={{ fontSize: 24 }} />
+              </Box>
+              <Box>
+                <Typography variant="h5" sx={{ fontWeight: 800, color: '#ffffff' }}>
+                  🎯 Çalışma Hedefi Belirle
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                  ✨ Her ders için hedeflediğin çalışma sürelerini ayarla
+                </Typography>
+              </Box>
+            </Box>
+            <IconButton onClick={() => setTargetDialogOpen(false)} sx={{ color: '#ffffff' }}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent sx={{ p: 4 }}>
+          <Divider sx={{ 
+            my: 2, 
+            borderColor: 'rgba(33, 150, 243, 0.2)',
+            '&::before, &::after': {
+              borderColor: 'rgba(33, 150, 243, 0.2)'
+            }
+          }} />
+          <Box sx={{ px: 2.5, pb: 2.5 }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={5}>
+                <Box sx={{ mb: 3 }}>
+                  <Typography 
+                    variant="subtitle1" 
+                    sx={{
+                      fontWeight: 700, 
+                      color: '#55b3d9', 
+                      mb: 2,
+                      display: 'flex',
+                      alignItems: 'center',
+                      '&::before': {
+                        content: '""',
+                        display: 'inline-block',
+                        width: 4,
+                        height: 18,
+                        backgroundColor: '#55b3d9',
+                        borderRadius: 4,
+                        mr: 1.5
+                      }
+                    }}
+                  >
+                    Sınav Türü & Ders Seç
+                  </Typography>
+                  
+                  {/* TYT/AYT Seçim Butonları */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    gap: 1.5, 
+                    mb: 2,
+                    p: 1,
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(33, 150, 243, 0.2)'
+                  }}>
+                    {['TYT', 'AYT'].map((type) => (
+                      <Button
+                        key={type}
+                        variant={examType === type ? 'contained' : 'outlined'}
+                        onClick={() => {
+                          setExamType(type);
+                          setTargetSubject('');
+                        }}
+                        sx={{
+                          flex: 1,
+                          py: 1.5,
+                          px: 3,
+                          borderRadius: '12px',
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          textTransform: 'none',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                          ...(examType === type ? {
+                            background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                            color: '#ffffff',
+                            boxShadow: '0 8px 25px rgba(33, 150, 243, 0.4), 0 4px 12px rgba(33, 150, 243, 0.2)',
+                            border: '2px solid #2196F3',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #1976D2 0%, #0D47A1 100%)',
+                              boxShadow: '0 12px 35px rgba(33, 150, 243, 0.5), 0 6px 16px rgba(33, 150, 243, 0.3)',
+                              transform: 'translateY(-2px) scale(1.02)'
+                            }
+                          } : {
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            border: '2px solid rgba(33, 150, 243, 0.3)',
+                            '&:hover': {
+                              background: 'rgba(255, 255, 255, 0.1)',
+                              color: 'rgba(255, 255, 255, 0.9)',
+                              border: '2px solid rgba(33, 150, 243, 0.5)',
+                              transform: 'translateY(-1px)'
+                            }
+                          })
+                        }}
+                      >
+                        {type === 'TYT' ? '📝 TYT' : '🎯 AYT'}
+                      </Button>
+                    ))}
+                                     </Box>
+                   
+                   {/* Ders Seçimi Dropdown */}
+                   <FormControl fullWidth>
+                     <Select
+                       value={targetSubject}
+                       onChange={(e) => setTargetSubject(e.target.value)}
+                       displayEmpty
+                       sx={{
+                         borderRadius: '16px',
+                         background: 'rgba(255, 255, 255, 0.12)',
+                         backdropFilter: 'blur(10px)',
+                         border: '1px solid rgba(33, 150, 243, 0.3)',
+                         boxShadow: '0 8px 32px rgba(33, 150, 243, 0.15)',
+                         height: 64,
+                         transition: 'all 0.3s ease',
+                         '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                         '&:hover': { 
+                           background: 'rgba(255, 255, 255, 0.18)',
+                           border: '1px solid rgba(33, 150, 243, 0.5)',
+                           transform: 'translateY(-2px)',
+                           boxShadow: '0 12px 40px rgba(33, 150, 243, 0.2)'
+                         },
+                         '&.Mui-focused': { 
+                           background: 'rgba(255, 255, 255, 0.2)',
+                           border: '2px solid rgba(33, 150, 243, 0.7)',
+                           boxShadow: '0 16px 50px rgba(33, 150, 243, 0.25)'
+                         },
+                         '& .MuiSelect-select': { 
+                           display: 'flex', 
+                           alignItems: 'center',
+                           fontWeight: 700,
+                           fontSize: '1.1rem',
+                           py: 2,
+                           color: 'rgba(255, 255, 255, 0.9)',
+                           textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)'
+                         }
+                       }}
+                       MenuProps={{ 
+                         PaperProps: { 
+                           sx: { 
+                             borderRadius: '20px', 
+                             background: 'rgba(255, 255, 255, 0.15)',
+                             backdropFilter: 'blur(20px)',
+                             border: '1px solid rgba(33, 150, 243, 0.3)',
+                             boxShadow: '0 20px 60px rgba(0,0,0,0.2)', 
+                             mt: 1,
+                             maxHeight: 400,
+                             overflow: 'auto'
+                           } 
+                         } 
+                       }}
+                     >
+                       <MenuItem value="" disabled>
+                         <Box sx={{ 
+                           display: 'flex', 
+                           alignItems: 'center', 
+                           color: 'rgba(255, 255, 255, 0.6)',
+                           background: 'rgba(33, 150, 243, 0.1)',
+                           borderRadius: '12px',
+                           p: 1.5,
+                           m: 1
+                         }}>
+                           <SubjectIcon sx={{ mr: 2, fontSize: 24, opacity: 0.8 }} />
+                           <Typography sx={{ fontWeight: 600, fontSize: '1rem' }}>
+                             📚 Lütfen bir {examType} dersi seçin
+                           </Typography>
+                         </Box>
+                       </MenuItem>
+                       {getCurrentSubjects().map(subject => (
+                         <MenuItem
+                           key={subject}
+                           value={subject}
+                           sx={{
+                             borderLeft: `4px solid ${getSubjectColor(subject)}`,
+                             my: 0.8,
+                             mx: 0.5,
+                             borderRadius: 2,
+                             py: 1.5,
+                             transition: 'all 0.2s ease',
+                             '&.Mui-selected': { 
+                               bgcolor: `${getSubjectColor(subject)}15`, 
+                               fontWeight: 'bold',
+                               boxShadow: `0 2px 8px ${getSubjectColor(subject)}30`
+                             },
+                             '&.Mui-selected:hover': { bgcolor: `${getSubjectColor(subject)}25` },
+                             '&:hover': { bgcolor: `${getSubjectColor(subject)}10` }
+                           }}
+                         >
+                           <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                             <Avatar 
+                               sx={{ 
+                                 width: 28, 
+                                 height: 28, 
+                                 bgcolor: getSubjectColor(subject),
+                                 mr: 1.5,
+                                 fontSize: '0.9rem'
+                               }}
+                             >
+                               {getSubjectIcon(subject)}
+                             </Avatar>
+                             <Typography sx={{ fontWeight: 600 }}>{subject}</Typography>
+                           </Box>
+                         </MenuItem>
+                       ))}
+                     </Select>
+                   </FormControl>
+                 </Box>
+                 
+                 {/* Hedef Süre Girişi */}
+                 <Box>
+                   <Typography 
+                     variant="subtitle1" 
+                     sx={{
+                       fontWeight: 700, 
+                       color: '#55b3d9', 
+                       mb: 1.5,
+                       mt: 3,
+                       display: 'flex',
+                       alignItems: 'center',
+                       '&::before': {
+                         content: '""',
+                         display: 'inline-block',
+                         width: 4,
+                         height: 18,
+                         backgroundColor: '#55b3d9',
+                         borderRadius: 4,
+                         mr: 1.5
+                       }
+                     }}
+                   >
+                     Hedef Süre (Saat)
+                   </Typography>
+                   <TextField
+                     type="number"
+                     value={targetHours}
+                     onChange={(e) => {
+                       const value = parseInt(e.target.value);
+                       if (!isNaN(value) && value >= 1 && value <= 400) setTargetHours(value);
+                       else if (!isNaN(value) && value > 400) setTargetHours(400);
+                       else if (!isNaN(value) && value < 1) setTargetHours(1);
+                     }}
+                     inputProps={{ min: 1, max: 400, step: 1 }}
+                     fullWidth
+                     variant="outlined"
+                     placeholder="Hedef saat (1-400)"
+                     sx={{
+                       mb: 3,
+                       '& .MuiOutlinedInput-root': {
+                         borderRadius: '16px',
+                         background: 'rgba(255, 255, 255, 0.12)',
+                         backdropFilter: 'blur(10px)',
+                         border: `2px solid ${targetSubject ? getSubjectColor(targetSubject) + '60' : 'rgba(33, 150, 243, 0.3)'}`,
+                         boxShadow: `0 8px 32px ${targetSubject ? getSubjectColor(targetSubject) + '20' : 'rgba(33, 150, 243, 0.15)'}`,
+                         height: 80,
+                         transition: 'all 0.3s ease',
+                         '& fieldset': { border: 'none' },
+                         '&:hover': { 
+                           background: 'rgba(255, 255, 255, 0.18)',
+                           border: `2px solid ${targetSubject ? getSubjectColor(targetSubject) : 'rgba(33, 150, 243, 0.5)'}`,
+                           transform: 'translateY(-3px)',
+                           boxShadow: `0 12px 40px ${targetSubject ? getSubjectColor(targetSubject) + '30' : 'rgba(33, 150, 243, 0.2)'}`
+                         },
+                         '&.Mui-focused': { 
+                           background: 'rgba(255, 255, 255, 0.2)',
+                           border: `3px solid ${targetSubject ? getSubjectColor(targetSubject) : 'rgba(33, 150, 243, 0.7)'}`,
+                           boxShadow: `0 16px 50px ${targetSubject ? getSubjectColor(targetSubject) + '40' : 'rgba(33, 150, 243, 0.25)'}`
+                         },
+                       },
+                       '& .MuiInputBase-input': { 
+                         textAlign: 'center', 
+                         fontSize: '2rem', 
+                         fontWeight: 900, 
+                         py: 2,
+                         color: 'rgba(255, 255, 255, 0.9)',
+                         textShadow: `0 2px 4px ${targetSubject ? getSubjectColor(targetSubject) + '60' : 'rgba(33, 150, 243, 0.4)'}`,
+                         '&::placeholder': {
+                           color: 'rgba(255, 255, 255, 0.5)',
+                           fontSize: '1.2rem',
+                           fontWeight: 600
+                         }
+                       }
+                     }}
+                   />
+                   
+                   {/* Min/Max Bilgi Chipleri */}
+                   <Box sx={{ 
+                     display: 'flex', 
+                     justifyContent: 'space-between', 
+                     alignItems: 'center', 
+                     gap: 2,
+                     mb: 4,
+                     mt: 2
+                   }}>
+                     <Chip 
+                       label="⚡ Min: 1 saat" 
+                       size="medium" 
+                       sx={{ 
+                         background: 'rgba(76, 175, 80, 0.15)', 
+                         backdropFilter: 'blur(10px)',
+                         color: 'rgba(255, 255, 255, 0.9)',
+                         fontWeight: 700,
+                         fontSize: '0.9rem',
+                         border: '1px solid rgba(76, 175, 80, 0.4)',
+                         borderRadius: '12px',
+                         px: 2,
+                         py: 1,
+                         boxShadow: '0 4px 16px rgba(76, 175, 80, 0.2)',
+                         transition: 'all 0.3s ease',
+                         '&:hover': {
+                           transform: 'scale(1.05)',
+                           boxShadow: '0 6px 20px rgba(76, 175, 80, 0.3)'
+                         }
+                       }}
+                     />
+                     <Chip 
+                       label="🚀 Max: 400 saat" 
+                       size="medium" 
+                       sx={{ 
+                         background: 'rgba(255, 152, 0, 0.15)', 
+                         backdropFilter: 'blur(10px)',
+                         color: 'rgba(255, 255, 255, 0.9)',
+                         fontWeight: 700,
+                         fontSize: '0.9rem',
+                         border: '1px solid rgba(255, 152, 0, 0.4)',
+                         borderRadius: '12px',
+                         px: 2,
+                         py: 1,
+                         boxShadow: '0 4px 16px rgba(255, 152, 0, 0.2)',
+                         transition: 'all 0.3s ease',
+                         '&:hover': {
+                           transform: 'scale(1.05)',
+                           boxShadow: '0 6px 20px rgba(255, 152, 0, 0.3)'
+                         }
+                       }}
+                     />
+                   </Box>
+                 </Box>
+               </Grid>
+               
+               {/* Kaydet Butonu */}
+               <Grid item xs={12}>
+                 <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                   <Button
+                     variant="contained"
+                     startIcon={<SaveIcon sx={{ fontSize: 26 }} />}
+                     onClick={() => {
+                       saveStudyTarget(targetSubject, targetHours);
+                       setTargetDialogOpen(false);
+                     }}
+                     disabled={!targetSubject}
+                     sx={{
+                       py: 2.5,
+                       px: 6,
+                       borderRadius: '20px',
+                       background: targetSubject ? 
+                         `linear-gradient(135deg, ${getSubjectColor(targetSubject)} 0%, ${getLighterColor(getSubjectColor(targetSubject))} 50%, ${getSubjectColor(targetSubject)} 100%)` : 
+                         'linear-gradient(135deg, #2196F3 0%, #42A5F5 50%, #1976D2 100%)',
+                       boxShadow: targetSubject ? 
+                         `0 12px 30px ${getSubjectColor(targetSubject)}40, 0 4px 15px ${getSubjectColor(targetSubject)}20` : 
+                         '0 12px 30px rgba(33, 150, 243, 0.4), 0 4px 15px rgba(33, 150, 243, 0.2)',
+                       transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                       fontSize: '1.3rem',
+                       fontWeight: 900,
+                       letterSpacing: '0.5px',
+                       textTransform: 'none',
+                       minWidth: '280px',
+                       '&:hover': { 
+                         boxShadow: targetSubject ? 
+                           `0 16px 40px ${getSubjectColor(targetSubject)}50, 0 8px 25px ${getSubjectColor(targetSubject)}30` : 
+                           '0 16px 40px rgba(33, 150, 243, 0.5), 0 8px 25px rgba(33, 150, 243, 0.3)', 
+                         transform: 'translateY(-5px) scale(1.02)'
+                       },
+                       '&:disabled': {
+                         background: 'rgba(255, 255, 255, 0.1)',
+                         color: 'rgba(255, 255, 255, 0.5)',
+                         boxShadow: 'none'
+                       }
+                     }}
+                   >
+                     🎯 Hedefi Kaydet
+                   </Button>
+                 </Box>
+               </Grid>
+             </Grid>
+           </Box>
+         </DialogContent>
+       </Dialog>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}

@@ -15,7 +15,6 @@ import InsightsIcon from '@mui/icons-material/Insights';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import HandshakeIcon from '@mui/icons-material/Handshake';
 import LanguageIcon from '@mui/icons-material/Language';
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 
@@ -34,7 +33,7 @@ const StyledDrawer = styled(Drawer, { shouldForwardProp: (prop) => prop !== 'ope
     '& .MuiDrawer-paper': {
       width: 80,
       boxSizing: 'border-box',
-      backgroundColor: '#1b293d',
+      backgroundColor: '#1a0545',
       color: '#ffffff',
       overflowX: 'hidden',
       borderRight: 'none',
@@ -58,7 +57,6 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
     { text: 'Not Defterim', icon: <NoteAltIcon />, path: '/not-defterim', color: '#9C27B0' }, // Canlı Mor
     { text: 'Konu Takip', icon: <CheckCircleOutlineIcon />, path: '/konu-takip', color: '#8BC34A' }, // Canlı Açık Yeşil
     { text: 'SoruForum', icon: <SmartToyIcon />, path: '/soru-forum', color: '#F44336' }, // Canlı Kırmızı
-    { text: 'Benimle Çalış', icon: <HandshakeIcon />, path: '/benimle-calis', color: '#673AB7' }, // Canlı Mor
     { text: 'RekaNET', icon: <LanguageIcon />, path: '/rekanet', color: '#03A9F4' }, // Canlı Açık Mavi
     { text: 'Çalışma Odası', icon: <WorkspacesIcon />, path: '/calisma-odasi', color: '#E91E63' } // Canlı Pembe
   ], []);
@@ -210,25 +208,33 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                 if (!element) return null; // Element yoksa tooltip gösterme
                 
                 const rect = element.getBoundingClientRect();
-                const topPosition = rect.top + rect.height/2 - 25;
+                const topPosition = rect.top + rect.height/2;
                 
                 return ReactDOM.createPortal(
                 <Box
                   sx={{
                     position: 'fixed',
-                    left: `${80 + 15}px`,
-                    top: topPosition,
+                    left: `${80 + 16}px`,
+                    top: `${topPosition}px`,
                     transform: 'translateY(-50%)',
-                    background: `linear-gradient(135deg, ${item.color}20, ${item.color}10, rgba(255,255,255,0.95))`,
-                    boxShadow: `0 8px 32px ${item.color}30, 0 4px 16px rgba(0,0,0,0.1)`,
-                    border: `2px solid ${item.color}30`,
-                    backdropFilter: 'blur(20px)',
+                    background: `linear-gradient(135deg, 
+                      ${item.color}E6 0%, 
+                      ${item.color}CC 50%, 
+                      ${item.color}E6 100%)`,
+                    boxShadow: `
+                      0 16px 48px ${item.color}35,
+                      0 8px 24px ${item.color}25,
+                      0 4px 12px rgba(0,0,0,0.15),
+                      inset 0 1px 0 rgba(255,255,255,0.25),
+                      inset 0 -1px 0 rgba(0,0,0,0.1)`,
+                    border: `2px solid ${item.color}`,
+                    backdropFilter: 'blur(20px) saturate(1.5)',
                     borderRadius: '20px',
-                    padding: '12px 20px',
+                    padding: '14px 20px',
                     zIndex: 9999,
                     whiteSpace: 'nowrap',
                     fontWeight: 700,
-                    color: item.color,
+                    color: '#ffffff',
                     fontFamily: 'Poppins, Montserrat, sans-serif',
                     fontSize: '1rem',
                     letterSpacing: '0.5px',
@@ -237,7 +243,8 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                     alignItems: 'center',
                     minWidth: '140px',
                     justifyContent: 'center',
-                    textShadow: `0 1px 2px ${item.color}20`,
+                    textShadow: '0 2px 6px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.5)',
+                    overflow: 'visible',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -248,68 +255,29 @@ const Sidebar = ({ open, handleDrawerToggle }) => {
                       height: 0,
                       borderTop: '10px solid transparent',
                       borderBottom: '10px solid transparent',
-                      borderRight: `10px solid ${item.color}30`,
-                      filter: 'drop-shadow(-2px 0 4px rgba(0,0,0,0.1))',
+                      borderRight: `10px solid ${item.color}`,
+                      filter: 'drop-shadow(-2px 0 4px rgba(0,0,0,0.15))',
                       zIndex: 2
                     },
                     '&::after': {
                       content: '""',
                       position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: `linear-gradient(45deg, ${item.color}05, transparent, ${item.color}05)`,
-                      borderRadius: '18px',
+                      top: '-2px',
+                      left: '-2px',
+                      right: '-2px',
+                      bottom: '-2px',
+                      background: `linear-gradient(135deg, 
+                        ${item.color}40 0%, 
+                        transparent 25%, 
+                        transparent 75%, 
+                        ${item.color}30 100%)`,
+                      borderRadius: '22px',
                       zIndex: -1,
-                    },
-                    animation: 'tooltipSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                    '@keyframes tooltipSlideIn': {
-                      '0%': {
-                        opacity: 0,
-                        transform: 'translateY(-50%) translateX(-20px) scale(0.8) rotateY(-10deg)',
-                      },
-                      '100%': {
-                        opacity: 1,
-                        transform: 'translateY(-50%) translateX(0) scale(1) rotateY(0deg)',
-                      }
+                      opacity: 0.6,
                     }
                   }}
                 >
-                  <Box
-                    component="span"
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      position: 'relative',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        background: item.color,
-                        left: '-12px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        boxShadow: `0 0 8px ${item.color}60`,
-                        animation: 'pulse 2s infinite',
-                      },
-                      '@keyframes pulse': {
-                        '0%, 100%': {
-                          opacity: 1,
-                          transform: 'translateY(-50%) scale(1)',
-                        },
-                        '50%': {
-                          opacity: 0.7,
-                          transform: 'translateY(-50%) scale(1.2)',
-                        }
-                      }
-                    }}
-                  >
-                    {item.text}
-                  </Box>
+                  {item.text}
                 </Box>,
                 document.body
               );

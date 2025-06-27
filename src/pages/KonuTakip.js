@@ -226,7 +226,7 @@ const KonuTakip = () => {
       sx={{ 
         py: 4, 
         minHeight: '100vh',
-        backgroundColor: '#1b293d',
+        backgroundColor: '#1a0545',
         position: 'relative',
         overflow: 'hidden'
       }}
@@ -316,7 +316,7 @@ const KonuTakip = () => {
               px: 3,
               borderRadius: 2,
               backgroundColor: tabValue === 0 ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-              color: tabValue === 0 ? '#1b293d' : 'white',
+              color: tabValue === 0 ? '#1a0545' : 'white',
               fontWeight: 600,
               fontSize: '0.9rem',
               '&:hover': {
@@ -338,7 +338,7 @@ const KonuTakip = () => {
               px: 3,
               borderRadius: 2,
               backgroundColor: tabValue === 1 ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-              color: tabValue === 1 ? '#1b293d' : 'white',
+              color: tabValue === 1 ? '#1a0545' : 'white',
               fontWeight: 600,
               fontSize: '0.9rem',
               '&:hover': {
@@ -577,7 +577,7 @@ const KonuTakip = () => {
           sx: {
             borderRadius: 3,
             overflow: 'hidden',
-            backgroundColor: '#1b293d',
+            backgroundColor: '#1a0545',
             boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
             border: '1px solid rgba(255,255,255,0.1)'
           }
@@ -637,7 +637,7 @@ const KonuTakip = () => {
             </DialogTitle>
             
             <DialogContent sx={{ 
-              bgcolor: '#1b293d', 
+              bgcolor: '#1a0545', 
               p: 0,
               position: 'relative'
             }}>

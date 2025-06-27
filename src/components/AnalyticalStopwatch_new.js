@@ -256,7 +256,7 @@ const AnalyticalStopwatch = () => {
           borderRadius: '20px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          background: '#1b293d'
+          background: '#1a0545'
         }}>
           <CardContent sx={{ p: 0 }}>
             <Box sx={{ 
@@ -359,7 +359,7 @@ const AnalyticalStopwatch = () => {
                         p: 1.5,
                         borderRadius: '8px',
                         backgroundColor: selectedTopic === topic ? 
-                          `${subjectColors[expandedSubject]}10` : '#1b293d',
+                          `${subjectColors[expandedSubject]}10` : '#1a0545',
                         border: `1px solid ${selectedTopic === topic ? 
                           subjectColors[expandedSubject] : 'rgba(0,0,0,0.06)'}`,
                       }}
@@ -407,7 +407,7 @@ const AnalyticalStopwatch = () => {
           borderRadius: '20px', 
           boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
           overflow: 'hidden',
-          background: '#1b293d',
+          background: '#1a0545',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -587,7 +587,7 @@ const AnalyticalStopwatch = () => {
             borderRadius: '16px',
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
             p: 1,
-            background: '#1b293d'
+            background: '#1a0545'
           }
         }}
       >

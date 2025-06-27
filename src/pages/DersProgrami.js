@@ -66,7 +66,7 @@ const subjectColors = {
   'Ders Çalışma': '#7e57c2',
   'Tekrar': '#5c6bc0',
   'Test Çözme': '#3f51b5',
-  'Deneme': '#1e293d',
+  'Deneme': '#1a0545',
   'default': '#55b3d9'
 };
 
@@ -92,7 +92,7 @@ const getSubjectColor = (subject) => {
 const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
   padding: '18px',
   borderRadius: '16px',
-  backgroundColor: '#4a5a7a',
+  backgroundColor: '#1a0545',
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
@@ -132,7 +132,7 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
 
 const FilterButton = styled(Button)(({ theme }) => ({
   backgroundColor: 'white',
-  color: '#1e293d',
+  color: '#1a0545',
   border: `1px solid ${alpha('#55b3d9', 0.3)}`,
   borderRadius: '25px',
   padding: '12px 24px',
@@ -557,7 +557,7 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: 'linear-gradient(135deg, #1e293d 0%, #243447 50%, #1e293d 100%)',
+        background: 'linear-gradient(135deg, #1a0545 0%, #243447 50%, #1a0545 100%)',
         position: 'relative',
         overflow: 'hidden',
         '&::after': {
@@ -613,7 +613,7 @@ const DersProgrami = () => {
           mb: 3,
           flexWrap: 'wrap',
           gap: 2,
-          backgroundColor: '#566e99',
+          backgroundColor: '#1a0545',
           padding: '24px 28px',
           borderRadius: '20px',
           boxShadow: '0 15px 35px rgba(0,0,0,0.1), 0 8px 15px rgba(0,0,0,0.05)',
@@ -668,9 +668,9 @@ const DersProgrami = () => {
                     boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
                     border: '1px solid rgba(85, 179, 217, 0.2)',
                     transition: 'all 0.3s ease',
-                    color: '#1e293d',
+                    color: '#1a0545',
                     '& input': {
-                      color: '#1e293d !important'
+                      color: '#1a0545 !important'
                     },
                     '&:hover': {
                       backgroundColor: 'white',
@@ -706,7 +706,7 @@ const DersProgrami = () => {
           }}
         >
                       <Box sx={{ px: 2, pb: 1, mb: 1, borderBottom: '1px solid rgba(85, 179, 217, 0.2)' }}>
-            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1e293d' }}>
+            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545' }}>
               Ders Konuları
             </Typography>
           </Box>
@@ -765,7 +765,7 @@ const DersProgrami = () => {
                   }}
                   sx={{ 
                     textTransform: 'none',
-                    color: '#1e293d',
+                    color: '#1a0545',
                     '&:hover': {
                       backgroundColor: alpha('#55b3d9', 0.1)
                     }
@@ -885,7 +885,7 @@ const DersProgrami = () => {
                     minHeight: '450px',
                     display: 'flex',
                     flexDirection: 'column',
-                    background: '#566e99',
+                    background: '#1a0545',
                     backdropFilter: 'blur(15px)',
                   }}
                 >
@@ -1056,7 +1056,7 @@ const DersProgrami = () => {
                   <Box sx={{ 
                     p: 2, 
                     borderTop: '1px solid rgba(255,255,255,0.2)',
-                    background: '#566e99',
+                    background: '#1a0545',
                     backdropFilter: 'blur(5px)',
                     display: 'flex',
                     justifyContent: 'center'
@@ -1193,7 +1193,7 @@ const DersProgrami = () => {
         <DialogContent sx={{ px: 4, py: 4 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1e293d !important', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <SchoolIcon fontSize="small" sx={{ color: '#55b3d9' }} />
                 Ders Adı *
               </Typography>
@@ -1207,7 +1207,7 @@ const DersProgrami = () => {
                 sx={{ 
                   '& .MuiInputBase-root': {
                     borderRadius: '12px',
-                    backgroundColor: '#2a3f54',
+                    backgroundColor: '#1a0545',
                     border: '1px solid rgba(85, 179, 217, 0.3)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
@@ -1215,7 +1215,7 @@ const DersProgrami = () => {
                     },
                     '&.Mui-focused': {
                       borderColor: '#55b3d9',
-                      backgroundColor: '#2a3f54'
+                      backgroundColor: '#1a0545'
                     }
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -1240,7 +1240,7 @@ const DersProgrami = () => {
             </Box>
             
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1e293d !important', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PersonIcon fontSize="small" sx={{ color: '#55b3d9' }} />
                 Öğretmen
               </Typography>
@@ -1253,7 +1253,7 @@ const DersProgrami = () => {
                 sx={{ 
                   '& .MuiInputBase-root': {
                     borderRadius: '12px',
-                    backgroundColor: '#2a3f54',
+                    backgroundColor: '#1a0545',
                     border: '1px solid rgba(85, 179, 217, 0.3)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
@@ -1261,7 +1261,7 @@ const DersProgrami = () => {
                     },
                     '&.Mui-focused': {
                       borderColor: '#55b3d9',
-                      backgroundColor: '#2a3f54'
+                      backgroundColor: '#1a0545'
                     }
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -1286,7 +1286,7 @@ const DersProgrami = () => {
             </Box>
             
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1e293d !important', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <LocationOnIcon fontSize="small" sx={{ color: '#55b3d9' }} />
                 Video URL (YouTube veya diğer platformlar)
               </Typography>
@@ -1299,7 +1299,7 @@ const DersProgrami = () => {
                 sx={{ 
                   '& .MuiInputBase-root': {
                     borderRadius: '12px',
-                    backgroundColor: '#2a3f54',
+                    backgroundColor: '#1a0545',
                     border: '1px solid rgba(85, 179, 217, 0.3)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
@@ -1307,7 +1307,7 @@ const DersProgrami = () => {
                     },
                     '&.Mui-focused': {
                       borderColor: '#55b3d9',
-                      backgroundColor: '#2a3f54'
+                      backgroundColor: '#1a0545'
                     }
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -1332,7 +1332,7 @@ const DersProgrami = () => {
             </Box>
             
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1e293d !important', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <NotesIcon fontSize="small" sx={{ color: '#55b3d9' }} />
                 Konu Adı / Notlar
               </Typography>
@@ -1347,7 +1347,7 @@ const DersProgrami = () => {
                 sx={{ 
                   '& .MuiInputBase-root': {
                     borderRadius: '12px',
-                    backgroundColor: '#2a3f54',
+                    backgroundColor: '#1a0545',
                     border: '1px solid rgba(85, 179, 217, 0.3)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
@@ -1355,7 +1355,7 @@ const DersProgrami = () => {
                     },
                     '&.Mui-focused': {
                       borderColor: '#55b3d9',
-                      backgroundColor: '#2a3f54'
+                      backgroundColor: '#1a0545'
                     }
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -1542,7 +1542,7 @@ const DersProgrami = () => {
           </Typography>
         </Box>
         
-        <DialogContent sx={{ px: 3, py: 3, bgcolor: '#1e293d' }}>
+        <DialogContent sx={{ px: 3, py: 3, bgcolor: '#1a0545' }}>
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'column', 
@@ -1552,7 +1552,7 @@ const DersProgrami = () => {
             <Paper elevation={0} sx={{ 
               p: 2.5,
               borderRadius: '16px',
-              backgroundColor: '#2a3f54',
+              backgroundColor: '#1a0545',
               border: '1px solid rgba(85, 179, 217, 0.2)',
               boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               transition: 'all 0.3s ease',
@@ -1600,7 +1600,7 @@ const DersProgrami = () => {
               <Paper elevation={0} sx={{ 
                 p: 2.5,
                 borderRadius: '16px',
-                backgroundColor: '#2a3f54',
+                backgroundColor: '#1a0545',
                 border: '1px solid rgba(85, 179, 217, 0.2)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 transition: 'all 0.3s ease',
@@ -1676,7 +1676,7 @@ const DersProgrami = () => {
               <Paper elevation={0} sx={{ 
                 p: 2.5,
                 borderRadius: '16px',
-                backgroundColor: '#2a3f54',
+                backgroundColor: '#1a0545',
                 border: '1px solid rgba(85, 179, 217, 0.2)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 transition: 'all 0.3s ease',
@@ -1725,7 +1725,7 @@ const DersProgrami = () => {
               <Paper elevation={0} sx={{ 
                 p: 2.5,
                 borderRadius: '16px',
-                backgroundColor: '#2a3f54',
+                backgroundColor: '#1a0545',
                 border: '1px solid rgba(85, 179, 217, 0.2)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                 transition: 'all 0.3s ease',
@@ -1764,7 +1764,7 @@ const DersProgrami = () => {
                       sx={{ 
                         p: 2,
                         borderRadius: '12px',
-                        backgroundColor: '#1e293d',
+                        backgroundColor: '#1a0545',
                         border: '1px solid rgba(85, 179, 217, 0.1)',
                         whiteSpace: 'pre-line',
                         fontWeight: 500,
@@ -1789,7 +1789,7 @@ const DersProgrami = () => {
             alignItems: 'center',
             p: 3,
             borderTop: '1px solid rgba(85, 179, 217, 0.1)',
-            backgroundColor: '#1e293d'
+            backgroundColor: '#1a0545'
           }}
         >
           <Button 
