@@ -62,11 +62,88 @@ const ProfileAvatar = styled(Avatar)(({ theme }) => ({
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
-    backgroundColor: '#FF5722',
+    backgroundColor: '#FF4444',
     color: '#FFF',
-    fontWeight: 'bold',
-    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    fontWeight: '600',
+    fontSize: '0.7rem',
+    minWidth: '18px',
+    height: '18px',
+    borderRadius: '9px',
+    boxShadow: `0 2px 8px rgba(255, 68, 68, 0.3), 0 0 0 2px ${theme.palette.background.paper}`,
+    animation: 'pulse 2s infinite',
+    '@keyframes pulse': {
+      '0%': {
+        transform: 'scale(1)',
+        boxShadow: `0 2px 8px rgba(255, 68, 68, 0.3), 0 0 0 2px ${theme.palette.background.paper}`,
+      },
+      '50%': {
+        transform: 'scale(1.1)',
+        boxShadow: `0 4px 12px rgba(255, 68, 68, 0.5), 0 0 0 2px ${theme.palette.background.paper}`,
+      },
+      '100%': {
+        transform: 'scale(1)',
+        boxShadow: `0 2px 8px rgba(255, 68, 68, 0.3), 0 0 0 2px ${theme.palette.background.paper}`,
+      }
+    }
   },
+}));
+
+const ModernNotificationButton = styled(IconButton)(({ theme, hasNotifications }) => ({
+  width: '44px',
+  height: '44px',
+  borderRadius: '12px',
+  backgroundColor: hasNotifications ? 'rgba(138, 43, 226, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+  border: hasNotifications ? '1px solid rgba(138, 43, 226, 0.2)' : '1px solid rgba(255, 255, 255, 0.1)',
+  backdropFilter: 'blur(10px)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  position: 'relative',
+  overflow: 'hidden',
+  
+  '&:before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: hasNotifications 
+      ? 'linear-gradient(135deg, rgba(138, 43, 226, 0.1) 0%, rgba(255, 20, 147, 0.1) 100%)'
+      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
+    borderRadius: '12px',
+    zIndex: -1,
+    transition: 'all 0.3s ease',
+  },
+  
+  '&:hover': {
+    transform: 'translateY(-2px) scale(1.05)',
+    backgroundColor: hasNotifications ? 'rgba(138, 43, 226, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+    border: hasNotifications ? '1px solid rgba(138, 43, 226, 0.3)' : '1px solid rgba(255, 255, 255, 0.2)',
+    boxShadow: hasNotifications 
+      ? '0 8px 25px rgba(138, 43, 226, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15)'
+      : '0 8px 25px rgba(255, 255, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1)',
+    
+    '&:before': {
+      background: hasNotifications 
+        ? 'linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(255, 20, 147, 0.2) 100%)'
+        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+    },
+    
+    '& .MuiSvgIcon-root': {
+      transform: 'scale(1.1)',
+      color: hasNotifications ? '#8A2BE2' : '#2a5956',
+    }
+  },
+  
+  '&:active': {
+    transform: 'translateY(0) scale(1.02)',
+  },
+  
+  '& .MuiSvgIcon-root': {
+    fontSize: '1.3rem',
+    color: hasNotifications ? '#8A2BE2' : '#2a5956',
+    transition: 'all 0.3s ease',
+    filter: hasNotifications ? 'drop-shadow(0 2px 4px rgba(138, 43, 226, 0.3))' : 'none',
+  }
 }));
 
 const Header = ({ handleDrawerToggle, sidebarOpen }) => {
@@ -202,24 +279,16 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
 
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Tooltip title="Bildirimler">
-            <IconButton
-              size="large"
+          <Tooltip title="Bildirimler" placement="bottom">
+            <ModernNotificationButton
               aria-label="show new notifications"
-              color="inherit"
               onClick={handleNotificationClick}
-              sx={{ 
-                color: unreadCount > 0 ? 'primary.main' : 'text.primary',
-                transition: 'transform 0.2s',
-                '&:hover': {
-                  transform: 'scale(1.1)',
-                } 
-              }}
+              hasNotifications={unreadCount > 0}
             >
               <StyledBadge badgeContent={unreadCount} color="error" invisible={unreadCount === 0}>
                 <NotificationsIcon />
               </StyledBadge>
-            </IconButton>
+            </ModernNotificationButton>
           </Tooltip>
           
           <Menu
@@ -229,33 +298,86 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             PaperProps={{
-              elevation: 3,
+              elevation: 0,
               sx: {
-                borderRadius: 2,
-                minWidth: 280,
+                borderRadius: '16px',
+                minWidth: 320,
                 mt: 1.5,
                 overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(138, 43, 226, 0.1)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 10px 20px rgba(138, 43, 226, 0.1)',
                 '&:before': {
                   content: '""',
                   display: 'block',
                   position: 'absolute',
                   top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
+                  right: 20,
+                  width: 12,
+                  height: 12,
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(138, 43, 226, 0.1)',
+                  borderBottom: 'none',
+                  borderRight: 'none',
                   transform: 'translateY(-50%) rotate(45deg)',
                   zIndex: 0,
                 },
               },
             }}
           >
-            <Box sx={{ p: 2, pb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="subtitle1" fontWeight={600}>Bildirimler</Typography>
+            <Box sx={{ 
+              p: 2.5, 
+              pb: 1.5, 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.05) 0%, rgba(255, 20, 147, 0.05) 100%)',
+              borderRadius: '16px 16px 0 0'
+            }}>
+              <Typography 
+                variant="subtitle1" 
+                fontWeight={700}
+                sx={{ 
+                  color: '#2a5956',
+                  fontSize: '1.1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                🔔 Bildirimler
+                {unreadCount > 0 && (
+                  <Box sx={{
+                    backgroundColor: '#FF4444',
+                    color: 'white',
+                    fontSize: '0.7rem',
+                    fontWeight: 600,
+                    px: 1,
+                    py: 0.3,
+                    borderRadius: '12px',
+                    minWidth: '20px',
+                    textAlign: 'center'
+                  }}>
+                    {unreadCount}
+                  </Box>
+                )}
+              </Typography>
               {unreadCount > 0 && (
-                <Tooltip title="Tümünü okundu işaretle">
-                  <IconButton size="small" onClick={handleReadAllNotifications}>
+                <Tooltip title="Tümünü okundu işaretle" placement="left">
+                  <IconButton 
+                    size="small" 
+                    onClick={handleReadAllNotifications}
+                    sx={{
+                      backgroundColor: 'rgba(138, 43, 226, 0.1)',
+                      color: '#8A2BE2',
+                      '&:hover': {
+                        backgroundColor: 'rgba(138, 43, 226, 0.2)',
+                        transform: 'scale(1.1)'
+                      }
+                    }}
+                  >
                     <DoneAllIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -303,9 +425,41 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
                 </MenuItem>
               ))
             ) : (
-              <Box sx={{ py: 4, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  Bildirim bulunmuyor
+              <Box sx={{ 
+                py: 5, 
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 1.5
+              }}>
+                <Box sx={{
+                  fontSize: '3rem',
+                  opacity: 0.3,
+                  filter: 'grayscale(1)'
+                }}>
+                  🔕
+                </Box>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{ 
+                    fontWeight: 500,
+                    fontSize: '0.95rem'
+                  }}
+                >
+                  Henüz bildirim bulunmuyor
+                </Typography>
+                <Typography 
+                  variant="caption" 
+                  color="text.disabled"
+                  sx={{ 
+                    fontSize: '0.8rem',
+                    maxWidth: '200px',
+                    lineHeight: 1.4
+                  }}
+                >
+                  Yeni bildirimler burada görünecek
                 </Typography>
               </Box>
             )}
