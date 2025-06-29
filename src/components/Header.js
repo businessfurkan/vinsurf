@@ -330,67 +330,332 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
             transformOrigin={{ horizontal: 'right', vertical: 'top' }}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             PaperProps={{
-              elevation: 3,
+              elevation: 0,
               sx: {
-                borderRadius: 2,
-                minWidth: 200,
+                borderRadius: '24px',
+                minWidth: 320,
                 mt: 1.5,
                 overflow: 'visible',
-                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.15))',
+                background: 'linear-gradient(135deg, rgba(26, 5, 69, 0.95) 0%, rgba(45, 15, 90, 0.9) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(138, 43, 226, 0.3)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.4), 0 10px 20px rgba(138, 43, 226, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
                 '&:before': {
                   content: '""',
                   display: 'block',
                   position: 'absolute',
                   top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: 'background.paper',
+                  right: 20,
+                  width: 16,
+                  height: 16,
+                  background: 'linear-gradient(135deg, rgba(26, 5, 69, 0.95) 0%, rgba(45, 15, 90, 0.9) 100%)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1px solid rgba(138, 43, 226, 0.3)',
+                  borderBottom: 'none',
+                  borderRight: 'none',
                   transform: 'translateY(-50%) rotate(45deg)',
                   zIndex: 0,
                 },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  borderRadius: '24px',
+                  background: 'linear-gradient(45deg, rgba(138, 43, 226, 0.1) 0%, rgba(30, 144, 255, 0.1) 50%, rgba(255, 20, 147, 0.1) 100%)',
+                  zIndex: -1,
+                  animation: 'profileShimmer 3s ease-in-out infinite alternate'
+                },
+                '@keyframes profileShimmer': {
+                  '0%': {
+                    background: 'linear-gradient(45deg, rgba(138, 43, 226, 0.1) 0%, rgba(30, 144, 255, 0.1) 50%, rgba(255, 20, 147, 0.1) 100%)'
+                  },
+                  '100%': {
+                    background: 'linear-gradient(45deg, rgba(255, 20, 147, 0.1) 0%, rgba(138, 43, 226, 0.1) 50%, rgba(30, 144, 255, 0.1) 100%)'
+                  }
+                }
               },
             }}
           >
-            <Box sx={{ py: 1.5, px: 2 }}>
-              <Typography variant="subtitle1" fontWeight={600}>
-                {userName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {auth.currentUser?.email}
-              </Typography>
+            {/* Premium Header Section */}
+            <Box sx={{ 
+              p: 3, 
+              pb: 2,
+              background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, rgba(30, 144, 255, 0.2) 100%)',
+              borderRadius: '24px 24px 0 0',
+              position: 'relative',
+              overflow: 'hidden',
+              borderBottom: '1px solid rgba(138, 43, 226, 0.2)',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%)',
+                animation: 'headerShine 3s ease-in-out infinite'
+              },
+              '@keyframes headerShine': {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(100%)' }
+              }
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'relative', zIndex: 1 }}>
+                <Box sx={{ 
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: -4,
+                    left: -4,
+                    right: -4,
+                    bottom: -4,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(45deg, #8A2BE2, #1E90FF, #FF1493)',
+                    animation: 'avatarGlow 2s ease-in-out infinite alternate',
+                    filter: 'blur(8px)',
+                    opacity: 0.8
+                  },
+                  '@keyframes avatarGlow': {
+                    '0%': { opacity: 0.6, transform: 'scale(1)' },
+                    '100%': { opacity: 1, transform: 'scale(1.1)' }
+                  }
+                }}>
+                  <ProfileAvatar 
+                    src={userPhotoURL}
+                    sx={{ 
+                      bgcolor: userPhotoURL ? 'transparent' : theme.palette.primary.main,
+                      width: 56,
+                      height: 56,
+                      position: 'relative',
+                      zIndex: 1,
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    {!userPhotoURL && getInitials(userName)}
+                  </ProfileAvatar>
+                </Box>
+                <Box sx={{ flex: 1 }}>
+                  <Typography 
+                    variant="h6" 
+                    fontWeight={700}
+                    sx={{
+                      color: '#ffffff',
+                      fontSize: '1.1rem',
+                      mb: 0.5,
+                      textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                    }}
+                  >
+                    {userName}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: 'rgba(255,255,255,0.8)',
+                      fontSize: '0.85rem',
+                      fontWeight: 500
+                    }}
+                  >
+                    {auth.currentUser?.email}
+                  </Typography>
+                </Box>
+              </Box>
             </Box>
-            <Divider />
-            <MenuItem onClick={handleProfileClick} sx={{ py: 1.5 }}>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="Profil" />
-            </MenuItem>
-            <MenuItem onClick={handleClose} sx={{ py: 1.5 }}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText primary="Ayarlar" />
-            </MenuItem>
-            {isAdmin && (
-              <MenuItem onClick={() => {
-                handleAdminLogin();
-                handleClose();
-              }} sx={{ py: 1.5 }}>
-                <ListItemIcon>
-                  <LockIcon fontSize="small" color="error" />
+
+            {/* Menu Items */}
+            <Box sx={{ p: 1 }}>
+              <MenuItem 
+                onClick={handleProfileClick} 
+                sx={{ 
+                  py: 2, 
+                  px: 3,
+                  borderRadius: '16px',
+                  mb: 1,
+                  background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(30, 144, 255, 0.15) 100%)',
+                  border: '1px solid rgba(138, 43, 226, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, rgba(138, 43, 226, 0.25) 0%, rgba(30, 144, 255, 0.25) 100%)',
+                    transform: 'translateY(-2px) scale(1.02)',
+                    boxShadow: '0 8px 25px rgba(138, 43, 226, 0.4), 0 4px 12px rgba(30, 144, 255, 0.2)',
+                    border: '1px solid rgba(138, 43, 226, 0.4)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <Box sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #8A2BE2 0%, #1E90FF 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(138, 43, 226, 0.3)'
+                  }}>
+                    <PersonIcon sx={{ fontSize: '1.1rem', color: 'white' }} />
+                  </Box>
                 </ListItemIcon>
-                <ListItemText primary="Admin Girişi" sx={{ color: 'error.main' }} />
+                <ListItemText 
+                  primary="Profil" 
+                  sx={{ 
+                    '& .MuiTypography-root': { 
+                      fontWeight: 600,
+                      color: '#ffffff'
+                    } 
+                  }} 
+                />
               </MenuItem>
-            )}
-            <Divider />
-            <MenuItem onClick={handleLogout} sx={{ py: 1.5 }}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" color="error" />
-              </ListItemIcon>
-              <ListItemText primary="Çıkış Yap" sx={{ color: 'error.main' }} />
-            </MenuItem>
+
+              <MenuItem 
+                onClick={handleClose} 
+                sx={{ 
+                  py: 2, 
+                  px: 3,
+                  borderRadius: '16px',
+                  mb: 1,
+                  background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(139, 195, 74, 0.15) 100%)',
+                  border: '1px solid rgba(76, 175, 80, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(139, 195, 74, 0.25) 100%)',
+                    transform: 'translateY(-2px) scale(1.02)',
+                    boxShadow: '0 8px 25px rgba(76, 175, 80, 0.4), 0 4px 12px rgba(139, 195, 74, 0.2)',
+                    border: '1px solid rgba(76, 175, 80, 0.4)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <Box sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)'
+                  }}>
+                    <SettingsIcon sx={{ fontSize: '1.1rem', color: 'white' }} />
+                  </Box>
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Ayarlar" 
+                  sx={{ 
+                    '& .MuiTypography-root': { 
+                      fontWeight: 600,
+                      color: '#ffffff'
+                    } 
+                  }} 
+                />
+              </MenuItem>
+
+              {isAdmin && (
+                <MenuItem 
+                  onClick={() => {
+                    handleAdminLogin();
+                    handleClose();
+                  }} 
+                  sx={{ 
+                    py: 2, 
+                    px: 3,
+                    borderRadius: '16px',
+                    mb: 1,
+                    background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 193, 7, 0.15) 100%)',
+                    border: '1px solid rgba(255, 152, 0, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(255, 193, 7, 0.25) 100%)',
+                      transform: 'translateY(-2px) scale(1.02)',
+                      boxShadow: '0 8px 25px rgba(255, 152, 0, 0.4), 0 4px 12px rgba(255, 193, 7, 0.2)',
+                      border: '1px solid rgba(255, 152, 0, 0.4)'
+                    }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <Box sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '10px',
+                      background: 'linear-gradient(135deg, #FF9800 0%, #FFC107 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 12px rgba(255, 152, 0, 0.3)'
+                    }}>
+                      <LockIcon sx={{ fontSize: '1.1rem', color: 'white' }} />
+                    </Box>
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary="Admin Girişi" 
+                    sx={{ 
+                      '& .MuiTypography-root': { 
+                        fontWeight: 600,
+                        color: '#ffffff'
+                      } 
+                    }} 
+                  />
+                </MenuItem>
+              )}
+
+              {/* Divider */}
+              <Box sx={{ 
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.3), transparent)',
+                my: 1.5,
+                mx: 2,
+                boxShadow: '0 0 10px rgba(138, 43, 226, 0.2)'
+              }} />
+
+              <MenuItem 
+                onClick={handleLogout} 
+                sx={{ 
+                  py: 2, 
+                  px: 3,
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(244, 67, 54, 0.15) 0%, rgba(233, 30, 99, 0.15) 100%)',
+                  border: '1px solid rgba(244, 67, 54, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, rgba(244, 67, 54, 0.25) 0%, rgba(233, 30, 99, 0.25) 100%)',
+                    transform: 'translateY(-2px) scale(1.02)',
+                    boxShadow: '0 8px 25px rgba(244, 67, 54, 0.4), 0 4px 12px rgba(233, 30, 99, 0.2)',
+                    border: '1px solid rgba(244, 67, 54, 0.4)'
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 40 }}>
+                  <Box sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #F44336 0%, #E91E63 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(244, 67, 54, 0.3)'
+                  }}>
+                    <LogoutIcon sx={{ fontSize: '1.1rem', color: 'white' }} />
+                  </Box>
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Çıkış Yap" 
+                  sx={{ 
+                    '& .MuiTypography-root': { 
+                      fontWeight: 600,
+                      color: '#ffffff'
+                    } 
+                  }} 
+                />
+              </MenuItem>
+            </Box>
           </Menu>
 
       {/* Admin Giriş Dialog */}
