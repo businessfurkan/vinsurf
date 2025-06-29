@@ -1064,17 +1064,20 @@ const Analiz = () => {
         maxWidth="md" 
         PaperProps={{ 
           sx: { 
-            borderRadius: '24px', 
+            borderRadius: '32px', 
             overflow: 'hidden', 
-            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-            backdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            background: 'linear-gradient(145deg, rgba(26, 5, 69, 0.95) 0%, rgba(26, 5, 69, 0.98) 100%)',
+            backdropFilter: 'blur(50px)',
+            border: '2px solid rgba(255, 255, 255, 0.15)',
             boxShadow: `
-              0 20px 60px rgba(0, 0, 0, 0.3),
-              0 8px 32px rgba(0, 0, 0, 0.2),
-              inset 0 1px 0 rgba(255, 255, 255, 0.2)
+              0 32px 80px rgba(0, 0, 0, 0.4),
+              0 16px 48px rgba(0, 0, 0, 0.3),
+              inset 0 2px 0 rgba(255, 255, 255, 0.25),
+              inset 0 -2px 0 rgba(0, 0, 0, 0.1)
             `,
             position: 'relative',
+            transform: 'scale(1)',
+            transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             '&::before': {
               content: '""',
               position: 'absolute',
@@ -1082,19 +1085,38 @@ const Analiz = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              background: `radial-gradient(circle at 30% 20%, ${selectedSubject ? getSubjectColor(selectedSubject) : '#3f51b5'}20 0%, transparent 60%)`,
+              background: selectedSubject 
+                ? `radial-gradient(ellipse at 30% 20%, ${getSubjectColor(selectedSubject)}25 0%, ${getSubjectColor(selectedSubject)}15 40%, transparent 70%)`
+                : 'radial-gradient(ellipse at 30% 20%, #3f51b525 0%, #3f51b515 40%, transparent 70%)',
               pointerEvents: 'none',
               zIndex: 0,
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, transparent 30%, rgba(255,255,255,0.04) 100%)',
+              pointerEvents: 'none',
+              zIndex: 1,
             }
           } 
         }}
+        BackdropProps={{
+          sx: {
+            backdropFilter: 'blur(12px)',
+            backgroundColor: 'rgba(0,0,0,0.7)'
+          }
+        }}
       >
-        <DialogTitle sx={{ p: 0, position: 'relative', zIndex: 1 }}>
+        <DialogTitle sx={{ p: 0, position: 'relative', zIndex: 2 }}>
           <Box sx={{ 
-            p: 3, 
+            p: 4, 
             background: selectedSubject 
-              ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 60%, ${getSubjectColor(selectedSubject)}99 100%)` 
-              : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 60%, #7986cb 100%)', 
+              ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}E6 50%, ${getSubjectColor(selectedSubject)}CC 100%)` 
+              : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 50%, #7986cb 100%)', 
             color: 'white', 
             display: 'flex', 
             justifyContent: 'space-between', 
@@ -1108,50 +1130,68 @@ const Analiz = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              background: 'linear-gradient(45deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%)',
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 40%, rgba(255, 255, 255, 0.08) 100%)',
               pointerEvents: 'none',
             },
             '&::after': {
               content: '""',
               position: 'absolute',
               bottom: 0,
-              left: 0,
-              right: 0,
-              height: '2px',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)',
+              left: '10%',
+              right: '10%',
+              height: '3px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%)',
+              borderRadius: '2px',
+              boxShadow: '0 0 12px rgba(255, 255, 255, 0.4)'
             }
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
               <Box sx={{
-                p: 1.5,
-                borderRadius: '12px',
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                mr: 2,
-                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)'
+                p: 2,
+                borderRadius: '16px',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                backdropFilter: 'blur(15px)',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                mr: 3,
+                boxShadow: 'inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 8px 20px rgba(0,0,0,0.2)',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: 'inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 12px 28px rgba(0,0,0,0.25)'
+                }
               }}>
-                <SchoolIcon sx={{ fontSize: 28, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                <SchoolIcon sx={{ 
+                  fontSize: 32, 
+                  filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.4))',
+                  color: '#ffffff'
+                }} />
               </Box>
               <Box>
                 <Typography 
-                  variant="h5" 
+                  variant="h4" 
                   sx={{
-                    fontWeight: 800, 
-                    fontSize: '1.5rem',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                    filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))',
-                    letterSpacing: '-0.5px'
+                    fontWeight: 900, 
+                    fontSize: '1.8rem',
+                    textShadow: '0 3px 12px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                    letterSpacing: '-0.8px',
+                    background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 0.5
                   }}
                 >
                   {selectedSubject || 'Ders'} - Konu Detayları
                 </Typography>
                 <Typography 
-                  variant="body2" 
+                  variant="body1" 
                   sx={{
-                    opacity: 0.9,
-                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                    mt: 0.5
+                    opacity: 0.95,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.4)',
+                    fontWeight: 600,
+                    fontSize: '1rem',
+                    letterSpacing: '0.2px'
                   }}
                 >
                   Detaylı çalışma analizi
@@ -1160,55 +1200,83 @@ const Analiz = () => {
             </Box>
             <IconButton 
               color="inherit" 
-              size="small" 
+              size="medium" 
               onClick={handleCloseTopicDialog} 
               sx={{ 
-                background: 'rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.3)',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                backdropFilter: 'blur(15px)',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: 'inset 0 2px 0 rgba(255, 255, 255, 0.4), 0 8px 20px rgba(0,0,0,0.2)',
                 position: 'relative',
                 zIndex: 1,
+                width: 48,
+                height: 48,
+                borderRadius: '16px',
                 '&:hover': { 
-                  background: 'rgba(255, 255, 255, 0.25)',
-                  transform: 'scale(1.05)'
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%)',
+                  transform: 'scale(1.1) rotate(90deg)',
+                  boxShadow: 'inset 0 2px 0 rgba(255, 255, 255, 0.5), 0 12px 28px rgba(0,0,0,0.25)'
                 },
-                transition: 'all 0.3s ease'
+                transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
               }}
             >
-              <CloseIcon fontSize="small" />
+              <CloseIcon sx={{ fontSize: 20 }} />
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ p: 0, position: 'relative', zIndex: 1 }}>
+        <DialogContent sx={{ p: 0, position: 'relative', zIndex: 2 }}>
           {selectedSubject && analytics[selectedSubject] ? (
-            <Box sx={{ p: 4 }}>
+            <Box sx={{ p: 5 }}>
               <Box sx={{ 
-                mb: 4, 
-                p: 3, 
-                borderRadius: '20px',
-                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.08) 100%)',
-                backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                mb: 5, 
+                p: 4, 
+                borderRadius: '24px',
+                background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%)',
+                backdropFilter: 'blur(25px)',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
                 boxShadow: `
-                  0 8px 32px rgba(0, 0, 0, 0.15),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                  0 16px 48px rgba(0, 0, 0, 0.2),
+                  0 8px 24px rgba(0, 0, 0, 0.15),
+                  inset 0 2px 0 rgba(255, 255, 255, 0.25),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.1)
                 `,
                 position: 'relative',
                 overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-2px)',
+                  boxShadow: `
+                    0 20px 60px rgba(0, 0, 0, 0.25),
+                    0 12px 32px rgba(0, 0, 0, 0.2),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+                    inset 0 -1px 0 rgba(0, 0, 0, 0.1)
+                  `
+                },
                 '&::before': {
                   content: '""',
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
-                  height: '3px',
+                  height: '4px',
                   background: selectedSubject 
-                    ? `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}80 100%)`
-                    : 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 100%)',
+                    ? `linear-gradient(90deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}E6 50%, ${getSubjectColor(selectedSubject)}80 100%)`
+                    : 'linear-gradient(90deg, #3f51b5 0%, #5c6bc0 50%, #7986cb 100%)',
                   boxShadow: selectedSubject 
-                    ? `0 0 12px ${getSubjectColor(selectedSubject)}60`
-                    : '0 0 12px rgba(63, 81, 181, 0.6)',
+                    ? `0 0 16px ${getSubjectColor(selectedSubject)}80, 0 4px 8px ${getSubjectColor(selectedSubject)}40`
+                    : '0 0 16px rgba(63, 81, 181, 0.8), 0 4px 8px rgba(63, 81, 181, 0.4)',
+                  borderRadius: '2px'
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%, rgba(255,255,255,0.05) 100%)',
+                  pointerEvents: 'none',
+                  borderRadius: '24px'
                 }
               }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -1512,41 +1580,64 @@ const Analiz = () => {
           )}
         </DialogContent>
         <DialogActions sx={{ 
-          p: 3, 
+          p: 4, 
           justifyContent: 'center',
           position: 'relative',
-          zIndex: 1,
-          borderTop: '1px solid rgba(255, 255, 255, 0.15)'
+          zIndex: 2,
+          borderTop: '2px solid rgba(255, 255, 255, 0.15)',
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)',
+          backdropFilter: 'blur(20px)'
         }}>
           <Button 
             variant="contained" 
             onClick={handleCloseTopicDialog} 
             sx={{ 
-              fontWeight: 700, 
-              px: 6, 
-              py: 1.5,
-              borderRadius: '16px',
-              fontSize: '1rem',
+              fontWeight: 800, 
+              px: 8, 
+              py: 2,
+              borderRadius: '20px',
+              fontSize: '1.1rem',
               background: selectedSubject 
-                ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}CC 100%)`
-                : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%)',
+                ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)} 0%, ${getSubjectColor(selectedSubject)}E6 50%, ${getSubjectColor(selectedSubject)}CC 100%)`
+                : 'linear-gradient(135deg, #3f51b5 0%, #5c6bc0 50%, #7986cb 100%)',
               color: '#ffffff',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(255, 255, 255, 0.25)',
+              backdropFilter: 'blur(15px)',
               boxShadow: selectedSubject 
-                ? `0 4px 16px ${getSubjectColor(selectedSubject)}40`
-                : '0 4px 16px rgba(63, 81, 181, 0.4)',
-              textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                ? `0 8px 24px ${getSubjectColor(selectedSubject)}50, inset 0 2px 0 rgba(255, 255, 255, 0.3)`
+                : '0 8px 24px rgba(63, 81, 181, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.3)',
+              textShadow: '0 2px 4px rgba(0,0,0,0.4)',
+              letterSpacing: '0.5px',
+              textTransform: 'none',
+              minWidth: '160px',
+              position: 'relative',
+              overflow: 'hidden',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: '-100%',
+                width: '100%',
+                height: '100%',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                transition: 'left 0.6s ease'
+              },
               '&:hover': {
                 background: selectedSubject 
-                  ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)}DD 0%, ${getSubjectColor(selectedSubject)}AA 100%)`
-                  : 'linear-gradient(135deg, #5c6bc0 0%, #7986cb 100%)',
-                transform: 'translateY(-2px) scale(1.05)',
+                  ? `linear-gradient(135deg, ${getSubjectColor(selectedSubject)}F0 0%, ${getSubjectColor(selectedSubject)}DD 50%, ${getSubjectColor(selectedSubject)}BB 100%)`
+                  : 'linear-gradient(135deg, #5c6bc0 0%, #7986cb 50%, #9575cd 100%)',
+                transform: 'translateY(-3px) scale(1.08)',
                 boxShadow: selectedSubject 
-                  ? `0 8px 24px ${getSubjectColor(selectedSubject)}50`
-                  : '0 8px 24px rgba(63, 81, 181, 0.5)',
+                  ? `0 16px 40px ${getSubjectColor(selectedSubject)}60, inset 0 2px 0 rgba(255, 255, 255, 0.4)`
+                  : '0 16px 40px rgba(63, 81, 181, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.4)',
+                '&::before': {
+                  left: '100%'
+                }
               },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              '&:active': {
+                transform: 'translateY(-1px) scale(1.05)'
+              },
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
             Kapat

@@ -1,6 +1,5 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNotifications } from '../context/NotificationContext';
-import { ThemeContext } from '../context/ThemeContext';
 import {
   AppBar,
   Toolbar,
@@ -35,8 +34,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
+
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -85,8 +83,7 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
   
-  // Tema değiştirme için context'i kullan
-  const { darkMode, toggleTheme } = useContext(ThemeContext);
+
   
   // Bildirim sistemini kullan
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -202,33 +199,7 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
             YKS Çalışma Asistanı
           </Typography>
           
-          {/* Gece Modu Butonu */}
-          <Tooltip title={darkMode ? "Aydınlık Moda Geç" : "Koyu Moda Geç"}>
-            <IconButton
-              onClick={toggleTheme}
-              sx={{
-                ml: 1.5,
-                bgcolor: darkMode ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.05)',
-                color: darkMode ? '#ffffff' : '#000000',
-                '&:hover': {
-                  bgcolor: darkMode ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.1)',
-                  transform: 'scale(1.1) rotate(10deg)',
-                  boxShadow: darkMode ? '0 0 10px rgba(255, 255, 255, 0.3)' : '0 0 10px rgba(0, 0, 0, 0.1)',
-                },
-                transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                width: 40,
-                height: 40,
-                borderRadius: '12px',
-                boxShadow: darkMode ? '0 0 5px rgba(255, 255, 255, 0.2)' : '0 0 5px rgba(0, 0, 0, 0.05)',
-                border: darkMode ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid rgba(0, 0, 0, 0.05)',
-              }}
-            >
-              {darkMode ? 
-                <LightModeIcon sx={{ fontSize: '1.3rem', filter: 'drop-shadow(0 0 2px rgba(255, 255, 255, 0.7))' }} /> : 
-                <DarkModeIcon sx={{ fontSize: '1.3rem', filter: 'drop-shadow(0 0 1px rgba(0, 0, 0, 0.5))' }} />
-              }
-            </IconButton>
-          </Tooltip>
+
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Tooltip title="Bildirimler">

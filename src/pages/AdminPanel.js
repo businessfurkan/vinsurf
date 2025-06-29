@@ -62,12 +62,15 @@ const AdminPanel = () => {
 
   // RekaNET State'leri
   const [rekaNetActive, setRekaNetActive] = useState(false);
+  const [rekaNetCountdown, setRekaNetCountdown] = useState(null);
   const [rekaNetStats, setRekaNetStats] = useState({
     totalParticipants: 0,
     totalSubmissions: 0,
     lastActivated: null,
-    activatedBy: null
+    activatedBy: null,
+    competitionEndTime: null
   });
+  const [rekaNetSubmissions, setRekaNetSubmissions] = useState([]);
   
 
   
@@ -116,19 +119,44 @@ const AdminPanel = () => {
       
       const totalSubmissions = submissionsSnapshot.size;
       const uniqueParticipants = new Set();
+      const submissionsData = [];
       
+      // Kullanıcı profillerini almak için
+      const userProfilesRef = collection(db, 'userProfiles');
+      const userProfilesSnapshot = await getDocs(userProfilesRef);
+      const userProfiles = {};
+      
+      userProfilesSnapshot.forEach((doc) => {
+        userProfiles[doc.id] = doc.data();
+      });
+
       submissionsSnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.userId) {
           uniqueParticipants.add(data.userId);
+          
+          // Kullanıcı bilgilerini ekle
+          const userProfile = userProfiles[data.userId];
+          submissionsData.push({
+            id: doc.id,
+            ...data,
+            userName: userProfile?.displayName || 'Bilinmeyen Kullanıcı',
+            userEmail: userProfile?.email || 'Bilinmeyen Email',
+            submittedAt: data.submittedAt?.toDate() || new Date()
+          });
         }
       });
+
+      // Tarihe göre sırala (en yeni önce)
+      submissionsData.sort((a, b) => b.submittedAt - a.submittedAt);
 
       setRekaNetStats(prev => ({
         ...prev,
         totalParticipants: uniqueParticipants.size,
         totalSubmissions: totalSubmissions
       }));
+      
+      setRekaNetSubmissions(submissionsData);
     } catch (error) {
       console.error('RekaNET stats error:', error);
     }
@@ -190,6 +218,69 @@ const AdminPanel = () => {
       });
     }
   }, [studyRoomActive]);
+
+  // RekaNET durumunu takip et
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, 'rekaNet', 'competitionStatus'), (doc) => {
+      if (doc.exists()) {
+        const data = doc.data();
+        setRekaNetActive(data.active || false);
+        
+        if (data.active && data.actualEndTime) {
+          const endTime = new Date(data.actualEndTime);
+          const now = new Date();
+          
+          if (endTime > now) {
+            setRekaNetStats(prev => ({
+              ...prev,
+              lastActivated: data.lastActivated,
+              activatedBy: data.activatedBy,
+              competitionEndTime: endTime
+            }));
+          } else {
+            // Süre dolmuş, yarışmayı otomatik kapat
+            setDoc(doc.ref, { ...data, active: false });
+          }
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Sayaç için useEffect
+  useEffect(() => {
+    let interval;
+    
+    if (rekaNetActive && rekaNetStats.competitionEndTime) {
+      interval = setInterval(() => {
+        const now = new Date();
+        const endTime = rekaNetStats.competitionEndTime;
+        const timeLeft = endTime - now;
+        
+        if (timeLeft <= 0) {
+          setRekaNetCountdown('00:00:00');
+          // Yarışmayı otomatik kapat
+          const rekaNetRef = doc(db, 'rekaNet', 'competitionStatus');
+          setDoc(rekaNetRef, { active: false }, { merge: true });
+        } else {
+          const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+          const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+          
+          setRekaNetCountdown(
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+          );
+        }
+      }, 1000);
+    } else {
+      setRekaNetCountdown(null);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [rekaNetActive, rekaNetStats.competitionEndTime]);
 
   // Check if user is admin
   useEffect(() => {
@@ -265,7 +356,7 @@ const AdminPanel = () => {
         fetchStudyRoomStats();
       } else if (tabValue === 5) {
         fetchRekaNetStats();
-      }
+        }
     }
   }, [tabValue, isAdmin, fetchDashboardStats, fetchStudyRoomStats, fetchRekaNetStats]);
 
@@ -351,23 +442,27 @@ const AdminPanel = () => {
       const rekaNetRef = doc(db, 'rekaNet', 'competitionStatus');
       const newActiveState = !rekaNetActive;
       
+      let competitionEndTime = null;
+      if (newActiveState) {
+        // 24 saat sonrası için bitiş zamanı belirle
+        competitionEndTime = new Date();
+        competitionEndTime.setHours(competitionEndTime.getHours() + 24);
+      }
+
       await setDoc(rekaNetRef, {
         active: newActiveState,
         lastActivated: serverTimestamp(),
         activatedBy: user.uid,
-        activatedByEmail: user.email
+        activatedByEmail: user.email,
+        competitionEndTime: competitionEndTime ? serverTimestamp() : null,
+        // Gerçek bitiş zamanı için timestamp
+        actualEndTime: competitionEndTime
       });
-
-      // Eğer yarışma kapatılıyorsa, opsiyonel olarak verileri temizleyebiliriz
-      if (!newActiveState) {
-        // Şu an için veri temizlemiyoruz, sadece durumu kapatıyoruz
-        // İleride gerekirse temizleme fonksiyonu eklenebilir
-      }
 
       setSnackbar({
         open: true,
         message: newActiveState 
-          ? '🎯 RekaNET Yarışması başlatıldı! Kullanıcılar artık net verilerini girebilir.' 
+          ? '🎯 RekaNET Yarışması başlatıldı! 24 saatlik süreç başladı.' 
           : '🛑 RekaNET Yarışması durduruldu.',
         severity: 'success'
       });
@@ -545,6 +640,7 @@ const AdminPanel = () => {
           <Tab icon={<SettingsIcon />} label="Ayarlar" iconPosition="start" />
           <Tab icon={<StudyRoomIcon />} label="Çalışma Odası" iconPosition="start" />
           <Tab icon={<RekaNetIcon />} label="RekaNET" iconPosition="start" />
+          <Tab icon={<DatabaseIcon />} label="RekaNET Verileri" iconPosition="start" />
         </Tabs>
       </Card>
 
@@ -923,6 +1019,36 @@ const AdminPanel = () => {
                   {rekaNetActive ? 'REKANET AKTİF' : 'YARIŞMA KAPALI'}
                 </Typography>
 
+                {/* Sayaç gösterimi */}
+                {rekaNetActive && rekaNetCountdown && (
+                  <Box sx={{ 
+                    mb: 3, 
+                    p: 2, 
+                    backgroundColor: 'rgba(255,255,255,0.1)', 
+                    borderRadius: 2,
+                    border: '1px solid rgba(255,255,255,0.2)'
+                  }}>
+                    <Typography variant="body2" sx={{ 
+                      color: 'rgba(255,255,255,0.8)', 
+                      mb: 1 
+                    }}>
+                      ⏰ Kalan Süre
+                    </Typography>
+                    <Typography variant="h4" sx={{ 
+                      color: '#ffffff', 
+                      fontWeight: 900,
+                      fontFamily: 'monospace'
+                    }}>
+                      {rekaNetCountdown}
+                    </Typography>
+                    <Typography variant="body2" sx={{ 
+                      color: 'rgba(255,255,255,0.7)' 
+                    }}>
+                      Saat:Dakika:Saniye
+                    </Typography>
+                  </Box>
+                )}
+
                 <Typography variant="body1" sx={{ 
                   color: 'rgba(255,255,255,0.8)', 
                   mb: 4,
@@ -1289,6 +1415,204 @@ const AdminPanel = () => {
                 </Card>
               </Grid>
             </Grid>
+          </Grid>
+        </Grid>
+      )}
+
+      {/* RekaNET Verileri Tab */}
+      {tabValue === 6 && (
+        <Grid container spacing={3}>
+          {/* Başlık */}
+          <Grid item xs={12}>
+            <Typography variant="h4" sx={{ 
+              mb: 3, 
+              fontWeight: 700, 
+              color: '#ffffff',
+              textAlign: 'center'
+            }}>
+              📊 Bugünkü RekaNET Verileri
+            </Typography>
+          </Grid>
+
+          {/* Özet İstatistikler */}
+          <Grid item xs={12}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ backgroundColor: '#1a0545', borderRadius: '16px' }}>
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <GroupIcon sx={{ fontSize: 40, color: '#4CAF50', mb: 1 }} />
+                    <Typography variant="h4" sx={{ color: '#4CAF50', fontWeight: 900 }}>
+                      {rekaNetStats.totalParticipants}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      Toplam Katılımcı
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ backgroundColor: '#1a0545', borderRadius: '16px' }}>
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <AnalyticsIcon sx={{ fontSize: 40, color: '#FF9800', mb: 1 }} />
+                    <Typography variant="h4" sx={{ color: '#FF9800', fontWeight: 900 }}>
+                      {rekaNetStats.totalSubmissions}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      Toplam Gönderim
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ backgroundColor: '#1a0545', borderRadius: '16px' }}>
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <RekaNetIcon sx={{ fontSize: 40, color: '#E91E63', mb: 1 }} />
+                    <Typography variant="h4" sx={{ color: '#E91E63', fontWeight: 900 }}>
+                      {rekaNetActive ? 'AKTİF' : 'PASİF'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      Yarışma Durumu
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card sx={{ backgroundColor: '#1a0545', borderRadius: '16px' }}>
+                  <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                    <Typography variant="h6" sx={{ color: '#2196F3', mb: 1 }}>⏰</Typography>
+                    <Typography variant="h6" sx={{ color: '#2196F3', fontWeight: 900, fontSize: '1.2rem' }}>
+                      {rekaNetCountdown || '--:--:--'}
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                      Kalan Süre
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Grid>
+
+          {/* Katılımcı Verileri Tablosu */}
+          <Grid item xs={12}>
+            <Card sx={{ backgroundColor: '#2d4870', borderRadius: '16px' }}>
+              <CardContent sx={{ p: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700 }}>
+                    👥 Katılımcı Detayları
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    startIcon={<AnalyticsIcon />}
+                    onClick={fetchRekaNetStats}
+                    sx={{ 
+                      borderColor: '#4CAF50',
+                      color: '#4CAF50',
+                      '&:hover': {
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)'
+                      }
+                    }}
+                  >
+                    Yenile
+                  </Button>
+                </Box>
+
+                {rekaNetSubmissions.length > 0 ? (
+                  <Box sx={{ maxHeight: '600px', overflowY: 'auto' }}>
+                    {rekaNetSubmissions.map((submission, index) => {
+                      // TYT ve AYT toplamlarını hesapla
+                      const tytTotal = Object.values(submission.tytScores || {}).reduce((sum, subject) => {
+                        return sum + (subject.correct || 0);
+                      }, 0);
+                      
+                      const aytTotal = Object.values(submission.aytScores || {}).reduce((sum, subject) => {
+                        return sum + (subject.correct || 0);
+                      }, 0);
+
+                      return (
+                        <Card key={submission.id} sx={{ 
+                          mb: 2, 
+                          backgroundColor: '#1a0545',
+                          border: '1px solid rgba(255, 255, 255, 0.1)'
+                        }}>
+                          <CardContent sx={{ p: 3 }}>
+                            <Grid container spacing={2} alignItems="center">
+                              <Grid item xs={12} md={3}>
+                                <Typography variant="h6" sx={{ color: '#ffffff', fontWeight: 700 }}>
+                                  {submission.userName}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                                  {submission.userEmail}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                                  📍 {submission.province || 'Belirtilmemiş'}
+                                </Typography>
+                              </Grid>
+                              
+                              <Grid item xs={12} md={3}>
+                                <Box sx={{ textAlign: 'center' }}>
+                                  <Typography variant="h4" sx={{ color: '#4CAF50', fontWeight: 900 }}>
+                                    {tytTotal}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                                    TYT Net Toplamı
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={12} md={3}>
+                                <Box sx={{ textAlign: 'center' }}>
+                                  <Typography variant="h4" sx={{ color: '#FF9800', fontWeight: 900 }}>
+                                    {aytTotal}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                                    AYT Net Toplamı
+                                  </Typography>
+                                </Box>
+                              </Grid>
+                              
+                              <Grid item xs={12} md={3}>
+                                <Box sx={{ textAlign: 'center' }}>
+                                  <Typography variant="h4" sx={{ color: '#E91E63', fontWeight: 900 }}>
+                                    {tytTotal + aytTotal}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: '#ffffff' }}>
+                                    Toplam Net
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.5)', mt: 1 }}>
+                                    {submission.submittedAt.toLocaleString('tr-TR')}
+                                  </Typography>
+                                  {submission.includeNationalRanking && (
+                                    <Chip 
+                                      label="🇹🇷 Türkiye Geneli" 
+                                      size="small" 
+                                      sx={{ 
+                                        mt: 1,
+                                        backgroundColor: 'rgba(78, 205, 196, 0.2)',
+                                        color: '#4ECDC4'
+                                      }} 
+                                    />
+                                  )}
+                                </Box>
+                              </Grid>
+                            </Grid>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </Box>
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 6 }}>
+                    <DatabaseIcon sx={{ fontSize: 80, color: 'rgba(255, 255, 255, 0.3)', mb: 2 }} />
+                    <Typography variant="h6" sx={{ color: 'rgba(255, 255, 255, 0.7)', mb: 1 }}>
+                      Henüz veri bulunmuyor
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                      RekaNET yarışması başlatıldığında katılımcı verileri burada görünecek.
+                    </Typography>
+                  </Box>
+                )}
+              </CardContent>
+            </Card>
           </Grid>
         </Grid>
       )}

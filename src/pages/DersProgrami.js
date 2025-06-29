@@ -34,53 +34,16 @@ import FilterListOffIcon from '@mui/icons-material/FilterListOff';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
-import PersonIcon from '@mui/icons-material/Person';
+
 import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
 import { auth } from '../firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { scheduleService } from '../services/scheduleService';
+import yksData from '../utils/yksData';
 
-// Bu fonksiyon bileşen dışında tanımlandığı için kullanılmıyor
 
-// Renk paleti - ders konularına göre (tema ile uyumlu)
-const subjectColors = {
-  'Matematik': '#55b3d9',
-  'Geometri': '#52c7b8',
-  'Fizik': '#36a2eb',
-  'Kimya': '#ff6384',
-  'Biyoloji': '#4bc0c0',
-  'Edebiyat': '#9966ff',
-  'Türk Dili': '#c45850',
-  'Dil Bilgisi': '#ff9f40',
-  'Tarih': '#ff6b6b',
-  'İnkılap': '#ffa726',
-  'Coğrafya': '#26c6da',
-  'Felsefe': '#78909c',
-  'Sosyoloji': '#8d6e63',
-  'Psikoloji': '#ab47bc',
-  'Din Kültürü': '#66bb6a',
-  'İngilizce': '#42a5f5',
-  'Almanca': '#26a69a',
-  'Fransızca': '#5c6bc0',
-  'Arapça': '#66bb6a',
-  'Ders Çalışma': '#7e57c2',
-  'Tekrar': '#5c6bc0',
-  'Test Çözme': '#3f51b5',
-  'Deneme': '#1a0545',
-  'default': '#55b3d9'
-};
 
-// Ders konusu için renk döndüren yardımcı fonksiyon
-const getSubjectColor = (subject) => {
-  const defaultColor = subjectColors.default;
-  if (!subject) return defaultColor;
-  
-  const key = Object.keys(subjectColors).find(
-    key => subject.toLowerCase().includes(key.toLowerCase())
-  );
-  
-  return key ? subjectColors[key] : defaultColor;
-};
+
 
 
 // Styled components for table elements
@@ -90,22 +53,23 @@ const getSubjectColor = (subject) => {
 // Artık kullanılmayan bileşen
 
 const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
-  padding: '18px',
+  padding: '12px',
   borderRadius: '16px',
-  backgroundColor: '#1a0545',
+  background: `linear-gradient(135deg, ${alpha(color, 0.25)} 0%, ${alpha(color, 0.15)} 50%, #1a0545 100%)`,
   position: 'relative',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
-  boxShadow: '0 10px 30px rgba(0,0,0,0.15), 0 6px 10px rgba(0,0,0,0.08)',
+  boxShadow: `0 10px 30px ${alpha(color, 0.2)}, 0 6px 10px rgba(0,0,0,0.08)`,
   transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  margin: '10px 0',
+  border: `2px solid ${alpha(color, 0.3)}`,
+  margin: '0',
   backdropFilter: 'blur(8px)',
   '&:hover': {
-    boxShadow: '0 15px 35px rgba(0,0,0,0.2), 0 8px 12px rgba(0,0,0,0.12)',
+    boxShadow: `0 15px 35px ${alpha(color, 0.3)}, 0 8px 12px ${alpha(color, 0.15)}`,
     transform: 'translateY(-5px)',
-    backgroundColor: '#556080',
+    background: `linear-gradient(135deg, ${alpha(color, 0.35)} 0%, ${alpha(color, 0.25)} 50%, #1a0545 100%)`,
+    borderColor: `${alpha(color, 0.5)}`,
   },
   '&::before': {
     content: '""',
@@ -115,7 +79,7 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
     width: '100%',
     height: '6px',
     background: `linear-gradient(90deg, ${color}, ${alpha(color, 0.7)})`,
-    boxShadow: `0 3px 10px ${alpha(color, 0.3)}`,
+    boxShadow: `0 3px 10px ${alpha(color, 0.4)}`,
   },
   '&::after': {
     content: '""',
@@ -125,7 +89,7 @@ const ClassCard = styled(Paper)(({ theme, color = '#3f51b5' }) => ({
     width: '50px',
     height: '50px',
     borderRadius: '50%',
-    background: `radial-gradient(circle, ${alpha(color, 0.08)} 0%, transparent 70%)`,
+    background: `radial-gradient(circle, ${alpha(color, 0.15)} 0%, transparent 70%)`,
     pointerEvents: 'none',
   }
 }));
@@ -168,13 +132,14 @@ const DayHeader = styled(Box)(
       const dayColor = dayColors[dayIndex % dayColors.length];
       
       return {
-        padding: '16px 10px',
+        padding: '24px 16px',
         borderRadius: '16px 16px 0 0',
         background: `linear-gradient(135deg, ${dayColor} 0%, ${alpha(dayColor, 0.7)} 100%)`,
         color: '#333',
         fontWeight: 700,
-        fontSize: '1.1rem',
+        fontSize: '1.4rem',
         textAlign: 'center',
+        textShadow: '0 2px 4px rgba(0,0,0,0.1)',
         position: 'relative',
         overflow: 'hidden',
         boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
@@ -235,7 +200,9 @@ const DersProgrami = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [currentDay, setCurrentDay] = useState('');
   const [classDetails, setClassDetails] = useState({
+    examType: '', // TYT veya AYT
     subject: '',
+    topic: '',
     teacher: '',
     location: '',
     notes: ''
@@ -257,7 +224,44 @@ const DersProgrami = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const openFilterMenu = Boolean(anchorEl);
   
+  // yksData'dan ders ve konu bilgilerini alıyoruz
+  const getSubjectColor = (subject, examType = null) => {
+    // Eğer examType belirtilmişse ve yksData'da varsa o rengi kullan
+    if (examType && yksData[examType] && yksData[examType][subject]) {
+      return yksData[examType][subject].color;
+    }
+    
+    // examType belirtilmemişse veya bulunamazsa, her iki sınav türünde de ara
+    for (const type of ['TYT', 'AYT']) {
+      if (yksData[type] && yksData[type][subject]) {
+        return yksData[type][subject].color;
+      }
+    }
+    
+    // Hiçbir yerde bulunamazsa varsayılan renk
+    return '#2196F3';
+  };
+
+  const getSubjectTopics = (subject, examType) => {
+    if (examType && yksData[examType] && yksData[examType][subject]) {
+      return yksData[examType][subject].topics;
+    }
+    return [];
+  };
+
+  // Konu adının uzunluğuna göre kart boyutunu hesapla
+  const getCardWidth = (topic) => {
+    const length = topic.length;
+    if (length <= 10) return '160px';        // Çok kısa konular
+    if (length <= 20) return '200px';        // Kısa konular
+    if (length <= 35) return '260px';        // Orta konular  
+    if (length <= 50) return '320px';        // Uzun konular
+    return '380px';                          // Çok uzun konular
+  };
+  
   const daysOfWeek = useMemo(() => ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'], []);
+
+
 
   // Bildirim gösterme
   const showNotification = (message, severity = 'success') => {
@@ -385,7 +389,9 @@ const DersProgrami = () => {
   const handleAddClass = (day) => {
     setCurrentDay(day);
     setClassDetails({
+      examType: '',
       subject: '',
+      topic: '',
       teacher: '',
       location: '',
       notes: ''
@@ -394,8 +400,18 @@ const DersProgrami = () => {
   };
 
   const handleSaveClass = async () => {
+    if (!classDetails.examType) {
+      showNotification('Lütfen bir sınav türü seçin (TYT veya AYT).', 'warning');
+      return;
+    }
+    
     if (!classDetails.subject) {
-      showNotification('Lütfen en azından ders adını girin.', 'warning');
+      showNotification('Lütfen bir ders seçin.', 'warning');
+      return;
+    }
+    
+    if (!classDetails.topic) {
+      showNotification('Lütfen bir konu seçin.', 'warning');
       return;
     }
 
@@ -420,7 +436,9 @@ const DersProgrami = () => {
       // Düzenle modundan çıkış yap
       setClassDetails({
         id: null,
+        examType: '',
         subject: '',
+        topic: '',
         teacher: '',
         location: '',
         notes: '',
@@ -557,21 +575,9 @@ const DersProgrami = () => {
         alignItems: 'center',
         justifyContent: 'flex-start',
         width: '100%',
-        background: 'linear-gradient(135deg, #1a0545 0%, #243447 50%, #1a0545 100%)',
+        background: '#1a0545',
         position: 'relative',
         overflow: 'hidden',
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: '5%',
-          right: '5%',
-          width: '300px',
-          height: '300px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(63, 81, 181, 0.03) 0%, rgba(63, 81, 181, 0) 70%)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        },
         zIndex: 1,
       }}
     >
@@ -865,7 +871,7 @@ const DersProgrami = () => {
                     width: '30px',
                     height: '30px',
                     borderRadius: '50%',
-                    background: `radial-gradient(circle, ${alpha(getSubjectColor(day) || '#3f51b5', 0.2)} 0%, transparent 70%)`,
+                    background: `radial-gradient(circle, ${alpha('#3f51b5', 0.2)} 0%, transparent 70%)`,
                     zIndex: 0
                   }
                 }}
@@ -895,19 +901,33 @@ const DersProgrami = () => {
                     display: 'flex', 
                     flexDirection: 'column',
                     overflowY: 'auto',
-                    maxHeight: '500px'
+                    maxHeight: '600px',
+                    '&::-webkit-scrollbar': {
+                      width: '8px'
+                    },
+                    '&::-webkit-scrollbar-track': {
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '10px'
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                      background: 'linear-gradient(135deg, #55b3d9 0%, #3498db 100%)',
+                      borderRadius: '10px',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #4a9bc9 0%, #2980b9 100%)'
+                      }
+                    }
                   }}>
                     {filteredSchedule[day] && filteredSchedule[day].length > 0 ? (
                       <Box sx={{ 
                         display: 'flex', 
                         flexDirection: 'column',
-                        gap: 2,
+                        gap: 1,
                         height: '100%'
                       }}>
                         {filteredSchedule[day].map(classItem => (
                           <ClassCard 
                             key={classItem.id}
-                            color={getSubjectColor(classItem.subject)}
+                            color={getSubjectColor(classItem.subject, classItem.examType)}
                             onClick={() => handleViewClass(day, classItem)}
                             sx={{ 
                               cursor: 'pointer',
@@ -925,82 +945,37 @@ const DersProgrami = () => {
                               } : {}
                             }}
                           >
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                            <Box>
                               <Typography variant="subtitle1" fontWeight="600" sx={{ 
                                 color: 'white',
                                 display: 'flex',
                                 alignItems: 'center',
-                                mb: 0.5
+                                mb: 0.5,
+                                fontSize: '1rem'
                               }}>
-                                <SchoolIcon sx={{ mr: 1, fontSize: '1.1rem', color: getSubjectColor(classItem.subject) }} />
-                                {classItem.subject || 'Belirtilmemiş'}
+                                <SchoolIcon sx={{ mr: 1, fontSize: '1rem', color: getSubjectColor(classItem.subject, classItem.examType) }} />
+                                {classItem.examType ? `${classItem.examType} - ${classItem.subject}` : classItem.subject || 'Belirtilmemiş'}
                               </Typography>
-                            </Box>
-                            {classItem.time && (
-                              <Typography 
-                                variant="body2" 
-                                color="text.secondary" 
-                                sx={{ 
-                                  mb: 1,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  fontSize: '0.85rem'
-                                }}
-                              >
-                                <AccessTimeIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
-                                {classItem.time}
-                              </Typography>
-                            )}
-                            {classItem.location && (
-                              <Typography 
-                                variant="body2" 
-                                color="text.secondary" 
-                                sx={{ 
-                                  mb: 1,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  fontSize: '0.85rem'
-                                }}
-                              >
-                                <LocationOnIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
-                                {classItem.location}
-                              </Typography>
-                            )}
-                            {classItem.teacher && (
-                              <Typography 
-                                variant="body2" 
-                                color="text.secondary" 
-                                sx={{ 
-                                  mb: 1,
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  fontSize: '0.85rem'
-                                }}
-                              >
-                                <PersonIcon sx={{ mr: 0.5, fontSize: '0.9rem' }} />
-                                {classItem.teacher}
-                              </Typography>
-                            )}
-                            {classItem.notes && (
-                              <Typography 
-                                variant="body2" 
-                                color="text.secondary" 
-                                sx={{ 
+                              {classItem.topic && (
+                                <Typography variant="body2" sx={{ 
+                                  color: alpha(getSubjectColor(classItem.subject, classItem.examType), 0.9),
                                   fontSize: '0.85rem',
-                                  display: '-webkit-box',
-                                  WebkitLineClamp: 2,
-                                  WebkitBoxOrient: 'vertical',
-                                  overflow: 'hidden',
-                                  textOverflow: 'ellipsis',
-                                  mt: 1,
-                                  pt: 1,
-                                  borderTop: '1px dashed rgba(0,0,0,0.1)'
-                                }}
-                              >
-                                <NotesIcon sx={{ mr: 0.5, fontSize: '0.9rem', verticalAlign: 'text-top' }} />
-                                {classItem.notes}
-                              </Typography>
-                            )}
+                                  fontWeight: 500,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  ml: 2.5
+                                }}>
+                                  <Box sx={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: '50%',
+                                    backgroundColor: getSubjectColor(classItem.subject, classItem.examType),
+                                    mr: 1
+                                  }} />
+                                  {classItem.topic}
+                                </Typography>
+                              )}
+                            </Box>
                           </ClassCard>
                         ))}
                       </Box>
@@ -1095,20 +1070,28 @@ const DersProgrami = () => {
         open={openDialog} 
         onClose={() => setOpenDialog(false)}
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
         PaperProps={{
           sx: {
-            borderRadius: '24px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.15), 0 8px 25px rgba(0,0,0,0.1)',
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            borderRadius: '32px',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.2), 0 16px 40px rgba(0,0,0,0.15)',
+            background: 'linear-gradient(145deg, rgba(26, 5, 69, 0.95) 0%, rgba(26, 5, 69, 0.98) 100%)',
+            backdropFilter: 'blur(50px)',
             overflow: 'hidden',
-            border: '1px solid rgba(255,255,255,0.8)'
+            border: '2px solid rgba(255,255,255,0.15)',
+            minHeight: '600px'
+          }
+        }}
+        BackdropProps={{
+          sx: {
+            backdropFilter: 'blur(12px)',
+            backgroundColor: 'rgba(0,0,0,0.7)'
           }
         }}
       >
         <Box sx={{
           p: 4,
-          background: classDetails.subject ? `linear-gradient(135deg, ${getSubjectColor(classDetails.subject)} 0%, ${alpha(getSubjectColor(classDetails.subject), 0.8)} 100%)` : 'linear-gradient(135deg, #55b3d9 0%, #3498db 100%)',
+          background: classDetails.subject ? `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)` : 'linear-gradient(135deg, #55b3d9 0%, #3498db 100%)',
           color: 'white',
           position: 'relative',
           overflow: 'hidden'
@@ -1193,101 +1176,618 @@ const DersProgrami = () => {
         <DialogContent sx={{ px: 4, py: 4 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <SchoolIcon fontSize="small" sx={{ color: '#55b3d9' }} />
-                Ders Adı *
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.3rem' }}>
+                <SchoolIcon fontSize="medium" sx={{ color: '#55b3d9' }} />
+                Ders Seçimi *
               </Typography>
-              <TextField
-                placeholder="Örn: Matematik, Fizik, Kimya..."
-                value={classDetails.subject}
-                onChange={(e) => handleInputChange('subject', e.target.value)}
-                variant="outlined"
-                fullWidth
-                required
-                sx={{ 
-                  '& .MuiInputBase-root': {
-                    borderRadius: '12px',
-                    backgroundColor: '#1a0545',
-                    border: '1px solid rgba(85, 179, 217, 0.3)',
-                    transition: 'all 0.3s ease',
+              
+              {/* Sınav Türü Seçimi - Küçük Butonlar */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 3, justifyContent: 'center' }}>
+                {/* TYT Butonu */}
+                <Box 
+                  onClick={() => {
+                    setClassDetails(prev => ({
+                      ...prev,
+                      examType: 'TYT',
+                      subject: '',
+                      topic: ''
+                    }));
+                  }}
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: '16px',
+                    background: classDetails.examType === 'TYT' ? 
+                      'linear-gradient(145deg, rgba(33, 150, 243, 0.3) 0%, rgba(33, 150, 243, 0.2) 100%)' :
+                      'linear-gradient(145deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%)',
+                    backdropFilter: 'blur(15px)',
+                    border: classDetails.examType === 'TYT' ? 
+                      '2px solid rgba(33, 150, 243, 0.6)' : 
+                      '1px solid rgba(33, 150, 243, 0.3)',
+                    boxShadow: classDetails.examType === 'TYT' ? 
+                      '0 8px 25px rgba(33, 150, 243, 0.3)' :
+                      '0 4px 15px rgba(33, 150, 243, 0.1)',
+                    transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    cursor: 'pointer',
+                    minWidth: '120px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1.5,
                     '&:hover': {
-                      borderColor: 'rgba(85, 179, 217, 0.5)'
+                      transform: 'translateY(-2px) scale(1.05)',
+                      boxShadow: '0 12px 35px rgba(33, 150, 243, 0.4)',
+                      background: 'linear-gradient(145deg, rgba(33, 150, 243, 0.25) 0%, rgba(33, 150, 243, 0.15) 100%)'
+                    }
+                  }}
+                >
+                  <Box sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    boxShadow: '0 4px 12px rgba(33, 150, 243, 0.3)'
+                  }}>
+                    📝
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 700, 
+                      color: '#ffffff', 
+                      lineHeight: 1
+                    }}>
+                      TYT
+                    </Typography>
+                    <Typography variant="caption" sx={{ 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.7rem'
+                    }}>
+                      Temel Test
+                    </Typography>
+                  </Box>
+                  {classDetails.examType === 'TYT' && (
+                    <Box sx={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.8rem',
+                      animation: 'pulse 2s infinite'
+                    }}>
+                      ✓
+                    </Box>
+                  )}
+                </Box>
+
+                {/* AYT Butonu */}
+                <Box 
+                  onClick={() => {
+                    setClassDetails(prev => ({
+                      ...prev,
+                      examType: 'AYT',
+                      subject: '',
+                      topic: ''
+                    }));
+                  }}
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: '16px',
+                    background: classDetails.examType === 'AYT' ? 
+                      'linear-gradient(145deg, rgba(156, 39, 176, 0.3) 0%, rgba(156, 39, 176, 0.2) 100%)' :
+                      'linear-gradient(145deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%)',
+                    backdropFilter: 'blur(15px)',
+                    border: classDetails.examType === 'AYT' ? 
+                      '2px solid rgba(156, 39, 176, 0.6)' : 
+                      '1px solid rgba(156, 39, 176, 0.3)',
+                    boxShadow: classDetails.examType === 'AYT' ? 
+                      '0 8px 25px rgba(156, 39, 176, 0.3)' :
+                      '0 4px 15px rgba(156, 39, 176, 0.1)',
+                    transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                    cursor: 'pointer',
+                    minWidth: '120px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 1.5,
+                    '&:hover': {
+                      transform: 'translateY(-2px) scale(1.05)',
+                      boxShadow: '0 12px 35px rgba(156, 39, 176, 0.4)',
+                      background: 'linear-gradient(145deg, rgba(156, 39, 176, 0.25) 0%, rgba(156, 39, 176, 0.15) 100%)'
+                    }
+                  }}
+                >
+                  <Box sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.2rem',
+                    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.3)'
+                  }}>
+                    🎯
+                  </Box>
+                  <Box>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 700, 
+                      color: '#ffffff', 
+                      lineHeight: 1
+                    }}>
+                      AYT
+                    </Typography>
+                    <Typography variant="caption" sx={{ 
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '0.7rem'
+                    }}>
+                      Alan Testi
+                    </Typography>
+                  </Box>
+                  {classDetails.examType === 'AYT' && (
+                    <Box sx={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.8rem',
+                      animation: 'pulse 2s infinite'
+                    }}>
+                      ✓
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Ders Seçimi - Animasyonlu */}
+              {classDetails.examType && (
+                <Box sx={{ 
+                  mb: 4,
+                  animation: 'slideInUp 0.6s ease-out',
+                  '@keyframes slideInUp': {
+                    '0%': {
+                      opacity: 0,
+                      transform: 'translateY(30px)'
                     },
-                    '&.Mui-focused': {
-                      borderColor: '#55b3d9',
-                      backgroundColor: '#1a0545'
+                    '100%': {
+                      opacity: 1,
+                      transform: 'translateY(0)'
                     }
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  },
-                  '& .MuiInputBase-input': {
-                    color: 'white !important',
-                    fontSize: '1rem',
-                    '&::placeholder': {
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      opacity: 1
-                    }
-                  },
-                  '& input': {
-                    color: 'white !important'
-                  },
-                  '& textarea': {
-                    color: 'white !important'
                   }
-                }}
-              />
+                }}>
+                  <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.1rem' }}>
+                    <Box sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: '8px',
+                      background: classDetails.examType === 'TYT' ? 
+                        'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' :
+                        'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '1rem',
+                      animation: 'bounce 2s infinite'
+                    }}>
+                      📚
+                    </Box>
+                    {classDetails.examType} Dersleri Seçin
+                  </Typography>
+                  
+                  <Box sx={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                    gap: 2,
+                    '@keyframes bounce': {
+                      '0%, 20%, 50%, 80%, 100%': {
+                        transform: 'translateY(0)'
+                      },
+                      '40%': {
+                        transform: 'translateY(-5px)'
+                      },
+                      '60%': {
+                        transform: 'translateY(-3px)'
+                      }
+                    }
+                  }}>
+                    {Object.keys(yksData[classDetails.examType] || {}).map((subject, index) => (
+                      <Box
+                        key={`${classDetails.examType}-${subject}`}
+                        onClick={() => {
+                          setClassDetails(prev => ({
+                            ...prev,
+                            subject: subject,
+                            topic: '' // Konu seçimini sıfırla
+                          }));
+                        }}
+                        sx={{
+                          p: 2.5,
+                          borderRadius: '16px',
+                          textTransform: 'none',
+                          fontWeight: 600,
+                          fontSize: '0.95rem',
+                          cursor: 'pointer',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          animation: `slideInRight 0.4s ease-out ${index * 0.1}s both`,
+                          '@keyframes slideInRight': {
+                            '0%': {
+                              opacity: 0,
+                              transform: 'translateX(50px)'
+                            },
+                            '100%': {
+                              opacity: 1,
+                              transform: 'translateX(0)'
+                            }
+                          },
+                          ...(classDetails.subject === subject ? {
+                            background: `linear-gradient(135deg, ${getSubjectColor(subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(subject, classDetails.examType), 0.8)} 100%)`,
+                            color: '#ffffff',
+                            boxShadow: `0 8px 25px ${alpha(getSubjectColor(subject, classDetails.examType), 0.4)}`,
+                            border: '2px solid rgba(255, 255, 255, 0.3)',
+                            transform: 'scale(1.05)',
+                            '&:hover': {
+                              background: `linear-gradient(135deg, ${alpha(getSubjectColor(subject, classDetails.examType), 0.9)} 0%, ${getSubjectColor(subject, classDetails.examType)} 100%)`,
+                              transform: 'scale(1.05)',
+                              boxShadow: `0 8px 24px ${alpha(getSubjectColor(subject, classDetails.examType), 0.5)}`
+                            }
+                          } : {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            '&:hover': {
+                              background: `${alpha(getSubjectColor(subject, classDetails.examType), 0.15)}`,
+                              borderColor: `${alpha(getSubjectColor(subject, classDetails.examType), 0.5)}`,
+                              color: '#ffffff',
+                              transform: 'scale(1.02)'
+                            }
+                          })
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Box sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '6px',
+                            background: `linear-gradient(135deg, ${getSubjectColor(subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(subject, classDetails.examType), 0.8)} 100%)`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.8rem'
+                          }}>
+                            📖
+                          </Box>
+                          <Typography sx={{ fontWeight: 'inherit', fontSize: 'inherit', color: 'inherit' }}>
+                            {subject}
+                          </Typography>
+                          {classDetails.subject === subject && (
+                            <Box sx={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: '50%',
+                              background: 'rgba(255, 255, 255, 0.2)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.7rem',
+                              ml: 'auto'
+                            }}>
+                              ✓
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              
+              {classDetails.examType && classDetails.subject && (
+                <Box sx={{
+                  mt: 3,
+                  p: 3,
+                  borderRadius: '20px',
+                  background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.08) 100%)',
+                  border: '2px solid rgba(76, 175, 80, 0.3)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  boxShadow: '0 8px 25px rgba(76, 175, 80, 0.1)'
+                }}>
+                  <Box sx={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1rem'
+                  }}>
+                    ✓
+                  </Box>
+                  <Typography sx={{ color: '#ffffff', fontWeight: 600, fontSize: '1.1rem' }}>
+                    Seçilen: <span style={{ color: '#4CAF50', fontWeight: 700 }}>{classDetails.examType} - {classDetails.subject}</span>
+                  </Typography>
+                </Box>
+              )}
             </Box>
             
-            <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <PersonIcon fontSize="small" sx={{ color: '#55b3d9' }} />
-                Öğretmen
-              </Typography>
-              <TextField
-                placeholder="Örn: Ahmet Hoca, Mehmet Öğretmen..."
-                value={classDetails.teacher}
-                onChange={(e) => handleInputChange('teacher', e.target.value)}
-                variant="outlined"
-                fullWidth
-                sx={{ 
-                  '& .MuiInputBase-root': {
-                    borderRadius: '12px',
-                    backgroundColor: '#1a0545',
-                    border: '1px solid rgba(85, 179, 217, 0.3)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderColor: 'rgba(85, 179, 217, 0.5)'
-                    },
-                    '&.Mui-focused': {
-                      borderColor: '#55b3d9',
-                      backgroundColor: '#1a0545'
-                    }
+            {/* Konu Seçimi - Animasyonlu */}
+            {classDetails.examType && classDetails.subject && getSubjectTopics(classDetails.subject, classDetails.examType).length > 0 && (
+              <Box sx={{ 
+                position: 'relative',
+                animation: 'slideInUp 0.6s ease-out 0.3s both',
+                '@keyframes slideInUp': {
+                  '0%': {
+                    opacity: 0,
+                    transform: 'translateY(30px)'
                   },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  },
-                  '& .MuiInputBase-input': {
-                    color: 'white !important',
-                    fontSize: '1rem',
-                    '&::placeholder': {
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      opacity: 1
-                    }
-                  },
-                  '& input': {
-                    color: 'white !important'
-                  },
-                  '& textarea': {
-                    color: 'white !important'
+                  '100%': {
+                    opacity: 1,
+                    transform: 'translateY(0)'
                   }
-                }}
-              />
-            </Box>
+                }
+              }}>
+                <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
+                  <Box sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: '10px',
+                    background: `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '1.1rem',
+                    animation: 'pulse 2s infinite'
+                  }}>
+                    🎯
+                  </Box>
+                  {classDetails.subject} Konularını Seçin
+                </Typography>
+                
+                <Box sx={{ 
+                  p: 4, 
+                  borderRadius: '24px',
+                  background: `linear-gradient(145deg, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.15)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.08)} 100%)`,
+                  backdropFilter: 'blur(20px)',
+                  border: `2px solid ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.2)}`,
+                  boxShadow: `0 12px 40px ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.15)}`,
+                  transition: 'all 0.3s ease',
+                  maxHeight: '400px',
+                  overflowY: 'auto',
+                  '&::-webkit-scrollbar': {
+                    width: '8px'
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    borderRadius: '10px'
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)`,
+                    borderRadius: '10px',
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.9)} 0%, ${getSubjectColor(classDetails.subject, classDetails.examType)} 100%)`
+                    }
+                  }
+                }}>
+                  <Box sx={{ 
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 2,
+                    alignItems: 'flex-start',
+                    '@keyframes pulse': {
+                      '0%': { transform: 'scale(1)' },
+                      '50%': { transform: 'scale(1.05)' },
+                      '100%': { transform: 'scale(1)' }
+                    }
+                  }}>
+                    {getSubjectTopics(classDetails.subject, classDetails.examType).map((topic, index) => (
+                      <Box
+                        key={topic}
+                        onClick={() => {
+                          setClassDetails(prev => ({
+                            ...prev,
+                            topic: topic
+                          }));
+                        }}
+                        sx={{
+                          p: topic.length > 40 ? 3 : topic.length > 25 ? 2.5 : 2,
+                          borderRadius: '16px',
+                          background: classDetails.topic === topic ? 
+                            `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)` :
+                            'rgba(255, 255, 255, 0.05)',
+                          border: classDetails.topic === topic ? 
+                            '2px solid rgba(255, 255, 255, 0.3)' : 
+                            '2px solid rgba(255, 255, 255, 0.1)',
+                          cursor: 'pointer',
+                          transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          animation: `slideInUp 0.5s ease-out ${index * 0.1}s both`,
+                          width: getCardWidth(topic),
+                          minHeight: 'fit-content',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          '@keyframes slideInUp': {
+                            '0%': {
+                              opacity: 0,
+                              transform: 'translateY(20px)'
+                            },
+                            '100%': {
+                              opacity: 1,
+                              transform: 'translateY(0)'
+                            }
+                          },
+                          '&:before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: classDetails.topic === topic ? '0%' : '-100%',
+                            width: '100%',
+                            height: '2px',
+                            background: `linear-gradient(90deg, transparent, ${getSubjectColor(classDetails.subject, classDetails.examType)}, transparent)`,
+                            transition: 'left 0.6s ease'
+                          },
+                          '&:hover': {
+                            background: classDetails.topic === topic ? 
+                              `linear-gradient(135deg, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.9)} 0%, ${getSubjectColor(classDetails.subject, classDetails.examType)} 100%)` :
+                              `${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.15)}`,
+                            borderColor: `${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.5)}`,
+                            transform: 'translateY(-2px) scale(1.02)',
+                            boxShadow: `0 8px 25px ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.2)}`,
+                            '&:before': {
+                              left: '100%'
+                            }
+                          }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          <Box sx={{
+                            width: topic.length > 40 ? 32 : 28,
+                            height: topic.length > 40 ? 32 : 28,
+                            borderRadius: '8px',
+                            background: classDetails.topic === topic ? 
+                              'rgba(255, 255, 255, 0.2)' :
+                              `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)`,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '1rem',
+                            fontWeight: 700,
+                            color: '#ffffff',
+                            boxShadow: classDetails.topic === topic ? 
+                              'inset 0 2px 4px rgba(0,0,0,0.2)' :
+                              '0 2px 8px rgba(0,0,0,0.1)'
+                          }}>
+★
+                          </Box>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography sx={{ 
+                              color: '#ffffff', 
+                              fontWeight: classDetails.topic === topic ? 700 : 600,
+                              fontSize: topic.length > 50 ? '0.85rem' : topic.length > 30 ? '0.9rem' : '1rem',
+                              textShadow: classDetails.topic === topic ? '0 1px 2px rgba(0,0,0,0.2)' : 'none',
+                              lineHeight: 1.4,
+                              wordBreak: 'break-word',
+                              hyphens: 'auto'
+                            }}>
+                              {topic}
+                            </Typography>
+                          </Box>
+                          {classDetails.topic === topic && (
+                            <Box sx={{
+                              width: 24,
+                              height: 24,
+                              borderRadius: '50%',
+                              background: 'rgba(255, 255, 255, 0.2)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '0.8rem'
+                            }}>
+                              ✓
+                            </Box>
+                          )}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            )}
             
+            {/* Seçilen Ders ve Konu Bilgileri */}
+            {classDetails.examType && classDetails.subject && classDetails.topic && (
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, mb: 4 }}>
+                {/* Ders Adı */}
+                <Box sx={{ position: 'relative' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.1rem' }}>
+                    <SchoolIcon fontSize="medium" sx={{ color: getSubjectColor(classDetails.subject, classDetails.examType) }} />
+                    Ders Adı
+                  </Typography>
+                  <Box sx={{
+                    p: 3,
+                    borderRadius: '16px',
+                    background: `linear-gradient(135deg, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.15)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.08)} 100%)`,
+                    backdropFilter: 'blur(10px)',
+                    border: `2px solid ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.3)}`,
+                    boxShadow: `0 8px 25px ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.1)}`
+                  }}>
+                    <Typography sx={{ 
+                      color: '#ffffff', 
+                      fontSize: '1.1rem', 
+                      fontWeight: 600,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      <Box sx={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '6px',
+                        background: `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.8rem'
+                      }}>
+                        📚
+                      </Box>
+                      {classDetails.examType} - {classDetails.subject}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Konu */}
+                <Box sx={{ position: 'relative' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.1rem' }}>
+                    <Box sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '6px',
+                      background: `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.8rem'
+                    }}>
+                      🎯
+                    </Box>
+                    Konu
+                  </Typography>
+                  <Box sx={{
+                    p: 3,
+                    borderRadius: '16px',
+                    background: `linear-gradient(135deg, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.15)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.08)} 100%)`,
+                    backdropFilter: 'blur(10px)',
+                    border: `2px solid ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.3)}`,
+                    boxShadow: `0 8px 25px ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.1)}`
+                  }}>
+                    <Typography sx={{ 
+                      color: '#ffffff', 
+                      fontSize: '1.1rem', 
+                      fontWeight: 600
+                    }}>
+                      {classDetails.topic}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            )}
+
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <LocationOnIcon fontSize="small" sx={{ color: '#55b3d9' }} />
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.1rem' }}>
+                <LocationOnIcon fontSize="medium" sx={{ color: '#55b3d9' }} />
                 Video URL (YouTube veya diğer platformlar)
               </Typography>
               <TextField
@@ -1298,16 +1798,19 @@ const DersProgrami = () => {
                 fullWidth
                 sx={{ 
                   '& .MuiInputBase-root': {
-                    borderRadius: '12px',
-                    backgroundColor: '#1a0545',
-                    border: '1px solid rgba(85, 179, 217, 0.3)',
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(10px)',
+                    border: '2px solid rgba(85, 179, 217, 0.3)',
                     transition: 'all 0.3s ease',
                     '&:hover': {
-                      borderColor: 'rgba(85, 179, 217, 0.5)'
+                      borderColor: 'rgba(85, 179, 217, 0.5)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.08)'
                     },
                     '&.Mui-focused': {
                       borderColor: '#55b3d9',
-                      backgroundColor: '#1a0545'
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      boxShadow: '0 0 20px rgba(85, 179, 217, 0.3)'
                     }
                   },
                   '& .MuiOutlinedInput-notchedOutline': {
@@ -1315,93 +1818,127 @@ const DersProgrami = () => {
                   },
                   '& .MuiInputBase-input': {
                     color: 'white !important',
-                    fontSize: '1rem',
+                    fontSize: '1.1rem',
+                    fontWeight: 500,
+                    padding: '16px 20px',
                     '&::placeholder': {
                       color: 'rgba(255, 255, 255, 0.6)',
                       opacity: 1
                     }
-                  },
-                  '& input': {
-                    color: 'white !important'
-                  },
-                  '& textarea': {
-                    color: 'white !important'
                   }
                 }}
               />
             </Box>
             
+            {/* Notlar Kısmı - En Alta Taşındı */}
             <Box sx={{ position: 'relative' }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600, color: '#1a0545 !important', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <NotesIcon fontSize="small" sx={{ color: '#55b3d9' }} />
-                Konu Adı / Notlar
+              <Typography variant="h6" sx={{ mb: 3, fontWeight: 700, color: '#ffffff', display: 'flex', alignItems: 'center', gap: 1.5, fontSize: '1.2rem' }}>
+                <NotesIcon fontSize="medium" sx={{ color: '#55b3d9' }} />
+                Ek Notlar (Opsiyonel)
               </Typography>
-              <TextField
-                placeholder="Örn: Türev - Tanım ve Formüller, Limit Kavramı, Deneme Sınavı Hazırlığı..."
-                value={classDetails.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
-                variant="outlined"
-                fullWidth
-                multiline
-                rows={4}
-                sx={{ 
-                  '& .MuiInputBase-root': {
-                    borderRadius: '12px',
-                    backgroundColor: '#1a0545',
-                    border: '1px solid rgba(85, 179, 217, 0.3)',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      borderColor: 'rgba(85, 179, 217, 0.5)'
+              <Box sx={{
+                p: 3,
+                borderRadius: '20px',
+                background: 'linear-gradient(145deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.08) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '2px solid rgba(255, 193, 7, 0.2)',
+                boxShadow: '0 8px 32px rgba(255, 193, 7, 0.1)'
+              }}>
+                <TextField
+                  placeholder="Buraya dersinizle ilgili ek notlarınızı yazabilirsiniz... (Örn: Özel dikkat edilecek konular, tekrar edilecek bölümler, ödev detayları vb.)"
+                  value={classDetails.notes}
+                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  variant="outlined"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  sx={{ 
+                    '& .MuiInputBase-root': {
+                      borderRadius: '16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      backdropFilter: 'blur(10px)',
+                      border: '2px solid rgba(255, 193, 7, 0.3)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        borderColor: 'rgba(255, 193, 7, 0.5)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.08)'
+                      },
+                      '&.Mui-focused': {
+                        borderColor: '#FFC107',
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        boxShadow: '0 0 20px rgba(255, 193, 7, 0.3)'
+                      }
                     },
-                    '&.Mui-focused': {
-                      borderColor: '#55b3d9',
-                      backgroundColor: '#1a0545'
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      border: 'none'
+                    },
+                    '& .MuiInputBase-input': {
+                      color: 'white !important',
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      '&::placeholder': {
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        opacity: 1
+                      }
+                    },
+                    '& textarea': {
+                      color: 'white !important',
+                      padding: '16px 20px !important'
                     }
-                  },
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    border: 'none'
-                  },
-                  '& .MuiInputBase-input': {
-                    color: 'white !important',
-                    fontSize: '1rem',
-                    '&::placeholder': {
-                      color: 'rgba(255, 255, 255, 0.6)',
-                      opacity: 1
-                    }
-                  },
-                  '& input': {
-                    color: 'white !important'
-                  },
-                  '& textarea': {
-                    color: 'white !important'
-                  }
-                }}
-              />
+                  }}
+                />
+              </Box>
             </Box>
           </Box>
         </DialogContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 4, bgcolor: 'rgba(248, 250, 252, 0.8)', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          p: 4, 
+          background: 'linear-gradient(135deg, rgba(26, 5, 69, 0.8) 0%, rgba(26, 5, 69, 0.9) 100%)',
+          backdropFilter: 'blur(20px)',
+          borderTop: '2px solid rgba(255,255,255,0.1)' 
+        }}>
+          <Typography variant="body1" sx={{ 
+            fontStyle: 'italic', 
+            color: 'rgba(255, 255, 255, 0.7)',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1
+          }}>
+            <Box sx={{
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)'
+            }} />
             * Zorunlu alanlar
           </Typography>
-          <Box sx={{ display: 'flex', gap: 2 }}>
+          <Box sx={{ display: 'flex', gap: 3 }}>
             <Button 
               onClick={() => setOpenDialog(false)}
               variant="outlined"
               startIcon={<CloseIcon />}
               sx={{ 
-                borderRadius: '25px',
-                px: 4,
-                py: 1.5,
-                color: '#64748b',
-                borderColor: 'rgba(100, 116, 139, 0.3)',
+                borderRadius: '20px',
+                px: 5,
+                py: 2,
+                color: 'rgba(255, 255, 255, 0.8)',
+                borderColor: 'rgba(255, 255, 255, 0.3)',
                 textTransform: 'none',
                 fontWeight: 600,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                fontSize: '1rem',
+                background: 'rgba(255, 255, 255, 0.05)',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+                transition: 'all 0.3s ease',
                 '&:hover': {
-                  backgroundColor: 'rgba(100, 116, 139, 0.08)',
-                  borderColor: 'rgba(100, 116, 139, 0.5)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
                   transform: 'translateY(-2px)'
                 }
               }}
@@ -1412,26 +1949,51 @@ const DersProgrami = () => {
               onClick={handleSaveClass}
               variant="contained"
               startIcon={classDetails.id ? <SaveIcon /> : <AddCircleIcon />}
-              disabled={!classDetails.subject}
+              disabled={!classDetails.examType || !classDetails.subject || !classDetails.topic}
               sx={{ 
-                borderRadius: '25px',
-                px: 4,
-                py: 1.5,
-                boxShadow: `0 8px 20px ${alpha(getSubjectColor(classDetails.subject || 'default'), 0.3)}`,
-                background: `linear-gradient(135deg, ${getSubjectColor(classDetails.subject || 'default')} 0%, ${alpha(getSubjectColor(classDetails.subject || 'default'), 0.8)} 100%)`,
+                borderRadius: '20px',
+                px: 6,
+                py: 2,
+                boxShadow: (classDetails.examType && classDetails.subject) ? `0 8px 32px ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.4)}` : '0 8px 32px rgba(85, 179, 217, 0.4)',
+                background: (classDetails.examType && classDetails.subject) ? 
+                  `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.8)} 100%)` :
+                  'linear-gradient(135deg, #55b3d9 0%, #3498db 100%)',
                 textTransform: 'none',
-                fontWeight: 600,
-                fontSize: '1rem',
+                fontWeight: 700,
+                fontSize: '1.1rem',
+                color: '#ffffff',
+                backdropFilter: 'blur(10px)',
+                border: '2px solid rgba(255, 255, 255, 0.2)',
                 transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&:before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                  transition: 'left 0.6s ease'
+                },
                 '&:hover': {
-                  boxShadow: `0 12px 25px ${alpha(getSubjectColor(classDetails.subject || 'default'), 0.4)}`,
-                  transform: 'translateY(-3px)',
-                  background: `linear-gradient(135deg, ${getSubjectColor(classDetails.subject || 'default')} 0%, ${getSubjectColor(classDetails.subject || 'default')} 100%)`
+                  boxShadow: (classDetails.examType && classDetails.subject) ? 
+                    `0 16px 48px ${alpha(getSubjectColor(classDetails.subject, classDetails.examType), 0.5)}` : 
+                    '0 16px 48px rgba(85, 179, 217, 0.5)',
+                  transform: 'translateY(-3px) scale(1.02)',
+                  background: (classDetails.examType && classDetails.subject) ? 
+                    `linear-gradient(135deg, ${getSubjectColor(classDetails.subject, classDetails.examType)} 0%, ${getSubjectColor(classDetails.subject, classDetails.examType)} 100%)` :
+                    'linear-gradient(135deg, #3498db 0%, #2980b9 100%)',
+                  '&:before': {
+                    left: '100%'
+                  }
                 },
                 '&:disabled': {
-                  background: 'rgba(0,0,0,0.12)',
-                  color: 'rgba(0,0,0,0.38)',
-                  boxShadow: 'none'
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  boxShadow: 'none',
+                  border: '2px solid rgba(255, 255, 255, 0.1)'
                 }
               }}
             >
@@ -1449,19 +2011,22 @@ const DersProgrami = () => {
         maxWidth="sm"
         PaperProps={{
           sx: {
-            borderRadius: '20px',
-            boxShadow: '0 15px 50px rgba(0,0,0,0.15)',
-            background: 'linear-gradient(to bottom, #ffffff, #f9fafc)',
+            borderRadius: '24px',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.25), 0 16px 40px rgba(0,0,0,0.15)',
+            background: 'linear-gradient(145deg, rgba(26, 5, 69, 0.95) 0%, rgba(26, 5, 69, 0.98) 100%)',
+            backdropFilter: 'blur(50px)',
+            border: '2px solid rgba(255,255,255,0.1)',
             overflow: 'hidden'
           }
         }}
       >
         <Box sx={{
-          p: 3,
-          background: viewingClass ? `linear-gradient(45deg, ${alpha(getSubjectColor(viewingClass?.subject || 'default'), 0.9)} 0%, ${alpha(getSubjectColor(viewingClass?.subject || 'default'), 0.7)} 100%)` : 'linear-gradient(45deg, #3f51b5, #2196f3)',
+          p: 4,
+          background: viewingClass ? `linear-gradient(135deg, ${getSubjectColor(viewingClass?.subject || 'default', viewingClass?.examType)} 0%, ${alpha(getSubjectColor(viewingClass?.subject || 'default', viewingClass?.examType), 0.8)} 100%)` : 'linear-gradient(135deg, #55b3d9 0%, #3498db 100%)',
           color: 'white',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderRadius: '24px 24px 0 0'
         }}>
           {/* Dekoratif elementler */}
           <Box 
@@ -1491,55 +2056,110 @@ const DersProgrami = () => {
           
           {/* Başlık ve Kapat Butonu */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-            <Typography 
-              variant="h5" 
-              component="div" 
-              fontWeight={700}
-              sx={{
-                textShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
-              <SchoolIcon fontSize="large" />
-              {viewingClass?.subject || 'Ders Detayları'}
-            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Typography 
+                variant="h4" 
+                component="div" 
+                fontWeight={700}
+                sx={{
+                  textShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2
+                }}
+              >
+                <Box sx={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: '16px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
+                }}>
+                  <SchoolIcon sx={{ fontSize: '2rem' }} />
+                </Box>
+                <Box>
+                  <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1.2 }}>
+                    {viewingClass?.examType ? `${viewingClass.examType} - ${viewingClass.subject}` : viewingClass?.subject || 'Ders Detayları'}
+                  </Typography>
+                  {viewingClass?.topic && (
+                    <Typography variant="h6" sx={{ 
+                      opacity: 0.9, 
+                      fontWeight: 500,
+                      mt: 0.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1
+                    }}>
+                      <Box sx={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        background: 'rgba(255, 255, 255, 0.8)'
+                      }} />
+                      {viewingClass.topic}
+                    </Typography>
+                  )}
+                </Box>
+              </Typography>
+            </Box>
             <IconButton
               aria-label="close"
               onClick={handleCloseViewDialog}
               sx={{
                 color: 'white',
                 backgroundColor: 'rgba(255,255,255,0.15)',
+                backdropFilter: 'blur(10px)',
+                width: 48,
+                height: 48,
+                borderRadius: '12px',
                 '&:hover': {
                   backgroundColor: 'rgba(255,255,255,0.25)',
-                  transform: 'rotate(90deg)'
+                  transform: 'scale(1.1) rotate(90deg)',
+                  boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
                 },
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
               }}
             >
-              <CloseIcon />
+              <CloseIcon sx={{ fontSize: '1.5rem' }} />
             </IconButton>
           </Box>
           
           {/* Gün Bilgisi */}
-          <Typography 
-            variant="body1" 
-            sx={{
-              opacity: 0.9,
-              mt: 1,
-              textTransform: 'capitalize',
-              position: 'relative',
-              zIndex: 1,
-              fontWeight: 500,
+          <Box sx={{ 
+            mt: 3, 
+            position: 'relative', 
+            zIndex: 1,
+            display: 'flex',
+            justifyContent: 'center'
+          }}>
+            <Box sx={{
+              px: 3,
+              py: 1.5,
+              borderRadius: '16px',
+              background: 'rgba(255, 255, 255, 0.15)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               display: 'flex',
               alignItems: 'center',
-              gap: 0.5
-            }}
-          >
-            <CalendarMonthIcon fontSize="small" />
-            {viewingDay}
-          </Typography>
+              gap: 1.5
+            }}>
+              <CalendarMonthIcon sx={{ fontSize: '1.2rem' }} />
+              <Typography 
+                variant="h6" 
+                sx={{
+                  fontWeight: 600,
+                  textTransform: 'capitalize',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                {viewingDay}
+              </Typography>
+            </Box>
+          </Box>
         </Box>
         
         <DialogContent sx={{ px: 3, py: 3, bgcolor: '#1a0545' }}>
@@ -1548,92 +2168,75 @@ const DersProgrami = () => {
             flexDirection: 'column', 
             gap: 2.5
           }}>
-            {/* Öğretmen Bilgisi */}
-            <Paper elevation={0} sx={{ 
-              p: 2.5,
-              borderRadius: '16px',
-              backgroundColor: '#1a0545',
-              border: '1px solid rgba(85, 179, 217, 0.2)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s ease',
-              '&:hover': {
-                boxShadow: '0 6px 16px rgba(85, 179, 217, 0.2)',
-                transform: 'translateY(-2px)',
-                borderColor: 'rgba(85, 179, 217, 0.4)'
-              }
-            }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{
-                  width: 48,
-                  height: 48,
-                  borderRadius: '12px',
-                  backgroundColor: 'rgba(85, 179, 217, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  mr: 2
-                }}>
-                  <PersonIcon sx={{ color: '#55b3d9', fontSize: '1.8rem' }} />
-                </Box>
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant="subtitle2" sx={{ 
-                    color: 'rgba(255, 255, 255, 0.7)', 
-                    mb: 0.5,
-                    fontWeight: 500,
-                    fontSize: '0.8rem'
-                  }}>
-                    Öğretmen
-                  </Typography>
-                  <Typography variant="h6" sx={{ 
-                    fontWeight: 600,
-                    color: 'white',
-                    fontSize: '1.1rem'
-                  }}>
-                    {viewingClass?.teacher || 'Belirtilmemiş'}
-                  </Typography>
-                </Box>
-              </Box>
-            </Paper>
-            
+
             {/* Video URL */}
             {viewingClass?.location && (
               <Paper elevation={0} sx={{ 
-                p: 2.5,
-                borderRadius: '16px',
-                backgroundColor: '#1a0545',
-                border: '1px solid rgba(85, 179, 217, 0.2)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease',
+                p: 3,
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(85, 179, 217, 0.15) 0%, rgba(85, 179, 217, 0.08) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '2px solid rgba(85, 179, 217, 0.3)',
+                boxShadow: '0 8px 25px rgba(85, 179, 217, 0.15)',
+                transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
                 cursor: 'pointer',
+                position: 'relative',
+                overflow: 'hidden',
+                '&:before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #55b3d9, transparent)',
+                  transition: 'left 0.6s ease'
+                },
                 '&:hover': {
-                  boxShadow: '0 6px 16px rgba(85, 179, 217, 0.3)',
-                  transform: 'translateY(-2px)',
-                  borderColor: 'rgba(85, 179, 217, 0.4)'
+                  boxShadow: '0 12px 35px rgba(85, 179, 217, 0.25)',
+                  transform: 'translateY(-4px) scale(1.02)',
+                  borderColor: 'rgba(85, 179, 217, 0.5)',
+                  background: 'linear-gradient(135deg, rgba(85, 179, 217, 0.2) 0%, rgba(85, 179, 217, 0.12) 100%)',
+                  '&:before': {
+                    left: '100%'
+                  }
                 }
               }}
               onClick={() => viewingClass?.location && handleUrlClick(viewingClass.location)}
               >
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <Box sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(85, 179, 217, 0.15)',
+                    width: 56,
+                    height: 56,
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, #55b3d9 0%, #3498db 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    mr: 2
+                    mr: 3,
+                    boxShadow: '0 8px 20px rgba(85, 179, 217, 0.3)',
+                    position: 'relative',
+                    '&:before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: '2px',
+                      borderRadius: '14px',
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)',
+                      zIndex: 0
+                    }
                   }}>
-                    <VideoLibraryIcon sx={{ color: '#55b3d9', fontSize: '1.8rem' }} />
+                    <VideoLibraryIcon sx={{ color: 'white', fontSize: '2rem', position: 'relative', zIndex: 1 }} />
                   </Box>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="subtitle2" sx={{ 
-                      color: 'rgba(255, 255, 255, 0.7)', 
-                      mb: 0.5,
-                      fontWeight: 500,
-                      fontSize: '0.8rem'
+                      color: 'rgba(255, 255, 255, 0.8)', 
+                      mb: 1,
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase'
                     }}>
-                      Video URL
+                      📺 Video URL
                     </Typography>
                     <Typography 
                       variant="h6" 
@@ -1723,40 +2326,69 @@ const DersProgrami = () => {
             {/* Notlar */}
             {viewingClass?.notes && (
               <Paper elevation={0} sx={{ 
-                p: 2.5,
-                borderRadius: '16px',
-                backgroundColor: '#1a0545',
-                border: '1px solid rgba(85, 179, 217, 0.2)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                transition: 'all 0.3s ease',
+                p: 3,
+                borderRadius: '20px',
+                background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.08) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '2px solid rgba(255, 193, 7, 0.3)',
+                boxShadow: '0 8px 25px rgba(255, 193, 7, 0.15)',
+                transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                position: 'relative',
+                overflow: 'hidden',
+                '&:before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, transparent, #FFC107, transparent)',
+                  transition: 'left 0.6s ease'
+                },
                 '&:hover': {
-                  boxShadow: '0 6px 16px rgba(85, 179, 217, 0.2)',
-                  transform: 'translateY(-2px)',
-                  borderColor: 'rgba(85, 179, 217, 0.4)'
+                  boxShadow: '0 12px 35px rgba(255, 193, 7, 0.25)',
+                  transform: 'translateY(-4px) scale(1.01)',
+                  borderColor: 'rgba(255, 193, 7, 0.5)',
+                  background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.12) 100%)',
+                  '&:before': {
+                    left: '100%'
+                  }
                 }
               }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                   <Box sx={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: '12px',
-                    backgroundColor: 'rgba(85, 179, 217, 0.15)',
+                    width: 56,
+                    height: 56,
+                    borderRadius: '16px',
+                    background: 'linear-gradient(135deg, #FFC107 0%, #FF9800 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    mr: 2,
-                    mt: 0.5
+                    mr: 3,
+                    mt: 0.5,
+                    boxShadow: '0 8px 20px rgba(255, 193, 7, 0.3)',
+                    position: 'relative',
+                    '&:before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: '2px',
+                      borderRadius: '14px',
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%)',
+                      zIndex: 0
+                    }
                   }}>
-                    <NotesIcon sx={{ color: '#55b3d9', fontSize: '1.8rem' }} />
+                    <NotesIcon sx={{ color: 'white', fontSize: '2rem', position: 'relative', zIndex: 1 }} />
                   </Box>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="subtitle2" sx={{ 
-                      color: 'rgba(255, 255, 255, 0.7)', 
-                      mb: 1,
-                      fontWeight: 500,
-                      fontSize: '0.8rem'
+                      color: 'rgba(255, 255, 255, 0.8)', 
+                      mb: 1.5,
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase'
                     }}>
-                      Konu Adı / Notlar
+                      📝 Konu Adı / Notlar
                     </Typography>
                     <Typography 
                       variant="body1" 
@@ -1787,9 +2419,10 @@ const DersProgrami = () => {
             display: 'flex', 
             justifyContent: 'space-between',
             alignItems: 'center',
-            p: 3,
-            borderTop: '1px solid rgba(85, 179, 217, 0.1)',
-            backgroundColor: '#1a0545'
+            p: 4,
+            borderTop: '2px solid rgba(255,255,255,0.1)',
+            background: 'linear-gradient(135deg, rgba(26, 5, 69, 0.8) 0%, rgba(26, 5, 69, 0.9) 100%)',
+            backdropFilter: 'blur(20px)'
           }}
         >
           <Button 

@@ -4,11 +4,7 @@ import {
   Container, 
   Typography, 
   Button, 
-  List, 
-  ListItem, 
-  ListItemText, 
   Checkbox,
-  FormControlLabel,
   Alert,
   Snackbar,
   Dialog,
@@ -16,7 +12,6 @@ import {
   DialogContent,
   DialogActions,
   Card,
-  LinearProgress,
   Avatar
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -224,7 +219,7 @@ const KonuTakip = () => {
     <Container 
       maxWidth="xl" 
       sx={{ 
-        py: 4, 
+        py: 14, 
         minHeight: '100vh',
         backgroundColor: '#1a0545',
         position: 'relative',
@@ -377,22 +372,74 @@ const KonuTakip = () => {
               onClick={() => handleDersClick(ders)}
               sx={{
                 cursor: 'pointer',
-                borderRadius: 4,
+                borderRadius: '24px',
                 overflow: 'hidden',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                background: 'linear-gradient(145deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.08) 100%)',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                boxShadow: `
+                  0 8px 32px rgba(0,0,0,0.12),
+                  0 2px 8px rgba(0,0,0,0.08),
+                  inset 0 1px 0 rgba(255,255,255,0.15)
+                `,
+                transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
                 position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `linear-gradient(135deg, ${ders.color}15 0%, transparent 50%, ${ders.color}08 100%)`,
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                  borderRadius: '24px'
+                },
+                '&::after': {
+                  content: '""',
+                  position: 'absolute',
+                  top: -2,
+                  left: -2,
+                  right: -2,
+                  bottom: -2,
+                  background: `linear-gradient(135deg, ${ders.color}40 0%, transparent 50%, ${ders.color}20 100%)`,
+                  borderRadius: '26px',
+                  zIndex: -1,
+                  opacity: 0,
+                  transition: 'opacity 0.4s ease'
+                },
                 '&:hover': {
-                  transform: 'translateY(-8px)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+                  transform: 'translateY(-12px) scale(1.02)',
+                  boxShadow: `
+                    0 20px 60px rgba(0,0,0,0.2),
+                    0 8px 24px rgba(0,0,0,0.15),
+                    inset 0 1px 0 rgba(255,255,255,0.2),
+                    0 0 0 1px ${ders.color}30
+                  `,
+                  background: 'linear-gradient(145deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.12) 100%)',
+                  '&::after': {
+                    opacity: 1
+                  },
                   '& .subject-header': {
-                    transform: 'scale(1.02)'
+                    transform: 'scale(1.03)',
+                    '&::before': {
+                      opacity: 0.8
+                    }
+                  },
+                  '& .progress-section': {
+                    transform: 'translateY(-2px)'
+                  },
+                  '& .shimmer-overlay': {
+                    animation: 'shimmer 2s infinite'
                   }
                 },
                 '&:active': {
-                  transform: 'translateY(-4px)'
+                  transform: 'translateY(-8px) scale(1.01)'
+                },
+                '@keyframes shimmer': {
+                  '0%': { transform: 'translateX(-100%)' },
+                  '100%': { transform: 'translateX(100%)' }
                 }
               }}
             >
@@ -400,14 +447,15 @@ const KonuTakip = () => {
               <Box
                 className="subject-header"
                 sx={{
-                  background: `linear-gradient(135deg, ${ders.color} 0%, ${ders.color}dd 100%)`,
-                  p: 3,
+                  background: `linear-gradient(135deg, ${ders.color} 0%, ${ders.color}cc 50%, ${ders.color}aa 100%)`,
+                  p: 4,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 2,
-                  transition: 'transform 0.3s ease',
+                  gap: 3,
+                  transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
                   position: 'relative',
                   overflow: 'hidden',
+                  zIndex: 2,
                   '&::before': {
                     content: '""',
                     position: 'absolute',
@@ -415,33 +463,85 @@ const KonuTakip = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
-                    pointerEvents: 'none'
+                    background: `
+                      linear-gradient(135deg, 
+                        rgba(255,255,255,0.2) 0%, 
+                        rgba(255,255,255,0.1) 30%,
+                        transparent 60%,
+                        rgba(255,255,255,0.05) 100%
+                      )
+                    `,
+                    pointerEvents: 'none',
+                    opacity: 0.6,
+                    transition: 'opacity 0.4s ease'
+                  },
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    transition: 'left 0.6s ease',
+                    zIndex: 1
                   }
                 }}
               >
                 <Avatar
                   sx={{
-                    width: 50,
-                    height: 50,
-                    bgcolor: 'rgba(255,255,255,0.2)',
+                    width: 64,
+                    height: 64,
+                    background: `
+                      linear-gradient(135deg, 
+                        rgba(255,255,255,0.25) 0%, 
+                        rgba(255,255,255,0.15) 100%
+                      )
+                    `,
+                    backdropFilter: 'blur(10px)',
                     color: '#ffffff',
-                    fontSize: '1.5rem',
+                    fontSize: '1.8rem',
                     fontWeight: 700,
-                    border: '2px solid rgba(255,255,255,0.3)'
+                    border: '2px solid rgba(255,255,255,0.4)',
+                    boxShadow: `
+                      0 8px 24px rgba(0,0,0,0.15),
+                      inset 0 1px 0 rgba(255,255,255,0.3)
+                    `,
+                    position: 'relative',
+                    zIndex: 3,
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: -2,
+                      left: -2,
+                      right: -2,
+                      bottom: -2,
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))',
+                      borderRadius: '50%',
+                      zIndex: -1,
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease'
+                    }
                   }}
                 >
                   {getDersIcon(ders.ad)}
                 </Avatar>
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ flex: 1, zIndex: 3, position: 'relative' }}>
                   <Typography
-                    variant="h6"
+                    variant="h5"
                     sx={{
                       color: '#ffffff',
-                      fontWeight: 700,
-                      fontSize: '1.2rem',
-                      textShadow: '0 1px 2px rgba(0,0,0,0.2)',
-                      lineHeight: 1.2
+                      fontWeight: 800,
+                      fontSize: '1.4rem',
+                      textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                      lineHeight: 1.2,
+                      mb: 0.5,
+                      background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%)',
+                      backgroundClip: 'text',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
                     }}
                   >
                     {ders.ad}
@@ -449,9 +549,12 @@ const KonuTakip = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: 'rgba(255,255,255,0.9)',
-                      fontWeight: 500,
-                      fontSize: '0.9rem'
+                      color: 'rgba(255,255,255,0.95)',
+                      fontWeight: 600,
+                      fontSize: '1rem',
+                      textShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      letterSpacing: '0.5px',
+                      textTransform: 'uppercase'
                     }}
                   >
                     {ders.type} Dersi
@@ -459,107 +562,209 @@ const KonuTakip = () => {
                 </Box>
               </Box>
 
+              {/* Shimmer Overlay */}
+              <Box
+                className="shimmer-overlay"
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: '-100%',
+                  width: '100%',
+                  height: '100%',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+                  zIndex: 4,
+                  pointerEvents: 'none'
+                }}
+              />
+
               {/* Progress Section */}
-              <Box sx={{ p: 3 }}>
+              <Box 
+                className="progress-section"
+                sx={{ 
+                  p: 4, 
+                  position: 'relative',
+                  zIndex: 2,
+                  transition: 'transform 0.3s ease'
+                }}
+              >
                 <Box sx={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
                   alignItems: 'center',
-                  mb: 2
+                  mb: 3,
+                  p: 2,
+                  borderRadius: '16px',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.1)'
                 }}>
                   <Typography
-                    variant="body2"
+                    variant="body1"
                     sx={{
-                      color: '#666',
-                      fontWeight: 600,
-                      fontSize: '0.9rem'
+                      color: 'rgba(255,255,255,0.9)',
+                      fontWeight: 700,
+                      fontSize: '1rem',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                     }}
                   >
                     İlerleme Durumu
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: ders.color,
-                      fontWeight: 700,
-                      fontSize: '0.9rem'
-                    }}
-                  >
-                    {completedCount}/{totalCount}
-                  </Typography>
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    background: `linear-gradient(135deg, ${ders.color}20 0%, ${ders.color}10 100%)`,
+                    px: 2,
+                    py: 1,
+                    borderRadius: '12px',
+                    border: `1px solid ${ders.color}30`
+                  }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        color: ders.color,
+                        fontWeight: 800,
+                        fontSize: '1.1rem',
+                        textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      {completedCount}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'rgba(255,255,255,0.7)',
+                        fontWeight: 600,
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      / {totalCount}
+                    </Typography>
+                  </Box>
                 </Box>
                 
-                <LinearProgress
-                  variant="determinate"
-                  value={progressPercentage}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: 'rgba(0,0,0,0.08)',
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 4,
-                      background: `linear-gradient(90deg, ${ders.color} 0%, ${ders.color}aa 100%)`,
-                      transition: 'transform 0.4s ease'
-                    }
-                  }}
-                />
+                <Box sx={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 2,
+                  mb: 2
+                }}>
+                  <Box sx={{ flex: 1, position: 'relative' }}>
+                    {/* Custom Progress Bar */}
+                    <Box sx={{
+                      height: 12,
+                      borderRadius: '8px',
+                      background: `
+                        linear-gradient(135deg, 
+                          rgba(0,0,0,0.4) 0%, 
+                          rgba(0,0,0,0.3) 50%,
+                          rgba(0,0,0,0.35) 100%
+                        )
+                      `,
+                      backdropFilter: 'blur(10px)',
+                      border: `1px solid ${ders.color}60`,
+                      overflow: 'hidden',
+                      boxShadow: `inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.1)`,
+                      position: 'relative'
+                    }}>
+                      {/* Progress Fill */}
+                                             <Box sx={{
+                         height: '100%',
+                         width: `${progressPercentage}%`,
+                         background: `linear-gradient(90deg, ${ders.color} 0%, ${ders.color}dd 50%, ${ders.color} 100%)`,
+                         borderRadius: '8px',
+                         boxShadow: `0 0 16px ${ders.color}60, inset 0 1px 0 rgba(255,255,255,0.4)`,
+                         transition: 'width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1)'
+                       }} />
+                    </Box>
+                  </Box>
+                  <Box sx={{
+                    background: `linear-gradient(135deg, ${ders.color}25 0%, ${ders.color}15 100%)`,
+                    backdropFilter: 'blur(10px)',
+                    border: `1px solid ${ders.color}30`,
+                    borderRadius: '10px',
+                    px: 2,
+                    py: 0.5,
+                    minWidth: '60px',
+                    textAlign: 'center'
+                  }}>
+                    <Typography sx={{
+                      color: ders.color,
+                      fontWeight: 800,
+                      fontSize: '0.9rem',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                    }}>
+                      %{Math.round(progressPercentage)}
+                    </Typography>
+                  </Box>
+                </Box>
                 
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: '#888',
-                    fontSize: '0.8rem',
-                    mt: 1,
-                    textAlign: 'center',
-                    fontWeight: 500
-                  }}
-                >
-                  %{Math.round(progressPercentage)} Tamamlandı
-                </Typography>
+
               </Box>
 
               {/* Status Indicators */}
               <Box sx={{ 
-                px: 3, 
-                pb: 3,
+                px: 4, 
+                pb: 4,
                 display: 'flex',
-                gap: 1,
-                justifyContent: 'center'
+                gap: 2,
+                justifyContent: 'center',
+                position: 'relative',
+                zIndex: 2
               }}>
                 {ilerleme.needsReview > 0 && (
                   <Box
                     sx={{
-                      bgcolor: '#fff3e0',
-                      color: '#e65100',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 2,
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      border: '1px solid #ffcc02'
+                      background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(255, 152, 0, 0.1) 100%)',
+                      backdropFilter: 'blur(10px)',
+                      color: '#ff9800',
+                      px: 3,
+                      py: 1.5,
+                      borderRadius: '16px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      border: '1px solid rgba(255, 152, 0, 0.3)',
+                      boxShadow: '0 4px 12px rgba(255, 152, 0, 0.2)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 20px rgba(255, 152, 0, 0.3)'
+                      }
                     }}
                   >
-                    {ilerleme.needsReview} Tekrar
+                    ⚡ {ilerleme.needsReview} Tekrar
                   </Box>
                 )}
                 {completedCount === totalCount && (
                   <Box
                     sx={{
-                      bgcolor: '#e8f5e8',
-                      color: '#2e7d32',
-                      px: 2,
-                      py: 0.5,
-                      borderRadius: 2,
-                      fontSize: '0.75rem',
-                      fontWeight: 600,
-                      border: '1px solid #4caf50',
+                      background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(76, 175, 80, 0.15) 100%)',
+                      backdropFilter: 'blur(10px)',
+                      color: '#4caf50',
+                      px: 3,
+                      py: 1.5,
+                      borderRadius: '16px',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      border: '1px solid rgba(76, 175, 80, 0.4)',
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 0.5
+                      gap: 1,
+                      textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 20px rgba(76, 175, 80, 0.3)'
+                      }
                     }}
                   >
-                    <CheckCircleIcon sx={{ fontSize: '0.9rem' }} />
-                    Tamamlandı
+                    <CheckCircleIcon sx={{ fontSize: '1rem' }} />
+                    ✨ Tamamlandı
                   </Box>
                 )}
               </Box>
@@ -572,245 +777,556 @@ const KonuTakip = () => {
         open={openDialog} 
         onClose={handleDialogClose}
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
         PaperProps={{
           sx: {
-            borderRadius: 3,
+            borderRadius: '32px',
             overflow: 'hidden',
-            backgroundColor: '#1a0545',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
-            border: '1px solid rgba(255,255,255,0.1)'
+            background: `
+              linear-gradient(145deg, 
+                rgba(26, 5, 69, 0.95) 0%, 
+                rgba(26, 5, 69, 0.98) 50%,
+                rgba(26, 5, 69, 0.95) 100%
+              )
+            `,
+            backdropFilter: 'blur(40px)',
+            boxShadow: `
+              0 32px 80px rgba(0,0,0,0.6),
+              0 8px 32px rgba(0,0,0,0.4),
+              inset 0 1px 0 rgba(255,255,255,0.1),
+              0 0 0 1px rgba(255,255,255,0.05)
+            `,
+            border: '1px solid rgba(255,255,255,0.15)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 50%)',
+              pointerEvents: 'none',
+              zIndex: 1
+            }
           }
         }}
       >
         {selectedDers && (
           <>
             <DialogTitle sx={{ 
-              background: `linear-gradient(135deg, ${selectedDers.color} 0%, ${selectedDers.color}dd 100%)`,
+              background: `linear-gradient(135deg, ${selectedDers.color} 0%, ${selectedDers.color}cc 50%, ${selectedDers.color}aa 100%)`,
               display: 'flex',
               alignItems: 'center',
-              p: 3,
+              p: 5,
               position: 'relative',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              zIndex: 2,
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `
+                  linear-gradient(135deg, 
+                    rgba(255,255,255,0.15) 0%, 
+                    rgba(255,255,255,0.08) 30%,
+                    transparent 60%,
+                    rgba(255,255,255,0.05) 100%
+                  )
+                `,
+                pointerEvents: 'none'
+              },
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+              }
             }}>
-              {/* Decorative background element */}
+              {/* Decorative background elements */}
               <Box sx={{
                 position: 'absolute',
-                top: -20,
-                right: -20,
+                top: -30,
+                right: -30,
+                width: 150,
+                height: 150,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
+                zIndex: 0
+              }} />
+              <Box sx={{
+                position: 'absolute',
+                bottom: -20,
+                left: -20,
                 width: 100,
                 height: 100,
                 borderRadius: '50%',
-                background: 'rgba(255,255,255,0.1)',
+                background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)',
                 zIndex: 0
               }} />
               
               <Avatar sx={{ 
-                bgcolor: 'rgba(255,255,255,0.9)', 
+                background: `
+                  linear-gradient(135deg, 
+                    rgba(255,255,255,0.95) 0%, 
+                    rgba(255,255,255,0.85) 100%
+                  )
+                `,
+                backdropFilter: 'blur(10px)',
                 color: selectedDers.color, 
-                mr: 3, 
-                width: 64, 
-                height: 64,
-                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-                zIndex: 2,
-                border: '3px solid rgba(255,255,255,0.3)'
+                mr: 4, 
+                width: 80, 
+                height: 80,
+                boxShadow: `
+                  0 8px 32px rgba(0,0,0,0.3),
+                  0 2px 8px rgba(0,0,0,0.2),
+                  inset 0 1px 0 rgba(255,255,255,0.5)
+                `,
+                zIndex: 3,
+                border: '3px solid rgba(255,255,255,0.4)',
+                fontSize: '2rem',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: `
+                    0 12px 40px rgba(0,0,0,0.4),
+                    0 4px 12px rgba(0,0,0,0.3),
+                    inset 0 1px 0 rgba(255,255,255,0.6)
+                  `
+                }
               }}>
                 {getDersIcon(selectedDers.ad)}
               </Avatar>
-              <Box sx={{ zIndex: 2 }}>
-                <Typography variant="h4" sx={{ 
-                  fontWeight: 700, 
+              <Box sx={{ zIndex: 3, flex: 1 }}>
+                <Typography variant="h3" sx={{ 
+                  fontWeight: 800, 
                   color: 'white',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                  mb: 0.5
+                  textShadow: '0 3px 8px rgba(0,0,0,0.4)',
+                  mb: 1,
+                  fontSize: '2.2rem',
+                  background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))'
                 }}>
                   {selectedDers.ad}
                 </Typography>
-                <Typography variant="subtitle1" sx={{ 
-                  color: 'rgba(255,255,255,0.9)',
-                  fontWeight: 500,
-                  fontSize: '1.1rem'
+                <Typography variant="h6" sx={{ 
+                  color: 'rgba(255,255,255,0.95)',
+                  fontWeight: 600,
+                  fontSize: '1.3rem',
+                  textShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                  letterSpacing: '0.5px'
                 }}>
-                  Toplam {selectedDers.konular.length} Konu
+                  📚 Toplam {selectedDers.konular.length} Konu
                 </Typography>
               </Box>
             </DialogTitle>
             
             <DialogContent sx={{ 
-              bgcolor: '#1a0545', 
+              background: 'transparent',
               p: 0,
-              position: 'relative'
+              position: 'relative',
+              zIndex: 2
             }}>
               {/* Stats Header */}
               <Box sx={{ 
-                p: 3, 
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                backdropFilter: 'blur(10px)',
-                borderBottom: '1px solid rgba(255,255,255,0.1)'
+                p: 4, 
+                background: `
+                  linear-gradient(135deg, 
+                    rgba(255,255,255,0.12) 0%, 
+                    rgba(255,255,255,0.08) 50%,
+                    rgba(255,255,255,0.05) 100%
+                  )
+                `,
+                backdropFilter: 'blur(20px)',
+                borderBottom: '1px solid rgba(255,255,255,0.15)',
+                position: 'relative',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '1px',
+                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+                }
               }}>
-                <Typography variant="h6" sx={{ 
-                  fontWeight: 600, 
+                <Typography variant="h5" sx={{ 
+                  fontWeight: 700, 
                   color: 'white',
-                  mb: 2,
-                  textAlign: 'center'
+                  mb: 3,
+                  textAlign: 'center',
+                  fontSize: '1.5rem',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                  background: 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%)',
+                  backgroundClip: 'text',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
                 }}>
-                  Konu Listesi
+                  📋 Konu Listesi
                 </Typography>
                 <Box sx={{ 
                   display: 'flex', 
                   justifyContent: 'center',
-                  gap: 3,
+                  gap: 4,
                   flexWrap: 'wrap'
                 }}>
                   <Box sx={{ 
                     display: 'flex', 
-                    alignItems: 'center', 
-                    bgcolor: 'rgba(76, 175, 80, 0.2)', 
-                    px: 2, 
-                    py: 1, 
-                    borderRadius: 3,
-                    border: '1px solid rgba(76, 175, 80, 0.3)',
-                    backdropFilter: 'blur(10px)'
+                    alignItems: 'center',
+                    gap: 1.5,
+                    background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(76, 175, 80, 0.15) 100%)', 
+                    px: 3, 
+                    py: 2, 
+                    borderRadius: '16px',
+                    border: '1px solid rgba(76, 175, 80, 0.4)',
+                    backdropFilter: 'blur(15px)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 20px rgba(76, 175, 80, 0.3)'
+                    }
                   }}>
-                    <CheckCircleIcon sx={{ color: '#4caf50', fontSize: 20, mr: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#4caf50' }}>
-                      Tamamlanan: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'completed' || durum === 'completedNeedsReview').length}
+                    <CheckCircleIcon sx={{ 
+                      color: '#4caf50', 
+                      fontSize: 24,
+                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+                    }} />
+                    <Typography variant="body1" sx={{ 
+                      fontWeight: 700, 
+                      color: '#4caf50',
+                      fontSize: '1rem',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}>
+                      ✅ Tamamlanan: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'completed' || durum === 'completedNeedsReview').length}
                     </Typography>
                   </Box>
                   <Box sx={{ 
                     display: 'flex', 
-                    alignItems: 'center', 
-                    bgcolor: 'rgba(255, 152, 0, 0.2)', 
-                    px: 2, 
-                    py: 1, 
-                    borderRadius: 3,
-                    border: '1px solid rgba(255, 152, 0, 0.3)',
-                    backdropFilter: 'blur(10px)'
+                    alignItems: 'center',
+                    gap: 1.5,
+                    background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(255, 152, 0, 0.15) 100%)', 
+                    px: 3, 
+                    py: 2, 
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255, 152, 0, 0.4)',
+                    backdropFilter: 'blur(15px)',
+                    boxShadow: '0 4px 12px rgba(255, 152, 0, 0.2)',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 6px 20px rgba(255, 152, 0, 0.3)'
+                    }
                   }}>
-                    <AccessTimeIcon sx={{ color: '#ff9800', fontSize: 20, mr: 1 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#ff9800' }}>
-                      Tekrar: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'needsReview' || durum === 'completedNeedsReview').length}
+                    <AccessTimeIcon sx={{ 
+                      color: '#ff9800', 
+                      fontSize: 24,
+                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))'
+                    }} />
+                    <Typography variant="body1" sx={{ 
+                      fontWeight: 700, 
+                      color: '#ff9800',
+                      fontSize: '1rem',
+                      textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                    }}>
+                      ⚡ Tekrar: {Object.values(konuDurumu[selectedDers.id] || {}).filter(durum => durum === 'needsReview' || durum === 'completedNeedsReview').length}
                     </Typography>
                   </Box>
                 </Box>
               </Box>
-              <List sx={{ p: 0, maxHeight: '400px', overflow: 'auto' }}>
+              <Box sx={{ 
+                p: 3, 
+                maxHeight: '500px', 
+                overflow: 'auto',
+                '&::-webkit-scrollbar': {
+                  width: '8px'
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'rgba(255,255,255,0.1)',
+                  borderRadius: '4px'
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  background: 'rgba(255,255,255,0.3)',
+                  borderRadius: '4px',
+                  '&:hover': {
+                    background: 'rgba(255,255,255,0.4)'
+                  }
+                }
+              }}>
                 {selectedDers.konular.map((konu, index) => {
                   const konuKey = `${selectedDers.id}-${index}`;
                   const durum = konuDurumu[selectedDers.id]?.[index] || 'notStarted';
                   
-                  const getBgColor = () => {
-                    if (durum === 'completed') return 'rgba(76, 175, 80, 0.1)';
-                    if (durum === 'completedNeedsReview') return 'rgba(255, 152, 0, 0.1)';
-                    if (durum === 'needsReview') return 'rgba(255, 152, 0, 0.05)';
-                    return 'rgba(255,255,255,0.02)';
-                  };
+
                   
                   return (
-                    <ListItem 
+                    <Box
                       key={konuKey} 
                       sx={{ 
                         p: 3,
-                        bgcolor: getBgColor(),
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        mb: 2,
+                        borderRadius: '20px',
+                        background: `
+                          linear-gradient(135deg, 
+                            ${durum === 'completed' ? 'rgba(76, 175, 80, 0.15)' : 
+                              durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.15)' : 
+                              durum === 'needsReview' ? 'rgba(255, 152, 0, 0.1)' : 
+                              'rgba(255,255,255,0.08)'} 0%, 
+                            ${durum === 'completed' ? 'rgba(76, 175, 80, 0.08)' : 
+                              durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.08)' : 
+                              durum === 'needsReview' ? 'rgba(255, 152, 0, 0.05)' : 
+                              'rgba(255,255,255,0.04)'} 100%
+                          )
+                        `,
+                        backdropFilter: 'blur(15px)',
+                        border: `1px solid ${
+                          durum === 'completed' ? 'rgba(76, 175, 80, 0.3)' : 
+                          durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.3)' : 
+                          durum === 'needsReview' ? 'rgba(255, 152, 0, 0.2)' : 
+                          'rgba(255,255,255,0.15)'
+                        }`,
+                        boxShadow: `
+                          0 4px 16px ${
+                            durum === 'completed' ? 'rgba(76, 175, 80, 0.1)' : 
+                            durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.1)' : 
+                            durum === 'needsReview' ? 'rgba(255, 152, 0, 0.05)' : 
+                            'rgba(0,0,0,0.1)'
+                          },
+                          inset 0 1px 0 rgba(255,255,255,0.1)
+                        `,
                         '&:hover': { 
-                          bgcolor: durum === 'completed' ? 'rgba(76, 175, 80, 0.15)' : 
-                                    durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.15)' : 
-                                    durum === 'needsReview' ? 'rgba(255, 152, 0, 0.1)' : 
-                                    'rgba(255,255,255,0.05)',
-                          transform: 'translateX(4px)'
+                          transform: 'translateY(-4px) scale(1.01)',
+                          boxShadow: `
+                            0 8px 32px ${
+                              durum === 'completed' ? 'rgba(76, 175, 80, 0.2)' : 
+                              durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.2)' : 
+                              durum === 'needsReview' ? 'rgba(255, 152, 0, 0.1)' : 
+                              'rgba(0,0,0,0.15)'
+                            },
+                            inset 0 1px 0 rgba(255,255,255,0.15)
+                          `,
+                          background: `
+                            linear-gradient(135deg, 
+                              ${durum === 'completed' ? 'rgba(76, 175, 80, 0.2)' : 
+                                durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.2)' : 
+                                durum === 'needsReview' ? 'rgba(255, 152, 0, 0.15)' : 
+                                'rgba(255,255,255,0.12)'} 0%, 
+                              ${durum === 'completed' ? 'rgba(76, 175, 80, 0.12)' : 
+                                durum === 'completedNeedsReview' ? 'rgba(255, 152, 0, 0.12)' : 
+                                durum === 'needsReview' ? 'rgba(255, 152, 0, 0.08)' : 
+                                'rgba(255,255,255,0.08)'} 100%
+                            )
+                          `
                         },
-                        transition: 'all 0.3s ease',
-                        cursor: 'pointer'
+                        transition: 'all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1)',
+                        cursor: 'pointer',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          left: '-100%',
+                          width: '100%',
+                          height: '100%',
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
+                          transition: 'left 0.6s ease',
+                          pointerEvents: 'none'
+                        },
+                        '&:hover::before': {
+                          left: '100%'
+                        }
                       }}
                     >
-                      <ListItemText 
-                        primary={konu} 
-                        primaryTypographyProps={{ 
-                          fontWeight: durum === 'completed' || durum === 'completedNeedsReview' ? 600 : 500,
-                          color: durum === 'completed' ? '#4caf50' : 
-                                durum === 'completedNeedsReview' ? '#ff9800' : 
-                                durum === 'needsReview' ? '#ffb74d' : 'rgba(255,255,255,0.9)',
-                          fontSize: '1rem'
-                        }}
-                      />
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={durum === 'completed' || durum === 'completedNeedsReview'}
-                              onChange={(e) => handleKonuDurumuChange(
-                                selectedDers.id, 
-                                index, 
-                                e.target.checked ? 
-                                  durum === 'needsReview' || durum === 'completedNeedsReview' ? 'completedNeedsReview' : 'completed' : 
-                                  durum === 'needsReview' || durum === 'completedNeedsReview' ? 'needsReview' : 'notStarted'
-                              )}
-                              sx={{ 
-                                '& .MuiSvgIcon-root': { fontSize: 24 },
-                                color: 'rgba(76, 175, 80, 0.7)',
-                                '&.Mui-checked': {
-                                  color: '#4caf50',
-                                }
-                              }}
-                            />
+                      <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        width: '100%',
+                        gap: 4
+                      }}>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontWeight: 800,
+                            color: durum === 'completed' ? '#4caf50' : 
+                                  durum === 'completedNeedsReview' ? '#ff9800' : 
+                                  durum === 'needsReview' ? '#ffb74d' : 'rgba(255,255,255,0.98)',
+                            fontSize: '1.3rem',
+                            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                            lineHeight: 1.2,
+                            position: 'relative',
+                            zIndex: 2,
+                            background: durum === 'notStarted' ? 'linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.9) 100%)' : 'none',
+                            backgroundClip: durum === 'notStarted' ? 'text' : 'unset',
+                            WebkitBackgroundClip: durum === 'notStarted' ? 'text' : 'unset',
+                            WebkitTextFillColor: durum === 'notStarted' ? 'transparent' : 'unset',
+                            filter: durum === 'notStarted' ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.2))' : 'none'
+                          }}
+                        >
+                          {durum === 'completed' && '✅ '}
+                          {durum === 'completedNeedsReview' && '⚡ '}
+                          {durum === 'needsReview' && '🔄 '}
+                          {durum === 'notStarted' && '📝 '}
+                          {konu}
+                        </Typography>
+                        
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 2,
+                          position: 'relative',
+                          zIndex: 2,
+                          flexShrink: 0
+                        }}>
+                        <Box sx={{
+                          background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.08) 100%)',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(76, 175, 80, 0.3)',
+                          padding: '8px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.12) 100%)',
+                            transform: 'scale(1.02)'
                           }
-                          label={<Typography sx={{ fontWeight: 500, color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>Tamamlandı</Typography>}
-                          sx={{ m: 0 }}
-                        />
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={durum === 'needsReview' || durum === 'completedNeedsReview'}
-                              onChange={(e) => handleTekrarDurumuChange(
-                                selectedDers.id, 
-                                index, 
-                                e.target.checked
-                              )}
-                              sx={{ 
-                                '& .MuiSvgIcon-root': { fontSize: 24 },
-                                color: 'rgba(255, 152, 0, 0.7)',
-                                '&.Mui-checked': {
-                                  color: '#ff9800',
-                                }
-                              }}
-                            />
+                        }}>
+                          <Checkbox
+                            checked={durum === 'completed' || durum === 'completedNeedsReview'}
+                            onChange={(e) => handleKonuDurumuChange(
+                              selectedDers.id, 
+                              index, 
+                              e.target.checked ? 
+                                durum === 'needsReview' || durum === 'completedNeedsReview' ? 'completedNeedsReview' : 'completed' : 
+                                durum === 'needsReview' || durum === 'completedNeedsReview' ? 'needsReview' : 'notStarted'
+                            )}
+                            sx={{ 
+                              '& .MuiSvgIcon-root': { fontSize: 20 },
+                              color: 'rgba(76, 175, 80, 0.7)',
+                              '&.Mui-checked': {
+                                color: '#4caf50',
+                              },
+                              p: 0
+                            }}
+                          />
+                          <Typography sx={{ 
+                            fontWeight: 600, 
+                            color: '#4caf50', 
+                            fontSize: '0.85rem',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                          }}>
+                            Tamamlandı
+                          </Typography>
+                        </Box>
+                        <Box sx={{
+                          background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.15) 0%, rgba(255, 152, 0, 0.08) 100%)',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '12px',
+                          border: '1px solid rgba(255, 152, 0, 0.3)',
+                          padding: '8px 16px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            background: 'linear-gradient(135deg, rgba(255, 152, 0, 0.2) 0%, rgba(255, 152, 0, 0.12) 100%)',
+                            transform: 'scale(1.02)'
                           }
-                          label={<Typography sx={{ fontWeight: 500, color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>Tekrar Edilecek</Typography>}
-                          sx={{ m: 0 }}
-                        />
+                        }}>
+                          <Checkbox
+                            checked={durum === 'needsReview' || durum === 'completedNeedsReview'}
+                            onChange={(e) => handleTekrarDurumuChange(
+                              selectedDers.id, 
+                              index, 
+                              e.target.checked
+                            )}
+                            sx={{ 
+                              '& .MuiSvgIcon-root': { fontSize: 20 },
+                              color: 'rgba(255, 152, 0, 0.7)',
+                              '&.Mui-checked': {
+                                color: '#ff9800',
+                              },
+                              p: 0
+                            }}
+                          />
+                          <Typography sx={{ 
+                            fontWeight: 600, 
+                            color: '#ff9800', 
+                            fontSize: '0.85rem',
+                            textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                          }}>
+                            Tekrar Edilecek
+                          </Typography>
+                        </Box>
+                        </Box>
                       </Box>
-                    </ListItem>
+                    </Box>
                   );
                 })}
-              </List>
+              </Box>
             </DialogContent>
             <DialogActions sx={{ 
-              p: 3, 
-              bgcolor: 'rgba(255,255,255,0.05)', 
+              p: 4, 
+              background: `
+                linear-gradient(135deg, 
+                  rgba(255,255,255,0.08) 0%, 
+                  rgba(255,255,255,0.04) 100%
+                )
+              `,
               justifyContent: 'space-between',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(10px)'
+              borderTop: '1px solid rgba(255,255,255,0.15)',
+              backdropFilter: 'blur(20px)',
+              position: 'relative',
+              zIndex: 2,
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '1px',
+                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'
+              }
             }}>
               <Button 
                 onClick={handleDialogClose}
                 variant="outlined"
                 sx={{ 
-                  borderColor: 'rgba(255,255,255,0.3)',
-                  color: 'rgba(255,255,255,0.8)',
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  borderRadius: 3,
+                  borderColor: 'rgba(255,255,255,0.4)',
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 700,
+                  px: 6,
+                  py: 2,
+                  borderRadius: '16px',
+                  fontSize: '1rem',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
                   '&:hover': { 
-                    borderColor: 'rgba(255,255,255,0.5)', 
-                    bgcolor: 'rgba(255,255,255,0.1)',
-                    color: 'white'
+                    borderColor: 'rgba(255,255,255,0.6)', 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%)',
+                    color: 'white',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 24px rgba(0,0,0,0.15)'
                   },
-                  transition: 'all 0.3s ease'
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
                 }}
               >
-                Kapat
+                🚪 Kapat
               </Button>
               <Button 
                 onClick={() => {
@@ -818,23 +1334,37 @@ const KonuTakip = () => {
                   handleDialogClose();
                 }}
                 variant="contained" 
-                startIcon={<SaveIcon />}
+                startIcon={<SaveIcon sx={{ fontSize: '1.2rem' }} />}
                 sx={{ 
-                  background: `linear-gradient(135deg, ${selectedDers.color} 0%, ${selectedDers.color}dd 100%)`,
-                  fontWeight: 600,
-                  px: 4,
-                  py: 1.5,
-                  borderRadius: 3,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                  background: `linear-gradient(135deg, ${selectedDers.color} 0%, ${selectedDers.color}cc 50%, ${selectedDers.color}aa 100%)`,
+                  fontWeight: 700,
+                  px: 6,
+                  py: 2,
+                  borderRadius: '16px',
+                  fontSize: '1rem',
+                  boxShadow: `
+                    0 8px 32px ${selectedDers.color}30,
+                    0 4px 16px rgba(0,0,0,0.2),
+                    inset 0 1px 0 rgba(255,255,255,0.2)
+                  `,
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.2)',
                   '&:hover': { 
-                    background: `linear-gradient(135deg, ${selectedDers.color}dd 0%, ${selectedDers.color}bb 100%)`,
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 6px 25px rgba(0,0,0,0.3)'
+                    background: `linear-gradient(135deg, ${selectedDers.color}dd 0%, ${selectedDers.color}bb 50%, ${selectedDers.color}99 100%)`,
+                    transform: 'translateY(-3px) scale(1.02)',
+                    boxShadow: `
+                      0 12px 40px ${selectedDers.color}40,
+                      0 6px 20px rgba(0,0,0,0.3),
+                      inset 0 1px 0 rgba(255,255,255,0.3)
+                    `
                   },
-                  transition: 'all 0.3s ease'
+                  '&:active': {
+                    transform: 'translateY(-1px) scale(1.01)'
+                  },
+                  transition: 'all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)'
                 }}
               >
-                Kaydet
+                💾 Kaydet
               </Button>
             </DialogActions>
           </>

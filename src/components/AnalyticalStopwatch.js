@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Box, Typography, Button, Card, CardContent, 
   DialogTitle, DialogContent, DialogActions,
-  CircularProgress, Avatar, Chip
+  CircularProgress
 } from '@mui/material';
 
 // Icons
@@ -284,43 +284,76 @@ const AnalyticalStopwatch = () => {
 
   // Ana içerik
   return (
-          <Box sx={{ display: 'flex', gap: 3, height: '100%', p: 2, bgcolor: '#1a0545' }}>
+          <Box sx={{ display: 'flex', gap: 3, height: '100%', p: 2, pl: 0, bgcolor: '#1a0545' }}>
       {/* Sol Panel - Ders ve Konu Seçimi */}
-      <Box sx={{ flex: 2, maxWidth: '500px' }}>
+      <Box sx={{ flex: 2, maxWidth: '450px' }}>
         <Card sx={{ 
-          height: { xs: 'auto', md: '600px' }, 
+          height: { xs: 'auto', md: '500px' }, 
           borderRadius: '20px', 
-          boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+          boxShadow: '0 15px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1)',
           overflow: 'hidden',
-          background: '#1a0545',
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.1)',
           display: 'flex',
           flexDirection: 'column'
         }}>
           <CardContent sx={{ p: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ 
-              background: `linear-gradient(135deg, ${selectedColor}15 0%, ${selectedColor}25 100%)`,
+              background: `linear-gradient(135deg, ${selectedColor}20 0%, ${selectedColor}10 50%, rgba(255,255,255,0.05) 100%)`,
               p: 3,
-              borderBottom: '1px solid rgba(0,0,0,0.06)',
-              flexShrink: 0
+              borderBottom: '1px solid rgba(255,255,255,0.1)',
+              flexShrink: 0,
+              position: 'relative',
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: `linear-gradient(45deg, ${selectedColor}08 0%, transparent 100%)`,
+                pointerEvents: 'none'
+              }
             }}>
               <Typography variant="h6" sx={{ 
                 fontWeight: 700, 
                 color: '#ffffff',
-                mb: 1,
+                mb: 1.5,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 1
+                gap: 1.5,
+                position: 'relative',
+                zIndex: 1,
+                fontSize: '1.1rem'
               }}>
-                <TimerIcon sx={{ color: selectedColor }} />
+                <Box sx={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '10px',
+                  background: `linear-gradient(135deg, ${selectedColor} 0%, ${selectedColor}CC 100%)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: `0 6px 15px ${selectedColor}30`
+                }}>
+                  <TimerIcon sx={{ color: '#ffffff', fontSize: '1rem' }} />
+                </Box>
                 Ders ve Konu Seçimi
               </Typography>
-              <Typography variant="body2" sx={{ color: '#ffffff', opacity: 0.8 }}>
+              <Typography variant="body2" sx={{ 
+                color: 'rgba(255,255,255,0.9)', 
+                opacity: 0.8,
+                position: 'relative',
+                zIndex: 1,
+                fontSize: '0.85rem'
+              }}>
                 Çalışmak istediğiniz sınav türü, ders ve konuyu seçin
               </Typography>
             </Box>
             
             <Box sx={{ 
-              p: 2, 
+              p: 2.5, 
               flex: 1, 
               overflowY: 'auto',
               '&::-webkit-scrollbar': {
@@ -340,8 +373,8 @@ const AnalyticalStopwatch = () => {
             }}>
               {!selectedExamType ? (
                 // Sınav türü seçimi
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  <Typography variant="h6" sx={{ color: '#ffffff', mb: 2, textAlign: 'center' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+                  <Typography variant="h6" sx={{ color: '#ffffff', mb: 2, textAlign: 'center', fontSize: '1rem' }}>
                     Sınav Türü Seçin
                   </Typography>
                   
@@ -351,19 +384,36 @@ const AnalyticalStopwatch = () => {
                     size="large"
                     onClick={() => handleExamTypeSelect('TYT')}
                     sx={{
-                      background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                      background: 'linear-gradient(135deg, #2196F3 0%, #21CBF3 50%, #64B5F6 100%)',
                       color: '#fff',
-                      py: 2,
-                      borderRadius: '12px',
-                      fontWeight: 600,
-                      fontSize: '1.1rem',
+                      py: 2.5,
+                      borderRadius: '16px',
+                      fontWeight: 700,
+                      fontSize: '1rem',
                       textTransform: 'none',
-                      boxShadow: '0 3px 5px 2px rgba(33, 150, 243, .3)',
-                      transition: 'all 0.3s ease',
+                      boxShadow: '0 6px 20px rgba(33, 150, 243, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                        transition: 'left 0.6s'
+                      },
                       '&:hover': {
-                        background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 10px 2px rgba(33, 150, 243, .3)'
+                        background: 'linear-gradient(135deg, #21CBF3 0%, #2196F3 50%, #1976D2 100%)',
+                        transform: 'translateY(-3px) scale(1.02)',
+                        boxShadow: '0 10px 30px rgba(33, 150, 243, 0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
+                        '&::before': {
+                          left: '100%'
+                        }
                       }
                     }}
                   >
@@ -376,19 +426,36 @@ const AnalyticalStopwatch = () => {
                     size="large"
                     onClick={() => handleExamTypeSelect('AYT')}
                     sx={{
-                      background: 'linear-gradient(45deg, #FF6B6B 30%, #FF8E53 90%)',
+                      background: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FFAB40 100%)',
                       color: '#fff',
-                      py: 2,
-                      borderRadius: '12px',
-                      fontWeight: 600,
-                      fontSize: '1.1rem',
+                      py: 2.5,
+                      borderRadius: '16px',
+                      fontWeight: 700,
+                      fontSize: '1rem',
                       textTransform: 'none',
-                      boxShadow: '0 3px 5px 2px rgba(255, 107, 107, .3)',
-                      transition: 'all 0.3s ease',
+                      boxShadow: '0 6px 20px rgba(255, 107, 107, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      backdropFilter: 'blur(10px)',
+                      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                        transition: 'left 0.6s'
+                      },
                       '&:hover': {
-                        background: 'linear-gradient(45deg, #FF8E53 30%, #FF6B6B 90%)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 10px 2px rgba(255, 107, 107, .3)'
+                        background: 'linear-gradient(135deg, #FF8E53 0%, #FF6B6B 50%, #E64A19 100%)',
+                        transform: 'translateY(-3px) scale(1.02)',
+                        boxShadow: '0 10px 30px rgba(255, 107, 107, 0.5), inset 0 1px 0 rgba(255,255,255,0.3)',
+                        '&::before': {
+                          left: '100%'
+                        }
                       }
                     }}
                   >
@@ -398,110 +465,180 @@ const AnalyticalStopwatch = () => {
               ) : (
                 // Ders ve konu seçimi
                 <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, flexShrink: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, flexShrink: 0 }}>
                     <Button
                       onClick={() => setSelectedExamType('')}
-                      sx={{ color: '#ffffff', minWidth: 'auto', p: 0.5, mr: 1 }}
+                      sx={{ color: '#ffffff', minWidth: 'auto', p: 1.5, mr: 2 }}
                     >
                       ←
                     </Button>
-                    <Chip 
-                      label={selectedExamType} 
-                      sx={{ 
-                        backgroundColor: selectedExamType === 'TYT' ? '#2196F3' : '#FF6B6B',
-                        color: '#fff',
-                        fontWeight: 600
-                      }} 
-                    />
+                    <Box sx={{
+                      px: 3,
+                      py: 1.5,
+                      borderRadius: '16px',
+                      background: selectedExamType === 'TYT' 
+                        ? 'linear-gradient(135deg, #2196F3 0%, #21CBF3 100%)' 
+                        : 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      boxShadow: selectedExamType === 'TYT'
+                        ? '0 4px 12px rgba(33, 150, 243, 0.3)'
+                        : '0 4px 12px rgba(255, 107, 107, 0.3)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      backdropFilter: 'blur(10px)'
+                    }}>
+                      {selectedExamType}
+                    </Box>
                   </Box>
                   
                   <Box sx={{ 
                     display: 'flex', 
                     flexDirection: 'column', 
-                    gap: 1,
-                    maxHeight: 'calc(100% - 60px)',
+                    gap: 2,
+                    maxHeight: 'calc(100% - 70px)',
                     overflowY: 'auto',
-                    pr: 1,
+                    pr: 2,
                     '&::-webkit-scrollbar': {
-                      width: '4px',
+                      width: '5px',
                     },
                     '&::-webkit-scrollbar-track': {
                       background: 'rgba(255,255,255,0.1)',
-                      borderRadius: '2px',
+                      borderRadius: '3px',
                     },
                     '&::-webkit-scrollbar-thumb': {
                       background: 'rgba(255,255,255,0.3)',
-                      borderRadius: '2px',
+                      borderRadius: '3px',
                       '&:hover': {
                         background: 'rgba(255,255,255,0.5)',
                       }
                     }
                   }}>
                     {Object.entries(yksData[selectedExamType]).map(([subject, data]) => (
-                      <Box key={subject} sx={{ mb: 1 }}>
+                      <Box key={subject} sx={{ mb: 2 }}>
                         <Box
                           onClick={() => handleSubjectClick(subject)}
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            p: 2,
-                            borderRadius: '12px',
+                            p: 3,
+                            borderRadius: '20px',
                             cursor: 'pointer',
-                            background: 'rgba(255,255,255,0.1)',
-                            transition: 'all 0.2s ease',
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            position: 'relative',
+                            overflow: 'hidden',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: `linear-gradient(135deg, ${data.color}15 0%, ${data.color}05 100%)`,
+                              opacity: 0,
+                              transition: 'opacity 0.3s ease'
+                            },
                             '&:hover': {
-                              background: 'rgba(255,255,255,0.15)',
-                              transform: 'translateX(4px)'
+                              background: 'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.08) 100%)',
+                              transform: 'translateX(8px) scale(1.02)',
+                              boxShadow: `0 8px 25px ${data.color}20`,
+                              border: `1px solid ${data.color}30`,
+                              '&::before': {
+                                opacity: 1
+                              }
                             }
                           }}
                         >
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Avatar sx={{ 
-                              width: 36, 
-                              height: 36, 
-                              bgcolor: data.color,
-                              fontSize: '0.9rem',
-                              fontWeight: 600
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
+                            <Box sx={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: '16px',
+                              background: `linear-gradient(135deg, ${data.color} 0%, ${data.color}CC 100%)`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: `0 8px 20px ${data.color}30, inset 0 1px 0 rgba(255,255,255,0.2)`,
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              transition: 'all 0.3s ease'
                             }}>
-                              {subjectIcons[subject]}
-                            </Avatar>
+                              {React.cloneElement(subjectIcons[subject], { 
+                                sx: { color: '#ffffff', fontSize: '1.2rem' } 
+                              })}
+                            </Box>
                             <Typography sx={{ 
-                              fontWeight: 600, 
+                              fontWeight: 700, 
                               color: '#ffffff',
-                              fontSize: '1rem'
+                              fontSize: '1.1rem',
+                              textShadow: '0 2px 4px rgba(0,0,0,0.2)'
                             }}>
                               {subject}
                             </Typography>
                           </Box>
-                          <ChevronRightIcon sx={{ 
-                            color: '#ffffff',
-                            transform: expandedSubject === subject ? 'rotate(90deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s ease'
-                          }} />
+                          <Box sx={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            background: 'rgba(255,255,255,0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.3s ease',
+                            position: 'relative',
+                            zIndex: 1
+                          }}>
+                            <ChevronRightIcon sx={{ 
+                              color: '#ffffff',
+                              fontSize: '1.2rem',
+                              transform: expandedSubject === subject ? 'rotate(90deg)' : 'rotate(0deg)',
+                              transition: 'transform 0.3s ease'
+                            }} />
+                          </Box>
                         </Box>
                         
                         {expandedSubject === subject && (
                           <Box sx={{ 
-                            ml: 3, 
-                            mt: 1,
-                            maxHeight: '200px',
+                            ml: 2, 
+                            mr: 1,
+                            mt: 2,
+                            maxHeight: '240px',
                             overflowY: 'auto',
-                            background: 'rgba(0,0,0,0.1)',
-                            borderRadius: '8px',
-                            p: 1,
+                            background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)',
+                            backdropFilter: 'blur(15px)',
+                            borderRadius: '20px',
+                            p: 2,
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            boxShadow: '0 8px 25px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)',
+                            position: 'relative',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              background: `linear-gradient(135deg, ${data.color}08 0%, transparent 50%, ${data.color}05 100%)`,
+                              borderRadius: '20px',
+                              pointerEvents: 'none'
+                            },
                             '&::-webkit-scrollbar': {
-                              width: '4px',
+                              width: '6px',
                             },
                             '&::-webkit-scrollbar-track': {
                               background: 'rgba(255,255,255,0.05)',
-                              borderRadius: '2px',
+                              borderRadius: '3px',
                             },
                             '&::-webkit-scrollbar-thumb': {
-                              background: 'rgba(255,255,255,0.2)',
-                              borderRadius: '2px',
+                              background: `linear-gradient(135deg, ${data.color} 0%, ${data.color}80 100%)`,
+                              borderRadius: '3px',
                               '&:hover': {
-                                background: 'rgba(255,255,255,0.3)',
+                                background: `linear-gradient(135deg, ${data.color}CC 0%, ${data.color} 100%)`,
                               }
                             }
                           }}>
@@ -513,46 +650,107 @@ const AnalyticalStopwatch = () => {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'space-between',
-                                  p: 1.5,
-                                  borderRadius: '8px',
-                                  mt: 0.5,
-                                  background: 'rgba(255,255,255,0.05)',
-                                  transition: 'all 0.2s ease',
-                                  '&:hover': {
-                                    background: 'rgba(255,255,255,0.1)',
-                                    transform: 'translateX(4px)'
+                                  p: 1.8,
+                                  borderRadius: '12px',
+                                  mt: index > 0 ? 1 : 0,
+                                  background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 100%)',
+                                  backdropFilter: 'blur(10px)',
+                                  border: '1px solid rgba(255,255,255,0.15)',
+                                  boxShadow: '0 3px 12px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.25)',
+                                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                  cursor: 'pointer',
+                                  position: 'relative',
+                                  overflow: 'hidden',
+                                  '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: '-100%',
+                                    width: '100%',
+                                    height: '100%',
+                                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)',
+                                    transition: 'left 0.5s ease',
+                                    pointerEvents: 'none'
                                   },
-                                  cursor: 'pointer'
+                                  '&:hover': {
+                                    background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%)',
+                                    transform: 'translateX(4px) translateY(-1px) scale(1.01)',
+                                    boxShadow: `0 6px 20px ${data.color}20, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                                    border: `1px solid ${data.color}30`,
+                                    '&::before': {
+                                      left: '100%'
+                                    }
+                                  }
                                 }}
                               >
-                                <Typography sx={{ 
-                                  fontSize: '0.9rem', 
-                                  color: '#ffffff',
-                                  fontWeight: 500,
-                                  flex: 1
+                                <Box sx={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: 1.5, 
+                                  flex: 1,
+                                  position: 'relative',
+                                  zIndex: 1
                                 }}>
-                                  {topic}
-                                </Typography>
+                                  <Box sx={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: '50%',
+                                    background: `linear-gradient(135deg, ${data.color} 0%, ${data.color}80 100%)`,
+                                    boxShadow: `0 0 6px ${data.color}60, 0 1px 3px rgba(0,0,0,0.2)`,
+                                    flexShrink: 0
+                                  }} />
+                                  <Typography sx={{ 
+                                    fontSize: '0.85rem', 
+                                    color: '#ffffff',
+                                    fontWeight: 500,
+                                    flex: 1,
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                                    letterSpacing: '0.1px'
+                                  }}>
+                                    {topic}
+                                  </Typography>
+                                </Box>
                                 <Button
-                                  size="medium"
+                                  size="small"
                                   variant="contained"
                                   sx={{
-                                    minWidth: '70px',
-                                    background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                                    minWidth: '60px',
+                                    background: `linear-gradient(135deg, ${data.color} 0%, ${data.color}CC 50%, ${data.color}80 100%)`,
                                     color: '#ffffff',
                                     fontWeight: 600,
-                                    fontSize: '0.85rem',
-                                    py: 1,
-                                    px: 2,
-                                    ml: 1,
-                                    borderRadius: '8px',
-                                    boxShadow: '0 2px 4px rgba(33, 150, 243, 0.3)',
+                                    fontSize: '0.75rem',
+                                    py: 0.8,
+                                    px: 1.8,
+                                    ml: 1.5,
+                                    borderRadius: '10px',
+                                    boxShadow: `0 3px 10px ${data.color}40, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                                    border: '1px solid rgba(255,255,255,0.2)',
                                     textTransform: 'none',
-                                    transition: 'all 0.3s ease',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    position: 'relative',
+                                    zIndex: 1,
+                                    overflow: 'hidden',
+                                    '&::before': {
+                                      content: '""',
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                      right: 0,
+                                      bottom: 0,
+                                      background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%)',
+                                      opacity: 0,
+                                      transition: 'opacity 0.3s ease'
+                                    },
                                     '&:hover': {
-                                      background: 'linear-gradient(45deg, #21CBF3 30%, #2196F3 90%)',
-                                      transform: 'translateY(-2px)',
-                                      boxShadow: '0 4px 8px rgba(33, 150, 243, 0.4)'
+                                      background: `linear-gradient(135deg, ${data.color}CC 0%, ${data.color} 50%, ${data.color}E6 100%)`,
+                                      transform: 'translateY(-2px) scale(1.03)',
+                                      boxShadow: `0 6px 16px ${data.color}60, inset 0 1px 0 rgba(255,255,255,0.4)`,
+                                      '&::before': {
+                                        opacity: 1
+                                      }
+                                    },
+                                    '&:active': {
+                                      transform: 'translateY(-1px) scale(1.01)'
                                     }
                                   }}
                                 >
@@ -576,21 +774,24 @@ const AnalyticalStopwatch = () => {
       <Card id="timer-section" sx={{ 
         flex: 1,
         borderRadius: '20px', 
-        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+        boxShadow: '0 15px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.1)',
         overflow: 'hidden',
-                    background: '#1a0545',
+        background: 'linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.1)',
         display: 'flex',
         flexDirection: 'column',
-        height: { xs: 'auto', md: '600px' }
+        height: { xs: 'auto', md: '500px' }
       }}>
         <CardContent sx={{ p: 0, flex: 1, display: 'flex', flexDirection: 'column' }}>
           <Box sx={{ 
-            p: 2,
-            borderBottom: '1px solid rgba(0,0,0,0.06)',
+            p: 2.5,
+            borderBottom: '1px solid rgba(255,255,255,0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            flexShrink: 0
+            flexShrink: 0,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
           }}>
             <Typography 
               variant="h6" 
@@ -603,16 +804,42 @@ const AnalyticalStopwatch = () => {
               Analizli Kronometre
             </Typography>
             
-            <Chip 
-              label={isRunning ? "ÇALIŞIYOR" : "HAZIR"}
-              size="small"
-              color={isRunning ? "success" : "warning"}
-              sx={{ 
-                fontWeight: 600,
-                fontSize: '0.7rem',
-                height: '24px'
-              }}
-            />
+            <Box sx={{
+              px: 2,
+              py: 1,
+              borderRadius: '16px',
+              background: isRunning 
+                ? 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%)' 
+                : 'linear-gradient(135deg, #FF9800 0%, #FFB74D 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              boxShadow: isRunning 
+                ? '0 4px 12px rgba(76, 175, 80, 0.3)' 
+                : '0 4px 12px rgba(255, 152, 0, 0.3)',
+              border: '1px solid rgba(255,255,255,0.2)'
+            }}>
+              <Box sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: '#ffffff',
+                animation: isRunning ? 'pulse 1.5s ease-in-out infinite' : 'none',
+                '@keyframes pulse': {
+                  '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                  '50%': { opacity: 0.5, transform: 'scale(0.8)' }
+                }
+              }} />
+              <Typography sx={{
+                color: '#ffffff',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}>
+                {isRunning ? "ÇALIŞIYOR" : "HAZIR"}
+              </Typography>
+            </Box>
           </Box>
           
           {/* Kronometre Gösterimi */}
@@ -623,42 +850,62 @@ const AnalyticalStopwatch = () => {
             alignItems: 'center',
             justifyContent: 'center',
             p: 3,
-            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(85, 179, 217, 0.1) 100%)'
+            background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(85, 179, 217, 0.05) 50%, rgba(255,255,255,0.02) 100%)',
+            position: 'relative',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: `radial-gradient(circle at 30% 20%, ${selectedColor || '#2196F3'}10 0%, transparent 50%)`,
+              pointerEvents: 'none'
+            }
           }}>
             {/* Daire içinde zaman gösterimi */}
             <Box sx={{ 
-              width: { xs: '200px', sm: '250px' },
-              height: { xs: '200px', sm: '250px' },
+              width: { xs: '180px', sm: '220px' },
+              height: { xs: '180px', sm: '220px' },
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
-              mb: 4,
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%)',
-              backdropFilter: 'blur(15px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
+              mb: 3,
+              zIndex: 1,
+              background: `
+                linear-gradient(135deg, 
+                  rgba(255, 255, 255, 0.25) 0%, 
+                  rgba(255, 255, 255, 0.15) 50%,
+                  rgba(255, 255, 255, 0.1) 100%
+                )
+              `,
+              backdropFilter: 'blur(25px)',
+              border: '2px solid rgba(255, 255, 255, 0.2)',
               boxShadow: `
-                0 8px 32px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 20px 60px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.1),
                 0 0 0 1px rgba(255, 255, 255, 0.1)
               `,
-              transition: 'all 0.3s ease',
+              transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
-                transform: 'scale(1.02)',
+                transform: 'scale(1.05)',
                 boxShadow: `
-                  0 12px 40px rgba(0, 0, 0, 0.15),
-                  inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                  0 25px 80px rgba(0, 0, 0, 0.25),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                  inset 0 -1px 0 rgba(0, 0, 0, 0.1),
                   0 0 0 1px rgba(255, 255, 255, 0.2)
                 `
               },
               '&::before': {
                 content: '""',
                 position: 'absolute',
-                top: '-6px',
-                left: '-6px',
-                width: 'calc(100% + 12px)',
-                height: 'calc(100% + 12px)',
+                top: '-8px',
+                left: '-8px',
+                width: 'calc(100% + 16px)',
+                height: 'calc(100% + 16px)',
                 borderRadius: '50%',
                 background: `conic-gradient(
                   from 0deg,
@@ -690,12 +937,12 @@ const AnalyticalStopwatch = () => {
               '&::after': {
                 content: '""',
                 position: 'absolute',
-                top: '-3px',
-                left: '-3px',
-                width: 'calc(100% + 6px)',
-                height: 'calc(100% + 6px)',
+                top: '-4px',
+                left: '-4px',
+                width: 'calc(100% + 8px)',
+                height: 'calc(100% + 8px)',
                 borderRadius: '50%',
-                border: `2px solid ${selectedColor || '#2196F3'}`,
+                border: `3px solid ${selectedColor || '#2196F3'}`,
                 opacity: isRunning ? 0.6 : 0.2,
                 animation: isRunning ? 'pulse 2s ease-in-out infinite' : 'none',
                 '@keyframes pulse': {
@@ -719,14 +966,14 @@ const AnalyticalStopwatch = () => {
               }}>
                 <TimerIcon sx={{ 
                   color: selectedColor || '#2196F3',
-                  fontSize: { xs: '2rem', sm: '2.5rem' },
-                  mb: 1,
+                  fontSize: { xs: '1.8rem', sm: '2.2rem' },
+                  mb: 1.5,
                   opacity: 0.9,
                   filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
                 }} />
                 
                 <Typography variant="h1" sx={{ 
-                  fontSize: { xs: '2.2rem', sm: '2.8rem' },
+                  fontSize: { xs: '1.8rem', sm: '2.4rem' },
                   fontWeight: 800,
                   fontFamily: '"Satoshi", "Segoe UI", monospace',
                   color: '#ffffff',
@@ -745,17 +992,17 @@ const AnalyticalStopwatch = () => {
                 {/* Alt bilgi yazısı */}
                 {selectedSubject && selectedTopic && (
                   <Typography sx={{ 
-                    fontSize: '0.85rem',
+                    fontSize: '0.95rem',
                     fontWeight: 600,
                     color: 'rgba(255,255,255,0.8)',
                     textAlign: 'center',
-                    mt: 1,
+                    mt: 2,
                     background: 'rgba(255,255,255,0.1)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    px: 2,
-                    py: 0.5,
-                    border: '1px solid rgba(255,255,255,0.2)'
+                    backdropFilter: 'blur(12px)',
+                    borderRadius: '16px',
+                    px: 3,
+                    py: 1.5,
+                    border: '2px solid rgba(255,255,255,0.2)'
                   }}>
                     {selectedSubject} • {selectedTopic}
                   </Typography>
@@ -768,9 +1015,9 @@ const AnalyticalStopwatch = () => {
               display: 'flex',
               flexDirection: isRunning ? 'row' : 'column',
               gap: 2,
-              mt: 3,
+              mt: 4,
               width: '100%',
-              maxWidth: '320px'
+              maxWidth: '300px'
             }}>
               {selectedSubject && selectedTopic ? (
                 !isRunning ? (
@@ -782,20 +1029,20 @@ const AnalyticalStopwatch = () => {
                     sx={{
                       background: `linear-gradient(135deg, ${selectedColor || '#2196F3'} 0%, ${selectedColor || '#2196F3'}CC 50%, ${selectedColor || '#21CBF3'} 100%)`,
                       color: '#ffffff',
-                      py: 1.8,
+                      py: 2,
                       px: 3,
                       borderRadius: '16px',
                       fontWeight: 700,
-                      fontSize: '1.1rem',
+                      fontSize: '1rem',
                       textTransform: 'none',
-                      boxShadow: `0 8px 24px ${selectedColor || '#2196F3'}40`,
+                      boxShadow: `0 8px 20px ${selectedColor || '#2196F3'}40`,
                       border: '1px solid rgba(255,255,255,0.2)',
-                      backdropFilter: 'blur(10px)',
+                      backdropFilter: 'blur(12px)',
                       transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                       '&:hover': {
                         background: `linear-gradient(135deg, ${selectedColor || '#21CBF3'} 0%, ${selectedColor || '#2196F3'} 50%, ${selectedColor || '#1976D2'} 100%)`,
-                        transform: 'translateY(-4px) scale(1.02)',
-                        boxShadow: `0 12px 32px ${selectedColor || '#2196F3'}50`,
+                        transform: 'translateY(-3px) scale(1.02)',
+                        boxShadow: `0 12px 28px ${selectedColor || '#2196F3'}50`,
                         border: '1px solid rgba(255,255,255,0.3)'
                       },
                       '&:active': {
@@ -815,20 +1062,20 @@ const AnalyticalStopwatch = () => {
                       sx={{
                         background: 'linear-gradient(135deg, #FF5722 0%, #FF7043 50%, #FF9800 100%)',
                         color: '#ffffff',
-                        py: 1.3,
-                        px: 2,
-                        borderRadius: '12px',
+                        py: 1.5,
+                        px: 2.5,
+                        borderRadius: '14px',
                         fontWeight: 700,
                         fontSize: '0.9rem',
                         textTransform: 'none',
-                        boxShadow: '0 6px 20px rgba(255, 87, 34, 0.4)',
+                        boxShadow: '0 6px 18px rgba(255, 87, 34, 0.4)',
                         border: '1px solid rgba(255,255,255,0.2)',
-                        backdropFilter: 'blur(10px)',
+                        backdropFilter: 'blur(12px)',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #FF7043 0%, #FF5722 50%, #E64A19 100%)',
                           transform: 'translateY(-3px) scale(1.02)',
-                          boxShadow: '0 8px 24px rgba(255, 87, 34, 0.5)',
+                          boxShadow: '0 8px 22px rgba(255, 87, 34, 0.5)',
                           border: '1px solid rgba(255,255,255,0.3)'
                         }
                       }}
@@ -847,21 +1094,21 @@ const AnalyticalStopwatch = () => {
                       sx={{
                         background: 'linear-gradient(135deg, #9C27B0 0%, #BA68C8 50%, #E040FB 100%)',
                         color: '#ffffff',
-                        py: 1.3,
-                        px: 2,
-                        borderRadius: '12px',
+                        py: 1.7,
+                        px: 3,
+                        borderRadius: '16px',
                         fontWeight: 700,
-                        fontSize: '0.9rem',
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        boxShadow: '0 6px 20px rgba(156, 39, 176, 0.4)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 8px 24px rgba(156, 39, 176, 0.4)',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(12px)',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #BA68C8 0%, #9C27B0 50%, #7B1FA2 100%)',
-                          transform: 'translateY(-3px) scale(1.02)',
-                          boxShadow: '0 8px 24px rgba(156, 39, 176, 0.5)',
-                          border: '1px solid rgba(255,255,255,0.3)'
+                          transform: 'translateY(-4px) scale(1.03)',
+                          boxShadow: '0 10px 28px rgba(156, 39, 176, 0.5)',
+                          border: '2px solid rgba(255,255,255,0.3)'
                         }
                       }}
                     >
@@ -876,21 +1123,21 @@ const AnalyticalStopwatch = () => {
                       sx={{
                         background: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #8BC34A 100%)',
                         color: '#ffffff',
-                        py: 1.3,
-                        px: 2,
-                        borderRadius: '12px',
+                        py: 1.7,
+                        px: 3,
+                        borderRadius: '16px',
                         fontWeight: 700,
-                        fontSize: '0.9rem',
+                        fontSize: '1rem',
                         textTransform: 'none',
-                        boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 8px 24px rgba(76, 175, 80, 0.4)',
+                        border: '2px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(12px)',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                         '&:hover': {
                           background: 'linear-gradient(135deg, #66BB6A 0%, #4CAF50 50%, #388E3C 100%)',
-                          transform: 'translateY(-3px) scale(1.02)',
-                          boxShadow: '0 8px 24px rgba(76, 175, 80, 0.5)',
-                          border: '1px solid rgba(255,255,255,0.3)'
+                          transform: 'translateY(-4px) scale(1.03)',
+                          boxShadow: '0 10px 28px rgba(76, 175, 80, 0.5)',
+                          border: '2px solid rgba(255,255,255,0.3)'
                         }
                       }}
                     >
@@ -900,24 +1147,95 @@ const AnalyticalStopwatch = () => {
                 )
               ) : (
                 <Box sx={{
-                  background: 'rgba(255,255,255,0.1)',
-                  backdropFilter: 'blur(10px)',
+                  position: 'relative',
+                  width: '100%',
+                  background: 'linear-gradient(135deg, rgba(33, 150, 243, 0.12) 0%, rgba(156, 39, 176, 0.12) 50%, rgba(255,255,255,0.05) 100%)',
+                  backdropFilter: 'blur(20px)',
                   borderRadius: '16px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  p: 3,
-                  textAlign: 'center'
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  boxShadow: '0 6px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                  py: 2.5,
+                  px: 3,
+                  mb: 2,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 10px 32px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.3)'
+                  },
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: '-100%',
+                    width: '100%',
+                    height: '100%',
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                    animation: 'shimmer 4s ease-in-out infinite',
+                    '@keyframes shimmer': {
+                      '0%': { left: '-100%' },
+                      '100%': { left: '100%' }
+                    }
+                  }
                 }}>
-                  <Typography 
-                    variant="body2" 
-                    sx={{ 
-                      color: 'rgba(255,255,255,0.9)',
-                      fontWeight: 600,
-                      fontSize: '0.95rem',
-                      lineHeight: 1.5
-                    }}
-                  >
-                    Lütfen soldan bir ders ve konu seçiniz
-                  </Typography>
+                  <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 2.5,
+                    position: 'relative',
+                    zIndex: 1
+                  }}>
+                    <Box sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #2196F3 0%, #42A5F5 50%, #9C27B0 100%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 6px 20px rgba(33, 150, 243, 0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      position: 'relative',
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '100%',
+                        height: '100%',
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%)',
+                        pointerEvents: 'none'
+                      }
+                    }}>
+                      <TimerIcon sx={{ 
+                        color: '#ffffff', 
+                        fontSize: '1.3rem',
+                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                        position: 'relative',
+                        zIndex: 1
+                      }} />
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                          letterSpacing: '0.3px',
+                          lineHeight: 1.3
+                        }}
+                      >
+                        Lütfen soldan bir konu seçiniz
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
               )}
             </Box>
@@ -931,19 +1249,19 @@ const AnalyticalStopwatch = () => {
         onClose={() => setShowSaveDialog(false)}
         PaperProps={{
           sx: {
-            borderRadius: '20px',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+            borderRadius: '24px',
+            boxShadow: '0 24px 72px rgba(0, 0, 0, 0.3)',
             p: 0,
             background: 'linear-gradient(135deg, rgba(27, 41, 61, 0.95) 0%, rgba(27, 41, 61, 0.98) 100%)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            minWidth: '400px'
+            backdropFilter: 'blur(24px)',
+            border: '2px solid rgba(255,255,255,0.1)',
+            minWidth: '480px'
           }
         }}
         BackdropProps={{
           sx: {
-            backdropFilter: 'blur(8px)',
-            backgroundColor: 'rgba(0,0,0,0.5)'
+            backdropFilter: 'blur(10px)',
+            backgroundColor: 'rgba(0,0,0,0.6)'
           }
         }}
       >
@@ -951,34 +1269,34 @@ const AnalyticalStopwatch = () => {
           background: `linear-gradient(135deg, ${selectedColor || '#2196F3'}20 0%, ${selectedColor || '#2196F3'}10 100%)`,
           color: '#ffffff',
           fontWeight: 700,
-          fontSize: '1.3rem',
+          fontSize: '1.4rem',
           textAlign: 'center',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          py: 3
+          borderBottom: '2px solid rgba(255,255,255,0.1)',
+          py: 4
         }}>
           Çalışma Kaydı
         </DialogTitle>
         <DialogContent sx={{ 
-          p: 3,
+          p: 4,
           color: 'rgba(255,255,255,0.9)'
         }}>
           <Box sx={{
             background: 'rgba(255,255,255,0.05)',
-            borderRadius: '12px',
-            p: 2.5,
-            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '16px',
+            p: 3.5,
+            border: '2px solid rgba(255,255,255,0.1)',
             textAlign: 'center'
           }}>
             <Typography sx={{
-              fontSize: '1rem',
-              lineHeight: 1.6,
+              fontSize: '1.1rem',
+              lineHeight: 1.7,
               fontWeight: 500
             }}>
               <strong style={{ color: selectedColor || '#2196F3' }}>{selectedExamType}</strong> - <strong style={{ color: selectedColor || '#2196F3' }}>{selectedSubject}</strong> - <strong style={{ color: selectedColor || '#2196F3' }}>{selectedTopic}</strong> için <strong style={{ color: '#4CAF50' }}>{formatTime(time, false)}</strong> süresince çalıştınız. 
             </Typography>
             <Typography sx={{
-              fontSize: '0.95rem',
-              mt: 1.5,
+              fontSize: '1.05rem',
+              mt: 2.5,
               opacity: 0.8
             }}>
               Bu çalışmayı kaydetmek istiyor musunuz?
@@ -986,9 +1304,9 @@ const AnalyticalStopwatch = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ 
-          p: 3, 
-          gap: 2,
-          borderTop: '1px solid rgba(255,255,255,0.1)'
+          p: 4, 
+          gap: 3,
+          borderTop: '2px solid rgba(255,255,255,0.1)'
         }}>
           <Button 
             onClick={handleCancelSave} 
@@ -996,17 +1314,17 @@ const AnalyticalStopwatch = () => {
               background: 'linear-gradient(135deg, #f44336 0%, #e57373 100%)',
               color: '#ffffff',
               fontWeight: 600,
-              px: 3,
-              py: 1.2,
-              borderRadius: '12px',
+              px: 4,
+              py: 1.6,
+              borderRadius: '16px',
               textTransform: 'none',
-              boxShadow: '0 4px 16px rgba(244, 67, 54, 0.3)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 6px 20px rgba(244, 67, 54, 0.3)',
+              border: '2px solid rgba(255,255,255,0.1)',
               transition: 'all 0.3s ease',
               '&:hover': {
                 background: 'linear-gradient(135deg, #e57373 0%, #f44336 100%)',
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 20px rgba(244, 67, 54, 0.4)'
+                transform: 'translateY(-3px)',
+                boxShadow: '0 8px 24px rgba(244, 67, 54, 0.4)'
               }
             }}
           >
@@ -1019,17 +1337,17 @@ const AnalyticalStopwatch = () => {
               background: `linear-gradient(135deg, ${selectedColor || '#2196F3'} 0%, ${selectedColor || '#21CBF3'} 100%)`,
               color: '#ffffff',
               fontWeight: 600,
-              px: 3,
-              py: 1.2,
-              borderRadius: '12px',
+              px: 4,
+              py: 1.6,
+              borderRadius: '16px',
               textTransform: 'none',
-              boxShadow: `0 4px 16px ${selectedColor || '#2196F3'}40`,
-              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: `0 6px 20px ${selectedColor || '#2196F3'}40`,
+              border: '2px solid rgba(255,255,255,0.1)',
               transition: 'all 0.3s ease',
               '&:hover': {
                 background: `linear-gradient(135deg, ${selectedColor || '#21CBF3'} 0%, ${selectedColor || '#2196F3'} 100%)`,
-                transform: 'translateY(-2px)',
-                boxShadow: `0 6px 20px ${selectedColor || '#2196F3'}50`
+                transform: 'translateY(-3px)',
+                boxShadow: `0 8px 24px ${selectedColor || '#2196F3'}50`
               }
             }}
           >

@@ -13,13 +13,15 @@ import {
   CircularProgress,
   FormControl,
   InputLabel,
-  Select
+  Select,
+  Container
 } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LanguageIcon from '@mui/icons-material/Language';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import CelebrationIcon from '@mui/icons-material/Celebration';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SchoolIcon from '@mui/icons-material/School';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -30,10 +32,11 @@ import PublicIcon from '@mui/icons-material/Public'; // Coğrafya
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'; // Felsefe
 import ChurchIcon from '@mui/icons-material/Church'; // Din Kültürü
 import FunctionsIcon from '@mui/icons-material/Functions'; // Matematik
+import CalculateIcon from '@mui/icons-material/Calculate'; // Matematik (AYT)
 import ScienceIcon from '@mui/icons-material/Science'; // Fizik, Kimya, Biyoloji
 import ReactConfetti from 'react-confetti';
 import { db } from '../firebase';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, onSnapshot } from 'firebase/firestore';
 
 // Türkiye'deki 81 il listesi
 const turkeyProvinces = [
@@ -52,26 +55,25 @@ const RekaNET = () => {
   // State tanımlamaları
   const [activeStep, setActiveStep] = useState(0);
   const [selectedProvince, setSelectedProvince] = useState('');
+  const [timeLeft, setTimeLeft] = useState({});
   const [formData, setFormData] = useState({
     province: '',
     tytScores: {
       turkish: { correct: 0, wrong: 0, empty: 0 },
       social: { correct: 0, wrong: 0, empty: 0 },
-      math: { correct: 0, wrong: 0, empty: 0 },
+      mathTYT: { correct: 0, wrong: 0, empty: 0 },
       science: { correct: 0, wrong: 0, empty: 0 }
     },
     aytScores: {
-      literature: { correct: 0, wrong: 0, empty: 0 },
-      history1: { correct: 0, wrong: 0, empty: 0 },
-      geography1: { correct: 0, wrong: 0, empty: 0 },
-      history2: { correct: 0, wrong: 0, empty: 0 },
-      geography2: { correct: 0, wrong: 0, empty: 0 },
-      philosophy: { correct: 0, wrong: 0, empty: 0 },
-      religion: { correct: 0, wrong: 0, empty: 0 },
       mathAYT: { correct: 0, wrong: 0, empty: 0 },
+      literature: { correct: 0, wrong: 0, empty: 0 },
       physics: { correct: 0, wrong: 0, empty: 0 },
+      biology: { correct: 0, wrong: 0, empty: 0 },
       chemistry: { correct: 0, wrong: 0, empty: 0 },
-      biology: { correct: 0, wrong: 0, empty: 0 }
+      history: { correct: 0, wrong: 0, empty: 0 },
+      geography: { correct: 0, wrong: 0, empty: 0 },
+      philosophy: { correct: 0, wrong: 0, empty: 0 },
+      religion: { correct: 0, wrong: 0, empty: 0 }
     }
   });
 
@@ -155,9 +157,14 @@ const RekaNET = () => {
   const calculateTotalAYTNet = () => {
     return (
       parseFloat(calculateAYTNet('mathAYT')) +
+      parseFloat(calculateAYTNet('literature')) +
       parseFloat(calculateAYTNet('physics')) +
+      parseFloat(calculateAYTNet('biology')) +
       parseFloat(calculateAYTNet('chemistry')) +
-      parseFloat(calculateAYTNet('biology'))
+      parseFloat(calculateAYTNet('history')) +
+      parseFloat(calculateAYTNet('geography')) +
+      parseFloat(calculateAYTNet('philosophy')) +
+      parseFloat(calculateAYTNet('religion'))
     ).toFixed(2);
   };
   
@@ -171,6 +178,30 @@ const RekaNET = () => {
     height: window.innerHeight,
   });
   
+  // Yarışma durumu
+  const [competitionActive, setCompetitionActive] = useState(false);
+  const [competitionLoading, setCompetitionLoading] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [showPasswordDialog, setShowPasswordDialog] = useState(true);
+  
+  // Şifre kontrolü (admin tarafından belirlenebilir)
+  const COMPETITION_PASSWORD = "rekanet2024"; // Bu şifreyi admin panelinden değiştirilebilir hale getirebiliriz
+  
+
+  
+  // Şifre kontrolü fonksiyonu
+  const handlePasswordSubmit = () => {
+    if (passwordInput === COMPETITION_PASSWORD) {
+      setCompetitionActive(true);
+      setShowPasswordDialog(false);
+      setPasswordError('');
+    } else {
+      setPasswordError('Yanlış şifre! Lütfen doğru şifreyi girin.');
+      setPasswordInput('');
+    }
+  };
+
 
   
   // Pencere boyutunu takip et
@@ -199,6 +230,357 @@ const RekaNET = () => {
     'AYT Netleri',
     'Sonuçlar'
   ];
+
+  // Loading ekranı
+  if (competitionLoading) {
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #1e293d 0%, #2d3748 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative'
+      }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress size={60} sx={{ color: '#ffffff', mb: 2 }} />
+          <Typography variant="h6" sx={{ color: '#ffffff' }}>
+            Yarışma durumu kontrol ediliyor...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  // Şifre giriş ekranı
+  if (showPasswordDialog && !competitionActive) {
+
+
+
+    return (
+      <Box sx={{ 
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 25%, #24243e 50%, #1a1a2e 75%, #16213e 100%)',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+            radial-gradient(circle at 20% 30%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(255, 107, 107, 0.2) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(78, 205, 196, 0.25) 0%, transparent 50%)
+          `,
+          animation: 'float 6s ease-in-out infinite',
+          pointerEvents: 'none'
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+          opacity: 0.4,
+          pointerEvents: 'none'
+        },
+        '@keyframes float': {
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '33%': { transform: 'translateY(-20px) rotate(1deg)' },
+          '66%': { transform: 'translateY(-10px) rotate(-1deg)' }
+        },
+        '@keyframes pulse': {
+          '0%, 100%': { transform: 'scale(1)', opacity: 1 },
+          '50%': { transform: 'scale(1.05)', opacity: 0.8 }
+        },
+        '@keyframes shimmer': {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' }
+        },
+        '@keyframes glow': {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(78, 205, 196, 0.3)' },
+          '50%': { boxShadow: '0 0 40px rgba(78, 205, 196, 0.6), 0 0 60px rgba(78, 205, 196, 0.4)' }
+        }
+      }}>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+          <Card sx={{
+            borderRadius: '32px',
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+            backdropFilter: 'blur(30px)',
+            border: '2px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 25px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+            overflow: 'hidden',
+            position: 'relative',
+            animation: 'glow 3s ease-in-out infinite',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: '-100%',
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)',
+              animation: 'shimmer 3s infinite'
+            }
+          }}>
+            <CardContent sx={{ p: 6, textAlign: 'center', position: 'relative', zIndex: 1 }}>
+              {/* Ana logo ve ikon */}
+              <Box sx={{ 
+                display: 'inline-block',
+                animation: 'pulse 2s infinite',
+                mb: 4,
+                position: 'relative'
+              }}>
+                <Box sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '180px',
+                  height: '180px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(78, 205, 196, 0.2) 0%, transparent 70%)',
+                  animation: 'pulse 2s infinite reverse'
+                }} />
+                <LanguageIcon sx={{ 
+                  fontSize: 140, 
+                  color: '#4ECDC4',
+                  filter: 'drop-shadow(0 10px 20px rgba(78, 205, 196, 0.4))',
+                  position: 'relative',
+                  zIndex: 1
+                }} />
+              </Box>
+
+              {/* Ana başlık */}
+              <Typography variant="h1" sx={{
+                fontWeight: 900,
+                background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 50%, #093637 100%)',
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                mb: 2,
+                fontFamily: '"Satoshi", "Inter", sans-serif',
+                fontSize: { xs: '2.5rem', md: '3.5rem' },
+                textShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+                letterSpacing: '-0.02em'
+              }}>
+                🏆 RekaNET
+              </Typography>
+
+              <Typography variant="h4" sx={{
+                color: 'rgba(255, 255, 255, 0.9)',
+                mb: 4,
+                fontWeight: 700,
+                fontSize: { xs: '1.5rem', md: '2rem' }
+              }}>
+                Yarışma Platformu
+              </Typography>
+
+              {/* Uyarı mesajı */}
+              <Alert severity="warning" sx={{
+                mb: 4,
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                border: '1px solid rgba(255, 193, 7, 0.3)',
+                borderRadius: '16px',
+                '& .MuiAlert-message': {
+                  color: '#FFC107',
+                  fontWeight: 600
+                }
+              }}>
+                ⚠️ Bu platform şu anda kapalıdır. Sisteme erişim için özel şifre gereklidir.
+              </Alert>
+
+              {/* Şifre giriş formu */}
+              <Box sx={{
+                p: 4,
+                borderRadius: '20px',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                mb: 4
+              }}>
+                <Typography variant="h6" sx={{
+                  color: '#ffffff',
+                  mb: 3,
+                  fontWeight: 700
+                }}>
+                  🔐 Erişim Şifresi Girin
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  type="password"
+                  label="Şifre"
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handlePasswordSubmit();
+                    }
+                  }}
+                  sx={{
+                    mb: 2,
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderRadius: '12px',
+                      '& fieldset': {
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(78, 205, 196, 0.5)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#4ECDC4',
+                      },
+                    },
+                    '& .MuiInputLabel-root': {
+                      color: 'rgba(255, 255, 255, 0.7)',
+                    },
+                    '& .MuiOutlinedInput-input': {
+                      color: '#ffffff',
+                    },
+                  }}
+                />
+
+                {passwordError && (
+                  <Alert severity="error" sx={{
+                    mb: 2,
+                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                    border: '1px solid rgba(244, 67, 54, 0.3)',
+                    borderRadius: '12px',
+                    '& .MuiAlert-message': {
+                      color: '#ff5252'
+                    }
+                  }}>
+                    {passwordError}
+                  </Alert>
+                )}
+
+                <Button
+                  fullWidth
+                  variant="contained"
+                  onClick={handlePasswordSubmit}
+                  sx={{
+                    py: 2,
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    fontSize: '1.1rem',
+                    background: 'linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%)',
+                    boxShadow: '0 8px 25px rgba(78, 205, 196, 0.3)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #44A08D 0%, #4ECDC4 100%)',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 12px 35px rgba(78, 205, 196, 0.4)',
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  🚀 Sisteme Giriş Yap
+                </Button>
+              </Box>
+
+              {/* Bilgi mesajı */}
+              <Typography variant="body2" sx={{
+                color: 'rgba(255, 255, 255, 0.6)',
+                fontSize: '0.9rem',
+                fontStyle: 'italic'
+              }}>
+                💡 Şifre için lütfen yöneticinize başvurunuz
+              </Typography>
+            </CardContent>
+          </Card>
+              <Card sx={{
+                borderRadius: '24px',
+                background: 'linear-gradient(145deg, rgba(255, 107, 107, 0.15) 0%, rgba(78, 205, 196, 0.15) 100%)',
+                backdropFilter: 'blur(25px)',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+                mb: 3
+              }}>
+                <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                  <AccessTimeIcon sx={{ fontSize: 60, color: '#4ECDC4', mb: 2 }} />
+                  <Typography variant="h5" sx={{
+                    color: '#ffffff',
+                    mb: 3,
+                    fontWeight: 700
+                  }}>
+                    📅 Yarışma Başlangıcına
+                  </Typography>
+                  
+                  {/* Geri sayım */}
+                  <Grid container spacing={2}>
+                    {Object.entries(timeLeft).map(([unit, value]) => (
+                      <Grid item xs={6} sm={3} key={unit}>
+                        <Box sx={{
+                          p: 2,
+                          borderRadius: '12px',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                        }}>
+                          <Typography variant="h4" sx={{
+                            color: '#4ECDC4',
+                            fontWeight: 900,
+                            fontFamily: 'monospace'
+                          }}>
+                            {value}
+                          </Typography>
+                          <Typography variant="caption" sx={{
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            textTransform: 'uppercase',
+                            fontWeight: 600
+                          }}>
+                            {unit === 'days' ? 'Gün' : 
+                             unit === 'hours' ? 'Saat' : 
+                             unit === 'minutes' ? 'Dakika' : 'Saniye'}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Tarih kartı */}
+              <Card sx={{
+                borderRadius: '24px',
+                background: 'linear-gradient(135deg, rgba(78, 205, 196, 0.2) 0%, rgba(68, 160, 141, 0.2) 100%)',
+                backdropFilter: 'blur(25px)',
+                border: '2px solid rgba(78, 205, 196, 0.3)',
+                boxShadow: '0 20px 60px rgba(78, 205, 196, 0.2)'
+              }}>
+                <CardContent sx={{ p: 4, textAlign: 'center' }}>
+                  <CelebrationIcon sx={{ fontSize: 50, color: '#4ECDC4', mb: 2 }} />
+                  <Typography variant="h6" sx={{
+                    color: '#ffffff',
+                    mb: 2,
+                    fontWeight: 700
+                  }}>
+                    Başlangıç Tarihi
+                  </Typography>
+                  <Typography variant="h4" sx={{
+                    color: '#4ECDC4',
+                    fontWeight: 900,
+                    fontFamily: '"Satoshi", "Inter", sans-serif',
+                    mb: 1
+                  }}>
+                    {formatDate(nextCompetitionDate)}
+                  </Typography>
+                  <Typography variant="body2" sx={{
+                    color: 'rgba(255, 255, 255, 0.8)'
+                  }}>
+                    Her ayın 15&apos;inde otomatik başlar
+                  </Typography>
+                        </Container>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ 
@@ -288,12 +670,12 @@ const RekaNET = () => {
               justifyContent: 'center',
               position: 'relative',
               background: activeStep >= index 
-                ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+                ? 'linear-gradient(135deg, #16a34a 0%, #38f9d7 100%)'
                 : 'rgba(255, 255, 255, 0.1)',
               backdropFilter: 'blur(10px)',
               border: '2px solid rgba(255, 255, 255, 0.2)',
               boxShadow: activeStep >= index 
-                ? '0 8px 25px rgba(67, 233, 123, 0.4)'
+                ? '0 8px 25px rgba(22, 163, 74, 0.4)'
                 : '0 4px 15px rgba(255, 255, 255, 0.1)',
               transition: 'all 0.3s ease',
               cursor: 'pointer',
@@ -509,7 +891,7 @@ const RekaNET = () => {
                     disabled={!selectedProvince}
                     sx={{
                       background: selectedProvince 
-                        ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)'
+                        ? 'linear-gradient(135deg, #16a34a 0%, #38f9d7 100%)'
                         : 'rgba(255, 255, 255, 0.2)',
                       color: '#ffffff',
                       fontWeight: 700,
@@ -520,7 +902,7 @@ const RekaNET = () => {
                       minHeight: '56px',
                       minWidth: '160px',
                       boxShadow: selectedProvince 
-                        ? '0 8px 25px rgba(67, 233, 123, 0.4)'
+                        ? '0 8px 25px rgba(22, 163, 74, 0.4)'
                         : '0 4px 15px rgba(255, 255, 255, 0.1)',
                       transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                       border: '2px solid rgba(255, 255, 255, 0.2)',
@@ -753,7 +1135,7 @@ const RekaNET = () => {
                       {/* Doğru Section */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
+                          color: '#16a34a',
                           fontWeight: 800,
                           fontSize: '1.3rem',
                           fontFamily: '"Satoshi", "Inter", sans-serif',
@@ -772,25 +1154,25 @@ const RekaNET = () => {
                               borderRadius: '12px',
                               background: 'rgba(255, 255, 255, 0.95)',
                               backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
+                              border: '2px solid rgba(22, 163, 74, 0.4)',
                               height: '48px',
                               transition: 'all 0.3s ease',
                               '&:hover': {
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               },
                               '&.Mui-focused': {
                                 transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                boxShadow: '0 12px 30px rgba(22, 163, 74, 0.4)',
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
                               fontWeight: '800 !important',
                               fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              color: '#16a34a !important'
                             }
                           }}
                         />
@@ -1024,7 +1406,7 @@ const RekaNET = () => {
                       {/* Doğru Section */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
+                          color: '#16a34a',
                           fontWeight: 800,
                           fontSize: '1.3rem',
                           fontFamily: '"Satoshi", "Inter", sans-serif',
@@ -1043,25 +1425,25 @@ const RekaNET = () => {
                               borderRadius: '12px',
                               background: 'rgba(255, 255, 255, 0.95)',
                               backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
+                              border: '2px solid rgba(22, 163, 74, 0.4)',
                               height: '48px',
                               transition: 'all 0.3s ease',
                               '&:hover': {
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               },
                               '&.Mui-focused': {
                                 transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                boxShadow: '0 12px 30px rgba(22, 163, 74, 0.4)',
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
                               fontWeight: '800 !important',
                               fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              color: '#16a34a !important'
                             }
                           }}
                         />
@@ -1295,7 +1677,7 @@ const RekaNET = () => {
                       {/* Doğru Section */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
+                          color: '#16a34a',
                           fontWeight: 800,
                           fontSize: '1.3rem',
                           fontFamily: '"Satoshi", "Inter", sans-serif',
@@ -1306,33 +1688,33 @@ const RekaNET = () => {
                         <TextField
                           type="number"
                           InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={formData.tytScores.math.correct}
-                          onChange={(e) => handleScoreChange('tyt', 'math', 'correct', e.target.value)}
+                          value={formData.tytScores.mathTYT.correct}
+                          onChange={(e) => handleScoreChange('tyt', 'mathTYT', 'correct', e.target.value)}
                           sx={{
                             width: '80px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '12px',
                               background: 'rgba(255, 255, 255, 0.95)',
                               backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
+                              border: '2px solid rgba(22, 163, 74, 0.4)',
                               height: '48px',
                               transition: 'all 0.3s ease',
                               '&:hover': {
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               },
                               '&.Mui-focused': {
                                 transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                boxShadow: '0 12px 30px rgba(22, 163, 74, 0.4)',
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
                               fontWeight: '800 !important',
                               fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              color: '#16a34a !important'
                             }
                           }}
                         />
@@ -1352,8 +1734,8 @@ const RekaNET = () => {
                         <TextField
                           type="number"
                           InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={formData.tytScores.math.wrong}
-                          onChange={(e) => handleScoreChange('tyt', 'math', 'wrong', e.target.value)}
+                          value={formData.tytScores.mathTYT.wrong}
+                          onChange={(e) => handleScoreChange('tyt', 'mathTYT', 'wrong', e.target.value)}
                           sx={{
                             width: '80px',
                             '& .MuiOutlinedInput-root': {
@@ -1398,8 +1780,8 @@ const RekaNET = () => {
                         <TextField
                           type="number"
                           InputProps={{ inputProps: { min: 0, max: 40 } }}
-                          value={formData.tytScores.math.empty}
-                          onChange={(e) => handleScoreChange('tyt', 'math', 'empty', e.target.value)}
+                          value={formData.tytScores.mathTYT.empty}
+                          onChange={(e) => handleScoreChange('tyt', 'mathTYT', 'empty', e.target.value)}
                           sx={{
                             width: '80px',
                             '& .MuiOutlinedInput-root': {
@@ -1466,7 +1848,7 @@ const RekaNET = () => {
                         position: 'relative',
                         zIndex: 1
                       }}>
-                        {calculateTYTNet('math')}
+                        {calculateTYTNet('mathTYT')}
                       </Typography>
                     </Box>
                   </Box>
@@ -1566,7 +1948,7 @@ const RekaNET = () => {
                       {/* Doğru Section */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
+                          color: '#16a34a',
                           fontWeight: 800,
                           fontSize: '1.3rem',
                           fontFamily: '"Satoshi", "Inter", sans-serif',
@@ -1585,25 +1967,25 @@ const RekaNET = () => {
                               borderRadius: '12px',
                               background: 'rgba(255, 255, 255, 0.95)',
                               backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
+                              border: '2px solid rgba(22, 163, 74, 0.4)',
                               height: '48px',
                               transition: 'all 0.3s ease',
                               '&:hover': {
                                 transform: 'translateY(-2px)',
                                 boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               },
                               '&.Mui-focused': {
                                 transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                boxShadow: '0 12px 30px rgba(22, 163, 74, 0.4)',
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
                               fontWeight: '800 !important',
                               fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              color: '#16a34a !important'
                             }
                           }}
                         />
@@ -1750,7 +2132,7 @@ const RekaNET = () => {
                   mb: 6,
                   p: 5,
                   borderRadius: '30px',
-                  background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                  background: 'linear-gradient(135deg, #16a34a 0%, #38f9d7 100%)',
                   textAlign: 'center',
                   position: 'relative',
                   overflow: 'hidden',
@@ -1862,7 +2244,7 @@ const RekaNET = () => {
                     endIcon={<NavigateNextIcon />}
                     onClick={handleNext}
                     sx={{
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                      background: 'linear-gradient(135deg, #16a34a 0%, #38f9d7 100%)',
                       color: '#ffffff',
                       fontWeight: 800,
                       px: 8,
@@ -1902,7 +2284,7 @@ const RekaNET = () => {
                         transition: 'opacity 0.3s ease'
                       },
                       '&:hover': {
-                        background: 'linear-gradient(135deg, #38f9d7 0%, #43e97b 100%)',
+                        background: 'linear-gradient(135deg, #38f9d7 0%, #16a34a 100%)',
                         transform: 'translateY(-6px) scale(1.08)',
                         boxShadow: '0 20px 60px rgba(67, 233, 123, 0.7)',
                         borderColor: 'rgba(255, 255, 255, 0.4)',
@@ -1993,6 +2375,220 @@ const RekaNET = () => {
                     fontWeight: '700 !important'
                   }
                 }}>
+                  
+                  {/* Matematik */}
+                  <Box sx={{
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(135deg, rgba(52, 168, 83, 0.08) 0%, rgba(21, 128, 61, 0.08) 100%)',
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease',
+                      zIndex: 0
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(52, 168, 83, 0.2)',
+                      borderColor: 'rgba(52, 168, 83, 0.3)',
+                      '&::before': {
+                        opacity: 1
+                      }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
+                      <Box sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #34a853 0%, #15803d 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        color: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(52, 168, 83, 0.3)'
+                      }}>
+                        <CalculateIcon sx={{ 
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
+                        }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h6" sx={{ 
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontFamily: '"Satoshi", "Inter", sans-serif',
+                          fontSize: '0.95rem'
+                        }}>
+                          Matematik
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
+                        }}>
+                          40 Soru
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    {/* D: Y: B: Kompakt Input Layout */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1.5, 
+                      mb: 2, 
+                      position: 'relative', 
+                      zIndex: 1,
+                      justifyContent: 'center'
+                    }}>
+                      {/* Doğru */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#43e97b',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          D:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 40 } }}
+                          value={formData.aytScores.mathAYT.correct}
+                          onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'correct', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(67, 233, 123, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#43e97b'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#43e97b !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+
+                      {/* Yanlış */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#ef4444',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          Y:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 40 } }}
+                          value={formData.aytScores.mathAYT.wrong}
+                          onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'wrong', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#ef4444'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+
+                      {/* Boş */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#fb923c',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          B:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 40 } }}
+                          value={formData.aytScores.mathAYT.empty}
+                          onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'empty', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#fb923c'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{
+                      p: 1.5,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #34a853 0%, #15803d 100%)',
+                      textAlign: 'center',
+                      position: 'relative',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(52, 168, 83, 0.3)'
+                    }}>
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        fontWeight: 600,
+                        fontSize: '0.7rem'
+                      }}>
+                        NET
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontFamily: '"Satoshi", "Inter", sans-serif',
+                        fontSize: '1rem'
+                      }}>
+                        {calculateAYTNet('mathAYT')}
+                      </Typography>
+                    </Box>
+                  </Box>
                   {/* Türk Dili ve Edebiyatı */}
                   <Box sx={{
                     background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
@@ -2047,9 +2643,9 @@ const RekaNET = () => {
                           color: '#ffffff',
                           fontWeight: 700,
                           fontFamily: '"Satoshi", "Inter", sans-serif',
-                          fontSize: '0.95rem'
+                          fontSize: '1.1rem'
                         }}>
-                          Türk Dili ve Edebiyatı
+                          Edebiyat
                         </Typography>
                         <Typography variant="body2" sx={{ 
                           color: 'rgba(255, 255, 255, 0.7)',
@@ -2074,7 +2670,7 @@ const RekaNET = () => {
                       {/* Doğru */}
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Typography variant="body2" sx={{ 
-                          color: '#43e97b',
+                          color: '#16a34a',
                           fontWeight: 700,
                           fontSize: '0.9rem'
                         }}>
@@ -2090,17 +2686,17 @@ const RekaNET = () => {
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
                               background: 'rgba(255, 255, 255, 0.9)',
-                              border: '1px solid rgba(67, 233, 123, 0.4)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
                               height: '32px',
                               '&:hover': {
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
                               fontWeight: '700 !important',
                               fontSize: '0.85rem',
-                              color: '#43e97b !important',
+                              color: '#16a34a !important',
                               padding: '4px 8px'
                             }
                           }}
@@ -2261,9 +2857,9 @@ const RekaNET = () => {
                           color: '#ffffff',
                           fontWeight: 700,
                           fontFamily: '"Satoshi", "Inter", sans-serif',
-                          fontSize: '0.95rem'
+                          fontSize: '1.1rem'
                         }}>
-                          Tarih-1
+                          Tarih
                         </Typography>
                         <Typography variant="body2" sx={{ 
                           color: 'rgba(255, 255, 255, 0.7)',
@@ -2286,7 +2882,7 @@ const RekaNET = () => {
                     }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                         <Typography variant="body2" sx={{ 
-                          color: '#43e97b',
+                          color: '#16a34a',
                           fontWeight: 700,
                           fontSize: '0.9rem'
                         }}>
@@ -2295,24 +2891,24 @@ const RekaNET = () => {
                         <TextField
                           type="number"
                           InputProps={{ inputProps: { min: 0, max: 10 } }}
-                          value={formData.aytScores.history1.correct}
-                          onChange={(e) => handleScoreChange('ayt', 'history1', 'correct', e.target.value)}
+                          value={formData.aytScores.history.correct}
+                          onChange={(e) => handleScoreChange('ayt', 'history', 'correct', e.target.value)}
                           sx={{
                             width: '50px',
                             '& .MuiOutlinedInput-root': {
                               borderRadius: '8px',
                               background: 'rgba(255, 255, 255, 0.9)',
-                              border: '1px solid rgba(67, 233, 123, 0.4)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
                               height: '32px',
                               '&:hover': {
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
                               fontWeight: '700 !important',
                               fontSize: '0.85rem',
-                              color: '#43e97b !important',
+                              color: '#16a34a !important',
                               padding: '4px 8px'
                             }
                           }}
@@ -2329,8 +2925,8 @@ const RekaNET = () => {
                         <TextField
                           type="number"
                           InputProps={{ inputProps: { min: 0, max: 10 } }}
-                          value={formData.aytScores.history1.wrong}
-                          onChange={(e) => handleScoreChange('ayt', 'history1', 'wrong', e.target.value)}
+                          value={formData.aytScores.history.wrong}
+                          onChange={(e) => handleScoreChange('ayt', 'history', 'wrong', e.target.value)}
                           sx={{
                             width: '50px',
                             '& .MuiOutlinedInput-root': {
@@ -2363,8 +2959,8 @@ const RekaNET = () => {
                         <TextField
                           type="number"
                           InputProps={{ inputProps: { min: 0, max: 10 } }}
-                          value={formData.aytScores.history1.empty}
-                          onChange={(e) => handleScoreChange('ayt', 'history1', 'empty', e.target.value)}
+                          value={formData.aytScores.history.empty}
+                          onChange={(e) => handleScoreChange('ayt', 'history', 'empty', e.target.value)}
                           sx={{
                             width: '50px',
                             '& .MuiOutlinedInput-root': {
@@ -2410,7 +3006,7 @@ const RekaNET = () => {
                         fontFamily: '"Satoshi", "Inter", sans-serif',
                         fontSize: '1rem'
                       }}>
-                        {calculateAYTNet('history1')}
+                        {calculateAYTNet('history')}
                       </Typography>
                     </Box>
                   </Box>
@@ -2469,9 +3065,9 @@ const RekaNET = () => {
                           color: '#ffffff',
                           fontWeight: 700,
                           fontFamily: '"Satoshi", "Inter", sans-serif',
-                          fontSize: '0.95rem'
+                          fontSize: '1.1rem'
                         }}>
-                          Coğrafya-1
+                          Coğrafya
                         </Typography>
                         <Typography variant="body2" sx={{ 
                           color: 'rgba(255, 255, 255, 0.7)',
@@ -2483,25 +3079,862 @@ const RekaNET = () => {
                       </Box>
                     </Box>
                     
-                    {/* D: Y: B: Input Layout */}
+                    {/* D: Y: B: Kompakt Input Layout */}
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: 3, 
-                      mb: 4, 
+                      gap: 1.5, 
+                      mb: 2, 
                       position: 'relative', 
                       zIndex: 1,
-                      flexWrap: 'wrap',
                       justifyContent: 'center'
                     }}>
-                      {/* Doğru Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      {/* Doğru */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          D:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 6 } }}
+                          value={formData.aytScores.geography.correct}
+                          onChange={(e) => handleScoreChange('ayt', 'geography', 'correct', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#16a34a'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+
+                      {/* Yanlış */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#ef4444',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          Y:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 6 } }}
+                          value={formData.aytScores.geography.wrong}
+                          onChange={(e) => handleScoreChange('ayt', 'geography', 'wrong', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#ef4444'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+
+                      {/* Boş */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#fb923c',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          B:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 6 } }}
+                          value={formData.aytScores.geography.empty}
+                          onChange={(e) => handleScoreChange('ayt', 'geography', 'empty', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#fb923c'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{
+                      p: 1.5,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+                      textAlign: 'center',
+                      position: 'relative',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                    }}>
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        fontWeight: 600,
+                        fontSize: '0.7rem'
+                      }}>
+                        NET
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontFamily: '"Satoshi", "Inter", sans-serif',
+                        fontSize: '1rem'
+                      }}>
+                        {calculateAYTNet('geography')}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+
+
+
+
+                  {/* Felsefe */}
+                  <Box sx={{
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(167, 139, 250, 0.08) 100%)',
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease',
+                      zIndex: 0
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(139, 92, 246, 0.2)',
+                      borderColor: 'rgba(139, 92, 246, 0.3)',
+                      '&::before': {
+                        opacity: 1
+                      }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
+                      <Box sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        color: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                      }}>
+                        <AutoStoriesIcon sx={{ 
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
+                        }} />
+                      </Box>
+                      <Box>
                         <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
+                          color: '#ffffff',
+                          fontWeight: 700,
                           fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(67, 233, 123, 0.3)'
+                          fontSize: '1.1rem'
+                        }}>
+                          Felsefe
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
+                        }}>
+                          12 Soru
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1.5, 
+                      mb: 2, 
+                      position: 'relative', 
+                      zIndex: 1,
+                      justifyContent: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          D:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 12 } }}
+                          value={formData.aytScores.philosophy.correct}
+                          onChange={(e) => handleScoreChange('ayt', 'philosophy', 'correct', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#16a34a'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#ef4444',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          Y:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 12 } }}
+                          value={formData.aytScores.philosophy.wrong}
+                          onChange={(e) => handleScoreChange('ayt', 'philosophy', 'wrong', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#ef4444'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#fb923c',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          B:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 12 } }}
+                          value={formData.aytScores.philosophy.empty}
+                          onChange={(e) => handleScoreChange('ayt', 'philosophy', 'empty', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#fb923c'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{
+                      p: 1.5,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
+                      textAlign: 'center',
+                      position: 'relative',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
+                    }}>
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        fontWeight: 600,
+                        fontSize: '0.7rem'
+                      }}>
+                        NET
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontFamily: '"Satoshi", "Inter", sans-serif',
+                        fontSize: '1rem'
+                      }}>
+                        {calculateAYTNet('philosophy')}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Din Kültürü ve Ahlak Bilgisi */}
+                  <Box sx={{
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(135deg, rgba(245, 101, 101, 0.08) 0%, rgba(251, 146, 60, 0.08) 100%)',
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease',
+                      zIndex: 0
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(245, 101, 101, 0.2)',
+                      borderColor: 'rgba(245, 101, 101, 0.3)',
+                      '&::before': {
+                        opacity: 1
+                      }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
+                      <Box sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #f56565 0%, #fb923c 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        color: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(245, 101, 101, 0.3)'
+                      }}>
+                        <ChurchIcon sx={{ 
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
+                        }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h6" sx={{ 
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontFamily: '"Satoshi", "Inter", sans-serif',
+                          fontSize: '1.1rem'
+                        }}>
+                          Din Kültürü ve Ahlak Bilgisi
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
+                        }}>
+                          6 Soru
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1.5, 
+                      mb: 2, 
+                      position: 'relative', 
+                      zIndex: 1,
+                      justifyContent: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          D:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 6 } }}
+                          value={formData.aytScores.religion.correct}
+                          onChange={(e) => handleScoreChange('ayt', 'religion', 'correct', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#16a34a'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#ef4444',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          Y:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 6 } }}
+                          value={formData.aytScores.religion.wrong}
+                          onChange={(e) => handleScoreChange('ayt', 'religion', 'wrong', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#ef4444'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#fb923c',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          B:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 6 } }}
+                          value={formData.aytScores.religion.empty}
+                          onChange={(e) => handleScoreChange('ayt', 'religion', 'empty', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#fb923c'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{
+                      p: 1.5,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #f56565 0%, #fb923c 100%)',
+                      textAlign: 'center',
+                      position: 'relative',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(245, 101, 101, 0.3)'
+                    }}>
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        fontWeight: 600,
+                        fontSize: '0.7rem'
+                      }}>
+                        NET
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontFamily: '"Satoshi", "Inter", sans-serif',
+                        fontSize: '1rem'
+                      }}>
+                        {calculateAYTNet('religion')}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Matematik AYT */}
+                  <Box sx={{
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%)',
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease',
+                      zIndex: 0
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(59, 130, 246, 0.2)',
+                      borderColor: 'rgba(59, 130, 246, 0.3)',
+                      '&::before': {
+                        opacity: 1
+                      }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
+                      <Box sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #9333ea 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        color: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                      }}>
+                        <FunctionsIcon sx={{ 
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
+                        }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h6" sx={{ 
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontFamily: '"Satoshi", "Inter", sans-serif',
+                          fontSize: '1.1rem'
+                        }}>
+                          Matematik AYT
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
+                        }}>
+                          40 Soru
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1.5, 
+                      mb: 2, 
+                      position: 'relative', 
+                      zIndex: 1,
+                      justifyContent: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          D:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 40 } }}
+                          value={formData.aytScores.mathAYT.correct}
+                          onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'correct', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#16a34a'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#ef4444',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          Y:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 40 } }}
+                          value={formData.aytScores.mathAYT.wrong}
+                          onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'wrong', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#ef4444'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#fb923c',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}>
+                          B:
+                        </Typography>
+                        <TextField
+                          type="number"
+                          InputProps={{ inputProps: { min: 0, max: 40 } }}
+                          value={formData.aytScores.mathAYT.empty}
+                          onChange={(e) => handleScoreChange('ayt', 'mathAYT', 'empty', e.target.value)}
+                          sx={{
+                            width: '50px',
+                            '& .MuiOutlinedInput-root': {
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
+                              '&:hover': {
+                                borderColor: '#fb923c'
+                              }
+                            },
+                            '& .MuiOutlinedInput-input': {
+                              textAlign: 'center',
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
+                            }
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{
+                      p: 1.5,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #9333ea 100%)',
+                      textAlign: 'center',
+                      position: 'relative',
+                      zIndex: 1,
+                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                    }}>
+                      <Typography variant="caption" sx={{ 
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        fontWeight: 600,
+                        fontSize: '0.7rem'
+                      }}>
+                        NET
+                      </Typography>
+                      <Typography variant="h6" sx={{ 
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontFamily: '"Satoshi", "Inter", sans-serif',
+                        fontSize: '1rem'
+                      }}>
+                        {calculateAYTNet('mathAYT')}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Fizik */}
+                  <Box sx={{
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.3s ease',
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(34, 197, 94, 0.08) 100%)',
+                      opacity: 0,
+                      transition: 'opacity 0.3s ease',
+                      zIndex: 0
+                    },
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(16, 185, 129, 0.2)',
+                      borderColor: 'rgba(16, 185, 129, 0.3)',
+                      '&::before': {
+                        opacity: 1
+                      }
+                    }
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
+                      <Box sx={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
+                        background: 'linear-gradient(135deg, #10b981 0%, #22c55e 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 2,
+                        color: '#ffffff',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
+                      }}>
+                        <ScienceIcon sx={{ 
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
+                        }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="h6" sx={{ 
+                          color: '#ffffff',
+                          fontWeight: 700,
+                          fontFamily: '"Satoshi", "Inter", sans-serif',
+                          fontSize: '1.1rem'
+                        }}>
+                          Fizik
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
+                        }}>
+                          14 Soru
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1.5, 
+                      mb: 2, 
+                      position: 'relative', 
+                      zIndex: 1,
+                      justifyContent: 'center'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           D:
                         </Typography>
@@ -2511,43 +3944,31 @@ const RekaNET = () => {
                           value={formData.aytScores.physics.correct}
                           onChange={(e) => handleScoreChange('ayt', 'physics', 'correct', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
                       </Box>
-
-                      {/* Yanlış Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
                           color: '#ef4444',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           Y:
                         </Typography>
@@ -2557,43 +3978,31 @@ const RekaNET = () => {
                           value={formData.aytScores.physics.wrong}
                           onChange={(e) => handleScoreChange('ayt', 'physics', 'wrong', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(239, 68, 68, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(239, 68, 68, 0.3)',
-                                borderColor: '#ef4444'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(239, 68, 68, 0.4)',
                                 borderColor: '#ef4444'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#ef4444 !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
                       </Box>
-
-                      {/* Boş Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
                           color: '#fb923c',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(251, 146, 60, 0.3)'
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           B:
                         </Typography>
@@ -2603,30 +4012,22 @@ const RekaNET = () => {
                           value={formData.aytScores.physics.empty}
                           onChange={(e) => handleScoreChange('ayt', 'physics', 'empty', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(251, 146, 60, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(251, 146, 60, 0.3)',
-                                borderColor: '#fb923c'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(251, 146, 60, 0.4)',
                                 borderColor: '#fb923c'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#fb923c !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
@@ -2634,55 +4035,42 @@ const RekaNET = () => {
                     </Box>
                     
                     <Box sx={{
-                      p: 3,
-                      borderRadius: '20px',
-                      background: 'linear-gradient(135deg, #10b981 0%, #3b82f6 100%)',
+                      p: 1.5,
+                      borderRadius: '12px',
+                      background: 'linear-gradient(135deg, #10b981 0%, #22c55e 100%)',
                       textAlign: 'center',
                       position: 'relative',
                       zIndex: 1,
-                      boxShadow: '0 12px 30px rgba(16, 185, 129, 0.4)',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: '2px',
-                        left: '2px',
-                        right: '2px',
-                        height: '60%',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
-                        borderRadius: '18px 18px 0 0'
-                      }
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)'
                     }}>
-                      <Typography variant="body2" sx={{ 
+                      <Typography variant="caption" sx={{ 
                         color: 'rgba(255, 255, 255, 0.9)',
                         fontWeight: 600,
-                        mb: 1,
-                        position: 'relative',
-                        zIndex: 1
+                        fontSize: '0.7rem'
                       }}>
-                        NET PUANINIZ
+                        NET
                       </Typography>
-                      <Typography variant="h4" sx={{ 
+                      <Typography variant="h6" sx={{ 
                         color: '#ffffff',
-                        fontWeight: 900,
+                        fontWeight: 800,
                         fontFamily: '"Satoshi", "Inter", sans-serif',
-                        position: 'relative',
-                        zIndex: 1
+                        fontSize: '1rem'
                       }}>
                         {calculateAYTNet('physics')}
                       </Typography>
                     </Box>
                   </Box>
-                  
-                  {/* Kimya - Premium Card */}
+
+                  {/* Kimya */}
                   <Box sx={{
-                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
-                    backdropFilter: 'blur(25px)',
-                    borderRadius: '24px',
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                    p: 5,
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
                     position: 'relative',
                     overflow: 'hidden',
-                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    transition: 'all 0.3s ease',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -2690,89 +4078,71 @@ const RekaNET = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(135deg, rgba(245, 101, 101, 0.1) 0%, rgba(251, 146, 60, 0.1) 100%)',
+                      background: 'linear-gradient(135deg, rgba(245, 101, 101, 0.08) 0%, rgba(251, 146, 60, 0.08) 100%)',
                       opacity: 0,
                       transition: 'opacity 0.3s ease',
                       zIndex: 0
                     },
                     '&:hover': {
-                      transform: 'translateY(-8px) scale(1.02)',
-                      boxShadow: '0 25px 60px rgba(245, 101, 101, 0.3)',
-                      borderColor: 'rgba(245, 101, 101, 0.4)',
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(245, 101, 101, 0.2)',
+                      borderColor: 'rgba(245, 101, 101, 0.3)',
                       '&::before': {
                         opacity: 1
                       }
                     }
                   }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, position: 'relative', zIndex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
                       <Box sx={{
-                        width: 70,
-                        height: 70,
-                        borderRadius: '20px',
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
                         background: 'linear-gradient(135deg, #f56565 0%, #fb923c 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        mr: 3,
+                        mr: 2,
                         color: '#ffffff',
-                        boxShadow: '0 12px 30px rgba(245, 101, 101, 0.4)',
-                        position: 'relative',
-                        '&::before': {
-                          content: '""',
-                          position: 'absolute',
-                          top: '2px',
-                          left: '2px',
-                          right: '2px',
-                          height: '60%',
-                          background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
-                          borderRadius: '18px 18px 0 0'
-                        }
+                        boxShadow: '0 4px 12px rgba(245, 101, 101, 0.3)'
                       }}>
                         <ScienceIcon sx={{ 
-                          fontSize: '2.2rem',
-                          position: 'relative',
-                          zIndex: 1,
-                          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
                         }} />
                       </Box>
                       <Box>
-                        <Typography variant="h5" sx={{ 
+                        <Typography variant="h6" sx={{ 
                           color: '#ffffff',
-                          fontWeight: 800,
-                          mb: 1,
-                          fontFamily: '"Satoshi", "Inter", sans-serif'
+                          fontWeight: 700,
+                          fontFamily: '"Satoshi", "Inter", sans-serif',
+                          fontSize: '1.1rem'
                         }}>
                           Kimya
                         </Typography>
-                        <Typography variant="body1" sx={{ 
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          fontWeight: 600,
-                          fontSize: '1.1rem'
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
                         }}>
                           13 Soru
                         </Typography>
                       </Box>
                     </Box>
                     
-                    {/* D: Y: B: Input Layout */}
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: 3, 
-                      mb: 4, 
+                      gap: 1.5, 
+                      mb: 2, 
                       position: 'relative', 
                       zIndex: 1,
-                      flexWrap: 'wrap',
                       justifyContent: 'center'
                     }}>
-                      {/* Doğru Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(67, 233, 123, 0.3)'
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           D:
                         </Typography>
@@ -2782,43 +4152,31 @@ const RekaNET = () => {
                           value={formData.aytScores.chemistry.correct}
                           onChange={(e) => handleScoreChange('ayt', 'chemistry', 'correct', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
                       </Box>
-
-                      {/* Yanlış Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
                           color: '#ef4444',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           Y:
                         </Typography>
@@ -2828,43 +4186,31 @@ const RekaNET = () => {
                           value={formData.aytScores.chemistry.wrong}
                           onChange={(e) => handleScoreChange('ayt', 'chemistry', 'wrong', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(239, 68, 68, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(239, 68, 68, 0.3)',
-                                borderColor: '#ef4444'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(239, 68, 68, 0.4)',
                                 borderColor: '#ef4444'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#ef4444 !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
                       </Box>
-
-                      {/* Boş Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
                           color: '#fb923c',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(251, 146, 60, 0.3)'
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           B:
                         </Typography>
@@ -2874,30 +4220,22 @@ const RekaNET = () => {
                           value={formData.aytScores.chemistry.empty}
                           onChange={(e) => handleScoreChange('ayt', 'chemistry', 'empty', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(251, 146, 60, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(251, 146, 60, 0.3)',
-                                borderColor: '#fb923c'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(251, 146, 60, 0.4)',
                                 borderColor: '#fb923c'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#fb923c !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
@@ -2905,55 +4243,42 @@ const RekaNET = () => {
                     </Box>
                     
                     <Box sx={{
-                      p: 3,
-                      borderRadius: '20px',
+                      p: 1.5,
+                      borderRadius: '12px',
                       background: 'linear-gradient(135deg, #f56565 0%, #fb923c 100%)',
                       textAlign: 'center',
                       position: 'relative',
                       zIndex: 1,
-                      boxShadow: '0 12px 30px rgba(245, 101, 101, 0.4)',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: '2px',
-                        left: '2px',
-                        right: '2px',
-                        height: '60%',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
-                        borderRadius: '18px 18px 0 0'
-                      }
+                      boxShadow: '0 4px 12px rgba(245, 101, 101, 0.3)'
                     }}>
-                      <Typography variant="body2" sx={{ 
+                      <Typography variant="caption" sx={{ 
                         color: 'rgba(255, 255, 255, 0.9)',
                         fontWeight: 600,
-                        mb: 1,
-                        position: 'relative',
-                        zIndex: 1
+                        fontSize: '0.7rem'
                       }}>
-                        NET PUANINIZ
+                        NET
                       </Typography>
-                      <Typography variant="h4" sx={{ 
+                      <Typography variant="h6" sx={{ 
                         color: '#ffffff',
-                        fontWeight: 900,
+                        fontWeight: 800,
                         fontFamily: '"Satoshi", "Inter", sans-serif',
-                        position: 'relative',
-                        zIndex: 1
+                        fontSize: '1rem'
                       }}>
                         {calculateAYTNet('chemistry')}
                       </Typography>
                     </Box>
                   </Box>
                   
-                  {/* Biyoloji - Premium Card */}
+                  {/* Biyoloji */}
                   <Box sx={{
-                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%)',
-                    backdropFilter: 'blur(25px)',
-                    borderRadius: '24px',
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                    p: 5,
+                    background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '16px',
+                    border: '2px solid rgba(255, 255, 255, 0.15)',
+                    p: 3,
                     position: 'relative',
                     overflow: 'hidden',
-                    transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    transition: 'all 0.3s ease',
                     '&::before': {
                       content: '""',
                       position: 'absolute',
@@ -2961,89 +4286,73 @@ const RekaNET = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                      background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(167, 139, 250, 0.08) 100%)',
                       opacity: 0,
                       transition: 'opacity 0.3s ease',
                       zIndex: 0
                     },
                     '&:hover': {
-                      transform: 'translateY(-8px) scale(1.02)',
-                      boxShadow: '0 25px 60px rgba(139, 92, 246, 0.3)',
-                      borderColor: 'rgba(139, 92, 246, 0.4)',
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 25px rgba(139, 92, 246, 0.2)',
+                      borderColor: 'rgba(139, 92, 246, 0.3)',
                       '&::before': {
                         opacity: 1
                       }
                     }
                   }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, position: 'relative', zIndex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, position: 'relative', zIndex: 1 }}>
                       <Box sx={{
-                        width: 70,
-                        height: 70,
-                        borderRadius: '20px',
+                        width: 40,
+                        height: 40,
+                        borderRadius: '12px',
                         background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        mr: 3,
+                        mr: 2,
                         color: '#ffffff',
-                        boxShadow: '0 12px 30px rgba(139, 92, 246, 0.4)',
-                        position: 'relative',
-                        '&::before': {
-                          content: '""',
-                          position: 'absolute',
-                          top: '2px',
-                          left: '2px',
-                          right: '2px',
-                          height: '60%',
-                          background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
-                          borderRadius: '18px 18px 0 0'
-                        }
+                        boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                       }}>
                         <ScienceIcon sx={{ 
-                          fontSize: '2.2rem',
-                          position: 'relative',
-                          zIndex: 1,
-                          filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))'
+                          fontSize: '1.2rem',
+                          filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3))'
                         }} />
                       </Box>
                       <Box>
-                        <Typography variant="h5" sx={{ 
+                        <Typography variant="h6" sx={{ 
                           color: '#ffffff',
-                          fontWeight: 800,
-                          mb: 1,
-                          fontFamily: '"Satoshi", "Inter", sans-serif'
+                          fontWeight: 700,
+                          fontFamily: '"Satoshi", "Inter", sans-serif',
+                          fontSize: '1.1rem'
                         }}>
                           Biyoloji
                         </Typography>
-                        <Typography variant="body1" sx={{ 
-                          color: 'rgba(255, 255, 255, 0.8)',
-                          fontWeight: 600,
-                          fontSize: '1.1rem'
+                        <Typography variant="body2" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          fontWeight: 500,
+                          fontSize: '0.8rem'
                         }}>
                           13 Soru
                         </Typography>
                       </Box>
                     </Box>
                     
-                    {/* D: Y: B: Input Layout */}
+                    {/* D: Y: B: Kompakt Input Layout */}
                     <Box sx={{ 
                       display: 'flex', 
                       alignItems: 'center', 
-                      gap: 3, 
-                      mb: 4, 
+                      gap: 1.5, 
+                      mb: 2, 
                       position: 'relative', 
                       zIndex: 1,
-                      flexWrap: 'wrap',
                       justifyContent: 'center'
                     }}>
-                      {/* Doğru Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
-                          color: '#43e97b',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(67, 233, 123, 0.3)'
+                      {/* Doğru */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
+                          color: '#16a34a',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           D:
                         </Typography>
@@ -3053,43 +4362,33 @@ const RekaNET = () => {
                           value={formData.aytScores.biology.correct}
                           onChange={(e) => handleScoreChange('ayt', 'biology', 'correct', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(67, 233, 123, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(22, 163, 74, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(67, 233, 123, 0.3)',
-                                borderColor: '#43e97b'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(67, 233, 123, 0.4)',
-                                borderColor: '#43e97b'
+                                borderColor: '#16a34a'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#43e97b !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#16a34a !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
                       </Box>
 
-                      {/* Yanlış Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
+                      {/* Yanlış */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
                           color: '#ef4444',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(239, 68, 68, 0.3)'
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           Y:
                         </Typography>
@@ -3099,43 +4398,33 @@ const RekaNET = () => {
                           value={formData.aytScores.biology.wrong}
                           onChange={(e) => handleScoreChange('ayt', 'biology', 'wrong', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(239, 68, 68, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(239, 68, 68, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(239, 68, 68, 0.3)',
-                                borderColor: '#ef4444'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(239, 68, 68, 0.4)',
                                 borderColor: '#ef4444'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#ef4444 !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#ef4444 !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
                       </Box>
 
-                      {/* Boş Section */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                        <Typography variant="h6" sx={{ 
+                      {/* Boş */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ 
                           color: '#fb923c',
-                          fontWeight: 800,
-                          fontSize: '1.3rem',
-                          fontFamily: '"Satoshi", "Inter", sans-serif',
-                          textShadow: '0 2px 4px rgba(251, 146, 60, 0.3)'
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
                         }}>
                           B:
                         </Typography>
@@ -3145,30 +4434,22 @@ const RekaNET = () => {
                           value={formData.aytScores.biology.empty}
                           onChange={(e) => handleScoreChange('ayt', 'biology', 'empty', e.target.value)}
                           sx={{
-                            width: '80px',
+                            width: '50px',
                             '& .MuiOutlinedInput-root': {
-                              borderRadius: '12px',
-                              background: 'rgba(255, 255, 255, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '2px solid rgba(251, 146, 60, 0.4)',
-                              height: '48px',
-                              transition: 'all 0.3s ease',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.9)',
+                              border: '1px solid rgba(251, 146, 60, 0.4)',
+                              height: '32px',
                               '&:hover': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 8px 25px rgba(251, 146, 60, 0.3)',
-                                borderColor: '#fb923c'
-                              },
-                              '&.Mui-focused': {
-                                transform: 'translateY(-2px)',
-                                boxShadow: '0 12px 30px rgba(251, 146, 60, 0.4)',
                                 borderColor: '#fb923c'
                               }
                             },
                             '& .MuiOutlinedInput-input': {
                               textAlign: 'center',
-                              fontWeight: '800 !important',
-                              fontSize: '1.1rem',
-                              color: '#fb923c !important'
+                              fontWeight: '700 !important',
+                              fontSize: '0.85rem',
+                              color: '#fb923c !important',
+                              padding: '4px 8px'
                             }
                           }}
                         />
@@ -3176,39 +4457,26 @@ const RekaNET = () => {
                     </Box>
                     
                     <Box sx={{
-                      p: 3,
-                      borderRadius: '20px',
+                      p: 1.5,
+                      borderRadius: '12px',
                       background: 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
                       textAlign: 'center',
                       position: 'relative',
                       zIndex: 1,
-                      boxShadow: '0 12px 30px rgba(139, 92, 246, 0.4)',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: '2px',
-                        left: '2px',
-                        right: '2px',
-                        height: '60%',
-                        background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%)',
-                        borderRadius: '18px 18px 0 0'
-                      }
+                      boxShadow: '0 4px 12px rgba(139, 92, 246, 0.3)'
                     }}>
-                      <Typography variant="body2" sx={{ 
+                      <Typography variant="caption" sx={{ 
                         color: 'rgba(255, 255, 255, 0.9)',
                         fontWeight: 600,
-                        mb: 1,
-                        position: 'relative',
-                        zIndex: 1
+                        fontSize: '0.7rem'
                       }}>
-                        NET PUANINIZ
+                        NET
                       </Typography>
-                      <Typography variant="h4" sx={{ 
+                      <Typography variant="h6" sx={{ 
                         color: '#ffffff',
-                        fontWeight: 900,
+                        fontWeight: 800,
                         fontFamily: '"Satoshi", "Inter", sans-serif',
-                        position: 'relative',
-                        zIndex: 1
+                        fontSize: '1rem'
                       }}>
                         {calculateAYTNet('biology')}
                       </Typography>
@@ -3250,41 +4518,56 @@ const RekaNET = () => {
                     endIcon={<NavigateNextIcon />}
                     onClick={handleNext}
                     sx={{
-                      background: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                      background: 'linear-gradient(135deg, #16a34a 0%, #38f9d7 100%)',
                       color: '#ffffff',
-                      fontWeight: 700,
-                      px: 6,
+                      fontWeight: 800,
+                      px: 8,
                       py: 2,
-                      borderRadius: '16px',
+                      borderRadius: '20px',
                       fontSize: '1.1rem',
-                      minHeight: '56px',
-                      minWidth: '160px',
-                      boxShadow: '0 8px 25px rgba(67, 233, 123, 0.4)',
-                      transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                      border: '2px solid rgba(255, 255, 255, 0.2)',
+                      minHeight: '60px',
+                      minWidth: '180px',
+                      boxShadow: '0 12px 40px rgba(67, 233, 123, 0.5)',
+                      transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                      border: '3px solid rgba(255, 255, 255, 0.2)',
                       position: 'relative',
                       overflow: 'hidden',
                       textTransform: 'none',
-                      letterSpacing: '0.5px',
+                      letterSpacing: '1px',
+                      fontFamily: '"Satoshi", "Inter", sans-serif',
                       '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: '2px',
+                        left: '2px',
+                        right: '2px',
+                        height: '60%',
+                        background: 'linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%)',
+                        borderRadius: '18px 18px 0 0',
+                        transition: 'opacity 0.3s ease'
+                      },
+                      '&::after': {
                         content: '""',
                         position: 'absolute',
                         top: 0,
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
+                        background: 'linear-gradient(135deg, rgba(56, 249, 215, 0.3) 0%, rgba(67, 233, 123, 0.3) 100%)',
+                        opacity: 0,
                         transition: 'opacity 0.3s ease'
                       },
                       '&:hover': {
-                        transform: 'translateY(-4px) scale(1.02)',
-                        boxShadow: '0 16px 40px rgba(67, 233, 123, 0.6)',
-                        '&::before': {
-                          opacity: 0.9
+                        background: 'linear-gradient(135deg, #38f9d7 0%, #16a34a 100%)',
+                        transform: 'translateY(-6px) scale(1.08)',
+                        boxShadow: '0 20px 60px rgba(67, 233, 123, 0.7)',
+                        borderColor: 'rgba(255, 255, 255, 0.4)',
+                        '&::after': {
+                          opacity: 1
                         }
                       },
                       '&:active': {
-                        transform: 'translateY(-2px) scale(1.01)'
+                        transform: 'translateY(-3px) scale(1.05)'
                       }
                     }}
                   >
@@ -4525,12 +5808,24 @@ const RekaNET = () => {
                   >
                     Geri
                   </Button>
-                  <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button
                       variant="contained"
+                    disabled={loading}
                       onClick={async () => {
+                      setLoading(true);
+                      setError(null);
+                      setComparisonResult(null);
+                      
                         try {
-                          // Verileri Firestore'a kaydet
+                        // İl seçilip seçilmediğini kontrol et
+                        if (!formData.province) {
+                          setError("Lütfen önce bir il seçiniz.");
+                          setLoading(false);
+                          return;
+                        }
+                        
+                        // Önce yarışmaya katılım için Firestore'a kaydet
+                        try {
                           // Kullanıcının AYT netleri girip girmediğini kontrol et
                           const hasAYTScores = Object.values(formData.aytScores).some(score => 
                             parseInt(score.correct) > 0 || parseInt(score.wrong) > 0
@@ -4543,50 +5838,20 @@ const RekaNET = () => {
                             totalTYTNet: calculateTotalTYTNet(),
                             totalAYTNet: hasAYTScores ? calculateTotalAYTNet() : "0",
                             hasAYTScores: hasAYTScores,
-                            timestamp: new Date()
+                            timestamp: new Date(),
+                            participatedInCompetition: true // Yarışmaya katılım işareti
                           });
-                          alert('Bilgileriniz başarıyla kaydedildi!');
-                        } catch (error) {
-                          console.error("Error adding document: ", error);
-                          alert('Bilgileriniz kaydedilirken bir hata oluştu!');
-                        }
-                      }}
-                      sx={{
-                        bgcolor: '#4CAF50',
-                        '&:hover': {
-                          bgcolor: '#388E3C'
-                        }
-                      }}
-                    >
-                      Kaydet
-                    </Button>
-                    <Button
-                      variant="contained"
-                      disabled={loading}
-                      onClick={async () => {
-                        setLoading(true);
-                        setError(null);
-                        setComparisonResult(null);
-                        
-                        try {
-                          // İl seçilip seçilmediğini kontrol et
-                          if (!formData.province) {
-                            setError("Lütfen önce bir il seçiniz.");
+                        } catch (saveError) {
+                          console.error("Error saving to competition: ", saveError);
+                          setError('Yarışmaya katılım sırasında bir hata oluştu!');
                             setLoading(false);
                             return;
                           }
                           
-                          // Seçilen ildeki diğer kullanıcıların verilerini çek
+                        // Şimdi sıralama hesapla
                           try {
                             const q = query(collection(db, "rekanet_scores"), where("province", "==", formData.province));
                             const querySnapshot = await getDocs(q);
-                            
-                            // Veri yoksa uyarı göster
-                            if (querySnapshot.empty) {
-                              setError(`${formData.province} ilinde henüz net bilgisi girilmemiş. İlk kaydeden siz olabilirsiniz!`);
-                              setLoading(false);
-                              return;
-                            }
                             
                             // Kullanıcının AYT netleri girip girmediğini kontrol et
                             const hasAYTScores = Object.values(formData.aytScores).some(score => 
@@ -4636,55 +5901,78 @@ const RekaNET = () => {
                               }
                             });
                             
-                            // Veri yoksa uyarı göster
-                            if (allScores.length === 0) {
-                              setError(`${formData.province} ilinde geçerli net bilgisi bulunamadı.`);
-                              setLoading(false);
-                              return;
-                            }
-                            
                             // Kullanıcının toplam neti
                             const userTotalNet = comparisonType === "TYT" ? userTYTNet : (userTYTNet + userAYTNet);
                             
                             // Kullanıcının sıralamasını bul
-                            allScores.push(userTotalNet);
                             const sortedScores = [...allScores].sort((a, b) => b - a); // Büyükten küçüğe sırala
                             const userRank = sortedScores.indexOf(userTotalNet) + 1;
                             
                             // Sonucu göster
                             setComparisonResult({
                               province: formData.province,
-                              totalUsers: allScores.length - 1,
+                            totalUsers: allScores.length,
                               rank: userRank,
                               userNet: userTotalNet.toFixed(2),
                               highestNet: sortedScores[0].toFixed(2),
                               comparisonType: comparisonType,
                               tytNet: userTYTNet.toFixed(2),
-                              aytNet: hasAYTScores ? userAYTNet.toFixed(2) : "0.00"
+                            aytNet: hasAYTScores ? userAYTNet.toFixed(2) : "0.00",
+                            isCompetitionParticipant: true
                             });
+                          
+                          // Başarı konfetisi göster
+                          startConfetti();
+                          
                           } catch (firestoreError) {
                             console.error("Firestore error: ", firestoreError);
-                            setError(`Veritabanı sorgusu sırasında bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.`);
+                          // Kayıt başarılı olduğu için sadece sıralama gösterilemiyor mesajı
+                          setError(`Yarışmaya başarıyla katıldınız! Sıralama bilgileri şu anda yüklenemiyor.`);
                             setLoading(false);
                             return;
                           }
                         } catch (error) {
-                          console.error("Error comparing scores: ", error);
-                          setError("Karşılaştırma yapılırken bir hata oluştu.");
+                        console.error("Error in competition participation: ", error);
+                        setError("Yarışmaya katılım sırasında bir hata oluştu.");
                         } finally {
                           setLoading(false);
                         }
                       }}
+                    size="large"
+                    startIcon={loading ? null : <CelebrationIcon />}
                       sx={{
-                        bgcolor: '#3F51B5',
+                      py: 2.5,
+                      px: 4,
+                      borderRadius: '16px',
+                      fontWeight: 800,
+                      textTransform: 'none',
+                      fontSize: '1.2rem',
+                      background: 'linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 50%, #45B7D1 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 12px 30px rgba(255, 107, 107, 0.4)',
+                      transition: 'all 0.3s ease',
+                      fontFamily: '"Satoshi", "Inter", sans-serif',
                         '&:hover': {
-                          bgcolor: '#303F9F'
+                        transform: 'translateY(-3px)',
+                        boxShadow: '0 16px 40px rgba(255, 107, 107, 0.5)',
+                        background: 'linear-gradient(135deg, #4ECDC4 0%, #45B7D1 50%, #FF6B6B 100%)'
+                      },
+                      '&:disabled': {
+                        background: 'linear-gradient(135deg, #ccc 0%, #999 100%)',
+                        transform: 'none',
+                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)'
                         }
                       }}
                     >
-                      {loading ? <CircularProgress size={24} color="inherit" /> : 'RekaNET Hesapla'}
+                    {loading ? (
+                      <>
+                        <CircularProgress size={24} color="inherit" sx={{ mr: 1 }} />
+                        Yarışmaya Katılıyor...
+                      </>
+                    ) : (
+                      '🏆 RekaNet Yarışına Katıl'
+                    )}
                     </Button>
-                  </Box>
                 </Box>
               </Box>
             </Fade>
