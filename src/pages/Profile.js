@@ -44,7 +44,6 @@ import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { playClickSound } from '../utils/soundUtils';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { playClickSound } from '../utils/soundUtils';
 
 // Styled components
 const ProfileAvatar = styled(Avatar)(({ theme }) => ({
