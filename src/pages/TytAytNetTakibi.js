@@ -2936,7 +2936,7 @@ const TytAytNetTakibi = () => {
         if (change > 1.5) {
           // Güzel yükseliş
           actionTitle = 'Mükemmel İlerleme! 🚀';
-          message = `${subject} dersinde harika bir performans sergiliyorsun! Önceki denemede ${previousNet.toFixed(1)} net yapmıştın, şimdi ${lastNet.toFixed(1)} net ile ${change.toFixed(1)} puanlık artış gösterdin. Bu başarıyı sürdürmek için: düzenli çalışma programını korumaya devam et, yanlış yaptığın soruları analiz etmeyi ihmal etme.`;
+          message = `${subject} dersinde harika bir performans sergiliyorsun! Önceki denemede ${previousNet.toFixed(2)} net yapmıştın, şimdi ${lastNet.toFixed(2)} net ile ${change.toFixed(2)} puanlık artış gösterdin. Bu başarıyı sürdürmek için: düzenli çalışma programını korumaya devam et, yanlış yaptığın soruları analiz etmeyi ihmal etme.`;
           icon = <TrendingUpIcon sx={{ color: '#4caf50' }} />;
           color = '#4caf50';
         } else if (change < -1.5) {
@@ -2953,7 +2953,7 @@ const TytAytNetTakibi = () => {
             detailedAdvice += ` Yanlış sayın ${incorrectDiff} arttı. Hata analizine odaklan ve zayıf konuları tespit et.`;
           }
           
-          message = `${subject} dersinde önceki denemende ${previousNet.toFixed(1)} net yapmıştın, fakat şimdiki denemende ${lastNet.toFixed(1)} net yaptın (${Math.abs(change).toFixed(1)} puanlık düşüş). ${detailedAdvice} Bu düşüşü yükselişe çevirmek için: hatalarını not sistemine kaydet, zayıf konularda ekstra çalışma yap, düzenli tekrar programı oluştur.`;
+          message = `${subject} dersinde önceki denemende ${previousNet.toFixed(2)} net yapmıştın, fakat şimdiki denemende ${lastNet.toFixed(2)} net yaptın (${Math.abs(change).toFixed(2)} puanlık düşüş). ${detailedAdvice} Bu düşüşü yükselişe çevirmek için: hatalarını not sistemine kaydet, zayıf konularda ekstra çalışma yap, düzenli tekrar programı oluştur.`;
           icon = <TrendingDownIcon sx={{ color: '#f44336' }} />;
           color = '#f44336';
         } else if (change >= -1.5 && change <= 1.5) {
@@ -2970,7 +2970,7 @@ const TytAytNetTakibi = () => {
             stabilityAdvice = 'Temel seviyede kararlısın. Konu eksiklerini giderip hızını artırman gerekiyor.';
           }
           
-          message = `${subject} dersinde istikrarlı bir performans gösteriyorsun (önceki: ${previousNet.toFixed(1)}, şimdi: ${lastNet.toFixed(1)}). ${stabilityAdvice} Önerim: farklı soru tipleri dene, zaman yönetimini geliştir, güçlü olduğun konuları da ihmal etme.`;
+          message = `${subject} dersinde istikrarlı bir performans gösteriyorsun (önceki: ${previousNet.toFixed(2)}, şimdi: ${lastNet.toFixed(2)}). ${stabilityAdvice} Önerim: farklı soru tipleri dene, zaman yönetimini geliştir, güçlü olduğun konuları da ihmal etme.`;
           icon = <TrendingFlatIcon sx={{ color: '#ff9800' }} />;
           color = '#ff9800';
         }
@@ -3002,9 +3002,9 @@ const TytAytNetTakibi = () => {
           icon,
           color,
           actionTitle: actionTitle || subject,
-          lastNet: lastNet.toFixed(1),
-          previousNet: previousNet.toFixed(1),
-          change: change.toFixed(1),
+          lastNet: lastNet.toFixed(2),
+          previousNet: previousNet.toFixed(2),
+          change: change.toFixed(2),
           lastCorrect,
           lastIncorrect,
           previousCorrect,

@@ -34,11 +34,18 @@ import WarningIcon from '@mui/icons-material/Warning';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import InfoIcon from '@mui/icons-material/Info';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import { format, subWeeks, subMonths } from 'date-fns';
+import { tr } from 'date-fns/locale';
+import yksData from '../utils/yksData';
 
 const StyledAppBar = styled(AppBar)(({ theme }) => ({
         backgroundColor: 'var(--appbar-bg-color, #1a0545)',
@@ -146,6 +153,67 @@ const ModernNotificationButton = styled(IconButton)(({ theme, hasNotifications }
   }
 }));
 
+const ModernReportButton = styled(IconButton)(({ theme, generating }) => ({
+  width: '44px',
+  height: '44px',
+  borderRadius: '12px',
+  backgroundColor: generating ? 'rgba(255, 87, 34, 0.15)' : 'rgba(255, 87, 34, 0.1)',
+  border: generating ? '1px solid rgba(255, 87, 34, 0.3)' : '1px solid rgba(255, 87, 34, 0.2)',
+  backdropFilter: 'blur(10px)',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+  position: 'relative',
+  overflow: 'hidden',
+  marginRight: '12px',
+  
+  '&:before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: generating 
+      ? 'linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(255, 193, 7, 0.2) 100%)'
+      : 'linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(255, 193, 7, 0.1) 100%)',
+    borderRadius: '12px',
+    zIndex: -1,
+    transition: 'all 0.3s ease',
+  },
+  
+  '&:hover': {
+    transform: 'translateY(-2px) scale(1.05)',
+    backgroundColor: 'rgba(255, 87, 34, 0.2)',
+    border: '1px solid rgba(255, 87, 34, 0.4)',
+    boxShadow: '0 8px 25px rgba(255, 87, 34, 0.25), 0 4px 12px rgba(0, 0, 0, 0.15)',
+    
+    '&:before': {
+      background: 'linear-gradient(135deg, rgba(255, 87, 34, 0.25) 0%, rgba(255, 193, 7, 0.25) 100%)',
+    },
+    
+    '& .MuiSvgIcon-root': {
+      transform: 'scale(1.1)',
+      color: '#FF5722',
+    }
+  },
+  
+  '&:active': {
+    transform: 'translateY(0) scale(1.02)',
+  },
+  
+  '&:disabled': {
+    opacity: 0.6,
+    cursor: 'not-allowed',
+    transform: 'none',
+  },
+  
+  '& .MuiSvgIcon-root': {
+    fontSize: '1.3rem',
+    color: '#FF5722',
+    transition: 'all 0.3s ease',
+    filter: 'drop-shadow(0 2px 4px rgba(255, 87, 34, 0.3))',
+  }
+}));
+
 const Header = ({ handleDrawerToggle, sidebarOpen }) => {
   const theme = useTheme();
   const navigate = useNavigate();
@@ -159,6 +227,10 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState('');
+  
+  // PDF rapor variables
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportGenerating, setReportGenerating] = useState(false);
   
 
   
@@ -257,6 +329,394 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
     return name?.charAt(0).toUpperCase() || "K";
   };
 
+  // PDF rapor oluşturma fonksiyonları
+  const generateReport = async (period) => {
+    setReportGenerating(true);
+    setShowReportDialog(false);
+    
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        alert('Kullanıcı girişi gereklidir.');
+        return;
+      }
+
+      console.log('Rapor oluşturma başladı:', { period, userUid: user.uid });
+
+      const now = new Date();
+      const startDate = period === 'week' ? subWeeks(now, 1) : subMonths(now, 1);
+      
+      console.log('Tarih aralığı:', { startDate, endDate: now });
+      
+      // Verileri topla
+      const reportData = await collectReportData(user.uid, startDate, now);
+      
+      // Veri kontrolü
+      if (!reportData) {
+        throw new Error('Veri toplanamadı');
+      }
+      
+      // PDF oluştur
+      await createPDF(reportData, period, startDate, now);
+      
+      console.log('Rapor başarıyla tamamlandı');
+      
+    } catch (error) {
+      console.error('Rapor oluşturma hatası:', error);
+      alert(`Rapor oluşturulurken bir hata oluştu: ${error.message}\n\nLütfen konsolu kontrol edin ve geliştiriciye bildirin.`);
+    } finally {
+      setReportGenerating(false);
+    }
+  };
+
+  const collectReportData = async (userId, startDate, endDate) => {
+    const data = {
+      studyRecords: [],
+      netRecords: [],
+      topicProgress: []
+    };
+
+    try {
+      console.log('Rapor verileri toplanıyor...', { userId, startDate, endDate });
+
+      // Analizli kronometre verilerini çek (studyRecords)
+      try {
+        const studyQuery = query(
+          collection(db, 'studyRecords'),
+          where('userId', '==', userId)
+        );
+        const studySnapshot = await getDocs(studyQuery);
+        const allStudyRecords = studySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Tarih aralığında filtrele
+        data.studyRecords = allStudyRecords.filter(record => {
+          try {
+            const recordDate = record.timestamp?.toDate ? record.timestamp.toDate() : new Date(record.timestamp);
+            return recordDate >= startDate && recordDate <= endDate;
+          } catch (e) {
+            console.warn('Çalışma kaydı tarih hatası:', e);
+            return false;
+          }
+        });
+        
+        console.log(`${data.studyRecords.length} analizli kronometre kaydı bulundu`);
+      } catch (studyError) {
+        console.warn('Çalışma kayıtları çekilemedi:', studyError);
+      }
+
+      // Net takibi verilerini çek (TYT AYT net takibi)
+      try {
+        const netQuery = query(
+          collection(db, 'netRecords'),
+          where('userId', '==', userId)
+        );
+        const netSnapshot = await getDocs(netQuery);
+        const allNetRecords = netSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        
+        // Tarih aralığında filtrele
+        data.netRecords = allNetRecords.filter(record => {
+          try {
+            const examDate = record.date?.toDate ? record.date.toDate() : new Date(record.date);
+            return examDate >= startDate && examDate <= endDate;
+          } catch (e) {
+            console.warn('Net kaydı tarih hatası:', e);
+            return false;
+          }
+        });
+        
+        console.log(`${data.netRecords.length} net kaydı bulundu`);
+      } catch (netError) {
+        console.warn('Net records çekilemedi:', netError);
+      }
+
+      // Konu takip verilerini çek (konuDurumu)
+      try {
+        const topicDocRef = doc(db, 'konuDurumu', userId);
+        const topicSnapshot = await getDoc(topicDocRef);
+        
+        if (topicSnapshot.exists()) {
+          const topicData = topicSnapshot.data();
+          const durumlar = topicData.durumlar || {};
+          
+          // Durumları işle
+          Object.entries(durumlar).forEach(([key, durum]) => {
+            if (key.includes('_')) {
+              const [dersId, konuIndex] = key.split('_');
+              
+              // yksData'dan ders ve konu ismini bul
+              let dersAdi = dersId;
+              let konuAdi = `Konu ${konuIndex}`;
+              
+              // TYT ve AYT'de ara
+              Object.entries(yksData.TYT).forEach(([name, data]) => {
+                if (data.topics && data.topics[parseInt(konuIndex)]) {
+                  dersAdi = name;
+                  konuAdi = data.topics[parseInt(konuIndex)];
+                }
+              });
+              
+              Object.entries(yksData.AYT).forEach(([name, data]) => {
+                if (data.topics && data.topics[parseInt(konuIndex)]) {
+                  dersAdi = name;
+                  konuAdi = data.topics[parseInt(konuIndex)];
+                }
+              });
+              
+              data.topicProgress.push({
+                subject: dersAdi,
+                topic: konuAdi,
+                status: durum,
+                completed: durum === 'completed' || durum === 'completedNeedsReview',
+                needsReview: durum === 'needsReview' || durum === 'completedNeedsReview'
+              });
+            }
+          });
+        }
+        
+        console.log(`${data.topicProgress.length} konu durumu bulundu`);
+      } catch (topicError) {
+        console.warn('Konu takip verileri çekilemedi:', topicError);
+      }
+
+      console.log('Toplanan veri özeti:', {
+        studyRecords: data.studyRecords.length,
+        netRecords: data.netRecords.length,
+        topicProgress: data.topicProgress.length
+      });
+
+    } catch (error) {
+      console.error('Veri toplama genel hatası:', error);
+      alert(`Veri toplama hatası: ${error.message}`);
+    }
+
+    return data;
+  };
+
+  const createPDF = async (data, period, startDate, endDate) => {
+    try {
+      console.log('PDF oluşturuluyor...', data);
+      
+      // HTML içeriği oluştur
+      const htmlContent = createPDFContent(data, period, startDate, endDate);
+      
+      // Geçici div oluştur
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.top = '0px';
+      tempDiv.style.width = '794px'; // A4 genişliği (pixel)
+      tempDiv.style.background = 'white';
+      tempDiv.style.fontFamily = 'Arial, sans-serif';
+      tempDiv.style.color = 'black';
+      tempDiv.style.fontSize = '14px';
+      tempDiv.style.lineHeight = '1.6';
+      tempDiv.style.padding = '40px';
+      
+      document.body.appendChild(tempDiv);
+      
+      try {
+        // HTML2Canvas ile canvas oluştur
+        const canvas = await html2canvas(tempDiv, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          width: 794,
+          height: 1123 // A4 yüksekliği
+        });
+        
+        // PDF oluştur
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+        
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 210; // A4 genişliği mm
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        doc.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        
+        // Eğer içerik bir sayfadan fazlaysa, sayfa ekle
+        if (imgHeight > 297) {
+          let position = 297;
+          while (position < imgHeight) {
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 0, -position, imgWidth, imgHeight);
+            position += 297;
+          }
+        }
+        
+        // PDF'i indir
+        const user = auth.currentUser;
+        const periodText = period === 'week' ? 'Haftalik' : 'Aylik';
+        const fileName = `${user?.displayName || 'YKS_Öğrenci'}_Çalışma_Raporu_${periodText}_${format(new Date(), 'dd-MM-yyyy', { locale: tr })}.pdf`;
+        doc.save(fileName);
+        
+        console.log('PDF başarıyla oluşturuldu:', fileName);
+        
+      } catch (error) {
+        console.error('PDF oluşturma hatası:', error);
+        alert(`PDF oluşturulurken bir hata oluştu: ${error.message}`);
+        throw error;
+      } finally {
+                 // Geçici div'i temizle
+         document.body.removeChild(tempDiv);
+       }
+     } catch (pdfError) {
+       console.error('PDF oluşturma hatası:', pdfError);
+       alert(`PDF oluşturulurken hata oluştu: ${pdfError.message}`);
+       throw pdfError;
+     }
+  };
+
+  const createPDFContent = (data, period, startDate, endDate) => {
+    const user = auth.currentUser;
+    const periodText = period === 'week' ? 'Haftalık' : 'Aylık';
+    
+    // Çalışma verilerini işle
+    const totalStudyHours = data.studyRecords.reduce((sum, record) => sum + (record.duration || 0), 0) / 3600; // saniye to saat
+    const completedTopics = data.topicProgress.filter(topic => topic.completed);
+    const pendingTopics = data.topicProgress.filter(topic => topic.needsReview);
+    
+    // Ders bazında çalışma saatleri
+    const studyBySubject = {};
+    data.studyRecords.forEach(record => {
+      const subject = record.subject || 'Bilinmiyor';
+      if (!studyBySubject[subject]) studyBySubject[subject] = 0;
+      studyBySubject[subject] += (record.duration || 0) / 3600; // saniye to saat
+    });
+    
+    // Net ortalama hesapla
+    const averageNet = data.netRecords.length > 0 ? 
+      data.netRecords.reduce((sum, record) => {
+        const net = (record.correctCount || 0) - ((record.incorrectCount || 0) * 0.25);
+        return sum + net;
+      }, 0) / data.netRecords.length : 0;
+
+    return `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #8A2BE2 0%, #4B0082 100%); color: white; padding: 30px 20px; margin: -40px -40px 30px -40px; text-align: center; border-radius: 0;">
+          <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🎯 YKS Çalışma Asistanı</h1>
+          <h2 style="margin: 10px 0 0 0; font-size: 18px; font-weight: normal;">📊 ${periodText} Çalışma Raporu</h2>
+          <p style="margin: 5px 0 0 0; font-size: 14px;">👤 ${user?.displayName || user?.email?.split('@')[0] || 'YKS Adayı'}</p>
+          <p style="margin: 5px 0 0 0; font-size: 12px;">${format(startDate, 'dd/MM/yyyy', { locale: tr })} - ${format(endDate, 'dd/MM/yyyy', { locale: tr })}</p>
+        </div>
+
+        <!-- Analizli Kronometre Bilgileri -->
+        <div style="margin-bottom: 30px;">
+          <div style="background: #4CAF50; color: white; padding: 12px 20px; margin-bottom: 15px; border-radius: 8px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: bold;">⏱️ ANALİZLİ KRONOMETRE VERİLERİ</h3>
+          </div>
+          <div style="padding: 0 20px;">
+            <p><strong>📚 Toplam Çalışma Süresi:</strong> ${totalStudyHours.toFixed(1)} saat</p>
+            <p><strong>📝 Çalışma Oturumu:</strong> ${data.studyRecords.length} oturum</p>
+            <p><strong>⚡ Günlük Ortalama:</strong> ${(totalStudyHours / (period === 'week' ? 7 : 30)).toFixed(1)} saat</p>
+            
+            <h4 style="color: #4CAF50; margin-top: 20px;">📊 Ders Bazında Çalışma Saatleri:</h4>
+            ${Object.entries(studyBySubject).map(([subject, hours]) => 
+              `<p style="margin: 5px 0;"><strong>${subject}:</strong> ${hours.toFixed(1)} saat (${(hours / totalStudyHours * 100).toFixed(1)}%)</p>`
+            ).join('')}
+            
+            <h4 style="color: #4CAF50; margin-top: 20px;">🎯 Detaylı Çalışma Kayıtları:</h4>
+            <div style="max-height: 200px; overflow-y: auto;">
+              ${data.studyRecords.map(record => {
+                const duration = Math.round((record.duration || 0) / 60); // dakika
+                const date = record.timestamp?.toDate ? 
+                  format(record.timestamp.toDate(), 'dd/MM/yyyy', { locale: tr }) : 
+                  'Bilinmiyor';
+                return `<p style="margin: 3px 0; font-size: 13px; background: #f5f5f5; padding: 5px 10px; border-radius: 5px;">
+                  <strong>${record.subject || 'Ders'}</strong> - ${record.topic || 'Konu'} | ${duration} dk | ${date}
+                </p>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- TYT AYT Net Takibi -->
+        ${data.netRecords.length > 0 ? `
+        <div style="margin-bottom: 30px;">
+          <div style="background: #FF9800; color: white; padding: 12px 20px; margin-bottom: 15px; border-radius: 8px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: bold;">📈 TYT AYT NET TAKİBİ</h3>
+          </div>
+          <div style="padding: 0 20px;">
+            <p><strong>📊 Toplam Deneme Sayısı:</strong> ${data.netRecords.length} deneme</p>
+            <p><strong>🎯 Ortalama Net:</strong> ${averageNet.toFixed(2)} net</p>
+            
+            <h4 style="color: #FF9800; margin-top: 20px;">📋 Deneme Sonuçları:</h4>
+            ${data.netRecords.map(record => {
+              const net = (record.correctCount || 0) - ((record.incorrectCount || 0) * 0.25);
+              const date = record.date?.toDate ? 
+                format(record.date.toDate(), 'dd/MM/yyyy', { locale: tr }) : 
+                'Bilinmiyor';
+              return `<p style="margin: 5px 0; background: #fff3e0; padding: 8px 12px; border-radius: 5px; border-left: 4px solid #FF9800;">
+                <strong>${record.examName || 'Deneme'}</strong> (${record.examType || 'TYT'}) | 
+                <span style="color: #4CAF50;">${record.correctCount || 0} doğru</span>, 
+                <span style="color: #f44336;">${record.incorrectCount || 0} yanlış</span> | 
+                <strong>${net.toFixed(2)} net</strong> | ${date}
+              </p>`;
+            }).join('')}
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- Konu Takip Bilgileri -->
+        ${data.topicProgress.length > 0 ? `
+        <div style="margin-bottom: 30px;">
+          <div style="background: #E91E63; color: white; padding: 12px 20px; margin-bottom: 15px; border-radius: 8px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: bold;">📚 KONU TAKİP BİLGİLERİ</h3>
+          </div>
+          <div style="padding: 0 20px;">
+            <p><strong>✅ Tamamlanan Konular:</strong> ${completedTopics.length} konu</p>
+            <p><strong>🔄 Tekrar Edilecek Konular:</strong> ${pendingTopics.length} konu</p>
+            <p><strong>📊 Başarı Oranı:</strong> ${data.topicProgress.length > 0 ? Math.round((completedTopics.length / data.topicProgress.length) * 100) : 0}%</p>
+            
+            ${completedTopics.length > 0 ? `
+            <h4 style="color: #4CAF50; margin-top: 20px;">✅ Tamamlanan Konular:</h4>
+            ${completedTopics.slice(0, 10).map(topic => 
+              `<p style="margin: 3px 0; color: #4CAF50;">✓ <strong>${topic.subject}:</strong> ${topic.topic}</p>`
+            ).join('')}
+            ${completedTopics.length > 10 ? `<p style="color: #666; font-style: italic;">...ve ${completedTopics.length - 10} konu daha</p>` : ''}
+            ` : ''}
+            
+            ${pendingTopics.length > 0 ? `
+            <h4 style="color: #FF9800; margin-top: 20px;">🔄 Tekrar Edilecek Konular:</h4>
+            ${pendingTopics.slice(0, 10).map(topic => 
+              `<p style="margin: 3px 0; color: #FF9800;">⚡ <strong>${topic.subject}:</strong> ${topic.topic}</p>`
+            ).join('')}
+            ${pendingTopics.length > 10 ? `<p style="color: #666; font-style: italic;">...ve ${pendingTopics.length - 10} konu daha</p>` : ''}
+            ` : ''}
+          </div>
+        </div>
+        ` : ''}
+
+        <!-- Koçluk Önerileri -->
+        <div style="margin-bottom: 30px;">
+          <div style="background: #9C27B0; color: white; padding: 12px 20px; margin-bottom: 15px; border-radius: 8px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: bold;">💡 KOÇLUK ÖNERİLERİ</h3>
+          </div>
+          <div style="padding: 0 20px;">
+            <p>• ${totalStudyHours > 20 ? 'Mükemmel! Çalışma disiplininiz harika devam edin.' : 'Çalışma sürenizi artırmanız gerekiyor. Günde en az 4 saat hedefleyin.'}</p>
+            <p>• ${completedTopics.length > pendingTopics.length ? 'Konu tamamlama oranınız iyi, böyle devam edin.' : 'Daha fazla konuyu tamamlamaya odaklanın.'}</p>
+            <p>• ${data.netRecords.length > 5 ? 'Deneme çözme düzeniniz iyi.' : 'Daha sık deneme çözmeye odaklanın.'}</p>
+            <p>• ${averageNet > 80 ? 'Net ortalamanız çok iyi!' : averageNet > 50 ? 'Net ortalamanız orta seviyede, geliştirebilirsiniz.' : 'Net ortalamanızı yükseltmek için eksik konularınızı çalışın.'}</p>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #8A2BE2; text-align: center; color: #666; font-size: 12px;">
+          <p>🎯 YKS Çalışma Asistanı - Kişisel Gelişim Raporu</p>
+          <p>📅 Oluşturulma Tarihi: ${format(new Date(), 'dd/MM/yyyy HH:mm', { locale: tr })}</p>
+          <p>💪 Başarılar dileriz!</p>
+        </div>
+      </div>
+    `;
+  };
+
+
   return (
     <StyledAppBar position="fixed">
       <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -279,6 +739,17 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
 
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Tooltip title="Rapor Çıkart" placement="bottom">
+            <ModernReportButton
+              aria-label="create report"
+              onClick={() => setShowReportDialog(true)}
+              generating={reportGenerating}
+              disabled={reportGenerating}
+            >
+              <PictureAsPdfIcon />
+            </ModernReportButton>
+          </Tooltip>
+          
           <Tooltip title="Bildirimler" placement="bottom">
             <ModernNotificationButton
               aria-label="show new notifications"
@@ -838,6 +1309,163 @@ const Header = ({ handleDrawerToggle, sidebarOpen }) => {
           <Button onClick={handleAdminDialogClose}>İptal</Button>
           <Button onClick={handleAdminPasswordSubmit} variant="contained" color="primary">
             Giriş
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Rapor Çıkart Dialog */}
+      <Dialog 
+        open={showReportDialog} 
+        onClose={() => setShowReportDialog(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            color: '#ffffff',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            maxWidth: 480,
+            width: '100%',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        <DialogTitle sx={{ 
+          pb: 2, 
+          pt: 3,
+          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{
+              width: 48,
+              height: 48,
+              borderRadius: '12px',
+              background: 'linear-gradient(135deg, #FF5722 0%, #FF9800 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 20px rgba(255, 87, 34, 0.4)'
+            }}>
+              <PictureAsPdfIcon sx={{ fontSize: '1.5rem', color: '#ffffff' }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: '#ffffff', fontSize: '1.3rem' }}>
+                📊 Rapor Çıkart
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
+                Çalışma verilerinizi PDF olarak indirin
+              </Typography>
+            </Box>
+          </Box>
+        </DialogTitle>
+        
+        <DialogContent sx={{ pt: 3, pb: 2, px: 3 }}>
+          <Typography variant="body1" sx={{ 
+            color: 'rgba(255,255,255,0.9)', 
+            mb: 3,
+            textAlign: 'center',
+            lineHeight: 1.6
+          }}>
+            Hangi süre aralığındaki verilerinizi rapor olarak almak istiyorsunuz?
+          </Typography>
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Button 
+              onClick={() => generateReport('week')} 
+              variant="contained"
+              disabled={reportGenerating}
+              sx={{ 
+                py: 2,
+                px: 4,
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#ffffff',
+                fontWeight: 600,
+                fontSize: '1rem',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)'
+                },
+                '&:disabled': {
+                  opacity: 0.6,
+                  cursor: 'not-allowed'
+                }
+              }}
+            >
+              📅 Son 1 Hafta
+            </Button>
+            
+            <Button 
+              onClick={() => generateReport('month')} 
+              variant="contained"
+              disabled={reportGenerating}
+              sx={{ 
+                py: 2,
+                px: 4,
+                borderRadius: '12px',
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#ffffff',
+                fontWeight: 600,
+                fontSize: '1rem',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)'
+                },
+                '&:disabled': {
+                  opacity: 0.6,
+                  cursor: 'not-allowed'
+                }
+              }}
+            >
+              📆 Son 1 Ay
+            </Button>
+          </Box>
+          
+          {reportGenerating && (
+            <Box sx={{ 
+              mt: 3, 
+              p: 2, 
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              textAlign: 'center'
+            }}>
+              <Typography variant="body2" sx={{ 
+                color: 'rgba(255,255,255,0.9)',
+                fontWeight: 500
+              }}>
+                🔄 Rapor hazırlanıyor, lütfen bekleyin...
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setShowReportDialog(false)} 
+            disabled={reportGenerating}
+            sx={{ 
+              color: 'rgba(255,255,255,0.8)',
+              fontWeight: 600,
+              px: 3,
+              py: 1.5,
+              borderRadius: '10px',
+              '&:hover': {
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#ffffff'
+              },
+              '&:disabled': {
+                opacity: 0.5
+              }
+            }}
+          >
+            ❌ İptal
           </Button>
         </DialogActions>
       </Dialog>
